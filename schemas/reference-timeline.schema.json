@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/reference-timeline.schema.json",
+  "title": "reference-timeline",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "referencePath": { "type": "string", "minLength": 1 },
+        "referenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "referenceLanguage": {
+          "type": "string",
+          "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+        },
+        "mediaDurationSeconds": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": [
+        "referencePath",
+        "referenceSha256",
+        "referenceLanguage",
+        "mediaDurationSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "normalizationVersion": { "type": "string", "minLength": 1 },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "timingMode": {
+          "type": "string",
+          "enum": ["trusted", "verify", "auto"]
+        },
+        "contentPolicy": {
+          "type": "string",
+          "enum": ["dialogue-only", "dialogue-and-lyrics", "all"]
+        }
+      },
+      "required": ["timingMode", "contentPolicy"],
+      "additionalProperties": false
+    },
+    "anchors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "dialogue",
+              "narration",
+              "lyrics-original",
+              "lyrics-translation",
+              "visual-text"
+            ]
+          },
+          "sourceCueIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "referenceText": { "type": "string", "minLength": 1 },
+          "timingTrusted": { "type": "boolean" },
+          "expectedSpeech": { "type": "boolean" },
+          "expectedSinging": { "type": "boolean" },
+          "overlappingAnchorIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "interval",
+          "kind",
+          "sourceCueIds",
+          "referenceText",
+          "timingTrusted",
+          "expectedSpeech",
+          "expectedSinging",
+          "overlappingAnchorIds",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sourceCueToAnchor": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "lyricsGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "originalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "romanizationCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "translationCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedAnchorId": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "id",
+          "interval",
+          "originalCueIds",
+          "romanizationCueIds",
+          "translationCueIds",
+          "selectedAnchorId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "rawCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mergedEffectCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dialogueAnchorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "narrationAnchorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lyricsGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lyricsOriginalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "visualTextCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "creditCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "translatorNoteCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "rawCueCount",
+        "mergedEffectCueCount",
+        "dialogueAnchorCount",
+        "narrationAnchorCount",
+        "lyricsGroupCount",
+        "lyricsOriginalCount",
+        "visualTextCount",
+        "creditCount",
+        "translatorNoteCount",
+        "unknownCount"
+      ],
+      "additionalProperties": false
+    },
+    "fallback": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "input",
+    "normalizationVersion",
+    "configuration",
+    "anchors",
+    "sourceCueToAnchor",
+    "lyricsGroups",
+    "summary",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

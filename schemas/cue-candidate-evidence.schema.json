@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/cue-candidate-evidence.schema.json",
+  "title": "cue-candidate-evidence",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["top-score", "conservative", "balanced"]
+        },
+        "runtimeMode": { "type": "string", "const": "top-score" },
+        "conservativeSelectionMargin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "balancedSelectionMargin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "scoreGapReviewThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": ["mode"],
+      "additionalProperties": false
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "text": { "type": "string", "minLength": 1 },
+          "sourceCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceRequestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceProfileIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "referenceAnchorIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "referenceUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "recoveryUnitId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "sceneId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "sceneLabel": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "clean-dialogue",
+                  "quiet-dialogue",
+                  "noisy-dialogue",
+                  "singing",
+                  "non-speech",
+                  "unknown"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "acousticSupport": { "type": "number", "minimum": 0, "maximum": 1 },
+          "independentSupportCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "profileConsensus": { "type": "number", "minimum": 0, "maximum": 1 },
+          "speechCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+          "tokenTimingQuality": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "japaneseTextCompleteness": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "terminologySupport": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "referenceTimingSupport": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "referenceSemanticSupport": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "repetitionRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+          "hallucinationRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+          "fragmentRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+          "totalScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "selectionScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "provenancePriority": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "selectionEligible": { "type": "boolean" },
+          "hardBlockReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "cueId",
+          "interval",
+          "text",
+          "sourceCueIds",
+          "sourceRequestIds",
+          "sourceProfileIds",
+          "referenceAnchorIds",
+          "referenceUnitIds",
+          "recoveryUnitId",
+          "sceneId",
+          "sceneLabel",
+          "acousticSupport",
+          "profileConsensus",
+          "speechCoverage",
+          "tokenTimingQuality",
+          "japaneseTextCompleteness",
+          "terminologySupport",
+          "referenceTimingSupport",
+          "referenceSemanticSupport",
+          "repetitionRisk",
+          "hallucinationRisk",
+          "fragmentRisk",
+          "totalScore",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "configuration",
+    "candidates",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

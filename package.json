@@ -1,0 +1,59 @@
+{
+  "name": "multilingual-video-learning",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.18.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "build": "tsc -b && npm run build -w @mvl/grammar-learning-site-template",
+    "typecheck": "tsc -b --pretty false",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:e2e": "vitest run tests/e2e",
+    "test:watch": "vitest",
+    "generate:fixtures": "tsx scripts/generate-fixtures.ts",
+    "generate:schemas": "tsx scripts/generate-schemas.ts",
+    "replay:arbitration": "tsx scripts/replay-transcription-arbitration.ts",
+    "replay:c3-top-score": "tsx scripts/replay-c3-top-score.ts",
+    "targeted:c3-large-v3": "tsx scripts/run-c3-targeted-asr.ts",
+    "replay:c4-coverage": "tsx scripts/replay-c4-coverage-recovery.ts",
+    "replay:c4-1-presentation": "tsx scripts/replay-c4-1-presentation-integrity.ts",
+    "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
+    "verify:c4-persistent-worker": "tsx scripts/verify-c4-persistent-worker.ts",
+    "validate:c4-real-runs": "tsx scripts/validate-c4-real-runs.ts",
+    "rebuild:final-review-queue": "tsx scripts/rebuild-final-review-queue.ts",
+    "rebuild:final-subtitle-integrity": "tsx scripts/rebuild-final-subtitle-integrity.ts",
+    "parity:asr-segmentation": "tsx scripts/asr-segmentation-parity.ts",
+    "subtitle": "tsx apps/cli/src/index.ts subtitle",
+    "grammar-report": "tsx apps/cli/src/index.ts grammar-report",
+    "build-learning-site": "tsx apps/cli/src/index.ts build-learning-site",
+    "pipeline": "tsx apps/cli/src/index.ts pipeline"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "commander": "15.0.0",
+    "openai": "6.48.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.13.3",
+    "eslint": "10.7.0",
+    "prettier": "3.9.6",
+    "tsx": "4.23.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.65.0",
+    "vitest": "4.1.10"
+  }
+}

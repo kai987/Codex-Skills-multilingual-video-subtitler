@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/canonical-asr-segments.schema.json",
+  "title": "canonical-asr-segments",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "sourceAdapter": {
+      "type": "string",
+      "enum": ["whisper-cli", "whisper-server", "openai"]
+    },
+    "rawSegmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "canonicalUtteranceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "rawSegments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "start": { "type": "number", "minimum": 0 },
+          "end": { "type": "number", "exclusiveMinimum": 0 },
+          "text": { "type": "string" },
+          "sourceAdapter": {
+            "type": "string",
+            "enum": ["whisper-cli", "whisper-server", "openai"]
+          },
+          "chunkId": { "type": "string", "minLength": 1 },
+          "speaker": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "language": {
+            "type": "string",
+            "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+          },
+          "confidence": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "averageLogProbability": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "noSpeechProbability": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string" },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "probability": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": ["text", "start", "end"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["id", "start", "end", "text", "sourceAdapter"],
+        "additionalProperties": false
+      }
+    },
+    "utterances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "start": { "type": "number", "minimum": 0 },
+          "end": { "type": "number", "exclusiveMinimum": 0 },
+          "text": { "type": "string" },
+          "sourceAdapter": {
+            "type": "string",
+            "enum": ["whisper-cli", "whisper-server", "openai"]
+          },
+          "chunkId": { "type": "string", "minLength": 1 },
+          "language": {
+            "type": "string",
+            "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+          },
+          "confidence": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "averageLogProbability": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "noSpeechProbability": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string" },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "probability": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": ["text", "start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "sourceSegmentIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speechIslandId": { "type": "string", "minLength": 1 },
+          "speaker": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "tokenTimestampsAvailable": { "type": "boolean" },
+          "canonicalization": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": ["preserved", "merged", "split"]
+              },
+              "reasons": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": ["operation", "reasons"],
+            "additionalProperties": false
+          },
+          "qualityStatus": {
+            "type": "string",
+            "enum": ["accepted", "suspected-hallucination"]
+          },
+          "qualityReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "repetitionEvidence": {
+            "type": "object",
+            "properties": {
+              "normalizedCorePhrase": { "type": "string", "minLength": 1 },
+              "occurrences": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 9007199254740991
+              },
+              "contributingSegmentIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "suffixVariants": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "repeatedCharacterRatio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "normalizedCorePhrase",
+              "occurrences",
+              "contributingSegmentIds",
+              "suffixVariants",
+              "repeatedCharacterRatio"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "start",
+          "end",
+          "text",
+          "sourceAdapter",
+          "sourceSegmentIds",
+          "canonicalization"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sourceAdapter",
+    "rawSegmentCount",
+    "canonicalUtteranceCount",
+    "rawSegments",
+    "utterances"
+  ],
+  "additionalProperties": false
+}

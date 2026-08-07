@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../../packages/grammar-report-core" },
+    { "path": "../../packages/pipeline-core" },
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/site-builder-core" },
+    { "path": "../../packages/video-subtitler" }
+  ]
+}

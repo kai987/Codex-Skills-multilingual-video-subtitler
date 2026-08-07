@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/hypothesis-clusters.schema.json",
+  "title": "hypothesis-clusters",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "maximumBoundaryDistanceSeconds": { "type": "number", "minimum": 0 },
+        "minimumNearDuplicateSimilarity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "clusteringMethod": {
+          "type": "string",
+          "enum": ["connected-components", "constrained-medoid"]
+        },
+        "maximumAtomicSpanSeconds": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": [
+        "maximumBoundaryDistanceSeconds",
+        "minimumNearDuplicateSimilarity"
+      ],
+      "additionalProperties": false
+    },
+    "clusters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "candidateCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "referenceAnchorIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceRequestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "clusterReason": {
+            "type": "string",
+            "enum": [
+              "temporal-overlap",
+              "near-duplicate-text",
+              "same-reference-unit",
+              "same-recovery-unit",
+              "mixed"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomic": { "type": "boolean" },
+          "medoidCueId": { "type": "string", "minLength": 1 },
+          "sourceLegacyClusterIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "interval",
+          "candidateCueIds",
+          "referenceAnchorIds",
+          "sourceRequestIds",
+          "clusterReason",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "configuration",
+    "clusters",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

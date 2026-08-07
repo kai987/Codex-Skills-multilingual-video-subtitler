@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/reference-subtitle-analysis.schema.json",
+  "title": "reference-subtitle-analysis",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "parserVersion": { "type": "string", "minLength": 1 },
+    "classifierVersion": { "type": "string", "minLength": 1 },
+    "timelineVersion": { "type": "string", "minLength": 1 },
+    "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "cacheHit": { "type": "boolean" },
+    "input": {
+      "type": "object",
+      "properties": {
+        "referencePath": { "type": "string", "minLength": 1 },
+        "referenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "referenceLanguage": {
+          "type": "string",
+          "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+        },
+        "mediaDurationSeconds": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": [
+        "referencePath",
+        "referenceSha256",
+        "referenceLanguage",
+        "mediaDurationSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "format": { "type": "string", "enum": ["srt", "vtt", "ass"] },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "timingMode": {
+          "type": "string",
+          "enum": ["trusted", "verify", "auto"]
+        },
+        "contentPolicy": {
+          "type": "string",
+          "enum": ["dialogue-only", "dialogue-and-lyrics", "all"]
+        }
+      },
+      "required": ["timingMode", "contentPolicy"],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "rawCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "classifiedCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "suspectTimingCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlappingCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "rawCueCount",
+        "classifiedCueCount",
+        "suspectTimingCueCount",
+        "overlappingCueCount"
+      ],
+      "additionalProperties": false
+    },
+    "timingValidation": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["trusted", "verified", "suspect"]
+        },
+        "referenceEndSeconds": { "type": "number", "minimum": 0 },
+        "durationDeltaSeconds": { "type": "number" },
+        "outOfBoundsCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "abnormalShortCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateEffectCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiTrackIntervalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "globalOffsetSeconds": {
+          "anyOf": [{ "type": "number" }, { "type": "null" }]
+        },
+        "driftSeconds": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+        "audioEvidenceMethod": {
+          "type": "string",
+          "enum": ["available", "unavailable"]
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "required": [
+        "status",
+        "referenceEndSeconds",
+        "durationDeltaSeconds",
+        "outOfBoundsCueCount",
+        "abnormalShortCueCount",
+        "duplicateEffectCueCount",
+        "multiTrackIntervalCount",
+        "globalOffsetSeconds",
+        "driftSeconds",
+        "audioEvidenceMethod",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "parserVersion",
+    "classifierVersion",
+    "timelineVersion",
+    "cacheKey",
+    "cacheHit",
+    "input",
+    "format",
+    "configuration",
+    "summary",
+    "timingValidation",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

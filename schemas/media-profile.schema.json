@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/media-profile.schema.json",
+  "title": "media-profile",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "durationSeconds": { "type": "number", "minimum": 0 },
+    "dialogueLanguages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+      }
+    },
+    "audioTrack": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sampleRate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            { "type": "null" }
+          ]
+        },
+        "channels": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["index", "sampleRate", "channels"],
+      "additionalProperties": false
+    },
+    "speechDurationSeconds": { "type": "number", "minimum": 0 },
+    "speechRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "effectiveSpeechDurationSeconds": { "type": "number", "minimum": 0 },
+    "musicHeavy": { "type": "boolean" },
+    "longSilenceRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "availableEmbeddedSubtitle": { "type": "boolean" },
+    "availableReferenceSubtitle": { "type": "boolean" },
+    "availablePrimarySubtitle": { "type": "boolean" },
+    "speechIntervals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "start": { "type": "number", "minimum": 0 },
+          "end": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "required": ["start", "end"],
+        "additionalProperties": false
+      }
+    },
+    "profilingMethod": {
+      "type": "string",
+      "enum": ["ffmpeg-silencedetect", "vad", "duration-fallback"]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "durationSeconds",
+    "dialogueLanguages",
+    "audioTrack",
+    "speechDurationSeconds",
+    "speechRatio",
+    "effectiveSpeechDurationSeconds",
+    "musicHeavy",
+    "longSilenceRatio",
+    "availableEmbeddedSubtitle",
+    "availableReferenceSubtitle",
+    "availablePrimarySubtitle",
+    "speechIntervals",
+    "profilingMethod"
+  ],
+  "additionalProperties": false
+}

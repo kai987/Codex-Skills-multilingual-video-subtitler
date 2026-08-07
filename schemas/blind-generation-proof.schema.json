@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/blind-generation-proof.schema.json",
+  "title": "blind-generation-proof",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "guidanceMode": {
+      "type": "string",
+      "enum": ["reference-free", "reference-assisted"]
+    },
+    "referencePathKnownBeforeGeneration": { "type": "boolean" },
+    "referenceOpenedBeforeGeneration": { "type": "boolean", "const": false },
+    "referenceTimingUsedByAsr": { "type": "boolean", "const": false },
+    "referenceTextUsedByAsr": { "type": "boolean", "const": false },
+    "referenceTextUsedAsPrompt": { "type": "boolean", "const": false },
+    "generatedSubtitleSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalTranscriptSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "configuration": {
+      "default": { "isolationPhase": "blind-generation" },
+      "type": "object",
+      "properties": {
+        "isolationPhase": { "type": "string", "const": "blind-generation" }
+      },
+      "required": ["isolationPhase"],
+      "additionalProperties": false
+    },
+    "fallback": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "guidanceMode",
+    "referencePathKnownBeforeGeneration",
+    "referenceOpenedBeforeGeneration",
+    "referenceTimingUsedByAsr",
+    "referenceTextUsedByAsr",
+    "referenceTextUsedAsPrompt",
+    "generatedSubtitleSha256",
+    "canonicalTranscriptSha256",
+    "configuration",
+    "fallback",
+    "completedAt"
+  ],
+  "additionalProperties": false
+}

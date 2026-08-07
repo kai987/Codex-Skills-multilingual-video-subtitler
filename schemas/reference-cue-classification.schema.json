@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/reference-cue-classification.schema.json",
+  "title": "reference-cue-classification",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "referencePath": { "type": "string", "minLength": 1 },
+        "referenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "referenceLanguage": {
+          "type": "string",
+          "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+        },
+        "mediaDurationSeconds": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": [
+        "referencePath",
+        "referenceSha256",
+        "referenceLanguage",
+        "mediaDurationSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "classifierVersion": { "type": "string", "minLength": 1 },
+    "configuration": {
+      "default": { "timingMode": "auto" },
+      "type": "object",
+      "properties": {
+        "timingMode": {
+          "type": "string",
+          "enum": ["trusted", "verify", "auto"]
+        }
+      },
+      "required": ["timingMode"],
+      "additionalProperties": false
+    },
+    "cues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "sourceIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "rawText": { "type": "string", "minLength": 1 },
+          "normalizedText": { "type": "string", "minLength": 1 },
+          "detectedLanguage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "dialogue",
+              "narration",
+              "lyrics-original",
+              "lyrics-romanization",
+              "lyrics-translation",
+              "on-screen-text",
+              "character-introduction",
+              "credit",
+              "translator-note",
+              "sound-description",
+              "unknown"
+            ]
+          },
+          "classificationConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "overlappingCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "timingTrust": {
+            "type": "string",
+            "enum": ["trusted", "verified", "suspect"]
+          }
+        },
+        "required": [
+          "id",
+          "sourceIndex",
+          "interval",
+          "rawText",
+          "normalizedText",
+          "detectedLanguage",
+          "kind",
+          "classificationConfidence",
+          "overlappingCueIds",
+          "evidence",
+          "timingTrust"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "counts": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "dialogue",
+          "narration",
+          "lyrics-original",
+          "lyrics-romanization",
+          "lyrics-translation",
+          "on-screen-text",
+          "character-introduction",
+          "credit",
+          "translator-note",
+          "sound-description",
+          "unknown"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      "required": [
+        "dialogue",
+        "narration",
+        "lyrics-original",
+        "lyrics-romanization",
+        "lyrics-translation",
+        "on-screen-text",
+        "character-introduction",
+        "credit",
+        "translator-note",
+        "sound-description",
+        "unknown"
+      ]
+    },
+    "fallback": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "input",
+    "classifierVersion",
+    "configuration",
+    "cues",
+    "counts",
+    "fallback"
+  ],
+  "additionalProperties": false
+}
