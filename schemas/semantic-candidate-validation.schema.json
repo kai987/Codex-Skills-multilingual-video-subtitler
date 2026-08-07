@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/semantic-candidate-validation.schema.json",
+  "title": "semantic-candidate-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["off", "auto", "on"] },
+        "onlineApiAllowed": { "type": "boolean", "const": false }
+      },
+      "required": ["mode", "onlineApiAllowed"],
+      "additionalProperties": false
+    },
+    "method": {
+      "type": "string",
+      "enum": ["local-model", "local-translation", "heuristic", "unavailable"]
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateCueId": { "type": "string", "minLength": 1 },
+          "referenceAnchorIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticSimilarity": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "entityAgreement": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "numberAgreement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "polarityConflict": { "type": "boolean" },
+          "relationConflict": { "type": "boolean" },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "candidateCueId",
+          "referenceAnchorIds",
+          "semanticSimilarity",
+          "entityAgreement",
+          "numberAgreement",
+          "polarityConflict",
+          "relationConflict",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "configuration",
+    "method",
+    "results",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

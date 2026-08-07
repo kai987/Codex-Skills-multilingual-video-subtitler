@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/japanese-lexical-normalization.schema.json",
+  "title": "japanese-lexical-normalization",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "terminologySha256": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["off", "top-score"] },
+        "globalReplacementEnabled": { "type": "boolean", "const": false },
+        "dialectPreservationEnabled": { "type": "boolean", "const": true }
+      },
+      "required": [
+        "mode",
+        "globalReplacementEnabled",
+        "dialectPreservationEnabled"
+      ],
+      "additionalProperties": false
+    },
+    "cues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "rawText": { "type": "string" },
+          "repairedText": { "type": "string" },
+          "normalizedText": { "type": "string" },
+          "changed": { "type": "boolean" },
+          "selectionScore": { "type": "number" },
+          "replacements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "original": { "type": "string", "minLength": 1 },
+                "replacement": { "type": "string", "minLength": 1 },
+                "category": { "type": "string", "minLength": 1 },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "evidence": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "original",
+                "replacement",
+                "category",
+                "confidence",
+                "evidence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "reviewRecommended": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "candidateForms": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "candidateScores": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string", "minLength": 1 },
+                "score": { "type": "number" },
+                "evidence": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": ["text", "score", "evidence"],
+              "additionalProperties": false
+            }
+          },
+          "readingEvidence": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sameClusterSupport": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "properNounEvidence": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dialectProtection": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedReason": {
+            "default": "original-stable-fallback",
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "cueId",
+          "rawText",
+          "repairedText",
+          "normalizedText",
+          "changed",
+          "selectionScore",
+          "replacements",
+          "reviewRecommended",
+          "reasons",
+          "candidateForms",
+          "candidateScores",
+          "readingEvidence",
+          "sameClusterSupport",
+          "properNounEvidence",
+          "dialectProtection",
+          "selectedReason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "changedCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kanaToKanjiCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "katakanaNormalizationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "properNounRepairCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "terminologyRepairCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dialectPreservedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "changedCueCount",
+        "kanaToKanjiCount",
+        "katakanaNormalizationCount",
+        "properNounRepairCount",
+        "terminologyRepairCount",
+        "dialectPreservedCount"
+      ],
+      "additionalProperties": false
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "terminologySha256",
+    "configuration",
+    "cues",
+    "summary",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

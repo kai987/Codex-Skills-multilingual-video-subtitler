@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/presentation-constraint-integrity.schema.json",
+  "title": "presentation-constraint-integrity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "cueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "maximumLines": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "maximumCharactersPerLine": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "lineTooLongCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "tooManyLinesCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unresolvedCapacityCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "musicPositionViolationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "musicItalicViolationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "fontSizeViolationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "code": {
+            "type": "string",
+            "enum": [
+              "FINAL_LINE_EXCEEDS_CHARACTER_LIMIT",
+              "FINAL_CUE_EXCEEDS_TWO_LINES",
+              "FINAL_UNRESOLVED_PRESENTATION_CAPACITY",
+              "FINAL_MUSIC_POSITION_VIOLATION",
+              "FINAL_MUSIC_ITALIC_VIOLATION",
+              "FINAL_ASS_FONT_SIZE_VIOLATION"
+            ]
+          },
+          "cueId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["id", "code", "cueId", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "validationStatus": { "type": "string", "enum": ["passed", "needs-review"] }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "cueCount",
+    "maximumLines",
+    "maximumCharactersPerLine",
+    "lineTooLongCount",
+    "tooManyLinesCount",
+    "unresolvedCapacityCount",
+    "musicPositionViolationCount",
+    "musicItalicViolationCount",
+    "fontSizeViolationCount",
+    "findings",
+    "validationStatus"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@mvl/video-subtitler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@mvl/media-identity": "0.1.0",
+    "@mvl/shared": "0.1.0",
+    "@mvl/subtitle-search": "0.1.0",
+    "@mvl/subtitle-core": "0.1.0",
+    "@mvl/transcription-core": "0.1.0"
+  }
+}

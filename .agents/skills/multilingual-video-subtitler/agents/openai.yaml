@@ -1,0 +1,4 @@
+interface:
+  display_name: "Multilingual Video Subtitler"
+  short_description: "Local-first multilingual video subtitles"
+  default_prompt: "Use $multilingual-video-subtitler to inspect this local video, prefer embedded, API, or permitted public-page subtitles, then use offline transcription when no reliable subtitle is found."

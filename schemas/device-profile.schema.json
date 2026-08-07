@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/device-profile.schema.json",
+  "title": "device-profile",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "platform": { "type": "string", "minLength": 1 },
+    "architecture": { "type": "string", "minLength": 1 },
+    "appleSilicon": { "type": "boolean" },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "totalGiB": { "type": "number", "minimum": 0 },
+        "availableGiB": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        }
+      },
+      "required": ["totalGiB", "availableGiB"],
+      "additionalProperties": false
+    },
+    "cpu": {
+      "type": "object",
+      "properties": {
+        "physicalCores": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            { "type": "null" }
+          ]
+        },
+        "logicalCores": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "model": { "type": "string", "minLength": 1 }
+      },
+      "required": ["physicalCores", "logicalCores", "model"],
+      "additionalProperties": false
+    },
+    "ffmpeg": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "boolean" },
+        "version": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        }
+      },
+      "required": ["available", "version"],
+      "additionalProperties": false
+    },
+    "ffprobe": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "boolean" },
+        "version": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        }
+      },
+      "required": ["available", "version"],
+      "additionalProperties": false
+    },
+    "whisperCpp": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "boolean" },
+        "executablePath": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "version": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "metalAvailable": { "type": "boolean" },
+        "coreMLCompiled": { "type": "boolean" },
+        "tokenTimestampsAvailable": { "type": "boolean" },
+        "fullJsonAvailable": { "type": "boolean" }
+      },
+      "required": [
+        "available",
+        "executablePath",
+        "version",
+        "metalAvailable",
+        "coreMLCompiled"
+      ],
+      "additionalProperties": false
+    },
+    "coreMLEncoders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "modelFamily": { "type": "string", "minLength": 1 },
+          "fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["path", "modelFamily", "fingerprint"],
+        "additionalProperties": false
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "modelPath": { "type": "string", "minLength": 1 },
+          "modelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "modelFamily": { "type": "string", "minLength": 1 },
+          "runtime": { "type": "string", "enum": ["cpu", "coreml"] },
+          "qualityTier": {
+            "type": "string",
+            "enum": ["maximum", "high", "balanced", "fast"]
+          },
+          "quantization": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "coreML": {
+            "type": "object",
+            "properties": {
+              "supported": { "type": "boolean" },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "unsupported-platform",
+                  "not-compiled",
+                  "encoder-missing",
+                  "encoder-mismatch",
+                  "load-failed",
+                  "available",
+                  "disabled-by-user"
+                ]
+              },
+              "deviceCapable": { "type": "boolean" },
+              "whisperCppCompiledWithCoreML": { "type": "boolean" },
+              "encoderAvailable": { "type": "boolean" },
+              "encoderPath": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "encoderFingerprint": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "runtimeValidated": { "type": "boolean" },
+              "reason": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": [
+              "supported",
+              "status",
+              "deviceCapable",
+              "whisperCppCompiledWithCoreML",
+              "encoderAvailable",
+              "encoderPath",
+              "runtimeValidated",
+              "reason"
+            ],
+            "additionalProperties": false
+          },
+          "estimatedMemoryBytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "roles": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["baseline", "refinement", "fallback"]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "modelPath",
+          "modelHash",
+          "modelFamily",
+          "runtime",
+          "qualityTier",
+          "quantization",
+          "coreML",
+          "estimatedMemoryBytes",
+          "roles"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "platform",
+    "architecture",
+    "appleSilicon",
+    "memory",
+    "cpu",
+    "ffmpeg",
+    "ffprobe",
+    "whisperCpp",
+    "coreMLEncoders",
+    "models",
+    "fingerprint"
+  ],
+  "additionalProperties": false
+}

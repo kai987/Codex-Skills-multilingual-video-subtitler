@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "../dist/scripts",
+    "tsBuildInfoFile": "../dist/scripts/.tsbuildinfo"
+  },
+  "include": ["*.ts"],
+  "references": [
+    { "path": "../packages/shared" },
+    { "path": "../packages/subtitle-core" },
+    { "path": "../packages/transcription-core" }
+  ]
+}

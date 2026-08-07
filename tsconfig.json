@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/media-identity" },
+    { "path": "./packages/subtitle-core" },
+    { "path": "./packages/subtitle-search" },
+    { "path": "./packages/transcription-core" },
+    { "path": "./packages/grammar-report-core" },
+    { "path": "./packages/site-builder-core" },
+    { "path": "./packages/pipeline-core" },
+    { "path": "./packages/video-subtitler" },
+    { "path": "./apps/grammar-learning-site-template" },
+    { "path": "./apps/cli" },
+    { "path": "./scripts" }
+  ]
+}

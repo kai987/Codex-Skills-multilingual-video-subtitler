@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/fragment-repair.schema.json",
+  "title": "fragment-repair",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "dialogueMaximumGapSeconds": { "type": "number", "minimum": 0 },
+        "rapidDialogueMaximumGapSeconds": { "type": "number", "minimum": 0 },
+        "narrationMaximumGapSeconds": { "type": "number", "minimum": 0 },
+        "previousWinnerPreferred": { "type": "boolean", "const": true }
+      },
+      "required": [
+        "dialogueMaximumGapSeconds",
+        "rapidDialogueMaximumGapSeconds",
+        "narrationMaximumGapSeconds",
+        "previousWinnerPreferred"
+      ],
+      "additionalProperties": false
+    },
+    "inputWinnerCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "outputWinnerCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "repairType": {
+            "type": "string",
+            "enum": [
+              "merge-previous",
+              "merge-next",
+              "merge-three",
+              "prefix-superseded",
+              "suffix-superseded"
+            ]
+          },
+          "sourceWinnerIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rawSourceTexts": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "outputCueId": { "type": "string", "minLength": 1 },
+          "mergedText": { "type": "string", "minLength": 1 },
+          "mergeEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "repairType",
+          "sourceWinnerIds",
+          "rawSourceTexts",
+          "outputCueId",
+          "mergedText",
+          "mergeEvidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "repairCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fragmentMergeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mergedWithPreviousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mergedWithNextCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "prefixSupersededCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "repairCount",
+        "fragmentMergeCount",
+        "mergedWithPreviousCount",
+        "mergedWithNextCount",
+        "prefixSupersededCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "configuration",
+    "inputWinnerCount",
+    "outputWinnerCount",
+    "repairs",
+    "summary"
+  ],
+  "additionalProperties": false
+}

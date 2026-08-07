@@ -1,0 +1,503 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/top-score-winners.schema.json",
+  "title": "top-score-winners",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "winnerCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "winners": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "start": { "type": "number", "minimum": 0 },
+          "end": { "type": "number", "exclusiveMinimum": 0 },
+          "language": {
+            "type": "string",
+            "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+          },
+          "languages": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+            }
+          },
+          "text": { "type": "string", "minLength": 1 },
+          "style": {
+            "type": "string",
+            "enum": ["default", "thought", "music"]
+          },
+          "textSource": {
+            "type": "string",
+            "enum": [
+              "audio-asr",
+              "reference-original-language",
+              "embedded",
+              "online"
+            ]
+          },
+          "speaker": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "confidence": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "sourceLayer": {
+                "type": "string",
+                "enum": [
+                  "baseline-vad",
+                  "scene-extra-sensitive-vad",
+                  "no-vad",
+                  "large-v3-refinement",
+                  "recovery",
+                  "lyrics-asr",
+                  "reference-original-language",
+                  "embedded",
+                  "online"
+                ]
+              },
+              "sourceRequestIds": {
+                "default": [],
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "sourceProfileIds": {
+                "default": [],
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "referenceAnchorIds": {
+                "default": [],
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "referenceUnitIds": {
+                "default": [],
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "recoveryUnitId": {
+                "default": null,
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "sceneId": {
+                "default": null,
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "sceneLabel": {
+                "default": null,
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "independentSupportCount": {
+                "default": 0,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "qualityScore": {
+                "default": null,
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": [
+              "sourceLayer",
+              "sourceRequestIds",
+              "sourceProfileIds",
+              "referenceAnchorIds",
+              "referenceUnitIds",
+              "recoveryUnitId",
+              "sceneId",
+              "sceneLabel",
+              "independentSupportCount",
+              "qualityScore"
+            ],
+            "additionalProperties": false
+          },
+          "textAudit": {
+            "type": "object",
+            "properties": {
+              "rawAsrText": { "type": "string" },
+              "repairedText": { "type": "string" },
+              "normalizedText": { "type": "string" },
+              "winnerClusterIds": {
+                "default": [],
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "sourceWinnerCueIds": {
+                "default": [],
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "winnerScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "runnerUpCueId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "runnerUpScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "scoreGap": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "replacements": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "original": { "type": "string", "minLength": 1 },
+                    "replacement": { "type": "string", "minLength": 1 },
+                    "category": { "type": "string", "minLength": 1 },
+                    "confidence": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "evidence": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    }
+                  },
+                  "required": [
+                    "original",
+                    "replacement",
+                    "category",
+                    "confidence",
+                    "evidence"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "deduplicationActions": {
+                "default": [],
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "repairType": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "timingDonorCueId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "timingRepairMethod": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "reviewRecommended": { "type": "boolean" },
+              "reviewReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "rawAsrText",
+              "repairedText",
+              "normalizedText",
+              "winnerClusterIds",
+              "sourceWinnerCueIds",
+              "replacements",
+              "deduplicationActions",
+              "reviewRecommended",
+              "reviewReasons"
+            ],
+            "additionalProperties": false
+          },
+          "transcriptionMetrics": {
+            "type": "object",
+            "properties": {
+              "averageLogProbability": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "noSpeechProbability": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "tokenProbability": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "entropy": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "decoderFallback": {
+                "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+              },
+              "detectedLanguage": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "zh",
+                      "zh-Hans",
+                      "zh-Hant",
+                      "ja",
+                      "en",
+                      "mixed",
+                      "und"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "timingEvidence": {
+            "type": "object",
+            "properties": {
+              "sourceTrusted": { "default": false, "type": "boolean" },
+              "speechStart": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "speechEnd": {
+                "anyOf": [
+                  { "type": "number", "exclusiveMinimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "tokenTimestampsAvailable": {
+                "default": false,
+                "type": "boolean"
+              },
+              "tokenTimestampsUsed": { "default": false, "type": "boolean" },
+              "tokens": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": { "type": "string" },
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "minimum": 0 },
+                    "probability": {
+                      "anyOf": [
+                        { "type": "number", "minimum": 0, "maximum": 1 },
+                        { "type": "null" }
+                      ]
+                    }
+                  },
+                  "required": ["text", "start", "end"],
+                  "additionalProperties": false
+                }
+              },
+              "alignmentSource": {
+                "type": "string",
+                "enum": [
+                  "source",
+                  "token",
+                  "speech",
+                  "vad",
+                  "segment",
+                  "pause",
+                  "semantic",
+                  "character-ratio"
+                ]
+              },
+              "presentationTimingMethod": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "preserved-source",
+                      "token",
+                      "speech-boundary",
+                      "pause",
+                      "semantic",
+                      "vad",
+                      "character-ratio"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "chunkBoundaryConflict": { "type": "boolean" },
+              "speechIntervals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                }
+              },
+              "speechBoundarySource": {
+                "type": "string",
+                "enum": ["silence", "vad", "segment"]
+              }
+            },
+            "required": [
+              "sourceTrusted",
+              "speechStart",
+              "speechEnd",
+              "tokenTimestampsAvailable",
+              "tokenTimestampsUsed",
+              "tokens",
+              "alignmentSource",
+              "presentationTimingMethod"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "start",
+          "end",
+          "language",
+          "languages",
+          "text",
+          "speaker",
+          "confidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "clusterId": { "type": "string", "minLength": 1 },
+          "candidateCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "winnerCueId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "winnerScore": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "runnerUpCueId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "runnerUpScore": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "scoreGap": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "rejectedCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "hardBlockReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reviewRecommended": { "type": "boolean" },
+          "reviewReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "tieBreakApplied": { "type": "boolean" },
+          "tieBreakReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "clusterId",
+          "candidateCueIds",
+          "winnerCueId",
+          "winnerScore",
+          "runnerUpCueId",
+          "runnerUpScore",
+          "scoreGap",
+          "rejectedCueIds",
+          "hardBlockReasons",
+          "reviewRecommended",
+          "reviewReasons",
+          "tieBreakApplied",
+          "tieBreakReasons"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "winnerCount",
+    "winners",
+    "records"
+  ],
+  "additionalProperties": false
+}

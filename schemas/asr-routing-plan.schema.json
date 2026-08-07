@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/asr-routing-plan.schema.json",
+  "title": "asr-routing-plan",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "status": { "type": "string", "enum": ["completed", "failed"] },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sceneAnalysisMode": {
+      "type": "string",
+      "enum": ["off", "observe", "route"]
+    },
+    "sceneRoutingMode": {
+      "type": "string",
+      "enum": ["conservative", "balanced", "aggressive"]
+    },
+    "additiveOnly": { "type": "boolean", "const": true },
+    "selectiveSkipEnabled": { "type": "boolean", "const": false },
+    "analysisVersion": { "type": "string", "minLength": 1 },
+    "failure": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sceneId": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "label": {
+            "type": "string",
+            "enum": [
+              "clean-dialogue",
+              "quiet-dialogue",
+              "noisy-dialogue",
+              "singing",
+              "non-speech",
+              "unknown"
+            ]
+          },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "probabilities": {
+            "type": "object",
+            "properties": {
+              "speech": { "type": "number", "minimum": 0, "maximum": 1 },
+              "vocal": { "type": "number", "minimum": 0, "maximum": 1 },
+              "music": { "type": "number", "minimum": 0, "maximum": 1 },
+              "drums": { "type": "number", "minimum": 0, "maximum": 1 },
+              "crowd": { "type": "number", "minimum": 0, "maximum": 1 },
+              "overlap": { "type": "number", "minimum": 0, "maximum": 1 },
+              "silence": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": [
+              "speech",
+              "vocal",
+              "music",
+              "drums",
+              "crowd",
+              "overlap",
+              "silence"
+            ],
+            "additionalProperties": false
+          },
+          "recommendedStrategy": {
+            "type": "string",
+            "enum": [
+              "vad-only",
+              "extra-sensitive-vad",
+              "vad-plus-no-vad",
+              "lyrics-no-vad",
+              "observe-only",
+              "skip-dialogue-asr",
+              "conservative-default"
+            ]
+          },
+          "actualStrategy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "vad-only",
+                  "extra-sensitive-vad",
+                  "vad-plus-no-vad",
+                  "lyrics-no-vad",
+                  "observe-only",
+                  "skip-dialogue-asr",
+                  "conservative-default"
+                ]
+              },
+              { "type": "string", "const": "legacy-baseline" }
+            ]
+          },
+          "observeOnly": { "type": "boolean" },
+          "decision": {
+            "type": "object",
+            "properties": {
+              "strategy": {
+                "type": "string",
+                "enum": [
+                  "vad-only",
+                  "extra-sensitive-vad",
+                  "vad-plus-no-vad",
+                  "lyrics-no-vad",
+                  "observe-only",
+                  "skip-dialogue-asr",
+                  "conservative-default"
+                ]
+              },
+              "useVad": { "type": "boolean" },
+              "useExtraSensitiveVad": { "type": "boolean" },
+              "useNoVad": { "type": "boolean" },
+              "useLyricsMode": { "type": "boolean" },
+              "requireIndependentConsensus": { "type": "boolean" },
+              "requireLargeV3RefinementOnConflict": { "type": "boolean" },
+              "requireHumanReviewOnUnresolved": { "type": "boolean" },
+              "reasons": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "strategy",
+              "useVad",
+              "useExtraSensitiveVad",
+              "useNoVad",
+              "useLyricsMode",
+              "requireIndependentConsensus",
+              "requireLargeV3RefinementOnConflict",
+              "requireHumanReviewOnUnresolved",
+              "reasons"
+            ],
+            "additionalProperties": false
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "vadBaseline": { "type": "boolean" },
+              "extraSensitiveVad": { "type": "boolean" },
+              "noVad": { "type": "boolean" },
+              "lyricsMode": { "type": "boolean" },
+              "cacheHits": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "asrRequestIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "vadBaseline",
+              "extraSensitiveVad",
+              "noVad",
+              "lyricsMode",
+              "cacheHits",
+              "asrRequestIds"
+            ],
+            "additionalProperties": false
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "sceneId",
+          "interval",
+          "label",
+          "confidence",
+          "probabilities",
+          "recommendedStrategy",
+          "actualStrategy",
+          "observeOnly",
+          "decision",
+          "execution",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "sceneCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "proactiveNoVadScenes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "proactiveExtraSensitiveVadScenes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "proactiveLyricsScenes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "noVadRequests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "extraSensitiveVadRequests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lyricsRequests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "sceneCount",
+        "proactiveNoVadScenes",
+        "proactiveExtraSensitiveVadScenes",
+        "proactiveLyricsScenes",
+        "noVadRequests",
+        "extraSensitiveVadRequests",
+        "lyricsRequests",
+        "cacheHits"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "status",
+    "generatedAt",
+    "sceneAnalysisMode",
+    "sceneRoutingMode",
+    "additiveOnly",
+    "selectiveSkipEnabled",
+    "analysisVersion",
+    "failure",
+    "entries",
+    "summary"
+  ],
+  "additionalProperties": false
+}
