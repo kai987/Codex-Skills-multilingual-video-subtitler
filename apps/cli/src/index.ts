@@ -171,6 +171,7 @@ interface FinalizeCliOptions extends GlobalOptions {
   task: string;
   finalization: "auto" | "review-fallback" | "human";
   resolutions?: string;
+  humanReviewedSubtitle?: string;
   sourceVideo?: string;
   prepareReview?: boolean;
   reviewAudio: boolean;
@@ -179,6 +180,7 @@ interface FinalizeCliOptions extends GlobalOptions {
 
 interface ReviewCliOptions extends GlobalOptions {
   task: string;
+  humanReviewedSubtitle?: string;
   sourceVideo?: string;
   reviewAudio: boolean;
 }
@@ -1115,6 +1117,10 @@ program
   )
   .option("--resolutions <path>", "human-review-resolutions.json")
   .option(
+    "--human-reviewed-subtitle <path>",
+    "user-confirmed human-reviewed ASS used as the authoritative baseline",
+  )
+  .option(
     "--source-video <path>",
     "explicit source video for fingerprint/audio",
   )
@@ -1133,6 +1139,9 @@ program
       ...(options.resolutions === undefined
         ? {}
         : { resolutionsPath: options.resolutions }),
+      ...(options.humanReviewedSubtitle === undefined
+        ? {}
+        : { humanReviewedSubtitlePath: options.humanReviewedSubtitle }),
       ...(options.sourceVideo === undefined
         ? {}
         : { sourceVideoPath: options.sourceVideo }),
@@ -1163,6 +1172,10 @@ program
   .description("Prepare an offline static review package for a subtitle task")
   .requiredOption("--task <directory>", "task or exact subtitle directory")
   .option(
+    "--human-reviewed-subtitle <path>",
+    "user-confirmed human-reviewed ASS used as the authoritative baseline",
+  )
+  .option(
     "--source-video <path>",
     "explicit source video for fingerprint/audio",
   )
@@ -1175,6 +1188,9 @@ program
     );
     const result = await prepareSubtitleReview({
       taskDirectory: options.task,
+      ...(options.humanReviewedSubtitle === undefined
+        ? {}
+        : { humanReviewedSubtitlePath: options.humanReviewedSubtitle }),
       ...(options.sourceVideo === undefined
         ? {}
         : { sourceVideoPath: options.sourceVideo }),

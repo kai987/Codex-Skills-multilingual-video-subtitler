@@ -17,6 +17,7 @@ import { parseAss, parseSrt, parseVtt } from "@mvl/subtitle-core";
 import {
   burnValidatedFinalSubtitle,
   finalizeSubtitleTask,
+  sha256LocalFile,
 } from "@mvl/video-subtitler";
 
 const temporaryDirectories: string[] = [];
@@ -138,6 +139,97 @@ async function writeCandidates(directory: string) {
 }
 
 describe("safe finalization integration", () => {
+  it("uses a user-confirmed reviewed ASS as the authoritative baseline", async () => {
+    const input = await fixture("needs-review");
+    await writeCandidates(input.subtitleDirectory);
+    const reviewedPath = path.join(input.root, "human-reviewed.ass");
+    await writeFile(
+      reviewedPath,
+      `[Script Info]
+ScriptType: v4.00+
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:01.00,0:00:02,35,Default,糸子,0,0,0,,人が確認した文
+Dialogue: 0,0:00:03.00,0:00:04.00,Music,,0,0,0,,♪ 人が確認した歌 ♪
+`,
+    );
+    const reviewedHashBefore = await sha256LocalFile(reviewedPath);
+
+    const result = await finalizeSubtitleTask({
+      taskDirectory: input.root,
+      mode: "auto",
+      humanReviewedSubtitlePath: reviewedPath,
+    });
+
+    expect(result.report.status).toBe("human-validated");
+    expect(result.report.finalizationMethod).toBe("human");
+    expect(result.report.metrics.automaticDecisionCount).toBe(0);
+    expect(result.report.metrics.humanDecisionCount).toBe(0);
+    expect(result.report.decisions).toHaveLength(0);
+    expect(result.report.humanReviewedBaseline).toMatchObject({
+      authority: "user-confirmed-human-review",
+      sourceFileName: "human-reviewed.ass",
+      cueCount: 2,
+      timestampNormalizationCount: 1,
+      sourceReadOnlyVerified: true,
+    });
+    expect(result.subtitlePackage.cues.map((cue) => cue.text)).toEqual([
+      "人が確認した文",
+      "♪ 人が確認した歌 ♪",
+    ]);
+    expect(result.subtitlePackage.cues[0]).toMatchObject({
+      end: 2.35,
+      speaker: "糸子",
+      style: "default",
+    });
+    expect(result.subtitlePackage.cues[1]?.style).toBe("music");
+    expect(result.outputPaths.humanReviewedBasePackage).not.toBeNull();
+    const humanBasePath = result.outputPaths.humanReviewedBasePackage;
+    if (humanBasePath === null)
+      throw new Error("Human-reviewed base package was not generated.");
+    expect(await sha256LocalFile(humanBasePath)).toBe(
+      result.report.baseSubtitlePackageHash,
+    );
+    const humanBase = subtitlePackageSchema.parse(
+      JSON.parse(await readFile(humanBasePath, "utf8")) as unknown,
+    );
+    expect(humanBase.primarySubtitle?.validationStatus).toBe("needs-review");
+    expect(
+      Object.values(humanBase.subtitleFiles).every((fileName) =>
+        fileName.includes(".human-reviewed-base."),
+      ),
+    ).toBe(true);
+    const parsedHumanBaseFiles = [
+      parseSrt(
+        await readFile(
+          path.resolve(input.subtitleDirectory, humanBase.subtitleFiles.srt),
+          "utf8",
+        ),
+      ),
+      parseVtt(
+        await readFile(
+          path.resolve(input.subtitleDirectory, humanBase.subtitleFiles.vtt),
+          "utf8",
+        ),
+      ),
+      parseAss(
+        await readFile(
+          path.resolve(input.subtitleDirectory, humanBase.subtitleFiles.ass),
+          "utf8",
+        ),
+      ),
+    ];
+    expect(
+      parsedHumanBaseFiles.map((cues) => cues.map((cue) => cue.text)),
+    ).toEqual([
+      ["人が確認した文", "♪ 人が確認した歌 ♪"],
+      ["人が確認した文", "♪ 人が確認した歌 ♪"],
+      ["人が確認した文", "♪ 人が確認した歌 ♪"],
+    ]);
+    expect(await sha256LocalFile(reviewedPath)).toBe(reviewedHashBefore);
+  });
+
   it("creates an auto-validated final without human files when every gate passes", async () => {
     const input = await fixture();
     const result = await finalizeSubtitleTask({

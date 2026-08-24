@@ -30,15 +30,19 @@ import {
   normalizeFinalizationText,
   repairSafeExactDuplicateCues,
 } from "@mvl/transcription-core";
+import { formatAss, formatSrt, formatVtt } from "@mvl/subtitle-core";
 
 import {
   evaluateFinalCueQuality,
   isRecord,
+  loadHumanReviewedSubtitle,
   loadFinalizationCandidates,
   locateSubtitlePackage,
   projectStrictSubtitlePackage,
+  sha256JsonFileValue,
   sha256LocalFile,
   sha256Value,
+  verifyHumanReviewedSubtitleReadOnly,
 } from "./finalization-support.js";
 import {
   applyHumanReviewResolutions,
@@ -53,6 +57,7 @@ export interface SubtitleFinalizationOptions {
   taskDirectory: string;
   mode?: FinalizationMode;
   resolutionsPath?: string;
+  humanReviewedSubtitlePath?: string;
   sourceVideoPath?: string;
   prepareReview?: boolean;
   generateReviewAudio?: boolean;
@@ -77,6 +82,7 @@ export interface SubtitleFinalizationResult {
     reviewPackage: string | null;
     reviewPage: string | null;
     correctionFeedback: string | null;
+    humanReviewedBasePackage: string | null;
   };
 }
 
@@ -403,13 +409,16 @@ function finalizationState(input: {
   baseRejected: boolean;
   humanDecisionCount: number;
   automaticDecisionCount: number;
+  humanReviewedBaseline: boolean;
 }): { status: FinalizationStatus; method: FinalizationMethod } {
   if (input.baseRejected) return { status: "rejected", method: "none" };
   if (!input.passed) return { status: "needs-review", method: "none" };
-  if (input.humanDecisionCount > 0 && input.automaticDecisionCount > 0) {
+  const hasHumanAuthority =
+    input.humanDecisionCount > 0 || input.humanReviewedBaseline;
+  if (hasHumanAuthority && input.automaticDecisionCount > 0) {
     return { status: "mixed-validated", method: "mixed" };
   }
-  if (input.humanDecisionCount > 0) {
+  if (hasHumanAuthority) {
     return { status: "human-validated", method: "human" };
   }
   return { status: "auto-validated", method: "automatic" };
@@ -494,23 +503,88 @@ export async function finalizeSubtitleTask(
     vtt: path.join(located.subtitleDirectory, `${baseStem}.vtt`),
     ass: path.join(located.subtitleDirectory, `${baseStem}.ass`),
   };
+  const humanReviewedBaseline =
+    options.humanReviewedSubtitlePath === undefined
+      ? null
+      : await loadHumanReviewedSubtitle(options.humanReviewedSubtitlePath);
+  const humanReviewedBaseFiles =
+    humanReviewedBaseline === null
+      ? null
+      : {
+          srt: path.join(
+            located.subtitleDirectory,
+            `${baseStem}.human-reviewed-base.srt`,
+          ),
+          vtt: path.join(
+            located.subtitleDirectory,
+            `${baseStem}.human-reviewed-base.vtt`,
+          ),
+          ass: path.join(
+            located.subtitleDirectory,
+            `${baseStem}.human-reviewed-base.ass`,
+          ),
+        };
+  const projectionRawPackage =
+    humanReviewedBaseline === null || !isRecord(rawPackage)
+      ? rawPackage
+      : {
+          ...rawPackage,
+          warnings: [
+            ...(Array.isArray(rawPackage.warnings)
+              ? rawPackage.warnings.filter(
+                  (warning): warning is string => typeof warning === "string",
+                )
+              : []),
+            `Imported user-confirmed human-reviewed baseline ${humanReviewedBaseline.sourceFileName}.`,
+            ...humanReviewedBaseline.warnings,
+          ],
+        };
   const projectedDraft = projectStrictSubtitlePackage({
-    rawPackage,
-    validationStatus: basePackageValidation(rawPackage) ?? "needs-review",
-    files: draftNames,
+    rawPackage: projectionRawPackage,
+    ...(humanReviewedBaseline === null
+      ? {}
+      : { cues: humanReviewedBaseline.cues }),
+    validationStatus:
+      humanReviewedBaseline === null
+        ? (basePackageValidation(rawPackage) ?? "needs-review")
+        : "needs-review",
+    files: humanReviewedBaseFiles ?? draftNames,
   });
   const machineCues = projectedDraft.cues;
-  const baseSubtitlePackageHash = await sha256LocalFile(located.packagePath);
+  const humanReviewedBasePackagePath =
+    humanReviewedBaseline === null
+      ? null
+      : path.join(
+          located.subtitleDirectory,
+          "subtitle-package.human-reviewed-base.json",
+        );
+  const effectiveBasePackagePath =
+    humanReviewedBasePackagePath ?? located.packagePath;
+  const baseSubtitlePackageHash =
+    humanReviewedBaseline === null
+      ? await sha256LocalFile(located.packagePath)
+      : sha256JsonFileValue(projectedDraft);
   const baseCueHash = sha256Value(machineCues);
-  const loadedCandidates = await loadFinalizationCandidates({
-    subtitleDirectory: located.subtitleDirectory,
-    cues: machineCues,
-  });
-  const inputEvidenceHash = sha256Value(
-    [...loadedCandidates.candidates].sort((left, right) =>
-      left.candidateId.localeCompare(right.candidateId),
-    ),
+  const loadedCandidates =
+    humanReviewedBaseline === null
+      ? await loadFinalizationCandidates({
+          subtitleDirectory: located.subtitleDirectory,
+          cues: machineCues,
+        })
+      : { candidates: [], evidencePath: null };
+  const sortedCandidates = [...loadedCandidates.candidates].sort(
+    (left, right) => left.candidateId.localeCompare(right.candidateId),
   );
+  const inputEvidenceHash =
+    humanReviewedBaseline === null
+      ? sha256Value(sortedCandidates)
+      : sha256Value({
+          humanReviewedBaseline: {
+            sourceFileSha256: humanReviewedBaseline.sourceFileSha256,
+            cueHash: humanReviewedBaseline.cueHash,
+          },
+          candidates: sortedCandidates,
+        });
   const thresholds = finalizationThresholdsSchema.parse({
     ...DEFAULT_FINALIZATION_THRESHOLDS,
     ...options.thresholds,
@@ -523,10 +597,13 @@ export async function finalizeSubtitleTask(
   const excluded = new Set(
     aggregated.decisions.flatMap((decision) => decision.targetCueIds),
   );
-  const duplicateRepair = repairSafeExactDuplicateCues({
-    cues: machineCues,
-    excludedCueIds: excluded,
-  });
+  const duplicateRepair =
+    humanReviewedBaseline === null
+      ? repairSafeExactDuplicateCues({
+          cues: machineCues,
+          excludedCueIds: excluded,
+        })
+      : { cues: [...machineCues], decisions: [] };
   let decisions = [...aggregated.decisions, ...duplicateRepair.decisions].sort(
     (left, right) => left.decisionId.localeCompare(right.decisionId),
   );
@@ -569,8 +646,31 @@ export async function finalizeSubtitleTask(
     correctionFeedback = human.feedback;
   }
 
-  const baseValidation = basePackageValidation(rawPackage);
+  const baseValidation =
+    humanReviewedBaseline === null
+      ? basePackageValidation(rawPackage)
+      : "validated";
   let findings: FinalizationFinding[] = [];
+  if (humanReviewedBaseline !== null) {
+    findings.push(
+      finding(
+        "HUMAN_REVIEWED_BASELINE_IMPORTED",
+        [],
+        `Imported ${humanReviewedBaseline.cues.length} user-confirmed human-reviewed cues; historical machine candidates and automatic duplicate repair were disabled.`,
+        "warning",
+      ),
+    );
+    if (humanReviewedBaseline.timestampNormalizationCount > 0) {
+      findings.push(
+        finding(
+          "ASS_TIMESTAMP_DECIMAL_COMMA_NORMALIZED",
+          [],
+          `Normalized ${humanReviewedBaseline.timestampNormalizationCount} ASS timestamp decimal comma separator(s) in memory without modifying the source file.`,
+          "warning",
+        ),
+      );
+    }
+  }
   if (sourceVideoPath === null) {
     findings.push(
       finding(
@@ -664,6 +764,18 @@ export async function finalizeSubtitleTask(
       ),
     );
   }
+  const humanReviewedSourceReadOnlyVerified =
+    humanReviewedBaseline === null ||
+    (await verifyHumanReviewedSubtitleReadOnly(humanReviewedBaseline));
+  if (!humanReviewedSourceReadOnlyVerified) {
+    findings.push(
+      finding(
+        "HUMAN_REVIEWED_SUBTITLE_CHANGED",
+        [],
+        "The human-reviewed subtitle changed during finalization.",
+      ),
+    );
+  }
   decisions = mergeIntegrityFindingsIntoDecisions({
     decisions,
     findings: quality.findings,
@@ -723,6 +835,7 @@ export async function finalizeSubtitleTask(
     baseRejected: baseValidation === "rejected",
     humanDecisionCount,
     automaticDecisionCount,
+    humanReviewedBaseline: humanReviewedBaseline !== null,
   });
   const validated = [
     "auto-validated",
@@ -746,7 +859,7 @@ export async function finalizeSubtitleTask(
     ),
   };
   const finalPackage = projectStrictSubtitlePackage({
-    rawPackage,
+    rawPackage: projectionRawPackage,
     cues: workingCues,
     validationStatus:
       state.status === "rejected"
@@ -766,7 +879,7 @@ export async function finalizeSubtitleTask(
   if (shouldPrepareReview && options.dryRun !== true) {
     const review = await prepareSubtitleReviewPackage({
       subtitleDirectory: located.subtitleDirectory,
-      baseSubtitlePackagePath: located.packagePath,
+      baseSubtitlePackagePath: effectiveBasePackagePath,
       baseSubtitlePackageHash,
       baseCueHash,
       inputEvidenceHash,
@@ -806,6 +919,14 @@ export async function finalizeSubtitleTask(
       "Source media changed while review artifacts were being prepared; validated output was not written.",
     );
   }
+  if (
+    humanReviewedBaseline !== null &&
+    !(await verifyHumanReviewedSubtitleReadOnly(humanReviewedBaseline))
+  ) {
+    throw new InputError(
+      "The human-reviewed subtitle changed while review artifacts were being prepared; output was not written.",
+    );
+  }
   const correctionFeedbackPath =
     correctionFeedback === null
       ? null
@@ -836,7 +957,7 @@ export async function finalizeSubtitleTask(
   const report = subtitleFinalizationReportSchema.parse({
     schemaVersion: "1.0.0",
     reportType: "subtitle-finalization-report",
-    finalizationVersion: "1.0.0",
+    finalizationVersion: "1.1.0",
     generatedAt: new Date().toISOString(),
     mode,
     status: state.status,
@@ -846,6 +967,25 @@ export async function finalizeSubtitleTask(
     inputEvidenceHash,
     outputCueHash: sha256Value(workingCues),
     outputHash,
+    humanReviewedBaseline:
+      humanReviewedBaseline === null || humanReviewedBasePackagePath === null
+        ? null
+        : {
+            authority: "user-confirmed-human-review",
+            sourceFileName: humanReviewedBaseline.sourceFileName,
+            sourceFileSha256: humanReviewedBaseline.sourceFileSha256,
+            sourceFileSize: humanReviewedBaseline.sourceFileSize,
+            format: humanReviewedBaseline.format,
+            cueCount: humanReviewedBaseline.cues.length,
+            cueHash: humanReviewedBaseline.cueHash,
+            timestampNormalizationCount:
+              humanReviewedBaseline.timestampNormalizationCount,
+            effectivePackagePath: relativeFrom(
+              located.subtitleDirectory,
+              humanReviewedBasePackagePath,
+            ),
+            sourceReadOnlyVerified: humanReviewedSourceReadOnlyVerified,
+          },
     thresholds,
     decisions,
     findings,
@@ -947,6 +1087,32 @@ export async function finalizeSubtitleTask(
               overwrite: true,
             }),
           ]),
+      ...(humanReviewedBasePackagePath === null
+        ? []
+        : [
+            atomicWriteJson(humanReviewedBasePackagePath, projectedDraft, {
+              overwrite: true,
+            }),
+          ]),
+      ...(humanReviewedBaseline === null || humanReviewedBaseFiles === null
+        ? []
+        : [
+            atomicWriteFile(
+              humanReviewedBaseFiles.srt,
+              formatSrt(humanReviewedBaseline.cues),
+              { overwrite: true },
+            ),
+            atomicWriteFile(
+              humanReviewedBaseFiles.vtt,
+              formatVtt(humanReviewedBaseline.cues),
+              { overwrite: true },
+            ),
+            atomicWriteFile(
+              humanReviewedBaseFiles.ass,
+              formatAss(humanReviewedBaseline.cues),
+              { overwrite: true },
+            ),
+          ]),
     ]);
   }
   options.logger?.log("info", "Subtitle finalization completed.", {
@@ -965,6 +1131,7 @@ export async function finalizeSubtitleTask(
       reviewPackage: reviewPackagePath,
       reviewPage: reviewPagePath,
       correctionFeedback: correctionFeedbackPath,
+      humanReviewedBasePackage: humanReviewedBasePackagePath,
     },
   };
 }

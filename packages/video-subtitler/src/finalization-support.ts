@@ -3,6 +3,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
 import {
+  detectTextLanguage,
   InputError,
   finalizationCandidateSchema,
   languageTagSchema,
@@ -49,10 +50,203 @@ export function sha256Value(value: unknown): string {
   return createHash("sha256").update(stableStringify(value)).digest("hex");
 }
 
+export function sha256JsonFileValue(value: unknown): string {
+  return createHash("sha256")
+    .update(`${JSON.stringify(value, null, 2)}\n`)
+    .digest("hex");
+}
+
 export async function sha256LocalFile(filePath: string): Promise<string> {
   return createHash("sha256")
     .update(await readFile(filePath))
     .digest("hex");
+}
+
+export interface LoadedHumanReviewedSubtitle {
+  sourcePath: string;
+  sourceFileName: string;
+  sourceFileSha256: string;
+  sourceFileSize: number;
+  sourceMtimeMs: number;
+  format: "ass";
+  timestampNormalizationCount: number;
+  cueHash: string;
+  cues: SubtitleCue[];
+  warnings: string[];
+}
+
+function normalizeAssTimestampDecimalCommas(content: string): {
+  content: string;
+  replacementCount: number;
+} {
+  let replacementCount = 0;
+  const replace = (
+    _match: string,
+    prefix: string,
+    fraction: string,
+    delimiter: string,
+  ): string => {
+    replacementCount += 1;
+    return `${prefix}.${fraction}${delimiter}`;
+  };
+  let normalized = content.replace(
+    /^(\s*Dialogue:\s*[^,\r\n]*,\s*\d+:\d{2}:\d{2}),(\d{1,2})(,)/gimu,
+    replace,
+  );
+  normalized = normalized.replace(
+    /^(\s*Dialogue:\s*[^,\r\n]*,\s*\d+:\d{2}:\d{2}(?:\.\d{1,2})?\s*,\s*\d+:\d{2}:\d{2}),(\d{1,2})(,)/gimu,
+    replace,
+  );
+  return { content: normalized, replacementCount };
+}
+
+function importedAssStyles(content: string): {
+  styles: ("default" | "thought" | "music")[];
+  unknownStyleCount: number;
+} {
+  let inEvents = false;
+  let format: string[] = [];
+  let unknownStyleCount = 0;
+  const styles: ("default" | "thought" | "music")[] = [];
+  for (const line of content
+    .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n")
+    .split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("[")) {
+      inEvents = trimmed.toLowerCase() === "[events]";
+      continue;
+    }
+    if (!inEvents || trimmed === "" || trimmed.startsWith(";")) continue;
+    if (/^Format:/iu.test(trimmed)) {
+      format = trimmed
+        .slice(trimmed.indexOf(":") + 1)
+        .split(",")
+        .map((field) => field.trim().toLowerCase());
+      continue;
+    }
+    if (!/^Dialogue:/iu.test(trimmed) || format.length === 0) continue;
+    const payload = trimmed.slice(trimmed.indexOf(":") + 1).trimStart();
+    const fields = payload.split(",");
+    const values = [
+      ...fields.slice(0, format.length - 1),
+      fields.slice(format.length - 1).join(","),
+    ];
+    const styleIndex = format.indexOf("style");
+    const styleName =
+      styleIndex < 0 ? "default" : (values[styleIndex] ?? "default");
+    const normalizedStyle = styleName.trim().toLowerCase();
+    if (normalizedStyle === "music") {
+      styles.push("music");
+    } else if (normalizedStyle === "thought") {
+      styles.push("thought");
+    } else {
+      styles.push("default");
+      if (normalizedStyle !== "" && normalizedStyle !== "default") {
+        unknownStyleCount += 1;
+      }
+    }
+  }
+  return { styles, unknownStyleCount };
+}
+
+export async function loadHumanReviewedSubtitle(
+  filePath: string,
+): Promise<LoadedHumanReviewedSubtitle> {
+  const sourcePath = path.resolve(filePath);
+  if (![".ass", ".ssa"].includes(path.extname(sourcePath).toLowerCase())) {
+    throw new InputError(
+      "A human-reviewed baseline must be an ASS or SSA subtitle file.",
+      { path: sourcePath },
+    );
+  }
+  const sourceStat = await stat(sourcePath);
+  if (!sourceStat.isFile()) {
+    throw new InputError(
+      `Human-reviewed subtitle is not a regular file: ${sourcePath}`,
+    );
+  }
+  const sourceBytes = await readFile(sourcePath);
+  const sourceFileSha256 = createHash("sha256")
+    .update(sourceBytes)
+    .digest("hex");
+  const normalized = normalizeAssTimestampDecimalCommas(
+    sourceBytes.toString("utf8"),
+  );
+  const parsed = parseAss(normalized.content);
+  const styleResult = importedAssStyles(normalized.content);
+  if (styleResult.styles.length !== parsed.length) {
+    throw new InputError(
+      "Human-reviewed ASS style and dialogue counts do not match.",
+      {
+        cueCount: parsed.length,
+        styleCount: styleResult.styles.length,
+      },
+    );
+  }
+  const cues = parsed.map((cue, index): SubtitleCue => {
+    if (cue.end <= cue.start) {
+      throw new InputError(
+        `Human-reviewed cue at source line ${cue.sourceLine} has invalid timing.`,
+      );
+    }
+    const detected = detectTextLanguage(cue.text);
+    const style = styleResult.styles[index] ?? "default";
+    return subtitleCueSchema.parse({
+      id: `human-reviewed-${String(index + 1).padStart(4, "0")}-${sha256Value({
+        index,
+        start: cue.start,
+        end: cue.end,
+        text: cue.text,
+        speaker: cue.speaker,
+        style,
+      }).slice(0, 12)}`,
+      start: cue.start,
+      end: cue.end,
+      language: detected.language,
+      languages: detected.languages,
+      text: cue.text,
+      style,
+      speaker: cue.speaker,
+      confidence: null,
+    });
+  });
+  const warnings = [
+    ...(normalized.replacementCount === 0
+      ? []
+      : [
+          `Normalized ${normalized.replacementCount} ASS timestamp decimal comma separator(s) without modifying the source file.`,
+        ]),
+    ...(styleResult.unknownStyleCount === 0
+      ? []
+      : [
+          `Mapped ${styleResult.unknownStyleCount} unknown ASS style(s) to default.`,
+        ]),
+  ];
+  return {
+    sourcePath,
+    sourceFileName: path.basename(sourcePath),
+    sourceFileSha256,
+    sourceFileSize: sourceStat.size,
+    sourceMtimeMs: sourceStat.mtimeMs,
+    format: "ass",
+    timestampNormalizationCount: normalized.replacementCount,
+    cueHash: sha256Value(cues),
+    cues,
+    warnings,
+  };
+}
+
+export async function verifyHumanReviewedSubtitleReadOnly(
+  input: LoadedHumanReviewedSubtitle,
+): Promise<boolean> {
+  const current = await stat(input.sourcePath);
+  return (
+    current.isFile() &&
+    current.size === input.sourceFileSize &&
+    current.mtimeMs === input.sourceMtimeMs &&
+    (await sha256LocalFile(input.sourcePath)) === input.sourceFileSha256
+  );
 }
 
 export async function locateSubtitlePackage(taskDirectory: string): Promise<{

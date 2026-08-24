@@ -49,11 +49,21 @@ npm run subtitle-finalize -- \
   --finalization auto
 ```
 
+To make a user-confirmed human-reviewed ASS the authoritative baseline, pass it explicitly. The importer preserves its cue text, timing, speaker, and styles; disables stale machine candidates and automatic duplicate removal; records source hashes and any in-memory timestamp-separator recovery; and writes `subtitle-package.human-reviewed-base.json` with matching `.human-reviewed-base.srt`, `.vtt`, and `.ass` derivatives:
+
+```bash
+npm run subtitle-finalize -- \
+  --task "/path/to/task-output" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
+  --finalization review-fallback
+```
+
 If evidence is insufficient, `review-fallback` writes honest `.best-effort.*` files, a strict `subtitle-package.needs-review.json`, an offline review page, bounded local audio clips, and candidate suggestions without changing visible cue text. Apply a downloaded review file only after a hash/fingerprint preflight:
 
 ```bash
 npm run subtitle-finalize -- \
   --task "/path/to/task-output" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
   --resolutions "/path/to/human-review-resolutions.json" \
   --dry-run
 ```

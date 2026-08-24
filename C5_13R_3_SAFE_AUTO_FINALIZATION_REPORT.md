@@ -4,7 +4,7 @@
 - 开发分支：`codex/c5-13r-3-safe-auto-finalization`
 - 基线：`agent/publish-core-runtime` @ `04f6aa27280043dd53e29937277221b4d8ec06e7`
 - 运行环境：Node.js `v24.18.0`、npm `11.18.0`、macOS
-- 日期：2026-08-24
+- 日期：2026-08-24—2026-08-25
 
 ## 1. 原问题根因
 
@@ -67,6 +67,8 @@ machine subtitle-package.json
 
 人工审核不是生产必经步骤。自动证据充足且所有质量门为零阻塞时，人工决定数量保持 `0`，直接输出 `auto-validated`。
 
+用户显式指定 `--human-reviewed-subtitle` 时，该 ASS/SSA 成为权威基线：导入器保留人工文本、时间、speaker 和 Default/Thought/Music 样式，停用旧机器候选与自动重复删除，并写出 `subtitle-package.human-reviewed-base.json`。只有终稿质量门全部通过时才可成为 `human-validated`；现存质量问题仍诚实进入 review fallback。
+
 ## 5. 修改文件清单
 
 核心实现：
@@ -97,6 +99,7 @@ machine subtitle-package.json
 测试：
 
 - `tests/finalization-safety.test.ts`
+- `tests/finalization-human-reviewed-baseline.test.ts`
 - `tests/finalization-human.test.ts`
 - `tests/e2e/finalization-flow.test.ts`
 
@@ -240,8 +243,9 @@ Skill 2 只读 checkout：`codex/publish-core-runtime`。检查结果：
 - 本轮没有修改旧 `subtitlePackageSchema`；
 - 聚焦 E2E 用严格 Zod schema 解析 final package，并调用相同输入模块重建句子；
 - 真实 `subtitle-package.needs-review.json` 经实际 `npm run grammar-report -- --analysis-provider mock` 成功读取，152 cues 重建为 118 sentences。
+- 纠正后的 `subtitle-package.human-reviewed-base.json` 也经 Skill 2 实际 CLI 严格读取，192 cues 重建为 106 sentences/106 grammar points。
 
-Skill 2 和 Skill 3 checkout 的 `git status` 均保持 clean；没有安装、编辑或提交任何文件。
+Skill 2 和 Skill 3 checkout 的 `git status` 均保持 clean；Skill 2 只运行锁文件 `npm ci` 和本地 build 以补齐被忽略的运行依赖，没有编辑或提交 tracked 文件。
 
 ## 18. CLI 示例
 
@@ -252,11 +256,17 @@ npm run subtitle -- --input "/path/video.mkv" --finalization review-fallback
 # 旧任务，无需重跑 ASR
 npm run subtitle-finalize -- --task "/path/task" --finalization auto
 
+# 用户确认的人工复核 ASS 作为权威基线
+npm run subtitle-finalize -- --task "/path/task" \
+  --human-reviewed-subtitle "/path/human-reviewed.ass" \
+  --finalization review-fallback
+
 # 显式审核
 npm run subtitle-review -- --task "/path/task"
 
 # 人工修订预检
 npm run subtitle-finalize -- --task "/path/task" \
+  --human-reviewed-subtitle "/path/human-reviewed.ass" \
   --resolutions "/path/human-review-resolutions.json" --dry-run
 
 # Skill wrapper 等价入口
@@ -274,7 +284,7 @@ CLI JSON 汇总包含 machine/automatic/safe mutation/suggestion/blocking/unreso
 PATH=<Node-24>/bin:$PATH npx --yes npm@11.18.0 test
 ```
 
-结果：3 个测试文件、33 个测试，全部通过。覆盖弱定位、局部区间缺失、partial/substring、neighbor intrusion、独立 request 去重、timing-only、完全重复、单一决策、顺序稳定、stale hash、各人工 action、确定性 ID、feedback、完整性 finding 审核物化和 burn 拒绝。
+结果：4 个测试文件、36 个测试，全部通过。覆盖弱定位、局部区间缺失、partial/substring、neighbor intrusion、独立 request 去重、timing-only、完全重复、单一决策、顺序稳定、stale hash、各人工 action、确定性 ID、feedback、完整性 finding 审核物化、人工 ASS 导入/小数逗号审计/只读保护和 burn 拒绝。
 
 ## 20. 集成测试结果
 
@@ -284,7 +294,7 @@ PATH=<Node-24>/bin:$PATH npx --yes npm@11.18.0 test
 PATH=<Node-24>/bin:$PATH npx --yes npm@11.18.0 run test:e2e
 ```
 
-结果：1 个 E2E 文件、7 个测试，全部通过。完整覆盖 machine package → auto final、best-effort、review fallback、完整性 finding → review decision、human mode、burn guard、human correction → unified final → Skill 2 input，以及重复运行 output hash 一致。
+结果：1 个 E2E 文件、8 个测试，全部通过。完整覆盖 machine package → auto final、best-effort、review fallback、完整性 finding → review decision、human mode、burn guard、human correction → unified final → Skill 2 input、人工 ASS 权威基线覆盖旧机器正文/候选，以及重复运行 output hash 一致。
 
 ## 21. Fixture 回归结果
 
@@ -297,10 +307,11 @@ PATH=<Node-24>/bin:$PATH npx --yes npm@11.18.0 run test:e2e
 - `human` 始终生成 review；
 - 人工 EDIT_TEXT 后生成 `human-validated` unified final；
 - 相同输入重复运行 cue/output hash 相同；
+- 人工 ASS 导入后旧候选不再参与，clean fixture 输出 `human-validated`；
 - 草稿文件内容保持不变；
 - SRT/VTT/ASS 全部重新解析且 cue 数一致。
 
-## 22. 真实素材/离线 replay
+## 22. 初始机器 package 离线 replay（已被人工基线重放取代）
 
 使用已有 C5.13R.2.1 artifact 和用户本地《カーネーション》第 1 集视频；没有重新运行 ASR、没有访问字幕网站、没有调用模型或 API。
 
@@ -323,7 +334,7 @@ PATH=<Node-24>/bin:$PATH npx --yes npm@11.18.0 run test:e2e
 
 额外 3 个 blocking findings 是旧字幕中仍存在的相邻重复，另有 1 个全局 `BASE_PACKAGE_NEEDS_REVIEW`。原草稿 package 与 replay 副本 `cmp` 相同；核心 `{id,start,end,text,style,speaker}` 哈希在 draft/best-effort 间完全相同，文本变化数为 0。
 
-## 23. 自动率与审核率指标
+## 23. 初始机器 package 自动率与审核率指标
 
 真实 replay：
 
@@ -339,7 +350,7 @@ PATH=<Node-24>/bin:$PATH npx --yes npm@11.18.0 run test:e2e
 ## 24. 未完成、失败或跳过项
 
 - 没有新增 ASR 模型、音素强制对齐、说话人分离、模型训练或 LLM 自由改写；这是明确的本轮非目标。
-- 真实 replay 没有人工提交 46 项 resolutions，因此没有伪造 human-validated 真实终稿，也没有烧录 needs-review 字幕。
+- 初始机器 package replay 没有人工提交 46 项 resolutions；纠正后的人工基线 replay 仍有 33 个质量审核项，因此没有伪造 human-validated 真实终稿，也没有烧录 needs-review 字幕。
 - npm install 报告 5 个既有依赖审计项（1 moderate、4 high）。未运行破坏性 `npm audit fix`；依赖审计升级不属于本轮，且全部功能门禁通过。
 - 最初两个一次性 `tsx -e` 兼容探针分别因 CJS top-level await 和 workspace package export 方式失败；随后改用实际 `grammar-report` CLI 完成同一输入路径验证并成功。产品测试没有跳过。
 - artifact-only 模式没有源视频时只能记录不可验证 warning；带显式源视频的真实 replay 已完整验证只读性。
@@ -384,18 +395,18 @@ npm run build
 npm run format:check
   → all matched
 npm test
-  → 3 files, 33 tests passed
+  → 4 files, 36 tests passed
 npm run test:e2e
-  → 1 file, 7 tests passed
+  → 1 file, 8 tests passed
 python3 <skill-creator>/scripts/quick_validate.py <skill>
   → Skill is valid!
 ```
 
-真实 replay 根目录：
+当前人工基线 replay 根目录：
 
 ```text
-/Users/paulasmith/Documents/Codex-Skills/output/
-  carnation-reference-guided-c5-13r-3-safe-auto-finalization-20260824/
+<workspace>/output/
+  carnation-reference-guided-c5-13r-3-human-reviewed-baseline-20260825/
 ```
 
 其中包括：
@@ -404,6 +415,10 @@ python3 <skill-creator>/scripts/quick_validate.py <skill>
 subtitle-<stem>.best-effort.srt
 subtitle-<stem>.best-effort.vtt
 subtitle-<stem>.best-effort.ass
+subtitle-<stem>.human-reviewed-base.srt
+subtitle-<stem>.human-reviewed-base.vtt
+subtitle-<stem>.human-reviewed-base.ass
+subtitle-package.human-reviewed-base.json
 subtitle-package.needs-review.json
 subtitle-finalization-report.json
 subtitle-review-package.json
@@ -411,8 +426,38 @@ review/index.html
 review/data/subtitle-review-package.json
 review/assets/review.css
 review/assets/review.js
-audio/review/*.wav (46)
-offline-replay-summary.json
+audio/review/*.wav (33)
 ```
+
+## 28. 人工复核 ASS 权威基线纠正与真实重放
+
+用户在 2026-08-25 明确确认 `machine-review-draft-contradiction-audited.ass` 是人工复核稿。此前 section 22 的初始 replay 实际读取同级 `subtitle-package.json`，没有导入该人工稿；本节记录修复后的权威重放，取代该初始 replay 作为人工稿验证结论。
+
+人工稿输入：
+
+- 精确 SHA-256：`a758701ed7c6e7ccf02ddda7646d7c46ffe4432e0f7dce0a7f6933146f6f100e`；
+- 192 cues，其中 Default 182、Music 10；
+- 1 处 ASS 时间戳小数逗号在内存中审计式恢复：`0:01:57,35 → 0:01:57.35`；源 ASS 未修改；
+- 旧 152-cue package 仅提供媒体元数据，124 个 legacy candidates 和自动重复删除均未参与人工正文判定。
+
+真实结果：
+
+| 指标                      |                  实际值 |
+| ------------------------- | ----------------------: |
+| 人工基线 cue              |                     192 |
+| 自动文本/时间修改         |                       0 |
+| 旧候选被选中              |                       0 |
+| 超过 16 字的行            |                      21 |
+| 非法相邻重叠              |                       9 |
+| 相邻完全重复              |                       5 |
+| blocking findings         |                      35 |
+| review items              |                      33 |
+| review 涉及唯一 cue       |                      47 |
+| review audio              |         33 成功、0 失败 |
+| SRT/VTT/ASS parity errors |                       0 |
+| source ASS/video readonly |                    true |
+| 最终状态                  | `needs-review` / `none` |
+
+`subtitle-package.human-reviewed-base.json` 与 `subtitle-package.needs-review.json` 的 cues 完全相同；其 `subtitleFiles` 指向同内容的 `.human-reviewed-base.srt/.vtt/.ass`，不再引用旧机器字幕。权威来源与终稿验证分离，因此该基线自身保持 `needs-review`，只有全部质量门通过后的 final package 才可标记 validated。`characterCorrectionRate = 0`、`timingCorrectionRate = 0`。相同输入第二次 replay 的 `outputHash`、`outputCueHash`、`baseCueHash`、`inputEvidenceHash` 和 `baseSubtitlePackageHash` 全部一致。该严格 v1 人工基线随后被 Skill 2 Mock CLI 成功读取并生成 106 sentences/106 grammar points。
 
 开发报告：`C5_13R_3_SAFE_AUTO_FINALIZATION_REPORT.md`。

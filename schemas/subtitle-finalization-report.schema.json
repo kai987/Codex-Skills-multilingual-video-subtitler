@@ -32,6 +32,62 @@
     "inputEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "outputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "humanReviewedBaseline": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "authority": {
+              "type": "string",
+              "const": "user-confirmed-human-review"
+            },
+            "sourceFileName": { "type": "string", "minLength": 1 },
+            "sourceFileSha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "sourceFileSize": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "format": { "type": "string", "const": "ass" },
+            "cueCount": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "timestampNormalizationCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "effectivePackagePath": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            "sourceReadOnlyVerified": { "type": "boolean" }
+          },
+          "required": [
+            "authority",
+            "sourceFileName",
+            "sourceFileSha256",
+            "sourceFileSize",
+            "format",
+            "cueCount",
+            "cueHash",
+            "timestampNormalizationCount",
+            "effectivePackagePath",
+            "sourceReadOnlyVerified"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
     "thresholds": {
       "type": "object",
       "properties": {
@@ -461,6 +517,7 @@
     "inputEvidenceHash",
     "outputCueHash",
     "outputHash",
+    "humanReviewedBaseline",
     "thresholds",
     "decisions",
     "findings",

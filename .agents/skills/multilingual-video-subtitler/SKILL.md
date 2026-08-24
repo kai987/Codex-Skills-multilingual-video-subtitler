@@ -41,6 +41,17 @@ node .agents/skills/multilingual-video-subtitler/scripts/run.mjs review \
   --task "/path/to/task-output"
 ```
 
+When the user explicitly identifies an ASS/SSA file as their human-reviewed draft, import it as the authoritative baseline instead of continuing from the machine `subtitle-package.json`:
+
+```bash
+node .agents/skills/multilingual-video-subtitler/scripts/run.mjs finalize \
+  --task "/path/to/task-output" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
+  --finalization review-fallback
+```
+
+Preserve the reviewed file byte-for-byte and record its name, SHA-256, size, cue hash, cue count, effective package path, and read-only verification in `subtitle-finalization-report.json`. Import its text, timing, speaker, and Default/Thought/Music styles without using legacy machine candidates or automatic duplicate removal. A recoverable ASS timestamp decimal comma may be normalized in memory only and must be reported. Write the effective strict v1 baseline to `subtitle-package.human-reviewed-base.json` together with matching `.human-reviewed-base.srt`, `.vtt`, and `.ass` derivatives; the package must not point to stale machine subtitle files. Remaining overlap, repetition, line-capacity, timing, or serialization failures stay in local review; do not silently rewrite the reviewed baseline. Pass the same `--human-reviewed-subtitle` again when importing resolutions so stale hashes target the same effective baseline.
+
 Automatic text mutation requires `EXACT_TARGET` or `PROBABLE_TARGET`, a local interval with direct acoustic support, conservative score and margin, at least two independent requests, full text coverage, no neighbor-cue intrusion, and passing language, hallucination, repetition, presentation, and final-integrity checks. `BROAD_WINDOW_ASSOCIATION`, `AMBIGUOUS_ASSOCIATION`, `UNASSOCIATED`, missing local timing, partial fragments, strict-substring replacements, unresolved timing, and insufficient independent support are always suggestion-only. Preserve them in the review package; never write them into visible cue text automatically.
 
 When all blocking counts are zero, write `subtitle-<stem>.final.srt`, `.final.vtt`, `.final.ass`, `subtitle-package.final.json`, and `subtitle-finalization-report.json`. The final package remains the strict Skill 2 v1 package and uses `primarySubtitle.validationStatus: validated`; automatic/human/mixed state stays in the sidecar. When any blocker remains, write `.best-effort.*` and `subtitle-package.needs-review.json`, never a validated final name.
@@ -50,6 +61,7 @@ Review output is fully local: `subtitle-review-package.json`, `review/index.html
 ```bash
 npm run subtitle-finalize -- \
   --task "/path/to/task-output" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
   --resolutions "/path/to/human-review-resolutions.json" \
   --dry-run
 ```

@@ -186,6 +186,21 @@ export const finalizationMetricsSchema = z
   })
   .strict();
 
+export const humanReviewedBaselineSchema = z
+  .object({
+    authority: z.literal("user-confirmed-human-review"),
+    sourceFileName: z.string().min(1),
+    sourceFileSha256: hashSchema,
+    sourceFileSize: z.number().int().nonnegative(),
+    format: z.literal("ass"),
+    cueCount: z.number().int().positive(),
+    cueHash: hashSchema,
+    timestampNormalizationCount: z.number().int().nonnegative(),
+    effectivePackagePath: relativePathSchema,
+    sourceReadOnlyVerified: z.boolean(),
+  })
+  .strict();
+
 export const subtitleFinalizationReportSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
@@ -200,6 +215,7 @@ export const subtitleFinalizationReportSchema = z
     inputEvidenceHash: hashSchema,
     outputCueHash: hashSchema,
     outputHash: hashSchema,
+    humanReviewedBaseline: humanReviewedBaselineSchema.nullable().default(null),
     thresholds: finalizationThresholdsSchema,
     decisions: z.array(cueDecisionSchema),
     findings: z.array(finalizationFindingSchema),
@@ -431,6 +447,7 @@ export type FinalizationFinding = z.infer<typeof finalizationFindingSchema>;
 export type FinalizationThresholds = z.infer<
   typeof finalizationThresholdsSchema
 >;
+export type HumanReviewedBaseline = z.infer<typeof humanReviewedBaselineSchema>;
 export type SubtitleFinalizationReport = z.infer<
   typeof subtitleFinalizationReportSchema
 >;
