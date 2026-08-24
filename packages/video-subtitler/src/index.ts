@@ -1,6 +1,7 @@
 export * from "./embedded.js";
 export * from "./finalization.js";
 export * from "./finalization-support.js";
+export * from "./finalization-metrics.js";
 export * from "./burn.js";
 export * from "./adaptive.js";
 export * from "./online.js";

@@ -340,6 +340,54 @@
           "maximum": 9007199254740991
         },
         "automaticCueRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "nonBlockingCueRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "passiveBaselineAcceptanceRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "autoResolvedCueRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "autoMutationCueRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "presentationAutoResolvedCueRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "intentionalRepetitionResolvedCueRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "legalOverlapCueRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "humanBaselineCueRate": {
+          "default": 0,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "manualReviewCueRate": { "type": "number", "minimum": 0, "maximum": 1 },
         "blockingCueRate": { "type": "number", "minimum": 0, "maximum": 1 },
         "characterCorrectionRate": {
@@ -387,6 +435,14 @@
         "fullCueFragmentReplacementCount",
         "formatParityErrorCount",
         "automaticCueRate",
+        "nonBlockingCueRate",
+        "passiveBaselineAcceptanceRate",
+        "autoResolvedCueRate",
+        "autoMutationCueRate",
+        "presentationAutoResolvedCueRate",
+        "intentionalRepetitionResolvedCueRate",
+        "legalOverlapCueRate",
+        "humanBaselineCueRate",
         "manualReviewCueRate",
         "blockingCueRate",
         "characterCorrectionRate",
@@ -404,8 +460,11 @@
         "finalIntegrityPassed": { "type": "boolean" },
         "serializationRoundTripPassed": { "type": "boolean" },
         "formatSemanticParityPassed": { "type": "boolean" },
+        "canonicalParityPassed": { "default": true, "type": "boolean" },
+        "presentationParityPassed": { "default": true, "type": "boolean" },
         "rollbackApplied": { "type": "boolean" },
         "sourceReadOnlyVerified": { "type": "boolean" },
+        "srtOverlapRenderingMayVary": { "default": false, "type": "boolean" },
         "blockingCodes": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
@@ -420,8 +479,11 @@
         "finalIntegrityPassed",
         "serializationRoundTripPassed",
         "formatSemanticParityPassed",
+        "canonicalParityPassed",
+        "presentationParityPassed",
         "rollbackApplied",
         "sourceReadOnlyVerified",
+        "srtOverlapRenderingMayVary",
         "blockingCodes",
         "warningCodes"
       ],
@@ -480,6 +542,17 @@
             { "type": "null" }
           ]
         },
+        "presentationResolution": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
         "subtitledVideo": {
           "anyOf": [
             {
@@ -499,6 +572,7 @@
         "reviewPackage",
         "reviewPage",
         "correctionFeedback",
+        "presentationResolution",
         "subtitledVideo"
       ],
       "additionalProperties": false

@@ -11,7 +11,10 @@ import {
   analyzeJapaneseText,
 } from "@mvl/subtitle-core";
 
-import { classifyJapaneseCueMerge } from "./text-integrity-repair.js";
+import {
+  classifyOverlapRelationship,
+  selectTrustedOverlapBoundary,
+} from "./overlap-classification.js";
 
 function hash(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -41,95 +44,6 @@ function similarity(left: string, right: string): number {
   );
   const common = [...leftPairs].filter((pair) => rightPairs.has(pair)).length;
   return (2 * common) / Math.max(1, leftPairs.size + rightPairs.size);
-}
-
-export type OverlapRelationship =
-  | "exact-duplicate"
-  | "near-duplicate"
-  | "same-utterance-alternative"
-  | "complementary-fragments"
-  | "different-dialogue-boundary-error"
-  | "true-simultaneous-speech"
-  | "unresolved";
-
-function overlapRatio(left: SubtitleCue, right: SubtitleCue): number {
-  const overlap = Math.max(
-    0,
-    Math.min(left.end, right.end) - Math.max(left.start, right.start),
-  );
-  return (
-    overlap /
-    Math.max(0.001, Math.min(left.end - left.start, right.end - right.start))
-  );
-}
-
-function shares(left: readonly string[], right: readonly string[]): boolean {
-  const values = new Set(right);
-  return left.some((value) => values.has(value));
-}
-
-export function classifyOverlapRelationship(
-  left: SubtitleCue,
-  right: SubtitleCue,
-): { relationship: OverlapRelationship; evidence: string[] } {
-  const textSimilarity = similarity(left.text, right.text);
-  const temporalOverlapRatio = overlapRatio(left, right);
-  const sameAnchor = shares(
-    left.provenance?.referenceAnchorIds ?? [],
-    right.provenance?.referenceAnchorIds ?? [],
-  );
-  const sameRequest = shares(
-    left.provenance?.sourceRequestIds ?? [],
-    right.provenance?.sourceRequestIds ?? [],
-  );
-  const sameRecovery =
-    left.provenance?.recoveryUnitId !== null &&
-    left.provenance?.recoveryUnitId !== undefined &&
-    left.provenance.recoveryUnitId === right.provenance?.recoveryUnitId;
-  const evidence = [
-    `text-similarity:${textSimilarity.toFixed(3)}`,
-    `temporal-overlap-ratio:${temporalOverlapRatio.toFixed(3)}`,
-    ...(sameAnchor ? ["same-reference-anchor"] : []),
-    ...(sameRequest ? ["same-source-request"] : []),
-    ...(sameRecovery ? ["same-recovery-unit"] : []),
-  ];
-  if (normalized(left.text) === normalized(right.text)) {
-    return { relationship: "exact-duplicate", evidence };
-  }
-  if (textSimilarity >= 0.88) {
-    return { relationship: "near-duplicate", evidence };
-  }
-  if (
-    temporalOverlapRatio >= 0.65 &&
-    textSimilarity >= 0.72 &&
-    (sameAnchor || sameRequest || sameRecovery)
-  ) {
-    return { relationship: "same-utterance-alternative", evidence };
-  }
-  const merge = classifyJapaneseCueMerge(left, right);
-  if (merge.relationship === "complementary-fragments") {
-    return {
-      relationship: "complementary-fragments",
-      evidence: [...evidence, ...merge.evidence],
-    };
-  }
-  if (
-    left.speaker !== null &&
-    right.speaker !== null &&
-    left.speaker !== right.speaker
-  ) {
-    return { relationship: "true-simultaneous-speech", evidence };
-  }
-  if (textSimilarity < 0.72) {
-    return {
-      relationship: "different-dialogue-boundary-error",
-      evidence: [...evidence, ...merge.evidence],
-    };
-  }
-  return {
-    relationship: "unresolved",
-    evidence: [...evidence, ...merge.evidence],
-  };
 }
 
 function alternativeQuality(cue: SubtitleCue): number {
@@ -226,31 +140,6 @@ function mergeProvenance(kept: SubtitleCue, removed: SubtitleCue): SubtitleCue {
       ),
     },
   };
-}
-
-function trustworthyBoundary(left: SubtitleCue, right: SubtitleCue): number {
-  const leftTokenEnd = left.timingEvidence?.tokens.at(-1)?.end;
-  const rightTokenStart = right.timingEvidence?.tokens[0]?.start;
-  const leftSpeechEnd = left.timingEvidence?.speechEnd;
-  const rightSpeechStart = right.timingEvidence?.speechStart;
-  const leftBoundary = leftTokenEnd ?? leftSpeechEnd;
-  const rightBoundary = rightTokenStart ?? rightSpeechStart;
-  if (
-    leftBoundary != null &&
-    rightBoundary != null &&
-    rightBoundary >= leftBoundary
-  ) {
-    return (leftBoundary + rightBoundary) / 2;
-  }
-  if (leftBoundary != null && leftBoundary <= right.end) {
-    return leftBoundary;
-  }
-  if (rightBoundary != null && rightBoundary >= left.start) {
-    return rightBoundary;
-  }
-  return (
-    (Math.min(left.end, right.end) + Math.max(left.start, right.start)) / 2
-  );
 }
 
 function splitLongCue(cue: SubtitleCue): SubtitleCue[] | null {
@@ -416,12 +305,9 @@ export function repairFinalSubtitleIntegrity(input: {
       );
       const overlapRelationship = classifyOverlapRelationship(left, right);
       if (
-        finding.code === "CROSS_CUE_EXACT_DUPLICATE" ||
         ["exact-duplicate", "near-duplicate"].includes(
           overlapRelationship.relationship,
-        ) ||
-        normalized(left.text).includes(normalized(right.text)) ||
-        normalized(right.text).includes(normalized(left.text))
+        )
       ) {
         const kept =
           normalized(right.text).length > normalized(left.text).length
@@ -487,9 +373,13 @@ export function repairFinalSubtitleIntegrity(input: {
             ...overlapRelationship.evidence,
             "strict-complementary-fragments",
           ];
-        } else {
-          const split = trustworthyBoundary(left, right);
-          if (split - left.start >= 0.25 && right.end - split >= 0.25) {
+        } else if (
+          overlapRelationship.relationship ===
+          "different-dialogue-boundary-error"
+        ) {
+          const trustedBoundary = selectTrustedOverlapBoundary(left, right);
+          if (trustedBoundary !== null) {
+            const split = trustedBoundary.boundary;
             const repairedLeft = trimCueToBoundary(left, split, "end");
             const repairedRight = trimCueToBoundary(right, split, "start");
             cues = [
@@ -503,9 +393,10 @@ export function repairFinalSubtitleIntegrity(input: {
             result = "repaired";
             outputCueIds = [repairedLeft.id, repairedRight.id];
             evidence = [
-              "token-speech-boundary-priority",
-              `selected-boundary:${split.toFixed(3)}`,
+              ...trustedBoundary.evidence,
+              `boundary-source:${trustedBoundary.boundarySource}`,
               "both-cues-retained",
+              "no-midpoint-fallback",
             ];
           }
         }

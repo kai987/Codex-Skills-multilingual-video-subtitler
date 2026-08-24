@@ -17,6 +17,8 @@ import {
 import {
   calculateCandidateCoverage,
   normalizeFinalizationText,
+  type AssEventEvidence,
+  type SubtitlePresentationResolutionResult,
 } from "@mvl/transcription-core";
 import {
   formatAss,
@@ -25,6 +27,7 @@ import {
   parseAss,
   parseSrt,
   parseVtt,
+  presentationLexicalText,
   type ParsedCue,
 } from "@mvl/subtitle-core";
 
@@ -72,6 +75,7 @@ export interface LoadedHumanReviewedSubtitle {
   timestampNormalizationCount: number;
   cueHash: string;
   cues: SubtitleCue[];
+  assEventEvidence: AssEventEvidence[];
   warnings: string[];
 }
 
@@ -102,12 +106,14 @@ function normalizeAssTimestampDecimalCommas(content: string): {
 
 function importedAssStyles(content: string): {
   styles: ("default" | "thought" | "music")[];
+  events: Omit<AssEventEvidence, "cueId">[];
   unknownStyleCount: number;
 } {
   let inEvents = false;
   let format: string[] = [];
   let unknownStyleCount = 0;
   const styles: ("default" | "thought" | "music")[] = [];
+  const events: Omit<AssEventEvidence, "cueId">[] = [];
   for (const line of content
     .replaceAll("\r\n", "\n")
     .replaceAll("\r", "\n")
@@ -136,6 +142,17 @@ function importedAssStyles(content: string): {
     const styleName =
       styleIndex < 0 ? "default" : (values[styleIndex] ?? "default");
     const normalizedStyle = styleName.trim().toLowerCase();
+    const layerIndex = format.indexOf("layer");
+    const rawLayer = layerIndex < 0 ? "0" : (values[layerIndex] ?? "0");
+    const parsedLayer = Number.parseInt(rawLayer.trim(), 10);
+    const nameIndex = format.indexOf("name");
+    const rawName = nameIndex < 0 ? "" : (values[nameIndex] ?? "");
+    events.push({
+      layer:
+        Number.isInteger(parsedLayer) && parsedLayer >= 0 ? parsedLayer : 0,
+      name: rawName.trim() === "" ? null : rawName.trim(),
+      style: styleName.trim() === "" ? "Default" : styleName.trim(),
+    });
     if (normalizedStyle === "music") {
       styles.push("music");
     } else if (normalizedStyle === "thought") {
@@ -147,7 +164,7 @@ function importedAssStyles(content: string): {
       }
     }
   }
-  return { styles, unknownStyleCount };
+  return { styles, events, unknownStyleCount };
 }
 
 export async function loadHumanReviewedSubtitle(
@@ -181,6 +198,15 @@ export async function loadHumanReviewedSubtitle(
       {
         cueCount: parsed.length,
         styleCount: styleResult.styles.length,
+      },
+    );
+  }
+  if (styleResult.events.length !== parsed.length) {
+    throw new InputError(
+      "Human-reviewed ASS event metadata and dialogue counts do not match.",
+      {
+        cueCount: parsed.length,
+        eventCount: styleResult.events.length,
       },
     );
   }
@@ -233,6 +259,14 @@ export async function loadHumanReviewedSubtitle(
     timestampNormalizationCount: normalized.replacementCount,
     cueHash: sha256Value(cues),
     cues,
+    assEventEvidence: cues.map((cue, index) => ({
+      cueId: cue.id,
+      ...(styleResult.events[index] ?? {
+        layer: 0,
+        name: null,
+        style: "Default",
+      }),
+    })),
     warnings,
   };
 }
@@ -663,7 +697,7 @@ export async function loadFinalizationCandidates(input: {
   };
 }
 
-function parsedParity(
+function parsedCanonicalParity(
   source: readonly SubtitleCue[],
   parsed: readonly ParsedCue[],
   timingTolerance: number,
@@ -673,8 +707,37 @@ function parsedParity(
     const item = parsed[index];
     return (
       item !== undefined &&
-      normalizeFinalizationText(item.text) ===
-        normalizeFinalizationText(cue.text) &&
+      presentationLexicalText(item.text) ===
+        presentationLexicalText(cue.text) &&
+      Math.abs(item.start - cue.start) <= timingTolerance &&
+      Math.abs(item.end - cue.end) <= timingTolerance
+    );
+  });
+}
+
+function normalizedDisplayText(value: string): string {
+  return value
+    .replaceAll("\r\n", "\n")
+    .replaceAll("\r", "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n")
+    .trim();
+}
+
+function parsedPresentationParity(
+  source: readonly SubtitleCue[],
+  parsed: readonly ParsedCue[],
+  displayTextByCueId: ReadonlyMap<string, string>,
+  timingTolerance: number,
+): boolean {
+  if (source.length !== parsed.length) return false;
+  return source.every((cue, index) => {
+    const item = parsed[index];
+    const expected = displayTextByCueId.get(cue.id) ?? cue.text;
+    return (
+      item !== undefined &&
+      normalizedDisplayText(item.text) === normalizedDisplayText(expected) &&
       Math.abs(item.start - cue.start) <= timingTolerance &&
       Math.abs(item.end - cue.end) <= timingTolerance
     );
@@ -707,6 +770,8 @@ export interface FinalCueQualityResult {
   finalIntegrityPassed: boolean;
   serializationRoundTripPassed: boolean;
   formatSemanticParityPassed: boolean;
+  canonicalParityPassed: boolean;
+  presentationParityPassed: boolean;
   formatParityErrorCount: number;
   serialized: SerializedFinalSubtitles;
 }
@@ -714,8 +779,20 @@ export interface FinalCueQualityResult {
 export function evaluateFinalCueQuality(input: {
   cues: readonly SubtitleCue[];
   mediaDurationSeconds: number;
+  presentation?: SubtitlePresentationResolutionResult;
+  presentationResolutionMode?: "off" | "observe" | "enforce";
 }): FinalCueQualityResult {
   const findings: FinalizationFinding[] = [];
+  const presentationResolutionMode = input.presentationResolutionMode ?? "off";
+  const enforced =
+    presentationResolutionMode === "enforce" &&
+    input.presentation !== undefined;
+  const layoutByCueId = new Map(
+    input.presentation?.artifact.layoutDecisions.map((decision) => [
+      decision.cueId,
+      decision,
+    ]) ?? [],
+  );
   for (const [index, cue] of input.cues.entries()) {
     if (cue.start < 0 || cue.end <= cue.start) {
       findings.push(
@@ -741,17 +818,15 @@ export function evaluateFinalCueQuality(input: {
         ),
       );
     }
-    if (previous !== undefined && cue.start < previous.end - 0.01) {
-      findings.push(
-        finding(
-          "ILLEGAL_SUBTITLE_OVERLAP",
-          [previous.id, cue.id],
-          "Adjacent cues overlap.",
-        ),
-      );
-    }
     const lines = cue.text.split("\n");
-    if (lines.length > 2) {
+    const layoutDecision = layoutByCueId.get(cue.id);
+    const layoutAutoResolved =
+      enforced &&
+      layoutDecision !== undefined &&
+      layoutDecision.resolved &&
+      !layoutDecision.blocking &&
+      layoutDecision.canonicalLexicalHash === layoutDecision.displayLexicalHash;
+    if (lines.length > 2 && !layoutAutoResolved) {
       findings.push(
         finding(
           "FINAL_CUE_EXCEEDS_TWO_LINES",
@@ -760,7 +835,10 @@ export function evaluateFinalCueQuality(input: {
         ),
       );
     }
-    if (lines.some((line) => Array.from(line).length > 16)) {
+    if (
+      lines.some((line) => Array.from(line).length > 16) &&
+      !layoutAutoResolved
+    ) {
       findings.push(
         finding(
           "FINAL_LINE_EXCEEDS_CHARACTER_LIMIT",
@@ -770,23 +848,128 @@ export function evaluateFinalCueQuality(input: {
       );
     }
     if (
-      previous !== undefined &&
-      normalizeFinalizationText(previous.text) ===
-        normalizeFinalizationText(cue.text)
+      layoutAutoResolved &&
+      (lines.length > 2 || lines.some((line) => Array.from(line).length > 16))
     ) {
       findings.push(
         finding(
-          "UNRESOLVED_CROSS_CUE_REPETITION",
-          [previous.id, cue.id],
-          "Adjacent cues contain identical visible text.",
+          "PRESENTATION_LINE_LAYOUT_AUTO_RESOLVED",
+          [cue.id],
+          "A display-only line layout satisfies the two-line capacity without changing canonical text or timing.",
+          "warning",
+        ),
+      );
+    }
+  }
+  if (
+    input.presentation === undefined ||
+    presentationResolutionMode === "off"
+  ) {
+    for (let index = 1; index < input.cues.length; index += 1) {
+      const previous = input.cues[index - 1];
+      const cue = input.cues[index];
+      if (previous === undefined || cue === undefined) continue;
+      if (cue.start < previous.end - 0.01) {
+        findings.push(
+          finding(
+            "ILLEGAL_SUBTITLE_OVERLAP",
+            [previous.id, cue.id],
+            "Adjacent cues overlap.",
+          ),
+        );
+      }
+      if (
+        normalizeFinalizationText(previous.text) ===
+        normalizeFinalizationText(cue.text)
+      ) {
+        findings.push(
+          finding(
+            "UNRESOLVED_CROSS_CUE_REPETITION",
+            [previous.id, cue.id],
+            "Adjacent cues contain identical visible text.",
+          ),
+        );
+      }
+    }
+  } else {
+    for (const decision of input.presentation.artifact.repetitionDecisions) {
+      if (enforced && !decision.blocking) {
+        findings.push(
+          finding(
+            "INTENTIONAL_REPETITION_CLASSIFIED",
+            decision.cueIds,
+            `Adjacent identical text was classified as ${decision.relationship} and both utterances were preserved.`,
+            "warning",
+          ),
+        );
+      } else {
+        findings.push(
+          finding(
+            "UNRESOLVED_CROSS_CUE_REPETITION",
+            decision.cueIds,
+            `Adjacent identical text remains ${decision.relationship}.`,
+          ),
+        );
+      }
+    }
+    for (const decision of input.presentation.artifact.overlapDecisions) {
+      if (enforced && !decision.blocking) {
+        findings.push(
+          finding(
+            decision.safeAutomaticAction === "timing-only"
+              ? "TRUSTED_TIMING_ONLY_OVERLAP_REPAIR"
+              : "LEGAL_SUBTITLE_OVERLAP_CLASSIFIED",
+            decision.cueIds,
+            `Overlap component was resolved as ${decision.relationship}.`,
+            "warning",
+          ),
+        );
+      } else {
+        findings.push(
+          finding(
+            "ILLEGAL_SUBTITLE_OVERLAP",
+            decision.cueIds,
+            `Overlap component remains ${decision.relationship}; no unsupported timing or deletion action was applied.`,
+          ),
+        );
+      }
+    }
+    if (
+      enforced &&
+      input.presentation.artifact.summary.srtOverlapRenderingMayVary
+    ) {
+      findings.push(
+        finding(
+          "SRT_OVERLAP_RENDERING_MAY_VARY",
+          [],
+          "Legal overlapping cues are preserved in SRT; simultaneous rendering depends on the player.",
+          "warning",
         ),
       );
     }
   }
   const serialized = {
-    srt: formatSrt(input.cues),
-    vtt: formatVtt(input.cues),
-    ass: formatAss(input.cues),
+    srt: formatSrt(input.cues, {
+      ...(input.presentation === undefined
+        ? {}
+        : { displayTextByCueId: input.presentation.displayTextByCueId }),
+    }),
+    vtt: formatVtt(input.cues, {
+      ...(input.presentation === undefined
+        ? {}
+        : {
+            displayTextByCueId: input.presentation.displayTextByCueId,
+            cueSettingsByCueId: input.presentation.vttCueSettingsByCueId,
+          }),
+    }),
+    ass: formatAss(input.cues, {
+      ...(input.presentation === undefined
+        ? {}
+        : {
+            displayTextByCueId: input.presentation.displayTextByCueId,
+            eventOverridesByCueId: input.presentation.assEventOverridesByCueId,
+          }),
+    }),
   };
   let srt: ParsedCue[] = [];
   let vtt: ParsedCue[] = [];
@@ -806,19 +989,36 @@ export function evaluateFinalCueQuality(input: {
       ),
     );
   }
-  const parity =
+  const canonicalParity =
     serializationRoundTripPassed &&
-    parsedParity(input.cues, srt, 0.001) &&
-    parsedParity(input.cues, vtt, 0.001) &&
-    parsedParity(input.cues, ass, 0.011) &&
+    parsedCanonicalParity(input.cues, srt, 0.001) &&
+    parsedCanonicalParity(input.cues, vtt, 0.001) &&
+    parsedCanonicalParity(input.cues, ass, 0.011) &&
     srt.length === vtt.length &&
     vtt.length === ass.length;
-  if (!parity) {
+  const displayTextByCueId =
+    input.presentation?.displayTextByCueId ?? new Map<string, string>();
+  const presentationParity =
+    serializationRoundTripPassed &&
+    parsedPresentationParity(input.cues, srt, displayTextByCueId, 0.001) &&
+    parsedPresentationParity(input.cues, vtt, displayTextByCueId, 0.001) &&
+    parsedPresentationParity(input.cues, ass, displayTextByCueId, 0.011);
+  const parity = canonicalParity && presentationParity;
+  if (!canonicalParity) {
     findings.push(
       finding(
-        "FORMAT_SEMANTIC_PARITY_FAILED",
+        "FORMAT_CANONICAL_PARITY_FAILED",
         [],
-        "SRT, VTT, and ASS do not round-trip to the same cue semantics.",
+        "SRT, VTT, and ASS do not round-trip to the canonical cue semantics after display-only whitespace and markup are removed.",
+      ),
+    );
+  }
+  if (!presentationParity) {
+    findings.push(
+      finding(
+        "FORMAT_PRESENTATION_PARITY_FAILED",
+        [],
+        "SRT, VTT, and ASS do not round-trip to the selected display text.",
       ),
     );
   }
@@ -838,7 +1038,10 @@ export function evaluateFinalCueQuality(input: {
     ),
     serializationRoundTripPassed,
     formatSemanticParityPassed: parity,
-    formatParityErrorCount: parity ? 0 : 1,
+    canonicalParityPassed: canonicalParity,
+    presentationParityPassed: presentationParity,
+    formatParityErrorCount:
+      Number(!canonicalParity) + Number(!presentationParity),
     serialized,
   };
 }

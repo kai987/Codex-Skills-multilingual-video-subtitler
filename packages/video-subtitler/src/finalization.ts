@@ -17,6 +17,8 @@ import {
   type FinalizationStatus,
   type FinalizationThresholds,
   type Logger,
+  type OverlapResolutionMode,
+  type PresentationResolutionMode,
   type ProcessRunner,
   type SourceFingerprint,
   type SubtitleCue,
@@ -27,6 +29,7 @@ import {
   DEFAULT_FINALIZATION_THRESHOLDS,
   aggregateCueDecisions,
   applyAutomaticCueDecisions,
+  buildSubtitlePresentationResolution,
   normalizeFinalizationText,
   repairSafeExactDuplicateCues,
 } from "@mvl/transcription-core";
@@ -52,6 +55,7 @@ import {
 } from "./review.js";
 import { subtitleArtifactStem } from "./output-paths.js";
 import { burnSubtitleIntoVideo } from "./burn.js";
+import { calculateC5FinalizationRates } from "./finalization-metrics.js";
 
 export interface SubtitleFinalizationOptions {
   taskDirectory: string;
@@ -66,6 +70,8 @@ export interface SubtitleFinalizationOptions {
   runner?: ProcessRunner;
   logger?: Logger;
   thresholds?: Partial<FinalizationThresholds>;
+  presentationResolution?: PresentationResolutionMode;
+  overlapResolution?: OverlapResolutionMode;
 }
 
 export interface SubtitleFinalizationResult {
@@ -82,6 +88,7 @@ export interface SubtitleFinalizationResult {
     reviewPackage: string | null;
     reviewPage: string | null;
     correctionFeedback: string | null;
+    presentationResolution: string;
     humanReviewedBasePackage: string | null;
   };
 }
@@ -485,7 +492,11 @@ function applyRollbackToUnsafeOutput(input: {
 export async function finalizeSubtitleTask(
   options: SubtitleFinalizationOptions,
 ): Promise<SubtitleFinalizationResult> {
+  const generatedAt = new Date().toISOString();
   const mode = options.mode ?? "review-fallback";
+  const presentationResolutionMode =
+    options.presentationResolution ?? "enforce";
+  const overlapResolutionMode = options.overlapResolution ?? "conservative";
   const runner = options.runner ?? new NodeProcessRunner();
   const located = await locateSubtitlePackage(options.taskDirectory);
   const rawPackage = JSON.parse(
@@ -646,6 +657,30 @@ export async function finalizeSubtitleTask(
     correctionFeedback = human.feedback;
   }
 
+  const humanAssEventEvidence =
+    humanReviewedBaseline === null
+      ? undefined
+      : new Map(
+          humanReviewedBaseline.assEventEvidence.map((event) => [
+            event.cueId,
+            event,
+          ]),
+        );
+  const resolvePresentation = (cues: readonly SubtitleCue[]) =>
+    buildSubtitlePresentationResolution({
+      cues,
+      baseCueHash,
+      humanReviewedAuthority: humanReviewedBaseline !== null,
+      ...(humanAssEventEvidence === undefined
+        ? {}
+        : { assEventEvidenceByCueId: humanAssEventEvidence }),
+      presentationResolution: presentationResolutionMode,
+      overlapResolution: overlapResolutionMode,
+      generatedAt,
+    });
+  let presentation = resolvePresentation(workingCues);
+  workingCues = presentation.cues;
+
   const baseValidation =
     humanReviewedBaseline === null
       ? basePackageValidation(rawPackage)
@@ -713,6 +748,8 @@ export async function finalizeSubtitleTask(
   let quality = evaluateFinalCueQuality({
     cues: workingCues,
     mediaDurationSeconds: projectedDraft.source.durationSeconds,
+    presentation,
+    presentationResolutionMode,
   });
   findings.push(...quality.findings);
   let rollbackApplied = false;
@@ -735,9 +772,13 @@ export async function finalizeSubtitleTask(
           (qualityItem) => qualityItem.findingId === item.findingId,
         ),
     );
+    presentation = resolvePresentation(workingCues);
+    workingCues = presentation.cues;
     quality = evaluateFinalCueQuality({
       cues: workingCues,
       mediaDurationSeconds: projectedDraft.source.durationSeconds,
+      presentation,
+      presentationResolutionMode,
     });
     findings.push(...quality.findings);
     if (rollbackApplied) {
@@ -857,6 +898,10 @@ export async function finalizeSubtitleTask(
       located.subtitleDirectory,
       "subtitle-finalization-report.json",
     ),
+    presentationResolution: path.join(
+      located.subtitleDirectory,
+      "subtitle-presentation-resolution.json",
+    ),
   };
   const finalPackage = projectStrictSubtitlePackage({
     rawPackage: projectionRawPackage,
@@ -933,32 +978,34 @@ export async function finalizeSubtitleTask(
       : path.join(located.subtitleDirectory, "correction-feedback.json");
   const outputHash = sha256Value({
     package: finalPackage,
+    // generatedAt is provenance, not output semantics. Normalizing it keeps
+    // an identical offline replay idempotent while the written sidecar still
+    // records its real generation timestamp.
+    presentationResolution: {
+      ...presentation.artifact,
+      generatedAt: null,
+    },
     srt: quality.serialized.srt,
     vtt: quality.serialized.vtt,
     ass: quality.serialized.ass,
   });
   const machineCueCount = machineCues.length;
   const denominator = Math.max(1, machineCueCount);
-  const blockingCueIds = new Set(
-    findings
-      .filter((item) => item.severity === "blocking")
-      .flatMap((item) => item.cueIds),
-  );
-  const manualReviewCueIds = new Set(
-    decisions
-      .filter((decision) => decision.requiresHumanReview)
-      .flatMap((decision) => decision.targetCueIds),
-  );
-  const hasGlobalBlockingFinding = findings.some(
-    (item) => item.severity === "blocking" && item.cueIds.length === 0,
-  );
+  const c5Rates = calculateC5FinalizationRates({
+    baselineCues: machineCues,
+    finalCues: workingCues,
+    findings,
+    decisions,
+    presentation: presentation.artifact,
+    humanReviewedBaseline: humanReviewedBaseline !== null,
+  });
   const errorTypes =
     correctionFeedback?.records.flatMap((record) => record.errorTypes) ?? [];
   const report = subtitleFinalizationReportSchema.parse({
     schemaVersion: "1.0.0",
     reportType: "subtitle-finalization-report",
-    finalizationVersion: "1.1.0",
-    generatedAt: new Date().toISOString(),
+    finalizationVersion: "1.2.0-C5.14",
+    generatedAt,
     mode,
     status: state.status,
     finalizationMethod: state.method,
@@ -1010,11 +1057,7 @@ export async function finalizeSubtitleTask(
       ).length,
       ...visible,
       formatParityErrorCount: quality.formatParityErrorCount,
-      automaticCueRate: hasGlobalBlockingFinding
-        ? 0
-        : Math.max(0, 1 - manualReviewCueIds.size / denominator),
-      manualReviewCueRate: Math.min(1, manualReviewCueIds.size / denominator),
-      blockingCueRate: Math.min(1, blockingCueIds.size / denominator),
+      ...c5Rates,
       characterCorrectionRate: changedCueRate(machineCues, workingCues, "text"),
       timingCorrectionRate: changedCueRate(machineCues, workingCues, "timing"),
       terminologyCorrectionRate:
@@ -1033,8 +1076,12 @@ export async function finalizeSubtitleTask(
       finalIntegrityPassed: quality.finalIntegrityPassed,
       serializationRoundTripPassed: quality.serializationRoundTripPassed,
       formatSemanticParityPassed: quality.formatSemanticParityPassed,
+      canonicalParityPassed: quality.canonicalParityPassed,
+      presentationParityPassed: quality.presentationParityPassed,
       rollbackApplied,
       sourceReadOnlyVerified,
+      srtOverlapRenderingMayVary:
+        presentation.artifact.summary.srtOverlapRenderingMayVary,
       blockingCodes: findings
         .filter((item) => item.severity === "blocking")
         .map((item) => item.code),
@@ -1062,6 +1109,10 @@ export async function finalizeSubtitleTask(
         correctionFeedbackPath === null
           ? null
           : relativeFrom(located.subtitleDirectory, correctionFeedbackPath),
+      presentationResolution: relativeFrom(
+        located.subtitleDirectory,
+        outputPaths.presentationResolution,
+      ),
       subtitledVideo: null,
     },
   });
@@ -1080,6 +1131,11 @@ export async function finalizeSubtitleTask(
         overwrite: true,
       }),
       atomicWriteJson(outputPaths.report, report, { overwrite: true }),
+      atomicWriteJson(
+        outputPaths.presentationResolution,
+        presentation.artifact,
+        { overwrite: true },
+      ),
       ...(correctionFeedbackPath === null || correctionFeedback === null
         ? []
         : [

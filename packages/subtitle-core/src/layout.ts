@@ -3,7 +3,9 @@ import { createHash } from "node:crypto";
 import {
   DEFAULT_TIMING_QA_CONFIG,
   countVisibleSubtitleCharacters,
+  displayLayoutDecisionSchema,
   lineLayoutIntegrityArtifactSchema,
+  type DisplayLayoutDecision,
   type LineLayoutIntegrityArtifact,
   type SubtitleCue,
   type TimingQaConfig,
@@ -116,7 +118,10 @@ function splitLongText(value: string, capacity: number): string[] {
   return chunks;
 }
 
-function lineBreakScore(characters: readonly string[], index: number): number {
+export function lineBreakScore(
+  characters: readonly string[],
+  index: number,
+): number {
   const firstLength = index;
   const secondLength = characters.length - index;
   const previous = characters[index - 1] ?? "";
@@ -153,6 +158,336 @@ function lineBreakScore(characters: readonly string[], index: number): number {
     score -= 20;
   }
   return score;
+}
+
+const PRESENTATION_MARKUP = /\{\\[^}]*\}|<\/?[^>]+>/gu;
+const DISPLAY_WHITESPACE = /[\p{White_Space}\u3000]+/gu;
+const PROHIBITED_LINE_START =
+  /^[ゃゅょぁぃぅぇぉっゎヵヶャュョァィゥェォッヮー、。，．!?！？）】」』]/u;
+const PROHIBITED_LINE_END = /[（【「『]$/u;
+
+export function visibleDisplayCharacters(value: string): string[] {
+  return Array.from(
+    value.replace(PRESENTATION_MARKUP, "").replace(/\r?\n/gu, ""),
+  );
+}
+
+/**
+ * Canonical/display equivalence deliberately removes only presentation
+ * markup and display whitespace. It does not normalize Unicode, punctuation,
+ * spelling, particles, dialect endings, or music markers.
+ */
+export function presentationLexicalText(value: string): string {
+  return value.replace(PRESENTATION_MARKUP, "").replace(DISPLAY_WHITESPACE, "");
+}
+
+export function presentationLexicalHash(value: string): string {
+  return createHash("sha256")
+    .update(presentationLexicalText(value))
+    .digest("hex");
+}
+
+function visibleLineLength(value: string): number {
+  return Array.from(value.replace(PRESENTATION_MARKUP, "")).length;
+}
+
+function displayLinesAreValid(
+  value: string,
+  maximumLines: number,
+  maximumCharactersPerLine: number,
+): boolean {
+  const lines = value.split(/\r?\n/gu);
+  return (
+    lines.length <= maximumLines &&
+    lines.every((line) => visibleLineLength(line) <= maximumCharactersPerLine)
+  );
+}
+
+function repeatedChantBoundary(value: string): number | null {
+  const units = value.match(/[^!?！？\n]+[!?！？]+/gu) ?? [];
+  if (units.length < 4 || units.join("") !== value) return null;
+  const normalizedUnits = units.map((unit) =>
+    unit.replace(DISPLAY_WHITESPACE, ""),
+  );
+  if (!normalizedUnits.every((unit) => unit === normalizedUnits[0])) {
+    return null;
+  }
+  return Array.from(units.slice(0, Math.ceil(units.length / 2)).join(""))
+    .length;
+}
+
+function minimallyCompactJapaneseDisplayWhitespace(
+  value: string,
+  maximumCharactersPerLine: number,
+): string | null {
+  if (!isJapaneseSubtitleText(value)) return null;
+  const lines = value.split(/\r?\n/gu);
+  // Compaction is only a last-mile repair for a human-authored two-line cue
+  // whose existing semantic break is already authoritative. A single long
+  // line must go through the boundary scorer below so that whitespace is not
+  // removed merely to avoid inserting a presentation line break.
+  if (lines.length !== 2) return null;
+  const compacted = lines.map((line) => {
+    let output = line;
+    while (visibleLineLength(output) > maximumCharactersPerLine) {
+      const characters = Array.from(output);
+      const removable = characters
+        .map((character, index) => ({ character, index }))
+        .filter(
+          ({ character, index }) =>
+            /[ \t\u3000]/u.test(character) &&
+            index > 0 &&
+            index < characters.length - 1,
+        )
+        .at(-1);
+      if (removable === undefined) return line;
+      characters.splice(removable.index, 1);
+      output = characters.join("");
+    }
+    return output;
+  });
+  const result = compacted.join("\n");
+  return result !== value &&
+    displayLinesAreValid(result, 2, maximumCharactersPerLine) &&
+    presentationLexicalHash(result) === presentationLexicalHash(value)
+    ? result
+    : null;
+}
+
+function methodForBoundary(input: {
+  canonicalText: string;
+  flattenedText: string;
+  characters: readonly string[];
+  index: number;
+  style: SubtitleCue["style"];
+  chantBoundary: number | null;
+}): DisplayLayoutDecision["method"] {
+  if (input.chantBoundary === input.index) return "chant-unit-line-break";
+  if (input.style === "music" || input.canonicalText.includes("♪")) {
+    return "music-decoration-aware-line-break";
+  }
+  const previous = input.characters[input.index - 1] ?? "";
+  if (/[!?！？…、。，．]/u.test(previous)) {
+    return "natural-punctuation-line-break";
+  }
+  const prefix = input.characters.slice(0, input.index).join("");
+  if (/(?:は|が|を|に|へ|と|で|の|も|や|から|まで|より|って)$/u.test(prefix)) {
+    return "particle-boundary-line-break";
+  }
+  return "semantic-balanced-line-break";
+}
+
+/**
+ * Computes a display-only two-line layout. The returned decision never
+ * changes cue text, cue count, or timing; callers serialize displayText via a
+ * presentation override map while retaining the canonical cue unchanged.
+ */
+export function resolveDisplayLayout(
+  cue: SubtitleCue,
+  options: { maximumLines?: number; maximumCharactersPerLine?: number } = {},
+): DisplayLayoutDecision {
+  const maximumLines = options.maximumLines ?? DEFAULT_MAX_LINES;
+  const maximumCharactersPerLine =
+    options.maximumCharactersPerLine ?? DEFAULT_MAX_CHARACTERS_PER_LINE;
+  const canonicalText = cue.text;
+  const canonicalLexicalHash = presentationLexicalHash(canonicalText);
+  const existingLines = canonicalText.split(/\r?\n/gu);
+  if (
+    displayLinesAreValid(canonicalText, maximumLines, maximumCharactersPerLine)
+  ) {
+    return displayLayoutDecisionSchema.parse({
+      decisionId: `layout-${createHash("sha256").update(`${cue.id}\0${canonicalText}`).digest("hex").slice(0, 20)}`,
+      cueId: cue.id,
+      canonicalText,
+      displayText: canonicalText,
+      canonicalLexicalHash,
+      displayLexicalHash: canonicalLexicalHash,
+      lineBreakIndices:
+        existingLines.length <= 1
+          ? []
+          : existingLines
+              .slice(0, -1)
+              .map((_, index) =>
+                existingLines
+                  .slice(0, index + 1)
+                  .reduce((sum, line) => sum + visibleLineLength(line), 0),
+              ),
+      lineCount: existingLines.length,
+      charactersPerLine: existingLines.map(visibleLineLength),
+      maximumLines,
+      maximumCharactersPerLine,
+      method: "preserved-existing-layout",
+      reasons: ["existing-display-layout-satisfies-hard-capacity"],
+      changed: false,
+      resolved: true,
+      blocking: false,
+    });
+  }
+
+  const compactedExistingLayout = minimallyCompactJapaneseDisplayWhitespace(
+    canonicalText,
+    maximumCharactersPerLine,
+  );
+  if (compactedExistingLayout !== null) {
+    const compactedLines = compactedExistingLayout.split(/\r?\n/gu);
+    return displayLayoutDecisionSchema.parse({
+      decisionId: `layout-${createHash("sha256").update(`${cue.id}\0${canonicalText}`).digest("hex").slice(0, 20)}`,
+      cueId: cue.id,
+      canonicalText,
+      displayText: compactedExistingLayout,
+      canonicalLexicalHash,
+      displayLexicalHash: presentationLexicalHash(compactedExistingLayout),
+      lineBreakIndices: compactedLines
+        .slice(0, -1)
+        .map((_, index) =>
+          compactedLines
+            .slice(0, index + 1)
+            .reduce((sum, line) => sum + visibleLineLength(line), 0),
+        ),
+      lineCount: compactedLines.length,
+      charactersPerLine: compactedLines.map(visibleLineLength),
+      maximumLines,
+      maximumCharactersPerLine,
+      method: "semantic-balanced-line-break",
+      reasons: [
+        "preserved-existing-semantic-line-boundary",
+        "minimally-compacted-display-only-japanese-whitespace",
+        "canonical-text-and-timing-preserved",
+        "canonical-display-lexical-hash-match",
+      ],
+      changed: true,
+      resolved: true,
+      blocking: false,
+    });
+  }
+
+  const flattenedText = canonicalText.replace(/\r?\n/gu, "");
+  const characters = Array.from(flattenedText);
+  const visibleCount = visibleDisplayCharacters(flattenedText).length;
+  const capacity = maximumLines * maximumCharactersPerLine;
+  let best:
+    | {
+        index: number;
+        left: string;
+        right: string;
+        score: number;
+      }
+    | undefined;
+  const chantBoundary = repeatedChantBoundary(flattenedText);
+  if (visibleCount <= capacity && maximumLines === 2) {
+    for (let index = 1; index < characters.length; index += 1) {
+      const left = trimBreakSpace(characters.slice(0, index).join(""));
+      const right = trimBreakSpace(characters.slice(index).join(""));
+      if (
+        left === "" ||
+        right === "" ||
+        visibleLineLength(left) > maximumCharactersPerLine ||
+        visibleLineLength(right) > maximumCharactersPerLine ||
+        PROHIBITED_LINE_START.test(right.replace(PRESENTATION_MARKUP, "")) ||
+        PROHIBITED_LINE_END.test(left.replace(PRESENTATION_MARKUP, ""))
+      ) {
+        continue;
+      }
+      const previous = characters[index - 1] ?? "";
+      const next = characters[index] ?? "";
+      const explicitWhitespaceBoundary =
+        /[ \t\u3000]/u.test(previous) || /[ \t\u3000]/u.test(next);
+      const leftDecoration = left.replace(PRESENTATION_MARKUP, "").trim();
+      const rightDecoration = right.replace(PRESENTATION_MARKUP, "").trim();
+      if (
+        (cue.style === "music" || canonicalText.includes("♪")) &&
+        (leftDecoration === "♪" || rightDecoration === "♪")
+      ) {
+        continue;
+      }
+      if (/[A-Za-z0-9]/u.test(previous) && /[A-Za-z0-9]/u.test(next)) {
+        continue;
+      }
+      const boundary = analyzeJapaneseBoundary(
+        left.replace(PRESENTATION_MARKUP, ""),
+        right.replace(PRESENTATION_MARKUP, ""),
+      );
+      if (
+        !explicitWhitespaceBoundary &&
+        boundary.boundarySplitsWord &&
+        boundary.confidence >= 0.8
+      ) {
+        continue;
+      }
+      let score: number;
+      if (explicitWhitespaceBoundary) {
+        const leftLength = visibleLineLength(left);
+        const rightLength = visibleLineLength(right);
+        score =
+          -Math.abs(leftLength - rightLength) * 2 +
+          (leftLength <= rightLength ? 3 : 0) +
+          30;
+      } else {
+        score = lineBreakScore(characters, index);
+      }
+      if (!Number.isFinite(score)) continue;
+      if (chantBoundary === index) score += 100;
+      if (
+        best === undefined ||
+        score > best.score ||
+        (score === best.score && index < best.index)
+      ) {
+        best = { index, left, right, score };
+      }
+    }
+  }
+
+  const displayText =
+    best === undefined ? canonicalText : `${best.left}\n${best.right}`;
+  const displayLexicalHash = presentationLexicalHash(displayText);
+  const lines = displayText.split(/\r?\n/gu);
+  const lexicalParity = canonicalLexicalHash === displayLexicalHash;
+  const resolved =
+    best !== undefined &&
+    lexicalParity &&
+    displayLinesAreValid(displayText, maximumLines, maximumCharactersPerLine);
+  const method =
+    best === undefined
+      ? "unresolved"
+      : methodForBoundary({
+          canonicalText,
+          flattenedText,
+          characters,
+          index: best.index,
+          style: cue.style,
+          chantBoundary,
+        });
+  return displayLayoutDecisionSchema.parse({
+    decisionId: `layout-${createHash("sha256").update(`${cue.id}\0${canonicalText}`).digest("hex").slice(0, 20)}`,
+    cueId: cue.id,
+    canonicalText,
+    displayText,
+    canonicalLexicalHash,
+    displayLexicalHash,
+    lineBreakIndices: best === undefined ? [] : [visibleLineLength(best.left)],
+    lineCount: lines.length,
+    charactersPerLine: lines.map(visibleLineLength),
+    maximumLines,
+    maximumCharactersPerLine,
+    method,
+    reasons: resolved
+      ? [
+          "display-only-line-break",
+          "canonical-text-and-timing-preserved",
+          "canonical-display-lexical-hash-match",
+        ]
+      : [
+          visibleCount > capacity
+            ? "display-text-exceeds-two-line-capacity"
+            : "no-safe-japanese-line-boundary",
+          ...(lexicalParity ? [] : ["canonical-display-lexical-hash-mismatch"]),
+          "no-temporal-cue-split-created",
+          "no-character-ratio-timing-used",
+        ],
+    changed: resolved && displayText !== canonicalText,
+    resolved,
+    blocking: !resolved,
+  });
 }
 
 function balanceLines(value: string, maximum: number): string {

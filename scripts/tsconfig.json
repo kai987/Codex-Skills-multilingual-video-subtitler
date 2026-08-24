@@ -8,7 +8,10 @@
   "include": ["*.ts"],
   "references": [
     { "path": "../packages/shared" },
+    { "path": "../packages/media-identity" },
     { "path": "../packages/subtitle-core" },
-    { "path": "../packages/transcription-core" }
+    { "path": "../packages/subtitle-search" },
+    { "path": "../packages/transcription-core" },
+    { "path": "../packages/video-subtitler" }
   ]
 }

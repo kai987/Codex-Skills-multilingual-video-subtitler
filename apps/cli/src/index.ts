@@ -176,6 +176,8 @@ interface FinalizeCliOptions extends GlobalOptions {
   prepareReview?: boolean;
   reviewAudio: boolean;
   dryRun?: boolean;
+  presentationResolution: "off" | "observe" | "enforce";
+  overlapResolution: "conservative" | "balanced";
 }
 
 interface ReviewCliOptions extends GlobalOptions {
@@ -1125,6 +1127,22 @@ program
     "explicit source video for fingerprint/audio",
   )
   .option("--prepare-review", "always prepare the local review package")
+  .addOption(
+    new Option(
+      "--presentation-resolution <mode>",
+      "display-only presentation resolution policy",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("enforce"),
+  )
+  .addOption(
+    new Option(
+      "--overlap-resolution <mode>",
+      "evidence threshold for overlap classification",
+    )
+      .choices(["conservative", "balanced"])
+      .default("conservative"),
+  )
   .option("--no-review-audio", "skip review audio extraction")
   .option("--dry-run", "validate and compute without writing outputs")
   .action(async (options: FinalizeCliOptions, command: Command) => {
@@ -1146,6 +1164,8 @@ program
         ? {}
         : { sourceVideoPath: options.sourceVideo }),
       prepareReview: options.prepareReview ?? false,
+      presentationResolution: options.presentationResolution,
+      overlapResolution: options.overlapResolution,
       generateReviewAudio: options.reviewAudio,
       dryRun: options.dryRun ?? false,
       runner: new NodeProcessRunner(),

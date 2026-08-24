@@ -67,6 +67,7 @@ import {
   correctionFeedbackSchema,
   humanReviewResolutionsSchema,
   subtitleFinalizationReportSchema,
+  subtitlePresentationResolutionSchema,
   subtitleReviewPackageSchema,
   whisperExecutionMetricsSchema,
   whisperBenchmarkSchema,
@@ -89,6 +90,11 @@ const schemas = [
     fileName: "subtitle-finalization-report.schema.json",
     id: "https://schemas.local/multilingual-video-learning/subtitle-finalization-report.schema.json",
     schema: subtitleFinalizationReportSchema,
+  },
+  {
+    fileName: "subtitle-presentation-resolution.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-presentation-resolution.schema.json",
+    schema: subtitlePresentationResolutionSchema,
   },
   {
     fileName: "subtitle-review-package.schema.json",

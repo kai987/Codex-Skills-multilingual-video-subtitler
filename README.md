@@ -55,8 +55,23 @@ To make a user-confirmed human-reviewed ASS the authoritative baseline, pass it 
 npm run subtitle-finalize -- \
   --task "/path/to/task-output" \
   --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
-  --finalization review-fallback
+  --finalization review-fallback \
+  --presentation-resolution enforce \
+  --overlap-resolution conservative
 ```
+
+Finalization keeps the strict v1 package cues canonical and writes display-only line breaks, repetition classifications, overlap-component decisions, and any trusted timing-only repair to `subtitle-presentation-resolution.json`. `--presentation-resolution observe` records recommendations without applying them; `off` preserves the legacy quality gate. `--overlap-resolution balanced` additionally permits only tightly bounded authoritative rapid-turn overlap and still never uses an unsupported midpoint trim.
+
+Replay an existing human-reviewed task into a collision-safe sibling directory without ASR, subtitle lookup, network access, or model/API calls:
+
+```bash
+npm run replay:c5-14-presentation -- \
+  --task "/path/to/c5-13r-3-task" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
+  --source-video "/path/to/source-video.mkv"
+```
+
+The replay verifies the human ASS and optional source video before and after the run, writes `c5-14-replay-summary.json`, and creates review audio only for unresolved blocking groups.
 
 If evidence is insufficient, `review-fallback` writes honest `.best-effort.*` files, a strict `subtitle-package.needs-review.json`, an offline review page, bounded local audio clips, and candidate suggestions without changing visible cue text. Apply a downloaded review file only after a hash/fingerprint preflight:
 
@@ -68,7 +83,7 @@ npm run subtitle-finalize -- \
   --dry-run
 ```
 
-Automatic, human, and mixed validation share `.final.*` and `subtitle-package.final.json`. The package remains compatible with the strict grammar-report v1 input contract; finalization status, decisions, quality-gate metrics, and correction feedback live in separate strict sidecars.
+Automatic, human, and mixed validation share `.final.*` and `subtitle-package.final.json`. The package remains compatible with the strict grammar-report v1 input contract; finalization status, canonical/presentation decisions, quality-gate metrics, and correction feedback live in separate strict sidecars.
 
 Reference-assisted mode keeps ASR generation blind and opens the reference only for post-generation evaluation:
 

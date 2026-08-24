@@ -23,21 +23,78 @@ export const DEFAULT_ASS_STYLE_CONFIGURATION: Readonly<AssStyleConfiguration> =
     marginVertical: 40,
   };
 
-export function formatSrt(cues: readonly SubtitleCue[]): string {
+export type CuePresentationMap<T> =
+  ReadonlyMap<string, T> | Readonly<Record<string, T>>;
+
+export interface SubtitleFormatOptions {
+  displayTextByCueId?: CuePresentationMap<string>;
+}
+
+export interface VttFormatOptions extends SubtitleFormatOptions {
+  cueSettingsByCueId?: CuePresentationMap<string>;
+}
+
+export interface AssEventOverride {
+  layer?: number;
+  alignment?: number;
+  marginLeft?: number;
+  marginRight?: number;
+  marginVertical?: number;
+  position?: { x: number; y: number };
+}
+
+export interface AssFormatOptions
+  extends Partial<AssStyleConfiguration>, SubtitleFormatOptions {
+  eventOverridesByCueId?: CuePresentationMap<AssEventOverride>;
+}
+
+function cuePresentationValue<T>(
+  values: CuePresentationMap<T> | undefined,
+  cueId: string,
+): T | undefined {
+  if (values === undefined) return undefined;
+  const mapValues = values as ReadonlyMap<string, T>;
+  if (typeof mapValues.get === "function") {
+    return mapValues.get(cueId);
+  }
+  return (values as Readonly<Record<string, T>>)[cueId];
+}
+
+export function formatSrt(
+  cues: readonly SubtitleCue[],
+  options: SubtitleFormatOptions = {},
+): string {
   return `${cues
-    .map(
-      (cue, index) =>
-        `${index + 1}\n${formatSrtClock(cue.start)} --> ${formatSrtClock(cue.end)}\n${cue.style === "thought" || cue.style === "music" ? `<i>${cue.text}</i>` : cue.text}`,
-    )
+    .map((cue, index) => {
+      const text =
+        cuePresentationValue(options.displayTextByCueId, cue.id) ?? cue.text;
+      return `${index + 1}\n${formatSrtClock(cue.start)} --> ${formatSrtClock(cue.end)}\n${cue.style === "thought" || cue.style === "music" ? `<i>${text}</i>` : text}`;
+    })
     .join("\n\n")}\n`;
 }
 
-export function formatVtt(cues: readonly SubtitleCue[]): string {
+export function formatVtt(
+  cues: readonly SubtitleCue[],
+  options: VttFormatOptions = {},
+): string {
   const body = cues
-    .map(
-      (cue) =>
-        `${cue.id}\n${formatVttClock(cue.start)} --> ${formatVttClock(cue.end)}${cue.style === "thought" ? " line:0 align:end" : cue.style === "music" ? " line:0 align:center" : ""}\n${cue.style === "thought" || cue.style === "music" ? `<i>${cue.text}</i>` : cue.text}`,
-    )
+    .map((cue) => {
+      const text =
+        cuePresentationValue(options.displayTextByCueId, cue.id) ?? cue.text;
+      const presentationSettings = cuePresentationValue(
+        options.cueSettingsByCueId,
+        cue.id,
+      );
+      const settings =
+        presentationSettings === undefined
+          ? cue.style === "thought"
+            ? "line:0 align:end"
+            : cue.style === "music"
+              ? "line:0 align:center"
+              : ""
+          : presentationSettings.trim();
+      return `${cue.id}\n${formatVttClock(cue.start)} --> ${formatVttClock(cue.end)}${settings === "" ? "" : ` ${settings}`}\n${cue.style === "thought" || cue.style === "music" ? `<i>${text}</i>` : text}`;
+    })
     .join("\n\n");
   return `WEBVTT\n\n${body}\n`;
 }
@@ -52,11 +109,23 @@ function escapeAssText(text: string): string {
 
 export function formatAss(
   cues: readonly SubtitleCue[],
-  configuration: Partial<AssStyleConfiguration> = {},
+  options: AssFormatOptions = {},
 ): string {
   const styles: AssStyleConfiguration = {
-    ...DEFAULT_ASS_STYLE_CONFIGURATION,
-    ...configuration,
+    fontName: options.fontName ?? DEFAULT_ASS_STYLE_CONFIGURATION.fontName,
+    fontSize: options.fontSize ?? DEFAULT_ASS_STYLE_CONFIGURATION.fontSize,
+    dialogueAlignment:
+      options.dialogueAlignment ??
+      DEFAULT_ASS_STYLE_CONFIGURATION.dialogueAlignment,
+    thoughtAlignment:
+      options.thoughtAlignment ??
+      DEFAULT_ASS_STYLE_CONFIGURATION.thoughtAlignment,
+    musicAlignment:
+      options.musicAlignment ?? DEFAULT_ASS_STYLE_CONFIGURATION.musicAlignment,
+    musicItalic:
+      options.musicItalic ?? DEFAULT_ASS_STYLE_CONFIGURATION.musicItalic,
+    marginVertical:
+      options.marginVertical ?? DEFAULT_ASS_STYLE_CONFIGURATION.marginVertical,
   };
   const musicItalic = styles.musicItalic ? -1 : 0;
   const header = `[Script Info]
@@ -78,6 +147,12 @@ Style: Music,${styles.fontName},${styles.fontSize},&H00FFFFFF,&H000000FF,&H00101
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text`;
   const dialogue = cues.map((cue) => {
+    const text =
+      cuePresentationValue(options.displayTextByCueId, cue.id) ?? cue.text;
+    const eventOverride = cuePresentationValue(
+      options.eventOverridesByCueId,
+      cue.id,
+    );
     const speaker = (cue.speaker ?? "").replaceAll(",", " ");
     const style =
       cue.style === "thought"
@@ -85,7 +160,18 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text`
         : cue.style === "music"
           ? "Music"
           : "Default";
-    return `Dialogue: 0,${formatAssClock(cue.start)},${formatAssClock(cue.end)},${style},${speaker},0,0,0,,${escapeAssText(cue.text)}`;
+    const tags = [
+      ...(eventOverride?.alignment === undefined
+        ? []
+        : [`\\an${eventOverride.alignment}`]),
+      ...(eventOverride?.position === undefined
+        ? []
+        : [
+            `\\pos(${eventOverride.position.x.toFixed(0)},${eventOverride.position.y.toFixed(0)})`,
+          ]),
+    ];
+    const overridePrefix = tags.length === 0 ? "" : `{${tags.join("")}}`;
+    return `Dialogue: ${eventOverride?.layer ?? 0},${formatAssClock(cue.start)},${formatAssClock(cue.end)},${style},${speaker},${eventOverride?.marginLeft ?? 0},${eventOverride?.marginRight ?? 0},${eventOverride?.marginVertical ?? 0},,${overridePrefix}${escapeAssText(text)}`;
   });
   return `${header}\n${dialogue.join("\n")}\n`;
 }

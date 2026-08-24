@@ -175,7 +175,24 @@ export const finalizationMetricsSchema = z
     localIntervalMissingVisibleMutationCount: z.number().int().nonnegative(),
     fullCueFragmentReplacementCount: z.number().int().nonnegative(),
     formatParityErrorCount: z.number().int().nonnegative(),
+    /** @deprecated C5.14 reports this as an alias of autoResolvedCueRate. */
     automaticCueRate: z.number().min(0).max(1),
+    /** Unique final cues without a final blocking finding / final cue count. */
+    nonBlockingCueRate: z.number().min(0).max(1).default(0),
+    /** Unchanged baseline cues with no structural decision / final cue count. */
+    passiveBaselineAcceptanceRate: z.number().min(0).max(1).default(0),
+    /** Unique cues whose blocker was closed by a safe structural decision. */
+    autoResolvedCueRate: z.number().min(0).max(1).default(0),
+    /** Unique cues with a canonical lexical or timing mutation. */
+    autoMutationCueRate: z.number().min(0).max(1).default(0),
+    /** Unique cues resolved by display-only layout / final cue count. */
+    presentationAutoResolvedCueRate: z.number().min(0).max(1).default(0),
+    /** Unique cues preserved as intentional repetition / final cue count. */
+    intentionalRepetitionResolvedCueRate: z.number().min(0).max(1).default(0),
+    /** Unique cues in evidence-supported legal overlaps / final cue count. */
+    legalOverlapCueRate: z.number().min(0).max(1).default(0),
+    /** Cues supplied by the user-confirmed human baseline / final cue count. */
+    humanBaselineCueRate: z.number().min(0).max(1).default(0),
     manualReviewCueRate: z.number().min(0).max(1),
     blockingCueRate: z.number().min(0).max(1),
     characterCorrectionRate: z.number().min(0).max(1),
@@ -226,8 +243,11 @@ export const subtitleFinalizationReportSchema = z
         finalIntegrityPassed: z.boolean(),
         serializationRoundTripPassed: z.boolean(),
         formatSemanticParityPassed: z.boolean(),
+        canonicalParityPassed: z.boolean().default(true),
+        presentationParityPassed: z.boolean().default(true),
         rollbackApplied: z.boolean(),
         sourceReadOnlyVerified: z.boolean(),
+        srtOverlapRenderingMayVary: z.boolean().default(false),
         blockingCodes: z.array(z.string().min(1)),
         warningCodes: z.array(z.string().min(1)),
       })
@@ -241,6 +261,7 @@ export const subtitleFinalizationReportSchema = z
         reviewPackage: relativePathSchema.nullable(),
         reviewPage: relativePathSchema.nullable(),
         correctionFeedback: relativePathSchema.nullable(),
+        presentationResolution: relativePathSchema.nullable().default(null),
         subtitledVideo: relativePathSchema.nullable(),
       })
       .strict(),

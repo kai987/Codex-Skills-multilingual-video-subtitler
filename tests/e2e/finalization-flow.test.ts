@@ -239,7 +239,11 @@ Dialogue: 0,0:00:03.00,0:00:04.00,Music,,0,0,0,,♪ 人が確認した歌 ♪
     expect(result.report.status).toBe("auto-validated");
     expect(result.report.finalizationMethod).toBe("automatic");
     expect(result.report.metrics.humanDecisionCount).toBe(0);
-    expect(result.report.metrics.automaticCueRate).toBe(1);
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- verifies the C5.14 compatibility alias
+    expect(result.report.metrics.automaticCueRate).toBe(0);
+    expect(result.report.metrics.autoResolvedCueRate).toBe(0);
+    expect(result.report.metrics.nonBlockingCueRate).toBe(1);
+    expect(result.report.metrics.passiveBaselineAcceptanceRate).toBe(1);
     expect(result.report.qualityGate.passed).toBe(true);
     expect(result.outputPaths.reviewPage).toBeNull();
     expect(
