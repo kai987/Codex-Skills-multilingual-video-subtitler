@@ -17,19 +17,25 @@ import {
   type FinalizationStatus,
   type FinalizationThresholds,
   type Logger,
+  type OverlapAcousticResolutionMode,
   type OverlapResolutionMode,
   type PresentationResolutionMode,
   type ProcessRunner,
   type SourceFingerprint,
   type SubtitleCue,
   type SubtitleFinalizationReport,
+  type SubtitleOverlapAcousticResolution,
   type SubtitlePackage,
+  type WhisperExecutionMode,
 } from "@mvl/shared";
 import {
   DEFAULT_FINALIZATION_THRESHOLDS,
   aggregateCueDecisions,
   applyAutomaticCueDecisions,
   buildSubtitlePresentationResolution,
+  applyOverlapAcousticResolution,
+  type AsrCacheMode,
+  type OverlapAcousticConfiguration,
   normalizeFinalizationText,
   repairSafeExactDuplicateCues,
 } from "@mvl/transcription-core";
@@ -56,6 +62,12 @@ import {
 import { subtitleArtifactStem } from "./output-paths.js";
 import { burnSubtitleIntoVideo } from "./burn.js";
 import { calculateC5FinalizationRates } from "./finalization-metrics.js";
+import {
+  runTargetedOverlapAcousticResolution,
+  type OverlapCoreMLMode,
+  type TargetedOverlapAcousticOptions,
+  type TargetedOverlapAcousticResult,
+} from "./overlap-acoustic.js";
 
 export interface SubtitleFinalizationOptions {
   taskDirectory: string;
@@ -72,6 +84,21 @@ export interface SubtitleFinalizationOptions {
   thresholds?: Partial<FinalizationThresholds>;
   presentationResolution?: PresentationResolutionMode;
   overlapResolution?: OverlapResolutionMode;
+  overlapAcousticResolution?: OverlapAcousticResolutionMode;
+  audioTrack?: number;
+  overlapAcousticConfiguration?: Partial<OverlapAcousticConfiguration>;
+  whisperCppPath?: string;
+  localTranscriptionModelPath?: string;
+  localTranscriptionModelDirectory?: string;
+  localVadModelPath?: string;
+  coreML?: OverlapCoreMLMode;
+  whisperExecutionMode?: WhisperExecutionMode;
+  asrCacheDirectory?: string;
+  asrCacheImportPaths?: readonly string[];
+  asrCacheMode?: AsrCacheMode;
+  overlapAcousticExecutor?: (
+    options: TargetedOverlapAcousticOptions,
+  ) => Promise<TargetedOverlapAcousticResult>;
 }
 
 export interface SubtitleFinalizationResult {
@@ -95,6 +122,30 @@ export interface SubtitleFinalizationResult {
 
 function relativeFrom(directory: string, target: string): string {
   return path.relative(directory, target).split(path.sep).join("/");
+}
+
+/**
+ * Cache provenance describes how evidence was obtained, not what the evidence
+ * says. Excluding it keeps stale-review and output hashes stable across a real
+ * run and its cache-only replay while the written acoustic artifact retains
+ * the full execution audit.
+ */
+export function overlapAcousticEvidenceForHash(
+  artifact: SubtitleOverlapAcousticResolution,
+): unknown {
+  return {
+    ...artifact,
+    generatedAt: null,
+    attempts: artifact.attempts.map((attempt) => ({
+      ...attempt,
+      cacheHit: false,
+    })),
+    summary: {
+      ...artifact.summary,
+      asrRequestCount: 0,
+      cacheHitCount: 0,
+    },
+  };
 }
 
 function finalizationArtifactStem(sourceFileName: string): string {
@@ -497,6 +548,8 @@ export async function finalizeSubtitleTask(
   const presentationResolutionMode =
     options.presentationResolution ?? "enforce";
   const overlapResolutionMode = options.overlapResolution ?? "conservative";
+  const overlapAcousticResolutionMode =
+    options.overlapAcousticResolution ?? "off";
   const runner = options.runner ?? new NodeProcessRunner();
   const located = await locateSubtitlePackage(options.taskDirectory);
   const rawPackage = JSON.parse(
@@ -596,6 +649,7 @@ export async function finalizeSubtitleTask(
           },
           candidates: sortedCandidates,
         });
+  let effectiveInputEvidenceHash = inputEvidenceHash;
   const thresholds = finalizationThresholdsSchema.parse({
     ...DEFAULT_FINALIZATION_THRESHOLDS,
     ...options.thresholds,
@@ -680,6 +734,64 @@ export async function finalizeSubtitleTask(
     });
   let presentation = resolvePresentation(workingCues);
   workingCues = presentation.cues;
+  let overlapAcousticResult: TargetedOverlapAcousticResult | null = null;
+  if (
+    overlapAcousticResolutionMode !== "off" &&
+    sourceVideoPath !== null &&
+    options.dryRun !== true
+  ) {
+    const executeOverlapAcoustic =
+      options.overlapAcousticExecutor ?? runTargetedOverlapAcousticResolution;
+    overlapAcousticResult = await executeOverlapAcoustic({
+      mode: overlapAcousticResolutionMode,
+      sourceVideoPath,
+      subtitleDirectory: located.subtitleDirectory,
+      sourceFingerprint: beforeSource.fingerprint,
+      cues: workingCues,
+      presentation,
+      baseCueHash,
+      ...(options.audioTrack === undefined
+        ? {}
+        : { audioStreamIndex: options.audioTrack }),
+      ...(options.overlapAcousticConfiguration === undefined
+        ? {}
+        : { configuration: options.overlapAcousticConfiguration }),
+      runner,
+      ffmpegPath: options.ffmpegPath ?? "ffmpeg",
+      ...(options.whisperCppPath === undefined
+        ? {}
+        : { whisperCppPath: options.whisperCppPath }),
+      ...(options.localTranscriptionModelPath === undefined
+        ? {}
+        : { localModelPath: options.localTranscriptionModelPath }),
+      ...(options.localTranscriptionModelDirectory === undefined
+        ? {}
+        : { localModelDirectory: options.localTranscriptionModelDirectory }),
+      ...(options.localVadModelPath === undefined
+        ? {}
+        : { vadModelPath: options.localVadModelPath }),
+      coreML: options.coreML ?? "auto",
+      whisperExecutionMode: options.whisperExecutionMode ?? "auto",
+      ...(options.asrCacheDirectory === undefined
+        ? {}
+        : { asrCacheDirectory: options.asrCacheDirectory }),
+      asrCacheImportPaths: options.asrCacheImportPaths ?? [],
+      asrCacheMode: options.asrCacheMode ?? "read-write",
+      ...(options.logger === undefined ? {} : { logger: options.logger }),
+    });
+    presentation = applyOverlapAcousticResolution({
+      presentation,
+      acoustic: overlapAcousticResult.artifact,
+      mode: overlapAcousticResolutionMode,
+    });
+    workingCues = presentation.cues;
+    effectiveInputEvidenceHash = sha256Value({
+      inputEvidenceHash,
+      overlapAcousticResolution: overlapAcousticEvidenceForHash(
+        overlapAcousticResult.artifact,
+      ),
+    });
+  }
 
   const baseValidation =
     humanReviewedBaseline === null
@@ -712,6 +824,29 @@ export async function finalizeSubtitleTask(
         "SOURCE_MEDIA_UNAVAILABLE_FOR_READ_ONLY_VERIFICATION",
         [],
         "Artifact-only finalization could not re-hash the source video.",
+        "warning",
+      ),
+    );
+  }
+  if (overlapAcousticResolutionMode !== "off" && sourceVideoPath === null) {
+    findings.push(
+      finding(
+        "OVERLAP_ACOUSTIC_SOURCE_UNAVAILABLE",
+        [],
+        "Targeted overlap acoustic analysis was requested, but the source video is unavailable.",
+        "warning",
+      ),
+    );
+  }
+  if (
+    overlapAcousticResult?.dependencyFailure !== null &&
+    overlapAcousticResult?.dependencyFailure !== undefined
+  ) {
+    findings.push(
+      finding(
+        "OVERLAP_ACOUSTIC_DEPENDENCY_UNAVAILABLE",
+        [],
+        `Local overlap evidence remained unresolved: ${overlapAcousticResult.dependencyFailure}`,
         "warning",
       ),
     );
@@ -921,13 +1056,14 @@ export async function finalizeSubtitleTask(
   let reviewPackagePath: string | null = null;
   let reviewPagePath: string | null = null;
   let reviewItemCount = 0;
+  let reviewAudioCoverageFailureCount = 0;
   if (shouldPrepareReview && options.dryRun !== true) {
     const review = await prepareSubtitleReviewPackage({
       subtitleDirectory: located.subtitleDirectory,
       baseSubtitlePackagePath: effectiveBasePackagePath,
       baseSubtitlePackageHash,
       baseCueHash,
-      inputEvidenceHash,
+      inputEvidenceHash: effectiveInputEvidenceHash,
       sourceFingerprint: beforeSource.fingerprint,
       sourceVideoPath,
       subtitlePackage: projectedDraft,
@@ -938,6 +1074,11 @@ export async function finalizeSubtitleTask(
       runner,
       ffmpegPath: options.ffmpegPath ?? "ffmpeg",
       generateAudio: options.generateReviewAudio ?? true,
+      ...(overlapAcousticResult === null
+        ? options.audioTrack === undefined
+          ? {}
+          : { audioStreamIndex: options.audioTrack }
+        : { audioStreamIndex: overlapAcousticResult.audioStreamIndex }),
       reviewAllCues:
         mode === "human" ||
         findings.some(
@@ -951,6 +1092,8 @@ export async function finalizeSubtitleTask(
     reviewPackagePath = review.packagePath;
     reviewPagePath = review.pagePath;
     reviewItemCount = review.reviewPackage.summary.itemCount;
+    reviewAudioCoverageFailureCount =
+      review.reviewPackage.summary.audioCoverageFailureCount;
   }
   if (
     sourceVideoPath !== null &&
@@ -985,6 +1128,10 @@ export async function finalizeSubtitleTask(
       ...presentation.artifact,
       generatedAt: null,
     },
+    overlapAcousticResolution:
+      overlapAcousticResult === null
+        ? null
+        : overlapAcousticEvidenceForHash(overlapAcousticResult.artifact),
     srt: quality.serialized.srt,
     vtt: quality.serialized.vtt,
     ass: quality.serialized.ass,
@@ -1004,14 +1151,15 @@ export async function finalizeSubtitleTask(
   const report = subtitleFinalizationReportSchema.parse({
     schemaVersion: "1.0.0",
     reportType: "subtitle-finalization-report",
-    finalizationVersion: "1.2.0-C5.14",
+    finalizationVersion:
+      overlapAcousticResult === null ? "1.2.0-C5.14" : "1.3.0-C5.15",
     generatedAt,
     mode,
     status: state.status,
     finalizationMethod: state.method,
     baseSubtitlePackageHash,
     baseCueHash,
-    inputEvidenceHash,
+    inputEvidenceHash: effectiveInputEvidenceHash,
     outputCueHash: sha256Value(workingCues),
     outputHash,
     humanReviewedBaseline:
@@ -1070,6 +1218,43 @@ export async function finalizeSubtitleTask(
         decisions.filter(
           (decision) => decision.action === "DELETE_HALLUCINATION",
         ).length + errorTypes.filter((code) => code === "HALLUCINATION").length,
+      overlapComponentCount:
+        presentation.artifact.summary.overlapComponentCount,
+      overlapAcousticAnalyzedCount:
+        overlapAcousticResult?.artifact.summary.componentCount ?? 0,
+      overlapAcousticResolvedCount:
+        overlapAcousticResult?.artifact.summary.resolvedCount ?? 0,
+      overlapTimingOnlyResolvedCount:
+        overlapAcousticResult?.artifact.summary.timingOnlyResolvedCount ?? 0,
+      legalOverlapResolvedCount:
+        overlapAcousticResult?.artifact.summary.legalOverlapResolvedCount ?? 0,
+      unresolvedOverlapCount:
+        presentation.artifact.summary.overlapBlockingCount,
+      overlapAsrRequestCount:
+        overlapAcousticResult?.executionMetrics.asrRequestCount ?? 0,
+      overlapAsrCacheHitCount:
+        overlapAcousticResult?.artifact.summary.cacheHitCount ?? 0,
+      overlapWorkerStartCount:
+        overlapAcousticResult?.executionMetrics.workerStartCount ?? 0,
+      overlapModelLoadCount:
+        overlapAcousticResult?.executionMetrics.modelLoadCount ?? 0,
+      overlapWarmupCount:
+        overlapAcousticResult?.executionMetrics.workers.reduce(
+          (sum, worker) => sum + worker.warmupCount,
+          0,
+        ) ?? 0,
+      wholeMediaAsrRequestCount: 0,
+      automaticStructuralDecisionCount:
+        presentation.artifact.summary.layoutResolvedCount +
+        presentation.artifact.summary.repetitionResolvedCount +
+        presentation.artifact.summary.overlapResolvedCount,
+      automaticCanonicalMutationDecisionCount: 0,
+      automaticTimingMutationDecisionCount:
+        overlapAcousticResult?.artifact.components.filter(
+          (component) =>
+            !component.blocking && component.timingMutations.length > 0,
+        ).length ?? 0,
+      reviewAudioCoverageFailureCount,
     },
     qualityGate: {
       passed: qualityPassed,
@@ -1080,8 +1265,14 @@ export async function finalizeSubtitleTask(
       presentationParityPassed: quality.presentationParityPassed,
       rollbackApplied,
       sourceReadOnlyVerified,
+      serializedSrtContainsOverlap:
+        presentation.artifact.summary.serializedSrtContainsOverlap,
+      legalSrtOverlapRenderingMayVary:
+        presentation.artifact.summary.legalSrtOverlapRenderingMayVary,
+      unresolvedSrtOverlapPresent:
+        presentation.artifact.summary.unresolvedSrtOverlapPresent,
       srtOverlapRenderingMayVary:
-        presentation.artifact.summary.srtOverlapRenderingMayVary,
+        presentation.artifact.summary.serializedSrtContainsOverlap,
       blockingCodes: findings
         .filter((item) => item.severity === "blocking")
         .map((item) => item.code),
@@ -1113,6 +1304,20 @@ export async function finalizeSubtitleTask(
         located.subtitleDirectory,
         outputPaths.presentationResolution,
       ),
+      overlapAcousticResolution:
+        overlapAcousticResult === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              overlapAcousticResult.outputPaths.resolution,
+            ),
+      overlapWhisperExecutionMetrics:
+        overlapAcousticResult === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              overlapAcousticResult.outputPaths.executionMetrics,
+            ),
       subtitledVideo: null,
     },
   });

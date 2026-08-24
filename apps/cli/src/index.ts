@@ -178,6 +178,20 @@ interface FinalizeCliOptions extends GlobalOptions {
   dryRun?: boolean;
   presentationResolution: "off" | "observe" | "enforce";
   overlapResolution: "conservative" | "balanced";
+  overlapAcousticResolution: "off" | "observe" | "enforce";
+  audioTrack?: number;
+  overlapContextSeconds: number;
+  overlapMaxWindowSeconds: number;
+  maxOverlapAsrRequests: number;
+  whisperCppPath?: string;
+  localTranscriptionModel?: string;
+  localTranscriptionModelDirectory?: string;
+  whisperVadModel?: string;
+  coreml: "auto" | "on" | "off";
+  whisperExecutionMode: "auto" | "persistent" | "batch" | "process";
+  asrCacheDir?: string;
+  asrCacheImport?: string[];
+  asrCacheMode: "off" | "read" | "read-write";
 }
 
 interface ReviewCliOptions extends GlobalOptions {
@@ -1143,6 +1157,64 @@ program
       .choices(["conservative", "balanced"])
       .default("conservative"),
   )
+  .addOption(
+    new Option(
+      "--overlap-acoustic-resolution <mode>",
+      "targeted local acoustic evidence for unresolved overlap components",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("off"),
+  )
+  .option(
+    "--audio-track <index>",
+    "global ffprobe audio stream index",
+    positiveInteger,
+  )
+  .option(
+    "--overlap-context-seconds <seconds>",
+    "context around each overlap component",
+    nonNegativeNumber,
+    1.5,
+  )
+  .option(
+    "--overlap-max-window-seconds <seconds>",
+    "soft maximum local overlap window",
+    positiveNumber,
+    20,
+  )
+  .option(
+    "--max-overlap-asr-requests <count>",
+    "bounded local overlap ASR request count (absolute maximum 28)",
+    positiveOneBasedInteger,
+    21,
+  )
+  .option("--whisper-cpp-path <path>", "local whisper.cpp executable")
+  .option("--local-transcription-model <path>", "local large-v3 model file")
+  .option(
+    "--local-transcription-model-directory <path>",
+    "directory containing local Whisper models",
+  )
+  .option("--whisper-vad-model <path>", "local Whisper VAD model")
+  .addOption(
+    new Option("--coreml <mode>", "Core ML policy")
+      .choices(["auto", "on", "off"])
+      .default("auto"),
+  )
+  .addOption(
+    new Option(
+      "--whisper-execution-mode <mode>",
+      "local whisper.cpp worker topology",
+    )
+      .choices(["auto", "persistent", "batch", "process"])
+      .default("auto"),
+  )
+  .option("--asr-cache-dir <path>", "portable ASR cache directory")
+  .option("--asr-cache-import <paths...>", "ASR cache import roots")
+  .addOption(
+    new Option("--asr-cache-mode <mode>", "portable ASR cache access mode")
+      .choices(["off", "read", "read-write"])
+      .default("read-write"),
+  )
   .option("--no-review-audio", "skip review audio extraction")
   .option("--dry-run", "validate and compute without writing outputs")
   .action(async (options: FinalizeCliOptions, command: Command) => {
@@ -1166,6 +1238,37 @@ program
       prepareReview: options.prepareReview ?? false,
       presentationResolution: options.presentationResolution,
       overlapResolution: options.overlapResolution,
+      overlapAcousticResolution: options.overlapAcousticResolution,
+      ...(options.audioTrack === undefined
+        ? {}
+        : { audioTrack: options.audioTrack }),
+      overlapAcousticConfiguration: {
+        contextSeconds: options.overlapContextSeconds,
+        maximumWindowSeconds: options.overlapMaxWindowSeconds,
+        maximumAsrRequests: options.maxOverlapAsrRequests,
+      },
+      ...(options.whisperCppPath === undefined
+        ? {}
+        : { whisperCppPath: options.whisperCppPath }),
+      ...(options.localTranscriptionModel === undefined
+        ? {}
+        : { localTranscriptionModelPath: options.localTranscriptionModel }),
+      ...(options.localTranscriptionModelDirectory === undefined
+        ? {}
+        : {
+            localTranscriptionModelDirectory:
+              options.localTranscriptionModelDirectory,
+          }),
+      ...(options.whisperVadModel === undefined
+        ? {}
+        : { localVadModelPath: options.whisperVadModel }),
+      coreML: options.coreml,
+      whisperExecutionMode: options.whisperExecutionMode,
+      ...(options.asrCacheDir === undefined
+        ? {}
+        : { asrCacheDirectory: options.asrCacheDir }),
+      asrCacheImportPaths: options.asrCacheImport ?? [],
+      asrCacheMode: options.asrCacheMode,
       generateReviewAudio: options.reviewAudio,
       dryRun: options.dryRun ?? false,
       runner: new NodeProcessRunner(),

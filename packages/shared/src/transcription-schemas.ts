@@ -1102,6 +1102,7 @@ export const asrCacheRequestTypeSchema = z.enum([
   "recovery",
   "lyrics",
   "coverage-recovery",
+  "overlap-evidence",
 ]);
 
 export const portableAsrCacheEntryV2Schema = z

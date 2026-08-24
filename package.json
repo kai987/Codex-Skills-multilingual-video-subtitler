@@ -29,6 +29,7 @@
     "replay:c4-coverage": "tsx scripts/replay-c4-coverage-recovery.ts",
     "replay:c4-1-presentation": "tsx scripts/replay-c4-1-presentation-integrity.ts",
     "replay:c5-14-presentation": "tsx scripts/replay-c5-14-presentation.ts",
+    "replay:c5-15-overlap": "tsx scripts/replay-c5-15-overlap.ts",
     "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
     "verify:c4-persistent-worker": "tsx scripts/verify-c4-persistent-worker.ts",
     "validate:c4-real-runs": "tsx scripts/validate-c4-real-runs.ts",

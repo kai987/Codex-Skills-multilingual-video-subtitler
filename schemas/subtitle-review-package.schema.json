@@ -402,6 +402,62 @@
           "audioError": {
             "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
           },
+          "componentUnionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "audioRequestedInterval": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioExtractedInterval": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioDurationSeconds": {
+            "default": null,
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "audioSha256": {
+            "default": null,
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "audioContextSeconds": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0
+          },
+          "audioFullyCoversComponent": { "default": false, "type": "boolean" },
           "requiresHumanReview": { "type": "boolean" }
         },
         "required": [
@@ -422,6 +478,12 @@
           "allowedHumanActions",
           "audioClipPath",
           "audioError",
+          "audioRequestedInterval",
+          "audioExtractedInterval",
+          "audioDurationSeconds",
+          "audioSha256",
+          "audioContextSeconds",
+          "audioFullyCoversComponent",
           "requiresHumanReview"
         ],
         "additionalProperties": false
@@ -449,13 +511,20 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
+        },
+        "audioCoverageFailureCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
         }
       },
       "required": [
         "itemCount",
         "mandatoryItemCount",
         "audioClipCount",
-        "audioFailureCount"
+        "audioFailureCount",
+        "audioCoverageFailureCount"
       ],
       "additionalProperties": false
     }

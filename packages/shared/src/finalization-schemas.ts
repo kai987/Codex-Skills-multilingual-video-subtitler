@@ -200,6 +200,30 @@ export const finalizationMetricsSchema = z
     terminologyCorrectionRate: z.number().min(0).max(1),
     dialectCorrectionRate: z.number().min(0).max(1),
     hallucinationRejectionCount: z.number().int().nonnegative(),
+    overlapComponentCount: z.number().int().nonnegative().default(0),
+    overlapAcousticAnalyzedCount: z.number().int().nonnegative().default(0),
+    overlapAcousticResolvedCount: z.number().int().nonnegative().default(0),
+    overlapTimingOnlyResolvedCount: z.number().int().nonnegative().default(0),
+    legalOverlapResolvedCount: z.number().int().nonnegative().default(0),
+    unresolvedOverlapCount: z.number().int().nonnegative().default(0),
+    overlapAsrRequestCount: z.number().int().nonnegative().default(0),
+    overlapAsrCacheHitCount: z.number().int().nonnegative().default(0),
+    overlapWorkerStartCount: z.number().int().nonnegative().default(0),
+    overlapModelLoadCount: z.number().int().nonnegative().default(0),
+    overlapWarmupCount: z.number().int().nonnegative().default(0),
+    wholeMediaAsrRequestCount: z.number().int().nonnegative().default(0),
+    automaticStructuralDecisionCount: z.number().int().nonnegative().default(0),
+    automaticCanonicalMutationDecisionCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    automaticTimingMutationDecisionCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    reviewAudioCoverageFailureCount: z.number().int().nonnegative().default(0),
   })
   .strict();
 
@@ -247,6 +271,10 @@ export const subtitleFinalizationReportSchema = z
         presentationParityPassed: z.boolean().default(true),
         rollbackApplied: z.boolean(),
         sourceReadOnlyVerified: z.boolean(),
+        serializedSrtContainsOverlap: z.boolean().default(false),
+        legalSrtOverlapRenderingMayVary: z.boolean().default(false),
+        unresolvedSrtOverlapPresent: z.boolean().default(false),
+        /** @deprecated Alias of serializedSrtContainsOverlap. */
         srtOverlapRenderingMayVary: z.boolean().default(false),
         blockingCodes: z.array(z.string().min(1)),
         warningCodes: z.array(z.string().min(1)),
@@ -262,6 +290,10 @@ export const subtitleFinalizationReportSchema = z
         reviewPage: relativePathSchema.nullable(),
         correctionFeedback: relativePathSchema.nullable(),
         presentationResolution: relativePathSchema.nullable().default(null),
+        overlapAcousticResolution: relativePathSchema.nullable().default(null),
+        overlapWhisperExecutionMetrics: relativePathSchema
+          .nullable()
+          .default(null),
         subtitledVideo: relativePathSchema.nullable(),
       })
       .strict(),
@@ -317,6 +349,13 @@ export const subtitleReviewItemSchema = z
     ),
     audioClipPath: relativePathSchema.nullable(),
     audioError: z.string().min(1).nullable(),
+    componentUnionInterval: subtitleIntervalSchema.optional(),
+    audioRequestedInterval: subtitleIntervalSchema.nullable().default(null),
+    audioExtractedInterval: subtitleIntervalSchema.nullable().default(null),
+    audioDurationSeconds: z.number().nonnegative().nullable().default(null),
+    audioSha256: hashSchema.nullable().default(null),
+    audioContextSeconds: z.number().nonnegative().default(0),
+    audioFullyCoversComponent: z.boolean().default(false),
     requiresHumanReview: z.boolean(),
   })
   .strict();
@@ -339,6 +378,7 @@ export const subtitleReviewPackageSchema = z
         mandatoryItemCount: z.number().int().nonnegative(),
         audioClipCount: z.number().int().nonnegative(),
         audioFailureCount: z.number().int().nonnegative(),
+        audioCoverageFailureCount: z.number().int().nonnegative().default(0),
       })
       .strict(),
   })

@@ -68,6 +68,7 @@ import {
   humanReviewResolutionsSchema,
   subtitleFinalizationReportSchema,
   subtitlePresentationResolutionSchema,
+  subtitleOverlapAcousticResolutionSchema,
   subtitleReviewPackageSchema,
   whisperExecutionMetricsSchema,
   whisperBenchmarkSchema,
@@ -95,6 +96,11 @@ const schemas = [
     fileName: "subtitle-presentation-resolution.schema.json",
     id: "https://schemas.local/multilingual-video-learning/subtitle-presentation-resolution.schema.json",
     schema: subtitlePresentationResolutionSchema,
+  },
+  {
+    fileName: "subtitle-overlap-acoustic-resolution.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-overlap-acoustic-resolution.schema.json",
+    schema: subtitleOverlapAcousticResolutionSchema,
   },
   {
     fileName: "subtitle-review-package.schema.json",

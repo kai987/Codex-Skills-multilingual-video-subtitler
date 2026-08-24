@@ -62,6 +62,23 @@ npm run subtitle-finalize -- \
 
 Finalization keeps the strict v1 package cues canonical and writes display-only line breaks, repetition classifications, overlap-component decisions, and any trusted timing-only repair to `subtitle-presentation-resolution.json`. `--presentation-resolution observe` records recommendations without applying them; `off` preserves the legacy quality gate. `--overlap-resolution balanced` additionally permits only tightly bounded authoritative rapid-turn overlap and still never uses an unsupported midpoint trim.
 
+To collect bounded local acoustic evidence only for still-blocking overlap components, opt in to C5.15. It extracts each complete component union plus bounded context, runs three prompt-free local `large-v3` profiles through the shared whisper.cpp worker/cache, and aligns the already-reviewed text only after ASR. `observe` writes evidence without closing findings; `enforce` may apply an atomic timing-only repair or a serializer-only legal-overlap layout when the localized evidence passes every threshold. It never runs whole-media ASR or changes reviewed text:
+
+```bash
+npm run subtitle-finalize -- \
+  --task "/path/to/task-output" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
+  --source-video "/path/to/source-video.mkv" \
+  --audio-track 1 \
+  --overlap-acoustic-resolution enforce \
+  --local-transcription-model "/path/to/ggml-large-v3.bin" \
+  --whisper-vad-model "/path/to/ggml-silero-v6.2.0.bin" \
+  --whisper-execution-mode persistent \
+  --asr-cache-dir "/path/to/portable-cache"
+```
+
+The stage writes `subtitle-overlap-acoustic-resolution.json`, `overlap-whisper-execution-metrics.json`, and `overlap-asr-cache-manifest.json`. The default is `--overlap-acoustic-resolution off`; the request budget defaults to 21 and cannot exceed 28.
+
 Replay an existing human-reviewed task into a collision-safe sibling directory without ASR, subtitle lookup, network access, or model/API calls:
 
 ```bash
@@ -72,6 +89,8 @@ npm run replay:c5-14-presentation -- \
 ```
 
 The replay verifies the human ASS and optional source video before and after the run, writes `c5-14-replay-summary.json`, and creates review audio only for unresolved blocking groups.
+
+For a collision-safe C5.15 replay that defaults to targeted enforcement and supports a second cache-only pass, use `npm run replay:c5-15-overlap --` with the same task, human subtitle, source video, model, VAD, audio-track, and cache options. The C5.14 directory and both source files remain read-only.
 
 If evidence is insufficient, `review-fallback` writes honest `.best-effort.*` files, a strict `subtitle-package.needs-review.json`, an offline review page, bounded local audio clips, and candidate suggestions without changing visible cue text. Apply a downloaded review file only after a hash/fingerprint preflight:
 

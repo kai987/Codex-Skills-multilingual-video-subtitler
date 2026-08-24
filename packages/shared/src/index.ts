@@ -5,6 +5,7 @@ export * from "./language.js";
 export * from "./logger.js";
 export * from "./process.js";
 export * from "./presentation-resolution-schemas.js";
+export * from "./overlap-acoustic-resolution-schemas.js";
 export * from "./reference-schemas.js";
 export * from "./schema-validation.js";
 export * from "./schemas.js";

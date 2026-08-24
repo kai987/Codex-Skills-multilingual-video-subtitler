@@ -414,6 +414,102 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
+        },
+        "overlapComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAcousticAnalyzedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAcousticResolvedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapTimingOnlyResolvedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "legalOverlapResolvedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedOverlapCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAsrRequestCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAsrCacheHitCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapWorkerStartCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapModelLoadCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapWarmupCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wholeMediaAsrRequestCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "automaticStructuralDecisionCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "automaticCanonicalMutationDecisionCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "automaticTimingMutationDecisionCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioCoverageFailureCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
         }
       },
       "required": [
@@ -449,7 +545,23 @@
         "timingCorrectionRate",
         "terminologyCorrectionRate",
         "dialectCorrectionRate",
-        "hallucinationRejectionCount"
+        "hallucinationRejectionCount",
+        "overlapComponentCount",
+        "overlapAcousticAnalyzedCount",
+        "overlapAcousticResolvedCount",
+        "overlapTimingOnlyResolvedCount",
+        "legalOverlapResolvedCount",
+        "unresolvedOverlapCount",
+        "overlapAsrRequestCount",
+        "overlapAsrCacheHitCount",
+        "overlapWorkerStartCount",
+        "overlapModelLoadCount",
+        "overlapWarmupCount",
+        "wholeMediaAsrRequestCount",
+        "automaticStructuralDecisionCount",
+        "automaticCanonicalMutationDecisionCount",
+        "automaticTimingMutationDecisionCount",
+        "reviewAudioCoverageFailureCount"
       ],
       "additionalProperties": false
     },
@@ -464,6 +576,12 @@
         "presentationParityPassed": { "default": true, "type": "boolean" },
         "rollbackApplied": { "type": "boolean" },
         "sourceReadOnlyVerified": { "type": "boolean" },
+        "serializedSrtContainsOverlap": { "default": false, "type": "boolean" },
+        "legalSrtOverlapRenderingMayVary": {
+          "default": false,
+          "type": "boolean"
+        },
+        "unresolvedSrtOverlapPresent": { "default": false, "type": "boolean" },
         "srtOverlapRenderingMayVary": { "default": false, "type": "boolean" },
         "blockingCodes": {
           "type": "array",
@@ -483,6 +601,9 @@
         "presentationParityPassed",
         "rollbackApplied",
         "sourceReadOnlyVerified",
+        "serializedSrtContainsOverlap",
+        "legalSrtOverlapRenderingMayVary",
+        "unresolvedSrtOverlapPresent",
         "srtOverlapRenderingMayVary",
         "blockingCodes",
         "warningCodes"
@@ -553,6 +674,28 @@
             { "type": "null" }
           ]
         },
+        "overlapAcousticResolution": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "overlapWhisperExecutionMetrics": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
         "subtitledVideo": {
           "anyOf": [
             {
@@ -573,6 +716,8 @@
         "reviewPage",
         "correctionFeedback",
         "presentationResolution",
+        "overlapAcousticResolution",
+        "overlapWhisperExecutionMetrics",
         "subtitledVideo"
       ],
       "additionalProperties": false

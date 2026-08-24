@@ -64,6 +64,57 @@ export interface BuildSubtitlePresentationResolutionInput {
   generatedAt?: string;
 }
 
+function cueSetContainsOverlap(
+  cues: readonly Pick<SubtitleCue, "start" | "end">[],
+): boolean {
+  const ordered = [...cues].toSorted(
+    (left, right) => left.start - right.start || left.end - right.end,
+  );
+  let maximumEnd = -Infinity;
+  for (const cue of ordered) {
+    if (cue.start < maximumEnd - 0.01) return true;
+    maximumEnd = Math.max(maximumEnd, cue.end);
+  }
+  return false;
+}
+
+export function summarizeSrtOverlapStatus(input: {
+  cues: readonly SubtitleCue[];
+  decisions: readonly Pick<
+    SubtitlePresentationResolution["overlapDecisions"][number],
+    "cueIds" | "blocking"
+  >[];
+}): {
+  serializedSrtContainsOverlap: boolean;
+  legalSrtOverlapRenderingMayVary: boolean;
+  unresolvedSrtOverlapPresent: boolean;
+  srtOverlapRenderingMayVary: boolean;
+} {
+  const cuesById = new Map(input.cues.map((cue) => [cue.id, cue]));
+  const decisionStillContainsOverlap = (cueIds: readonly string[]): boolean =>
+    cueSetContainsOverlap(
+      cueIds.flatMap((cueId) => {
+        const cue = cuesById.get(cueId);
+        return cue === undefined ? [] : [cue];
+      }),
+    );
+  const serializedSrtContainsOverlap = cueSetContainsOverlap(input.cues);
+  const legalSrtOverlapRenderingMayVary = input.decisions.some(
+    (decision) =>
+      !decision.blocking && decisionStillContainsOverlap(decision.cueIds),
+  );
+  const unresolvedSrtOverlapPresent = input.decisions.some(
+    (decision) =>
+      decision.blocking && decisionStillContainsOverlap(decision.cueIds),
+  );
+  return {
+    serializedSrtContainsOverlap,
+    legalSrtOverlapRenderingMayVary,
+    unresolvedSrtOverlapPresent,
+    srtOverlapRenderingMayVary: serializedSrtContainsOverlap,
+  };
+}
+
 export function buildSubtitlePresentationResolution(
   input: BuildSubtitlePresentationResolutionInput,
 ): SubtitlePresentationResolutionResult {
@@ -157,6 +208,10 @@ export function buildSubtitlePresentationResolution(
     const before = originalById.get(cue.id);
     return before?.start !== cue.start || before.end !== cue.end;
   }).length;
+  const srtOverlapStatus = summarizeSrtOverlapStatus({
+    cues,
+    decisions: overlap.decisions,
+  });
   const artifact = subtitlePresentationResolutionSchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-presentation-resolution",
@@ -225,9 +280,7 @@ export function buildSubtitlePresentationResolution(
         layoutDecisions.filter((decision) => decision.blocking).length +
         repetitionDecisions.filter((decision) => decision.blocking).length +
         overlap.decisions.filter((decision) => decision.blocking).length,
-      srtOverlapRenderingMayVary: overlap.decisions.some(
-        (decision) => !decision.blocking && decision.overlapPairs.length > 0,
-      ),
+      ...srtOverlapStatus,
     },
   });
   return {

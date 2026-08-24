@@ -41,6 +41,7 @@ export const overlapRelationshipSchema = z.enum([
   "rapid-turn-taking",
   "true-simultaneous-speech",
   "crowd-call-plus-dialogue",
+  "nested-background-speech",
   "different-dialogue-boundary-error",
   "legal-authoritative-overlap",
   "unresolved",
@@ -184,6 +185,14 @@ export const overlapDecisionSchema = z
     vttCueSettings: z.array(vttCuePresentationSettingSchema),
     reasons: z.array(z.string().min(1)),
     blocking: z.boolean(),
+    resolutionSource: z
+      .enum(["presentation-only", "targeted-acoustic"])
+      .default("presentation-only"),
+    acousticEvidenceIds: z.array(z.string().min(1)).default([]),
+    classificationConfidence: z.number().min(0).max(1).nullable().default(null),
+    counterfactualScores: z
+      .record(z.string().min(1), z.number().min(0).max(1))
+      .default({}),
   })
   .strict();
 
@@ -191,7 +200,7 @@ export const subtitlePresentationResolutionSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-presentation-resolution"),
-    resolutionVersion: z.literal("C5.14"),
+    resolutionVersion: z.enum(["C5.14", "C5.15"]),
     generatedAt: z.string().min(1),
     baseCueHash: hashSchema,
     canonicalCueHash: hashSchema,
@@ -232,7 +241,11 @@ export const subtitlePresentationResolutionSchema = z
         displayLexicalMismatchCount: z.number().int().nonnegative(),
         presentationCreatedTemporalCueCount: z.number().int().nonnegative(),
         reviewGroupCount: z.number().int().nonnegative(),
-        srtOverlapRenderingMayVary: z.boolean(),
+        serializedSrtContainsOverlap: z.boolean().default(false),
+        legalSrtOverlapRenderingMayVary: z.boolean().default(false),
+        unresolvedSrtOverlapPresent: z.boolean().default(false),
+        /** @deprecated Alias of serializedSrtContainsOverlap. */
+        srtOverlapRenderingMayVary: z.boolean().default(false),
       })
       .strict(),
   })

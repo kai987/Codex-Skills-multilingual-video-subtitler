@@ -5,6 +5,7 @@ export * from "./finalization-metrics.js";
 export * from "./burn.js";
 export * from "./adaptive.js";
 export * from "./online.js";
+export * from "./overlap-acoustic.js";
 export * from "./output-paths.js";
 export * from "./package.js";
 export * from "./probe.js";

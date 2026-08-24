@@ -450,6 +450,7 @@ function componentRelationship(
     "rapid-turn-taking",
     "true-simultaneous-speech",
     "crowd-call-plus-dialogue",
+    "nested-background-speech",
     "legal-authoritative-overlap",
   ]);
   if (values.every((value) => legal.has(value))) {
@@ -474,6 +475,7 @@ function actionForRelationship(relationship: OverlapRelationship): {
       "rapid-turn-taking",
       "true-simultaneous-speech",
       "crowd-call-plus-dialogue",
+      "nested-background-speech",
       "legal-authoritative-overlap",
     ].includes(relationship)
   ) {
@@ -518,7 +520,9 @@ function actionForRelationship(relationship: OverlapRelationship): {
   };
 }
 
-function legalPresentationOverrides(cues: readonly SubtitleCue[]): {
+export function legalOverlapPresentationOverrides(
+  cues: readonly SubtitleCue[],
+): {
   ass: AssEventPresentationOverride[];
   vtt: VttCuePresentationSetting[];
 } {
@@ -699,9 +703,10 @@ export function classifyOverlapComponents(input: {
         "rapid-turn-taking",
         "true-simultaneous-speech",
         "crowd-call-plus-dialogue",
+        "nested-background-speech",
         "legal-authoritative-overlap",
       ].includes(relationship)
-        ? legalPresentationOverrides(componentCues)
+        ? legalOverlapPresentationOverrides(componentCues)
         : { ass: [], vtt: [] };
     const overlapPairs = component.map((edge) => ({
       leftCueId: edge.left.id,

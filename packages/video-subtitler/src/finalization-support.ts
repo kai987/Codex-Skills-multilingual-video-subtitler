@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
@@ -60,9 +61,13 @@ export function sha256JsonFileValue(value: unknown): string {
 }
 
 export async function sha256LocalFile(filePath: string): Promise<string> {
-  return createHash("sha256")
-    .update(await readFile(filePath))
-    .digest("hex");
+  const digest = createHash("sha256");
+  for await (const chunk of createReadStream(
+    filePath,
+  ) as AsyncIterable<Buffer>) {
+    digest.update(chunk);
+  }
+  return digest.digest("hex");
 }
 
 export interface LoadedHumanReviewedSubtitle {
@@ -936,7 +941,7 @@ export function evaluateFinalCueQuality(input: {
     }
     if (
       enforced &&
-      input.presentation.artifact.summary.srtOverlapRenderingMayVary
+      input.presentation.artifact.summary.legalSrtOverlapRenderingMayVary
     ) {
       findings.push(
         finding(

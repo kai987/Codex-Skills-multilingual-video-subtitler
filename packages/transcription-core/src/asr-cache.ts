@@ -19,7 +19,12 @@ import type { TranscriptionChunkResult } from "./types.js";
 
 export type AsrCacheMode = "off" | "read" | "read-write";
 export type AsrCacheRequestType =
-  "baseline" | "refinement" | "recovery" | "lyrics" | "coverage-recovery";
+  | "baseline"
+  | "refinement"
+  | "recovery"
+  | "lyrics"
+  | "coverage-recovery"
+  | "overlap-evidence";
 
 export interface PortableAsrCacheOptions {
   portableRoot?: string;

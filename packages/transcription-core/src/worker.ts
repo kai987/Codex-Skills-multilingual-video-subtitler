@@ -91,6 +91,16 @@ function numberOrNull(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+export function clampWhisperSegmentInterval(input: {
+  start: number;
+  end: number;
+  duration: number;
+}): { start: number; end: number } | null {
+  const start = Math.max(0, Math.min(input.duration, input.start));
+  const end = Math.max(0, Math.min(input.duration, input.end));
+  return end > start ? { start, end } : null;
+}
+
 function languageForWhisper(language: LanguageTag | undefined): string {
   if (language === undefined || language === "mixed" || language === "und") {
     return "auto";
@@ -142,6 +152,12 @@ function parseVerboseJson(
     const end = numberOrNull(segment.end);
     if (text === "" || start === null || end === null || end <= start)
       return [];
+    const interval = clampWhisperSegmentInterval({
+      start,
+      end,
+      duration: request.request.chunk.duration,
+    });
+    if (interval === null) return [];
     const words = Array.isArray(segment.words) ? segment.words : [];
     const tokens = words.flatMap((rawWord) => {
       if (typeof rawWord !== "object" || rawWord === null) return [];
@@ -171,8 +187,8 @@ function parseVerboseJson(
     });
     return [
       {
-        start: Math.max(0, start),
-        end: Math.min(request.request.chunk.duration, end),
+        start: interval.start,
+        end: interval.end,
         text,
         speaker: null,
         confidence: null,

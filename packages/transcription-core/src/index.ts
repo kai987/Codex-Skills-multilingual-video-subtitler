@@ -16,6 +16,7 @@ export * from "./japanese-normalization.js";
 export * from "./local.js";
 export * from "./lyrics-validation.js";
 export * from "./overlap-classification.js";
+export * from "./overlap-acoustic-resolution.js";
 export * from "./planner.js";
 export * from "./profiles.js";
 export * from "./presentation-resolution.js";
