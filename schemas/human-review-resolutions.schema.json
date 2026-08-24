@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/human-review-resolutions.schema.json",
+  "title": "human-review-resolutions",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "resolutionType": { "type": "string", "const": "human-review-resolutions" },
+    "reviewVersion": { "type": "string", "minLength": 1 },
+    "sourceFingerprint": {
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "durationSeconds": { "type": "number", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["fileName", "size", "durationSeconds", "sha256"],
+      "additionalProperties": false
+    },
+    "baseSubtitlePackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "resolutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resolutionId": { "type": "string", "minLength": 1 },
+          "reviewId": { "type": "string", "minLength": 1 },
+          "action": {
+            "type": "string",
+            "enum": [
+              "KEEP",
+              "ACCEPT_SUGGESTION",
+              "EDIT_TEXT",
+              "REJECT_SUGGESTION",
+              "SPLIT_CUE",
+              "MERGE_CUES",
+              "EDIT_TIMING",
+              "DELETE_CUE",
+              "MARK_UNRESOLVED"
+            ]
+          },
+          "selectedCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "correctedText": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "start": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "end": {
+            "anyOf": [
+              { "type": "number", "exclusiveMinimum": 0 },
+              { "type": "null" }
+            ]
+          },
+          "splitParts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string", "minLength": 1 },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["text", "start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "mergeCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reviewerNotes": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "errorTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "DIALECT_ERROR",
+                "CHARACTER_NAME_ERROR",
+                "DOMAIN_TERM_ERROR",
+                "KANJI_SELECTION_ERROR",
+                "VERB_ENDING_ERROR",
+                "PARTICLE_ERROR",
+                "MISSING_TEXT",
+                "EXTRA_TEXT",
+                "HALLUCINATION",
+                "FRAGMENT_ERROR",
+                "SEGMENTATION_ERROR",
+                "TIMING_ERROR",
+                "SPEAKER_ERROR",
+                "STYLE_ERROR",
+                "OTHER"
+              ]
+            }
+          },
+          "confirmedReading": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "terminologyHints": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dialectHints": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "resolutionId",
+          "reviewId",
+          "action",
+          "selectedCandidateId",
+          "correctedText",
+          "start",
+          "end",
+          "splitParts",
+          "mergeCueIds",
+          "reviewerNotes",
+          "errorTypes",
+          "confirmedReading",
+          "terminologyHints",
+          "dialectHints"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "resolutionType",
+    "reviewVersion",
+    "sourceFingerprint",
+    "baseSubtitlePackageHash",
+    "baseCueHash",
+    "inputEvidenceHash",
+    "resolutions"
+  ],
+  "additionalProperties": false
+}

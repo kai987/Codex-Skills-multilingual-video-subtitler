@@ -37,8 +37,28 @@ Or run the CLI directly:
 npm run subtitle -- \
   --input "/path/to/video.mkv" \
   --dialogue-language ja \
-  --transcription-provider auto
+  --transcription-provider auto \
+  --finalization review-fallback
 ```
+
+Finalize an existing task without re-running ASR:
+
+```bash
+npm run subtitle-finalize -- \
+  --task "/path/to/task-output" \
+  --finalization auto
+```
+
+If evidence is insufficient, `review-fallback` writes honest `.best-effort.*` files, a strict `subtitle-package.needs-review.json`, an offline review page, bounded local audio clips, and candidate suggestions without changing visible cue text. Apply a downloaded review file only after a hash/fingerprint preflight:
+
+```bash
+npm run subtitle-finalize -- \
+  --task "/path/to/task-output" \
+  --resolutions "/path/to/human-review-resolutions.json" \
+  --dry-run
+```
+
+Automatic, human, and mixed validation share `.final.*` and `subtitle-package.final.json`. The package remains compatible with the strict grammar-report v1 input contract; finalization status, decisions, quality-gate metrics, and correction feedback live in separate strict sidecars.
 
 Reference-assisted mode keeps ASR generation blind and opens the reference only for post-generation evaluation:
 
@@ -70,6 +90,8 @@ npm run typecheck
 npm run lint
 npm run build
 npm run format:check
+npm test
+npm run test:e2e
 ```
 
 ## License

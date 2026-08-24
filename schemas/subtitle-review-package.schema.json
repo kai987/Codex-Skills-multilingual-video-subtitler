@@ -1,0 +1,477 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-review-package.schema.json",
+  "title": "subtitle-review-package",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "packageType": {
+      "type": "string",
+      "const": "multilingual-subtitle-review-package"
+    },
+    "reviewVersion": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "sourceFingerprint": {
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "durationSeconds": { "type": "number", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["fileName", "size", "durationSeconds", "sha256"],
+      "additionalProperties": false
+    },
+    "baseSubtitlePackagePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+    },
+    "baseSubtitlePackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewId": { "type": "string", "minLength": 1 },
+          "targetCueIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "currentText": { "type": "string" },
+          "currentStart": { "type": "number", "minimum": 0 },
+          "currentEnd": { "type": "number", "exclusiveMinimum": 0 },
+          "currentStyle": {
+            "type": "string",
+            "enum": ["default", "thought", "music"]
+          },
+          "currentSpeaker": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "previousCue": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "cueId": { "type": "string", "minLength": 1 },
+                  "text": { "type": "string", "minLength": 1 },
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["cueId", "text", "start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "nextCue": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "cueId": { "type": "string", "minLength": 1 },
+                  "text": { "type": "string", "minLength": 1 },
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["cueId", "text", "start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "machineDecision": {
+            "type": "object",
+            "properties": {
+              "decisionId": { "type": "string", "minLength": 1 },
+              "targetCueIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "KEEP",
+                  "REPLACE",
+                  "EXPAND",
+                  "SPLIT",
+                  "MERGE",
+                  "REDISTRIBUTE",
+                  "DELETE_HALLUCINATION",
+                  "TIMING_ONLY",
+                  "REVIEW_ONLY"
+                ]
+              },
+              "currentText": { "type": "string" },
+              "proposedText": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "proposedCues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "minLength": 1 },
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 },
+                    "text": { "type": "string", "minLength": 1 }
+                  },
+                  "required": ["id", "start", "end", "text"],
+                  "additionalProperties": false
+                }
+              },
+              "selectedCandidateId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "alternativeCandidateIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "blockers": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "automaticMutationEligible": { "type": "boolean" },
+              "requiresHumanReview": { "type": "boolean" },
+              "decisionReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "decisionId",
+              "targetCueIds",
+              "action",
+              "currentText",
+              "proposedText",
+              "proposedCues",
+              "selectedCandidateId",
+              "alternativeCandidateIds",
+              "evidenceIds",
+              "blockers",
+              "automaticMutationEligible",
+              "requiresHumanReview",
+              "decisionReasons"
+            ],
+            "additionalProperties": false
+          },
+          "candidateSuggestions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "targetCueIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "candidateText": { "type": "string", "minLength": 1 },
+                "candidateInterval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "localInterval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "associationType": {
+                  "type": "string",
+                  "enum": [
+                    "EXACT_TARGET",
+                    "PROBABLE_TARGET",
+                    "BROAD_WINDOW_ASSOCIATION",
+                    "AMBIGUOUS_ASSOCIATION",
+                    "UNASSOCIATED"
+                  ]
+                },
+                "associationScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "associationMargin": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "sourceRequestIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "sourceProfileIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "independentSupportCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "coverageMetrics": {
+                  "type": "object",
+                  "properties": {
+                    "existingCuePreservationRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "candidateCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "contentOmissionRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "contentAdditionRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "neighborCueIntrusionRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "localSpeechCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "coverageMethod": {
+                      "type": "string",
+                      "const": "heuristic"
+                    },
+                    "semanticSimilarity": { "type": "null" }
+                  },
+                  "required": [
+                    "existingCuePreservationRatio",
+                    "candidateCoverageRatio",
+                    "contentOmissionRatio",
+                    "contentAdditionRatio",
+                    "neighborCueIntrusionRatio",
+                    "localSpeechCoverageRatio",
+                    "coverageMethod",
+                    "semanticSimilarity"
+                  ],
+                  "additionalProperties": false
+                },
+                "directAcousticSupport": { "type": "boolean" },
+                "partialFragment": { "type": "boolean" },
+                "timingResolved": { "type": "boolean" },
+                "languageIntegrityPassed": { "type": "boolean" },
+                "hallucinationQaPassed": { "type": "boolean" },
+                "repetitionQaPassed": { "type": "boolean" },
+                "presentationQaPassed": { "type": "boolean" },
+                "requestedAction": {
+                  "type": "string",
+                  "enum": [
+                    "KEEP",
+                    "REPLACE",
+                    "EXPAND",
+                    "SPLIT",
+                    "MERGE",
+                    "REDISTRIBUTE",
+                    "DELETE_HALLUCINATION",
+                    "TIMING_ONLY",
+                    "REVIEW_ONLY"
+                  ]
+                },
+                "automaticMutationEligible": { "type": "boolean" },
+                "requiresHumanReview": { "type": "boolean" },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "candidateId",
+                "targetCueIds",
+                "candidateText",
+                "candidateInterval",
+                "localInterval",
+                "associationType",
+                "associationScore",
+                "associationMargin",
+                "sourceEvidenceIds",
+                "sourceRequestIds",
+                "sourceProfileIds",
+                "independentSupportCount",
+                "coverageMetrics",
+                "directAcousticSupport",
+                "partialFragment",
+                "timingResolved",
+                "languageIntegrityPassed",
+                "hallucinationQaPassed",
+                "repetitionQaPassed",
+                "presentationQaPassed",
+                "requestedAction",
+                "automaticMutationEligible",
+                "requiresHumanReview",
+                "blockers"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "findingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "allowedHumanActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "KEEP",
+                "ACCEPT_SUGGESTION",
+                "EDIT_TEXT",
+                "REJECT_SUGGESTION",
+                "SPLIT_CUE",
+                "MERGE_CUES",
+                "EDIT_TIMING",
+                "DELETE_CUE",
+                "MARK_UNRESOLVED"
+              ]
+            }
+          },
+          "audioClipPath": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioError": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "requiresHumanReview": { "type": "boolean" }
+        },
+        "required": [
+          "reviewId",
+          "targetCueIds",
+          "interval",
+          "currentText",
+          "currentStart",
+          "currentEnd",
+          "currentStyle",
+          "currentSpeaker",
+          "previousCue",
+          "nextCue",
+          "machineDecision",
+          "candidateSuggestions",
+          "findingIds",
+          "blockers",
+          "allowedHumanActions",
+          "audioClipPath",
+          "audioError",
+          "requiresHumanReview"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mandatoryItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioClipCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioFailureCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "itemCount",
+        "mandatoryItemCount",
+        "audioClipCount",
+        "audioFailureCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "packageType",
+    "reviewVersion",
+    "generatedAt",
+    "sourceFingerprint",
+    "baseSubtitlePackagePath",
+    "baseSubtitlePackageHash",
+    "baseCueHash",
+    "inputEvidenceHash",
+    "items",
+    "summary"
+  ],
+  "additionalProperties": false
+}

@@ -22,6 +22,40 @@ node .agents/skills/multilingual-video-subtitler/scripts/run.mjs \
 5. Report `needsConfirmation` media identity fields and ambiguous stream candidates. Never guess among multiple plausible tracks.
 6. Preserve successful earlier files when a later step fails. Use the manifest to continue from the failed stage.
 
+## Finalize safely before delivery or burn-in
+
+The default `--finalization review-fallback` mode treats the existing subtitle files as a machine draft. It first aggregates every candidate for a cue, records exactly one deterministic `CueDecision`, applies only evidence-backed safe mutations, and runs final integrity, serialization round-trip, and SRT/VTT/ASS semantic-parity gates. Do not deliver or burn the machine draft merely because an ASS file exists.
+
+Use the wrapper for an existing task:
+
+```bash
+node .agents/skills/multilingual-video-subtitler/scripts/run.mjs finalize \
+  --task "/path/to/task-output" \
+  --finalization auto
+```
+
+Use `review-fallback` to create a local review package only when the automatic gate fails. Use `human` or the explicit review command for strict proofreading or Gold Set work:
+
+```bash
+node .agents/skills/multilingual-video-subtitler/scripts/run.mjs review \
+  --task "/path/to/task-output"
+```
+
+Automatic text mutation requires `EXACT_TARGET` or `PROBABLE_TARGET`, a local interval with direct acoustic support, conservative score and margin, at least two independent requests, full text coverage, no neighbor-cue intrusion, and passing language, hallucination, repetition, presentation, and final-integrity checks. `BROAD_WINDOW_ASSOCIATION`, `AMBIGUOUS_ASSOCIATION`, `UNASSOCIATED`, missing local timing, partial fragments, strict-substring replacements, unresolved timing, and insufficient independent support are always suggestion-only. Preserve them in the review package; never write them into visible cue text automatically.
+
+When all blocking counts are zero, write `subtitle-<stem>.final.srt`, `.final.vtt`, `.final.ass`, `subtitle-package.final.json`, and `subtitle-finalization-report.json`. The final package remains the strict Skill 2 v1 package and uses `primarySubtitle.validationStatus: validated`; automatic/human/mixed state stays in the sidecar. When any blocker remains, write `.best-effort.*` and `subtitle-package.needs-review.json`, never a validated final name.
+
+Review output is fully local: `subtitle-review-package.json`, `review/index.html`, relative `audio/review/*.wav` clips, and a browser-downloaded `human-review-resolutions.json`. Apply or preflight it with:
+
+```bash
+npm run subtitle-finalize -- \
+  --task "/path/to/task-output" \
+  --resolutions "/path/to/human-review-resolutions.json" \
+  --dry-run
+```
+
+Remove `--dry-run` only after the stale review version, evidence hash, base package hash, base cue hash, source fingerprint, cue IDs, candidate IDs, and action conflicts validate. Successful human changes create deterministic final cues and `correction-feedback.json`; feedback is scoped to that source fingerprint and must never trigger cross-video or global text replacement.
+
 ## Apply the source priority
 
 Use evidence in this order:
@@ -31,7 +65,7 @@ Use evidence in this order:
 3. When a provider credential is absent, try its permitted public-page fallback without bypassing login, CAPTCHA, robots directives, or access controls.
 4. Keep translated subtitles as references only.
 5. Transcribe the selected audio track locally when no integrity-valid original-language subtitle is obtained.
-6. Burn only a validated, non-reference subtitle when the user explicitly requests it.
+6. Burn only a validated embedded/online subtitle or an auto-, human-, or mixed-validated final when the user explicitly requests it. Never burn machine-draft, best-effort, needs-review, rejected, stale-review, or failed-integrity output.
 
 Never reconstruct Japanese, Chinese, or English original dialogue by translating a reference subtitle backward.
 

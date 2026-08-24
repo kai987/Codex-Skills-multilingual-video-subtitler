@@ -10,6 +10,7 @@ export * from "./candidate-atomization.js";
 export * from "./integrity.js";
 export * from "./intra-cue-repetition.js";
 export * from "./final-subtitle-repair.js";
+export * from "./finalization.js";
 export * from "./hypothesis-resolution.js";
 export * from "./japanese-normalization.js";
 export * from "./local.js";

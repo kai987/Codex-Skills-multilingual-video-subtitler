@@ -29,7 +29,7 @@ export async function burnSubtitleIntoVideo(input: {
   logger: Logger;
   ffmpegPath: string;
   overwrite: boolean;
-  manifest: ProcessingManifest;
+  manifest?: Pick<ProcessingManifest, "operations">;
 }): Promise<string> {
   const resolvedMedia = path.resolve(input.mediaPath);
   const videoDirectory = path.join(input.outputDirectory, "video");
@@ -90,7 +90,7 @@ export async function burnSubtitleIntoVideo(input: {
       "copy",
       temporaryPath,
     ]);
-    input.manifest.operations.push({
+    input.manifest?.operations.push({
       executable: input.ffmpegPath,
       purpose: "burn subtitles into new video artifact",
       exitCode: result.exitCode,

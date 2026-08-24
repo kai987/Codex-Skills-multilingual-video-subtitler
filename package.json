@@ -35,6 +35,8 @@
     "rebuild:final-subtitle-integrity": "tsx scripts/rebuild-final-subtitle-integrity.ts",
     "parity:asr-segmentation": "tsx scripts/asr-segmentation-parity.ts",
     "subtitle": "tsx apps/cli/src/index.ts subtitle",
+    "subtitle-finalize": "tsx apps/cli/src/index.ts subtitle-finalize",
+    "subtitle-review": "tsx apps/cli/src/index.ts subtitle-review",
     "grammar-report": "tsx apps/cli/src/index.ts grammar-report",
     "build-learning-site": "tsx apps/cli/src/index.ts build-learning-site",
     "pipeline": "tsx apps/cli/src/index.ts pipeline"

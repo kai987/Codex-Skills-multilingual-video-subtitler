@@ -2377,7 +2377,11 @@ export async function runVideoSubtitler(
           },
         );
       }
-      if (primarySubtitle?.validationStatus === "needs-review") {
+      if (
+        primarySubtitle !== null &&
+        primarySubtitle !== undefined &&
+        primarySubtitle.validationStatus !== "validated"
+      ) {
         throw new AppError(
           "Subtitle burn-in requires a validated subtitle; the selected subtitle needs review.",
           {

@@ -64,6 +64,10 @@ import {
   portableAsrCacheEntryV2Schema,
   coverageRecoveryPlanArtifactSchema,
   coverageRecoveryResultsArtifactSchema,
+  correctionFeedbackSchema,
+  humanReviewResolutionsSchema,
+  subtitleFinalizationReportSchema,
+  subtitleReviewPackageSchema,
   whisperExecutionMetricsSchema,
   whisperBenchmarkSchema,
 } from "@mvl/shared";
@@ -80,6 +84,26 @@ const schemas = [
     fileName: "subtitle-package.schema.json",
     id: "https://schemas.local/multilingual-video-learning/subtitle-package.schema.json",
     schema: subtitlePackageSchema,
+  },
+  {
+    fileName: "subtitle-finalization-report.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-finalization-report.schema.json",
+    schema: subtitleFinalizationReportSchema,
+  },
+  {
+    fileName: "subtitle-review-package.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-review-package.schema.json",
+    schema: subtitleReviewPackageSchema,
+  },
+  {
+    fileName: "human-review-resolutions.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/human-review-resolutions.schema.json",
+    schema: humanReviewResolutionsSchema,
+  },
+  {
+    fileName: "correction-feedback.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/correction-feedback.schema.json",
+    schema: correctionFeedbackSchema,
   },
   {
     fileName: "grammar-report.schema.json",

@@ -26,6 +26,9 @@ import {
   type SubtitlePackage,
 } from "@mvl/shared";
 import {
+  burnValidatedFinalSubtitle,
+  finalizeSubtitleTask,
+  prepareSubtitleReview,
   runVideoSubtitler,
   type VideoSubtitlerOptions,
 } from "@mvl/video-subtitler";
@@ -160,6 +163,24 @@ interface SubtitleCliOptions extends GlobalOptions {
   minimumSpeechRatio: number;
   vadNoVadBoundaryDiffSeconds: number;
   subtitleTailPaddingSeconds: number;
+  finalization: "auto" | "review-fallback" | "human";
+  prepareReview?: boolean;
+}
+
+interface FinalizeCliOptions extends GlobalOptions {
+  task: string;
+  finalization: "auto" | "review-fallback" | "human";
+  resolutions?: string;
+  sourceVideo?: string;
+  prepareReview?: boolean;
+  reviewAudio: boolean;
+  dryRun?: boolean;
+}
+
+interface ReviewCliOptions extends GlobalOptions {
+  task: string;
+  sourceVideo?: string;
+  reviewAudio: boolean;
 }
 
 interface GrammarCliOptions extends GlobalOptions {
@@ -801,6 +822,18 @@ program
     "--font-directory <paths...>",
     "additional font directories for burn-in",
   )
+  .addOption(
+    new Option(
+      "--finalization <mode>",
+      "safe finalization mode after the machine draft",
+    )
+      .choices(["auto", "review-fallback", "human"])
+      .default("review-fallback"),
+  )
+  .option(
+    "--prepare-review",
+    "prepare a local review package even when auto-finalization passes",
+  )
   .option(
     "--overwrite",
     "overwrite files only inside the selected task output directory",
@@ -869,7 +902,7 @@ program
       generateSrt: options.srt,
       generateVtt: options.vtt,
       generateAss: options.ass,
-      burnSubtitles: options.burn ?? false,
+      burnSubtitles: false,
       overwrite: options.overwrite ?? false,
       dryRun: options.dryRun ?? false,
       transportNormalization: options.transportNormalization,
@@ -1000,14 +1033,43 @@ program
             ),
           }),
     };
+    const runner = new NodeProcessRunner();
     const result = await runVideoSubtitler(runOptions, {
-      runner: new NodeProcessRunner(),
+      runner,
       logger,
       subtitleSearchAdapters: configuredSubtitleSources(
         options.subtitleSource,
         options.webSubtitleFallback,
       ),
     });
+    let finalization =
+      result.dryRun || result.outputDirectory === null
+        ? null
+        : await finalizeSubtitleTask({
+            taskDirectory: result.outputDirectory,
+            mode: options.finalization,
+            sourceVideoPath: options.input,
+            prepareReview: options.prepareReview ?? false,
+            runner,
+            logger,
+          });
+    if (
+      options.burn === true &&
+      finalization !== null &&
+      result.outputDirectory !== null
+    ) {
+      finalization = await burnValidatedFinalSubtitle({
+        result: finalization,
+        mediaPath: options.input,
+        outputDirectory: result.outputDirectory,
+        runner,
+        logger,
+        overwrite: options.overwrite ?? false,
+        ...(options.fontDirectory === undefined
+          ? {}
+          : { fontDirectories: options.fontDirectory }),
+      });
+    }
     console.log(
       JSON.stringify(
         {
@@ -1026,6 +1088,107 @@ program
           needsHumanReview:
             result.transcriptionQuality?.needsHumanReviewIntervals ?? [],
           plannedActions: result.plannedActions,
+          finalization:
+            finalization === null
+              ? null
+              : {
+                  ...finalization.report.metrics,
+                  finalizationMethod: finalization.report.finalizationMethod,
+                  finalStatus: finalization.report.status,
+                  outputPaths: finalization.report.outputPaths,
+                },
+        },
+        null,
+        2,
+      ),
+    );
+  });
+
+program
+  .command("subtitle-finalize")
+  .description("Safely finalize an existing machine subtitle task")
+  .requiredOption("--task <directory>", "task or exact subtitle directory")
+  .addOption(
+    new Option("--finalization <mode>", "finalization mode")
+      .choices(["auto", "review-fallback", "human"])
+      .default("auto"),
+  )
+  .option("--resolutions <path>", "human-review-resolutions.json")
+  .option(
+    "--source-video <path>",
+    "explicit source video for fingerprint/audio",
+  )
+  .option("--prepare-review", "always prepare the local review package")
+  .option("--no-review-audio", "skip review audio extraction")
+  .option("--dry-run", "validate and compute without writing outputs")
+  .action(async (options: FinalizeCliOptions, command: Command) => {
+    const globals = command.optsWithGlobals<GlobalOptions>();
+    const logger = new ConsoleLogger(
+      globals.jsonLogs ?? false,
+      globals.debug === true ? "debug" : "info",
+    );
+    const result = await finalizeSubtitleTask({
+      taskDirectory: options.task,
+      mode: options.finalization,
+      ...(options.resolutions === undefined
+        ? {}
+        : { resolutionsPath: options.resolutions }),
+      ...(options.sourceVideo === undefined
+        ? {}
+        : { sourceVideoPath: options.sourceVideo }),
+      prepareReview: options.prepareReview ?? false,
+      generateReviewAudio: options.reviewAudio,
+      dryRun: options.dryRun ?? false,
+      runner: new NodeProcessRunner(),
+      logger,
+    });
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          dryRun: result.dryRun,
+          ...result.report.metrics,
+          finalizationMethod: result.report.finalizationMethod,
+          finalStatus: result.report.status,
+          outputPaths: result.report.outputPaths,
+        },
+        null,
+        2,
+      ),
+    );
+  });
+
+program
+  .command("subtitle-review")
+  .description("Prepare an offline static review package for a subtitle task")
+  .requiredOption("--task <directory>", "task or exact subtitle directory")
+  .option(
+    "--source-video <path>",
+    "explicit source video for fingerprint/audio",
+  )
+  .option("--no-review-audio", "skip review audio extraction")
+  .action(async (options: ReviewCliOptions, command: Command) => {
+    const globals = command.optsWithGlobals<GlobalOptions>();
+    const logger = new ConsoleLogger(
+      globals.jsonLogs ?? false,
+      globals.debug === true ? "debug" : "info",
+    );
+    const result = await prepareSubtitleReview({
+      taskDirectory: options.task,
+      ...(options.sourceVideo === undefined
+        ? {}
+        : { sourceVideoPath: options.sourceVideo }),
+      generateReviewAudio: options.reviewAudio,
+      runner: new NodeProcessRunner(),
+      logger,
+    });
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          ...result.report.metrics,
+          finalStatus: result.report.status,
+          outputPaths: result.report.outputPaths,
         },
         null,
         2,

@@ -1,4 +1,6 @@
 export * from "./embedded.js";
+export * from "./finalization.js";
+export * from "./finalization-support.js";
 export * from "./burn.js";
 export * from "./adaptive.js";
 export * from "./online.js";
@@ -6,6 +8,7 @@ export * from "./output-paths.js";
 export * from "./package.js";
 export * from "./probe.js";
 export * from "./reference-workflow.js";
+export * from "./review.js";
 export * from "./transport.js";
 export * from "./types.js";
 export * from "./workflow.js";
