@@ -8,6 +8,7 @@ import {
   InputError,
   atomicWriteJson,
   c517ForcedAlignmentReplaySummarySchema,
+  mfaSampleProbeSchema,
   subtitleCanonicalAlignmentInputSchema,
   subtitleCanonicalForcedAlignmentSchema,
   subtitleReviewPackageSchema,
@@ -38,10 +39,15 @@ const { values } = parseArgs({
     "mfa-dictionary-model": { type: "string" },
     "mfa-g2p-model": { type: "string" },
     "mfa-temporary-directory": { type: "string" },
+    "sudachi-runtime-manifest": { type: "string" },
+    "sudachi-python-executable": { type: "string" },
+    "sudachi-requirements": { type: "string" },
     "forced-alignment-narrow-context": { type: "string", default: "0.50" },
     "forced-alignment-expanded-context": { type: "string", default: "1.00" },
     "max-forced-alignment-attempts": { type: "string", default: "32" },
     "forced-alignment-concurrency": { type: "string", default: "1" },
+    "target-component": { type: "string", multiple: true },
+    "write-sample-probe": { type: "string" },
     "forced-alignment-cache-dir": { type: "string" },
     "forced-alignment-cache-import": { type: "string", multiple: true },
     "forced-alignment-cache-mode": { type: "string" },
@@ -60,6 +66,10 @@ const { values } = parseArgs({
     "emit-shareable-artifacts": { type: "boolean", default: false },
     "shareable-output": { type: "string" },
     "stock-patched-ab": { type: "string" },
+    "mfa-sample-probe": { type: "string" },
+    "runtime-preparation-summary": { type: "string" },
+    "fresh-cache-observe-validation": { type: "string" },
+    offline: { type: "boolean", default: false },
   },
   strict: true,
 });
@@ -70,7 +80,7 @@ if (
   values["source-video"] === undefined
 ) {
   throw new InputError(
-    "Usage: npm run replay:c5-17-forced-alignment -- --task <C5.16.1 task> --human-reviewed-subtitle <reviewed.ass> --source-video <video> [MFA runtime/model options]",
+    "Usage: npm run replay:c5-17-1-forced-alignment -- --task <C5.16.1 task> --human-reviewed-subtitle <reviewed.ass> --source-video <video> --mfa-runtime-manifest <manifest> --sudachi-runtime-manifest <manifest> [runtime/model options]",
   );
 }
 
@@ -125,9 +135,9 @@ async function collisionSafeTarget(sourceTask: string): Promise<string> {
   const preferredName = /c5-16-1[^/]*/u.test(sourceName)
     ? sourceName.replace(
         /c5-16-1[^/]*/u,
-        "c5-17-canonical-transcript-forced-alignment-20260826",
+        "c5-17-1-mfa-runtime-alignment-semantics-fresh-20260826",
       )
-    : `${sourceName}-c5-17-canonical-transcript-forced-alignment`;
+    : `${sourceName}-c5-17-1-mfa-runtime-alignment-semantics`;
   const parent = path.dirname(sourceTask);
   for (let suffix = 0; suffix < 1_000; suffix += 1) {
     const target = path.join(
@@ -139,7 +149,7 @@ async function collisionSafeTarget(sourceTask: string): Promise<string> {
     if (!(await exists(target))) return target;
   }
   throw new InputError(
-    "Unable to allocate a collision-safe C5.17 output path.",
+    "Unable to allocate a collision-safe C5.17.1 output path.",
   );
 }
 
@@ -273,6 +283,27 @@ const mfaPythonExecutable =
           process.platform === "win32" ? "python.exe" : "python",
         )
     : path.resolve(values["mfa-python-executable"]);
+const sudachiRuntimeManifest =
+  values["sudachi-runtime-manifest"] === undefined
+    ? undefined
+    : path.resolve(values["sudachi-runtime-manifest"]);
+const inferredSudachiPythonExecutable =
+  sudachiRuntimeManifest === undefined
+    ? undefined
+    : path.join(
+        path.dirname(sudachiRuntimeManifest),
+        "venv",
+        "bin",
+        process.platform === "win32" ? "python.exe" : "python",
+      );
+const sudachiPythonExecutable =
+  values["sudachi-python-executable"] === undefined
+    ? inferredSudachiPythonExecutable
+    : path.resolve(values["sudachi-python-executable"]);
+const sudachiRequirements =
+  values["sudachi-requirements"] === undefined
+    ? undefined
+    : path.resolve(values["sudachi-requirements"]);
 if (
   backend !== "evidence-dp" &&
   [
@@ -282,10 +313,12 @@ if (
     values["mfa-acoustic-model"],
     values["mfa-dictionary-model"],
     values["mfa-g2p-model"],
+    sudachiRuntimeManifest,
+    sudachiPythonExecutable,
   ].some((value) => value === undefined)
 ) {
   throw new InputError(
-    "MFA/hybrid replay requires executable, Python, runtime manifest, acoustic model, dictionary, and verified G2P model.",
+    "MFA/hybrid C5.17.1 replay requires MFA executable/Python/runtime/models and an independent Sudachi runtime manifest/Python.",
   );
 }
 
@@ -322,6 +355,9 @@ const result = await finalizeSubtitleTask({
     maximumTotalAlignmentAttempts,
     concurrency,
   },
+  ...(values["target-component"] === undefined
+    ? {}
+    : { forcedAlignmentTargetComponentIds: values["target-component"] }),
   ...(mfaExecutable === undefined ? {} : { mfaExecutable }),
   ...(mfaPythonExecutable === undefined ? {} : { mfaPythonExecutable }),
   ...(mfaRuntimeManifest === undefined
@@ -341,6 +377,13 @@ const result = await finalizeSubtitleTask({
     : {
         mfaTemporaryDirectory: path.resolve(values["mfa-temporary-directory"]),
       }),
+  ...(sudachiRuntimeManifest === undefined
+    ? {}
+    : { sudachiRuntimeManifestPath: sudachiRuntimeManifest }),
+  ...(sudachiPythonExecutable === undefined ? {} : { sudachiPythonExecutable }),
+  ...(sudachiRequirements === undefined
+    ? {}
+    : { sudachiRequirementsPath: sudachiRequirements }),
   sudachiHelperPath: path.resolve(values["sudachi-helper"]),
   mfaParserHelperPath: path.resolve(values["mfa-parser-helper"]),
   ...(values["forced-alignment-cache-dir"] === undefined
@@ -364,7 +407,7 @@ if (
   result.outputPaths.canonicalForcedAlignment === null ||
   result.outputPaths.forcedAlignmentCacheManifest === null
 ) {
-  throw new InputError("C5.17 finalization did not emit required sidecars.");
+  throw new InputError("C5.17.1 finalization did not emit required sidecars.");
 }
 const canonicalInput = subtitleCanonicalAlignmentInputSchema.parse(
   JSON.parse(
@@ -389,12 +432,12 @@ const afterHuman = await fingerprint(humanReviewedSubtitle);
 const sourceReadOnly = readOnlyFingerprint(beforeVideo, afterVideo);
 const humanSubtitleReadOnly = readOnlyFingerprint(beforeHuman, afterHuman);
 if (!sourceReadOnly.verified || !humanSubtitleReadOnly.verified) {
-  throw new InputError("A read-only C5.17 input changed during replay.");
+  throw new InputError("A read-only C5.17.1 input changed during replay.");
 }
 const summary = c517ForcedAlignmentReplaySummarySchema.parse({
   schemaVersion: "1.0.0",
   artifactType: "c5-17-forced-alignment-replay-summary",
-  replayVersion: "C5.17",
+  replayVersion: "C5.17.1",
   generatedAt: new Date().toISOString(),
   runKind,
   inputTaskName: path.basename(sourceTask),
@@ -413,6 +456,7 @@ const summary = c517ForcedAlignmentReplaySummarySchema.parse({
     canonicalForcedAlignmentEvidenceForHash(alignment),
   ),
   componentDecisionHash: forcedAlignmentSha256(alignment.components),
+  mutationHash: forcedAlignmentSha256(alignment.mutations),
   outputCueHash: result.report.outputCueHash,
   sourceSha256Before: beforeVideo.sha256,
   sourceSha256After: afterVideo.sha256,
@@ -448,11 +492,62 @@ const summaryPath = path.join(
 );
 await atomicWriteJson(summaryPath, summary, { overwrite: false });
 
+let sampleProbePath: string | null = null;
+if (values["write-sample-probe"] !== undefined) {
+  const sampleAttempt = alignment.attempts.find(
+    (attempt) => attempt.alignmentSucceeded && !attempt.cacheHit,
+  );
+  if (sampleAttempt === undefined) {
+    throw new InputError(
+      "C5.17.1 sample probe requested, but no successful non-cache MFA attempt was produced.",
+    );
+  }
+  const interval = (
+    value: { start: number; end: number } | null | undefined,
+  ) =>
+    value === null || value === undefined
+      ? null
+      : { start: value.start, end: value.end };
+  const probe = mfaSampleProbeSchema.parse({
+    schemaVersion: "1.0.0",
+    artifactType: "mfa-sample-probe",
+    probeVersion: "C5.17.1",
+    generatedAt: new Date().toISOString(),
+    componentId: sampleAttempt.componentId,
+    cueId: sampleAttempt.cueId,
+    runtimeIdentityHash: sampleAttempt.runtimeIdentityHash,
+    acousticModelIdentityHash: sampleAttempt.acousticModelHash,
+    dictionaryModelIdentityHash: sampleAttempt.dictionaryModelHash,
+    g2pModelIdentityHash: sampleAttempt.g2pModelHash,
+    command: sampleAttempt.commandMode,
+    g2pCommand: "g2p",
+    outputFormat: sampleAttempt.outputFormat,
+    wordTierObserved: sampleAttempt.wordAlignments.length > 0,
+    phoneTierObserved: sampleAttempt.phoneAlignments.length > 0,
+    fileInterval: interval(sampleAttempt.fileInterval),
+    lexicalUtteranceInterval: interval(sampleAttempt.lexicalUtteranceInterval),
+    phoneUtteranceInterval: interval(sampleAttempt.phoneUtteranceInterval),
+    selectedUtteranceInterval: interval(
+      sampleAttempt.selectedUtteranceInterval,
+    ),
+    selectedBoundarySource: sampleAttempt.selectedBoundarySource ?? "none",
+    wordCount: sampleAttempt.wordAlignments.length,
+    phoneCount: sampleAttempt.phoneAlignments.length,
+    oovCount: sampleAttempt.oovCount,
+    timeUnit: "seconds",
+    parserVersion: sampleAttempt.parserVersion,
+    alignmentSucceeded: sampleAttempt.alignmentSucceeded,
+    failure: sampleAttempt.failure,
+  });
+  sampleProbePath = path.resolve(values["write-sample-probe"]);
+  await atomicWriteJson(sampleProbePath, probe, { overwrite: false });
+}
+
 let shareableDirectory: string | null = null;
 if (values["emit-shareable-artifacts"]) {
   if (result.outputPaths.forcedAlignmentRuntimeCapability === null) {
     throw new InputError(
-      "C5.17 shareable generation requires a verified MFA runtime capability artifact.",
+      "C5.17.1 shareable generation requires a verified MFA runtime capability artifact.",
     );
   }
   const stockPatchedRuntimeAbPath = path.resolve(
@@ -485,6 +580,12 @@ if (values["emit-shareable-artifacts"]) {
   ).filter(
     (value): value is { role: string; filePath: string } => value !== null,
   );
+  const requestedSampleProbePath = values["mfa-sample-probe"];
+  const resolvedSampleProbePath =
+    sampleProbePath ??
+    (requestedSampleProbePath === undefined
+      ? null
+      : path.resolve(requestedSampleProbePath));
   const generated = await generateC5161ShareableArtifacts({
     taskRoot: outputTask,
     subtitleDirectory: result.subtitleDirectory,
@@ -513,6 +614,33 @@ if (values["emit-shareable-artifacts"]) {
       canonicalInputPath: result.outputPaths.canonicalAlignmentInput,
       forcedAlignmentPath: result.outputPaths.canonicalForcedAlignment,
       replaySummaryPath: summaryPath,
+      ...(result.outputPaths.canonicalPronunciation === null
+        ? {}
+        : { pronunciationPath: result.outputPaths.canonicalPronunciation }),
+      ...(result.outputPaths.sudachiRuntimeCapability === null
+        ? {}
+        : {
+            sudachiRuntimeCapabilityPath:
+              result.outputPaths.sudachiRuntimeCapability,
+          }),
+      cacheManifestPath: result.outputPaths.forcedAlignmentCacheManifest,
+      ...(resolvedSampleProbePath === null
+        ? {}
+        : { sampleProbePath: resolvedSampleProbePath }),
+      ...(values["runtime-preparation-summary"] === undefined
+        ? {}
+        : {
+            runtimePreparationSummaryPath: path.resolve(
+              values["runtime-preparation-summary"],
+            ),
+          }),
+      ...(values["fresh-cache-observe-validation"] === undefined
+        ? {}
+        : {
+            freshCacheObserveValidationPath: path.resolve(
+              values["fresh-cache-observe-validation"],
+            ),
+          }),
     },
   });
   shareableDirectory = generated.outputDirectory;
@@ -525,6 +653,7 @@ process.stdout.write(
       outputTask,
       subtitleDirectory: result.subtitleDirectory,
       summaryPath,
+      sampleProbePath,
       shareableDirectory,
       summary,
     },

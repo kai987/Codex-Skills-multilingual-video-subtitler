@@ -35,10 +35,10 @@ import {
 } from "./presentation-resolution.js";
 
 export const FORCED_ALIGNMENT_OUTPUT_PARSER_VERSION =
-  "c5-17-mfa-json-or-praatio-long-textgrid-v1";
-export const ANTI_FORCE_POLICY_VERSION = "c5-17-anti-forcing-v1";
+  "c5-17-1-praatio-lexical-utterance-boundary-v1";
+export const ANTI_FORCE_POLICY_VERSION = "c5-17-1-anti-forcing-v1";
 export const JOINT_ASSIGNMENT_POLICY_VERSION =
-  "c5-17-component-joint-assignment-v1";
+  "c5-17-1-actionable-component-joint-assignment-v1";
 
 export const DEFAULT_FORCED_ALIGNMENT_CONFIGURATION = {
   mode: "enforce",
@@ -51,6 +51,9 @@ export const DEFAULT_FORCED_ALIGNMENT_CONFIGURATION = {
   minimumWordCoverageRatio: 0.82,
   minimumReadingCoverageRatio: 0.82,
   minimumPhoneCoverageRatio: 0.72,
+  minimumCanonicalUnitCoverageRatio: 0.82,
+  minimumPronunciationUnitCoverageRatio: 0.82,
+  minimumExpectedPhoneCoverageRatio: 0.72,
   maximumWindowBoundaryDifferenceSeconds: 0.2,
   maximumTimingAdjustmentSeconds: 0.5,
   minimumPostRepairCueDurationSeconds: 0.4,
@@ -60,6 +63,11 @@ export const DEFAULT_FORCED_ALIGNMENT_CONFIGURATION = {
   antiForcePolicyVersion: ANTI_FORCE_POLICY_VERSION,
   jointAssignmentPolicyVersion: JOINT_ASSIGNMENT_POLICY_VERSION,
   outputParserVersion: FORCED_ALIGNMENT_OUTPUT_PARSER_VERSION,
+  textGridLexicalBoundaryPolicyVersion: "c5.17.1-lexical-utterance-boundary-v1",
+  wordUnitMappingPolicyVersion: "c5.17.1-word-unit-sequence-mapping-v1",
+  pronunciationCoveragePolicyVersion: "c5.17.1-pronunciation-phone-coverage-v1",
+  boundaryAgreementPolicyVersion: "c5.17.1-two-sided-boundary-agreement-v1",
+  g2pPreparationPolicyVersion: "c5.17.1-mfa-g2p-preparation-v1",
   wholeMediaAsrAllowed: false,
   whisperPromptAllowed: false,
 } as const satisfies ForcedAlignmentConfiguration;
@@ -357,6 +365,7 @@ export function buildSubtitleCanonicalAlignmentInput(input: {
     readonly SudachiMorphemeAnalysis[]
   >;
   terminology?: readonly VerifiedTerminologyReading[];
+  alignmentVersion?: "C5.17" | "C5.17.1";
 }): SubtitleCanonicalAlignmentInput {
   const cues = input.components.flatMap((component) =>
     component.cues.map((cue) => {
@@ -374,7 +383,7 @@ export function buildSubtitleCanonicalAlignmentInput(input: {
   return subtitleCanonicalAlignmentInputSchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-canonical-alignment-input",
-    alignmentVersion: "C5.17",
+    alignmentVersion: input.alignmentVersion ?? "C5.17",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     baseCueHash: input.baseCueHash,
     baseTimingHash: input.baseTimingHash,
@@ -675,7 +684,10 @@ function alignmentTierDifference(input: {
 }
 
 export interface WindowStabilityResult {
+  status: "unavailable" | "single-window" | "stable" | "unstable";
   stable: boolean;
+  startBoundaryDifferenceSeconds: number | null;
+  endBoundaryDifferenceSeconds: number | null;
   boundaryDifferenceSeconds: number | null;
   wordBoundaryDifferenceSeconds: number | null;
   phoneBoundaryDifferenceSeconds: number | null;
@@ -692,22 +704,42 @@ export function evaluateForcedAlignmentWindowStability(input: {
   const maximumDifferenceSeconds = input.maximumDifferenceSeconds ?? 0.2;
   const narrowBoundary = attemptBoundary(input.narrow);
   const expandedBoundary = attemptBoundary(input.expanded);
+  const availableCount = [narrowBoundary, expandedBoundary].filter(
+    (value) => value !== null,
+  ).length;
+  if (availableCount < 2) {
+    const status = availableCount === 0 ? "unavailable" : "single-window";
+    return {
+      status,
+      stable: false,
+      startBoundaryDifferenceSeconds: null,
+      endBoundaryDifferenceSeconds: null,
+      boundaryDifferenceSeconds: null,
+      wordBoundaryDifferenceSeconds: null,
+      phoneBoundaryDifferenceSeconds: null,
+      coverageDifference: null,
+      score: 0,
+      blockers: [
+        status === "unavailable"
+          ? "ALIGNMENT_WINDOW_PAIR_UNAVAILABLE"
+          : "ALIGNMENT_SINGLE_WINDOW_ONLY",
+      ],
+    };
+  }
   if (
     input.narrow === null ||
     input.expanded === null ||
     narrowBoundary === null ||
     expandedBoundary === null
   ) {
-    return {
-      stable: false,
-      boundaryDifferenceSeconds: null,
-      wordBoundaryDifferenceSeconds: null,
-      phoneBoundaryDifferenceSeconds: null,
-      coverageDifference: null,
-      score: 0,
-      blockers: ["ALIGNMENT_WINDOW_PAIR_INCOMPLETE"],
-    };
+    throw new Error("Window availability count is inconsistent.");
   }
+  const startBoundaryDifferenceSeconds = Math.abs(
+    narrowBoundary.start - expandedBoundary.start,
+  );
+  const endBoundaryDifferenceSeconds = Math.abs(
+    narrowBoundary.end - expandedBoundary.end,
+  );
   const boundaryDifferenceSeconds = edgeDifference(
     narrowBoundary,
     expandedBoundary,
@@ -741,7 +773,10 @@ export function evaluateForcedAlignmentWindowStability(input: {
     maximumObserved <= maximumDifferenceSeconds + 1e-9 &&
     coverageDifference <= 0.15;
   return {
+    status: stable ? "stable" : "unstable",
     stable,
+    startBoundaryDifferenceSeconds,
+    endBoundaryDifferenceSeconds,
     boundaryDifferenceSeconds,
     wordBoundaryDifferenceSeconds,
     phoneBoundaryDifferenceSeconds,
@@ -777,13 +812,35 @@ function overlapRatio(
   );
 }
 
-function boundaryAgreement(input: {
+export interface BoundaryAgreementResult {
+  startDifferenceSeconds: number | null;
+  endDifferenceSeconds: number | null;
+  fullBoundaryDifferenceSeconds: number | null;
+  startScore: number;
+  endScore: number;
+  fullScore: number;
+  startEvidenceIds: string[];
+  endEvidenceIds: string[];
+}
+
+export function evaluateTwoSidedBoundaryAgreement(input: {
   boundary: { start: number; end: number } | null;
-  intervals: readonly { start: number; end: number }[];
+  intervals: readonly { evidenceId?: string; start: number; end: number }[];
   toleranceSeconds?: number;
-}): number {
+}): BoundaryAgreementResult {
   const boundary = input.boundary;
-  if (boundary === null || input.intervals.length === 0) return 0;
+  if (boundary === null || input.intervals.length === 0) {
+    return {
+      startDifferenceSeconds: null,
+      endDifferenceSeconds: null,
+      fullBoundaryDifferenceSeconds: null,
+      startScore: 0,
+      endScore: 0,
+      fullScore: 0,
+      startEvidenceIds: [],
+      endEvidenceIds: [],
+    };
+  }
   const tolerance = input.toleranceSeconds ?? 0.35;
   const startDifference = Math.min(
     ...input.intervals.flatMap((interval) => [
@@ -797,10 +854,28 @@ function boundaryAgreement(input: {
       Math.abs(boundary.end - interval.end),
     ]),
   );
-  return Math.max(
-    0,
-    1 - Math.min(startDifference, endDifference) / Math.max(0.001, tolerance),
-  );
+  const score = (difference: number) =>
+    Math.max(0, 1 - difference / Math.max(0.001, tolerance));
+  const evidenceIds = (boundaryValue: number) =>
+    input.intervals.flatMap((interval) => {
+      const difference = Math.min(
+        Math.abs(boundaryValue - interval.start),
+        Math.abs(boundaryValue - interval.end),
+      );
+      return difference <= tolerance && interval.evidenceId !== undefined
+        ? [interval.evidenceId]
+        : [];
+    });
+  return {
+    startDifferenceSeconds: startDifference,
+    endDifferenceSeconds: endDifference,
+    fullBoundaryDifferenceSeconds: Math.max(startDifference, endDifference),
+    startScore: score(startDifference),
+    endScore: score(endDifference),
+    fullScore: Math.min(score(startDifference), score(endDifference)),
+    startEvidenceIds: [...new Set(evidenceIds(boundary.start))],
+    endEvidenceIds: [...new Set(evidenceIds(boundary.end))],
+  };
 }
 
 function phonePlausibility(attempt: ForcedAlignmentAttempt | null): number {
@@ -832,6 +907,9 @@ export interface AntiForcingEvaluation {
   selectedBoundary: { start: number; end: number } | null;
   boundarySources: ForcedAlignmentCueDecision["boundarySources"];
   boundaryEvidenceIds: string[];
+  startBoundaryEvidenceIds: string[];
+  endBoundaryEvidenceIds: string[];
+  windowPairStatus: WindowStabilityResult["status"];
 }
 
 export function evaluateAntiForcingGate(input: {
@@ -871,17 +949,30 @@ export function evaluateAntiForcingGate(input: {
       configuration.maximumWindowBoundaryDifferenceSeconds,
   });
   const selectedBoundary = stability.stable ? narrowBoundary : null;
-  const mappedWhisperAgreement = boundaryAgreement({
+  const mappedAgreement = evaluateTwoSidedBoundaryAgreement({
     boundary: selectedBoundary,
     intervals: input.mappedTokenIntervals,
   });
-  const rawVadBoundaryAgreement = boundaryAgreement({
+  const vadAgreement = evaluateTwoSidedBoundaryAgreement({
     boundary: selectedBoundary,
     intervals: input.rawVadIntervals,
   });
-  const decodedSegmentAgreement = boundaryAgreement({
+  const decodedAgreement = evaluateTwoSidedBoundaryAgreement({
     boundary: selectedBoundary,
     intervals: input.decodedSegmentIntervals,
+  });
+  const phoneAgreement = evaluateTwoSidedBoundaryAgreement({
+    boundary: selectedBoundary,
+    intervals: [input.narrow, input.expanded].flatMap((attempt) =>
+      attempt === null
+        ? []
+        : attempt.phoneAlignments.map((phone) => ({
+            evidenceId: phone.alignmentId,
+            start: phone.mappedInterval.start,
+            end: phone.mappedInterval.end,
+          })),
+    ),
+    toleranceSeconds: 0.12,
   });
   const evidenceDpBoundary =
     input.evidenceDp.startBoundary === null ||
@@ -958,23 +1049,71 @@ export function evaluateAntiForcingGate(input: {
       silenceIntrusion(input.narrow, narrowBoundary),
       silenceIntrusion(input.expanded, expandedBoundary),
     ),
-    mappedWhisperAgreement,
-    rawVadBoundaryAgreement,
-    decodedSegmentAgreement,
+    mappedWhisperAgreement: mappedAgreement.fullScore,
+    rawVadBoundaryAgreement: vadAgreement.fullScore,
+    decodedSegmentAgreement: decodedAgreement.fullScore,
     evidenceDpAgreement,
     sourceCuePriorAgreement,
     neighborCueIntrusionRatio,
     duplicateOccurrenceOverlapRatio: input.duplicateOccurrenceOverlapRatio ?? 0,
+    canonicalUnitCoverageRatio: Math.min(
+      input.narrow?.canonicalUnitCoverageRatio ?? 0,
+      input.expanded?.canonicalUnitCoverageRatio ?? 0,
+    ),
+    alignedWordCoverageRatio: Math.min(
+      input.narrow?.alignedWordCoverageRatio ?? 0,
+      input.expanded?.alignedWordCoverageRatio ?? 0,
+    ),
+    pronunciationUnitCoverageRatio: Math.min(
+      input.narrow?.pronunciationUnitCoverageRatio ?? 0,
+      input.expanded?.pronunciationUnitCoverageRatio ?? 0,
+    ),
+    expectedPhoneCoverageRatio: Math.min(
+      input.narrow?.expectedPhoneCoverageRatio ?? 0,
+      input.expanded?.expectedPhoneCoverageRatio ?? 0,
+    ),
+    wordWithAnyPhoneRatio: Math.min(
+      input.narrow?.wordWithAnyPhoneRatio ?? 0,
+      input.expanded?.wordWithAnyPhoneRatio ?? 0,
+    ),
+    alignedPhonePlausibilityRatio: Math.min(
+      input.narrow?.alignedPhonePlausibilityRatio ?? 0,
+      input.expanded?.alignedPhonePlausibilityRatio ?? 0,
+    ),
+    startBoundaryDifferenceSeconds: stability.startBoundaryDifferenceSeconds,
+    endBoundaryDifferenceSeconds: stability.endBoundaryDifferenceSeconds,
+    startBoundaryAgreementScore: Math.min(
+      mappedAgreement.startScore,
+      vadAgreement.startScore,
+    ),
+    endBoundaryAgreementScore: Math.min(
+      mappedAgreement.endScore,
+      vadAgreement.endScore,
+    ),
+    fullBoundaryAgreementScore: Math.min(
+      mappedAgreement.fullScore,
+      vadAgreement.fullScore,
+    ),
   };
+  const startExternallySupported =
+    mappedAgreement.startScore >= 0.35 && vadAgreement.startScore >= 0.35;
+  const endExternallySupported =
+    mappedAgreement.endScore >= 0.35 && vadAgreement.endScore >= 0.35;
   const blockers = [
     ...stability.blockers,
-    ...(metrics.wordCoverageRatio < configuration.minimumWordCoverageRatio
+    ...((metrics.canonicalUnitCoverageRatio ?? 0) <
+    (configuration.minimumCanonicalUnitCoverageRatio ??
+      configuration.minimumWordCoverageRatio)
       ? ["FORCED_ALIGNMENT_WORD_COVERAGE_LOW"]
       : []),
-    ...(metrics.readingCoverageRatio < configuration.minimumReadingCoverageRatio
+    ...((metrics.pronunciationUnitCoverageRatio ?? 0) <
+    (configuration.minimumPronunciationUnitCoverageRatio ??
+      configuration.minimumReadingCoverageRatio)
       ? ["FORCED_ALIGNMENT_READING_COVERAGE_LOW"]
       : []),
-    ...(metrics.phoneCoverageRatio < configuration.minimumPhoneCoverageRatio
+    ...((metrics.expectedPhoneCoverageRatio ?? 0) <
+    (configuration.minimumExpectedPhoneCoverageRatio ??
+      configuration.minimumPhoneCoverageRatio)
       ? ["FORCED_ALIGNMENT_PHONE_COVERAGE_LOW"]
       : []),
     ...(input.cue.unresolvedOov.length > 0
@@ -989,11 +1128,8 @@ export function evaluateAntiForcingGate(input: {
     ...(metrics.silenceIntrusionRatio > 0.35
       ? ["FORCED_ALIGNMENT_SILENCE_INTRUSION"]
       : []),
-    ...(metrics.mappedWhisperAgreement < 0.35
-      ? ["MFA_MAPPED_TOKEN_DISAGREEMENT"]
-      : []),
-    ...(metrics.rawVadBoundaryAgreement < 0.35
-      ? ["MFA_RAW_VAD_DISAGREEMENT"]
+    ...(!startExternallySupported && !endExternallySupported
+      ? ["MFA_SIDE_SPECIFIC_EXTERNAL_BOUNDARY_SUPPORT_MISSING"]
       : []),
     ...(metrics.evidenceDpAgreement < 0.35
       ? ["MFA_EVIDENCE_DP_DISAGREEMENT"]
@@ -1006,14 +1142,29 @@ export function evaluateAntiForcingGate(input: {
       ? ["DUPLICATE_ACOUSTIC_OCCURRENCE_ASSIGNMENT"]
       : []),
   ];
-  const boundaryEvidenceIds = [
+  const mfaEvidenceIds = [
     ...(input.narrow?.attemptId === undefined ? [] : [input.narrow.attemptId]),
     ...(input.expanded?.attemptId === undefined
       ? []
       : [input.expanded.attemptId]),
-    ...input.evidenceDp.boundaryEvidenceIds,
-    ...input.mappedTokenIntervals.map((interval) => interval.evidenceId),
-    ...input.rawVadIntervals.map((interval) => interval.evidenceId),
+  ];
+  const startBoundaryEvidenceIds = [
+    ...mfaEvidenceIds,
+    ...mappedAgreement.startEvidenceIds,
+    ...vadAgreement.startEvidenceIds,
+    ...decodedAgreement.startEvidenceIds,
+    ...phoneAgreement.startEvidenceIds,
+  ];
+  const endBoundaryEvidenceIds = [
+    ...mfaEvidenceIds,
+    ...mappedAgreement.endEvidenceIds,
+    ...vadAgreement.endEvidenceIds,
+    ...decodedAgreement.endEvidenceIds,
+    ...phoneAgreement.endEvidenceIds,
+  ];
+  const boundaryEvidenceIds = [
+    ...startBoundaryEvidenceIds,
+    ...endBoundaryEvidenceIds,
   ];
   return {
     metrics,
@@ -1026,12 +1177,18 @@ export function evaluateAntiForcingGate(input: {
       ...(input.evidenceDp.boundaryEvidenceIds.length === 0
         ? []
         : (["evidence-dp"] as const)),
-      ...(mappedWhisperAgreement < 0.35 ? [] : (["mapped-token"] as const)),
-      ...(rawVadBoundaryAgreement < 0.35 ? [] : (["raw-vad"] as const)),
-      ...(decodedSegmentAgreement < 0.35 ? [] : (["decoded-segment"] as const)),
+      ...(!startExternallySupported && !endExternallySupported
+        ? []
+        : (["mapped-token", "raw-vad"] as const)),
+      ...(decodedAgreement.startScore < 0.35 && decodedAgreement.endScore < 0.35
+        ? []
+        : (["decoded-segment"] as const)),
       "source-cue-prior",
     ],
     boundaryEvidenceIds: [...new Set(boundaryEvidenceIds)],
+    startBoundaryEvidenceIds: [...new Set(startBoundaryEvidenceIds)],
+    endBoundaryEvidenceIds: [...new Set(endBoundaryEvidenceIds)],
+    windowPairStatus: stability.status,
   };
 }
 
@@ -1114,6 +1271,9 @@ export function buildForcedAlignmentCueDecision(input: {
     antiForcingPassed: gate.passed,
     blockers: gate.blockers,
     boundaryEvidenceIds: gate.boundaryEvidenceIds,
+    startBoundaryEvidenceIds: gate.startBoundaryEvidenceIds,
+    endBoundaryEvidenceIds: gate.endBoundaryEvidenceIds,
+    windowPairStatus: gate.windowPairStatus,
     boundarySources: gate.boundarySources,
     textChanged: false,
   };
@@ -1258,44 +1418,75 @@ function proposedMutation(input: {
 }): ForcedAlignmentTimingMutation | null {
   const boundary = input.decision.selectedBoundary;
   if (!input.decision.antiForcingPassed || boundary === null) return null;
-  const startDelta = boundary.start - input.cue.originalInterval.start;
-  const endDelta = boundary.end - input.cue.originalInterval.end;
+  const candidateStartDelta = boundary.start - input.cue.originalInterval.start;
+  const candidateEndDelta = boundary.end - input.cue.originalInterval.end;
+  const supportsSide = (ids: readonly string[]) => {
+    const mapped = ids.filter((id) => /token|mapped/iu.test(id));
+    const acoustic = ids.filter((id) => /vad|pause|mfa-phone/iu.test(id));
+    return {
+      supported: mapped.length > 0 && acoustic.length > 0,
+      mapped,
+      acoustic,
+    };
+  };
+  const startEvidenceIds = input.decision.startBoundaryEvidenceIds ?? [];
+  const endEvidenceIds = input.decision.endBoundaryEvidenceIds ?? [];
+  const startSupport = supportsSide(startEvidenceIds);
+  const endSupport = supportsSide(endEvidenceIds);
+  const startChanges = Math.abs(candidateStartDelta) > 0.001;
+  const endChanges = Math.abs(candidateEndDelta) > 0.001;
+  const afterStart =
+    startChanges && startSupport.supported
+      ? boundary.start
+      : input.cue.originalInterval.start;
+  const afterEnd =
+    endChanges && endSupport.supported
+      ? boundary.end
+      : input.cue.originalInterval.end;
+  const startDelta = afterStart - input.cue.originalInterval.start;
+  const endDelta = afterEnd - input.cue.originalInterval.end;
+  if (Math.abs(startDelta) <= 0.001 && Math.abs(endDelta) <= 0.001) return null;
   if (
     Math.abs(startDelta) >
       input.configuration.maximumTimingAdjustmentSeconds + 1e-9 ||
     Math.abs(endDelta) >
       input.configuration.maximumTimingAdjustmentSeconds + 1e-9 ||
-    boundary.end - boundary.start <
+    afterEnd - afterStart <
       input.configuration.minimumPostRepairCueDurationSeconds
   ) {
     return null;
   }
-  const mappedTokenEvidenceIds = input.decision.boundarySources.includes(
-    "mapped-token",
-  )
-    ? input.decision.boundaryEvidenceIds.filter((id) =>
+  const effectiveStartEvidenceIds =
+    Math.abs(startDelta) <= 0.001 ? [] : startEvidenceIds;
+  const effectiveEndEvidenceIds =
+    Math.abs(endDelta) <= 0.001 ? [] : endEvidenceIds;
+  const mappedTokenEvidenceIds = [
+    ...new Set(
+      [...effectiveStartEvidenceIds, ...effectiveEndEvidenceIds].filter((id) =>
         /token|mapped/iu.test(id),
-      )
-    : [];
-  const rawVadEvidenceIds = input.decision.boundarySources.includes("raw-vad")
-    ? input.decision.boundaryEvidenceIds.filter((id) => /vad/iu.test(id))
-    : [];
-  if (mappedTokenEvidenceIds.length === 0 || rawVadEvidenceIds.length === 0) {
-    return null;
-  }
+      ),
+    ),
+  ];
+  const rawVadEvidenceIds = [
+    ...new Set(
+      [...effectiveStartEvidenceIds, ...effectiveEndEvidenceIds].filter((id) =>
+        /vad/iu.test(id),
+      ),
+    ),
+  ];
   return {
     mutationId: `forced-timing-mutation-${forcedAlignmentSha256({
       componentId: input.componentId,
       cueId: input.cue.cueId,
       before: input.cue.originalInterval,
-      after: boundary,
+      after: { start: afterStart, end: afterEnd },
     }).slice(0, 20)}`,
     componentId: input.componentId,
     cueId: input.cue.cueId,
     beforeStart: input.cue.originalInterval.start,
     beforeEnd: input.cue.originalInterval.end,
-    afterStart: boundary.start,
-    afterEnd: boundary.end,
+    afterStart,
+    afterEnd,
     startDelta,
     endDelta,
     boundarySources: input.decision.boundarySources,
@@ -1309,6 +1500,8 @@ function proposedMutation(input: {
     ],
     mappedTokenEvidenceIds,
     rawVadEvidenceIds,
+    startBoundaryEvidenceIds: effectiveStartEvidenceIds,
+    endBoundaryEvidenceIds: effectiveEndEvidenceIds,
     textChanged: false,
     method: "evidence-backed-forced-alignment-boundaries",
   };
@@ -1464,15 +1657,20 @@ export function jointlyAssignForcedAlignmentComponent(input: {
       right.score - left.score ||
       left.relationship.localeCompare(right.relationship),
   );
+  const actionableHypotheses = counterfactualHypotheses.filter(
+    (item) =>
+      item.relationship !== "unresolved" &&
+      (!item.speakerEvidenceRequired || item.speakerEvidenceAvailable),
+  );
   const bestHypothesis = requiredAt(
-    counterfactualHypotheses,
+    actionableHypotheses,
     0,
-    "best hypothesis",
+    "best actionable hypothesis",
   );
   const runnerUpHypothesis = requiredAt(
-    counterfactualHypotheses,
+    actionableHypotheses,
     1,
-    "runner-up hypothesis",
+    "runner-up actionable hypothesis",
   );
   const decisionMargin = Math.max(
     0,
@@ -1528,6 +1726,7 @@ export function jointlyAssignForcedAlignmentComponent(input: {
     ...(!scoreEligible ? ["JOINT_DECISION_SCORE_OR_MARGIN_LOW"] : []),
     ...(input.mode === "observe" ? ["FORCED_ALIGNMENT_OBSERVE_ONLY"] : []),
   ];
+  const uniqueBlockers = [...new Set(blockers)];
   return forcedAlignmentComponentSchema.parse({
     componentId: input.componentId,
     cueIds: orderedCues.map((cue) => cue.cueId),
@@ -1545,8 +1744,15 @@ export function jointlyAssignForcedAlignmentComponent(input: {
     appliedMutations: resolved ? proposedMutations : [],
     atomicApplicationPassed,
     resolved,
+    resolutionStatus: resolved ? "resolved" : "blocked",
+    bestActionableHypothesis: bestHypothesis,
+    runnerUpActionableHypothesis: runnerUpHypothesis,
+    bestActionableHypothesisScore: bestHypothesis.score,
+    runnerUpActionableHypothesisScore: runnerUpHypothesis.score,
+    actionableDecisionMargin: decisionMargin,
+    unresolvedReasons: resolved ? [] : uniqueBlockers,
     blocking: !resolved,
-    blockers: [...new Set(blockers)],
+    blockers: uniqueBlockers,
     reviewRequired: !resolved,
   });
 }
@@ -1645,7 +1851,9 @@ export function buildSubtitleCanonicalForcedAlignment(input: {
   return subtitleCanonicalForcedAlignmentSchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-canonical-forced-alignment",
-    alignmentVersion: "C5.17",
+    alignmentVersion: configuration.outputParserVersion.includes("c5-17-1")
+      ? "C5.17.1"
+      : "C5.17",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     sourceFingerprint: input.sourceFingerprint,
     baseCueHash: input.baseCueHash,
@@ -1674,10 +1882,10 @@ export function buildSubtitleCanonicalForcedAlignment(input: {
         .length,
       mfaProcessCount: input.mfaProcessCount,
       stableWindowAlignmentCount: input.cueAlignments.filter(
-        (cue) => cue.antiForcingMetrics.windowStabilityScore > 0,
+        (cue) => cue.windowPairStatus === "stable",
       ).length,
       unstableWindowAlignmentCount: input.cueAlignments.filter(
-        (cue) => cue.antiForcingMetrics.windowStabilityScore === 0,
+        (cue) => cue.windowPairStatus === "unstable",
       ).length,
       windowEdgePinnedCount: input.cueAlignments.filter(
         (cue) => cue.antiForcingMetrics.windowBoundaryPinningScore > 0,
@@ -1720,6 +1928,71 @@ export function buildSubtitleCanonicalForcedAlignment(input: {
       characterRatioRepairCount: 0,
       readingRatioRepairCount: 0,
       phoneCountRatioRepairCount: 0,
+      mfaRuntimeVerified: input.attempts.length > 0,
+      mfaModelIdentityVerified: input.attempts.length > 0,
+      mfaFreshExecuted: input.mfaProcessCount > 0,
+      windowPairAvailableCount: input.cueAlignments.filter((cue) =>
+        ["stable", "unstable"].includes(cue.windowPairStatus ?? ""),
+      ).length,
+      windowPairUnavailableCount: input.cueAlignments.filter(
+        (cue) => cue.windowPairStatus === "unavailable",
+      ).length,
+      windowPairStableCount: input.cueAlignments.filter(
+        (cue) => cue.windowPairStatus === "stable",
+      ).length,
+      windowPairUnstableCount: input.cueAlignments.filter(
+        (cue) => cue.windowPairStatus === "unstable",
+      ).length,
+      singleWindowOnlyCount: input.cueAlignments.filter(
+        (cue) => cue.windowPairStatus === "single-window",
+      ).length,
+      uniqueBlockingComponentCount: new Set(
+        input.components
+          .filter((component) => component.blocking)
+          .map((component) => component.componentId),
+      ).size,
+      uniqueBlockingCueCount: new Set(
+        input.components
+          .filter((component) => component.blocking)
+          .flatMap((component) => component.cueIds),
+      ).size,
+      diagnosticBlockingFindingCount: input.components.reduce(
+        (sum, component) => sum + component.blockers.length,
+        0,
+      ),
+      actionableHypothesisAvailableCount: input.components.filter(
+        (component) => component.bestActionableHypothesis !== null,
+      ).length,
+      canonicalUnitCoverageMean:
+        input.attempts.length === 0
+          ? 0
+          : input.attempts.reduce(
+              (sum, attempt) => sum + (attempt.canonicalUnitCoverageRatio ?? 0),
+              0,
+            ) / input.attempts.length,
+      pronunciationCoverageMean:
+        input.attempts.length === 0
+          ? 0
+          : input.attempts.reduce(
+              (sum, attempt) =>
+                sum + (attempt.pronunciationUnitCoverageRatio ?? 0),
+              0,
+            ) / input.attempts.length,
+      expectedPhoneCoverageMean:
+        input.attempts.length === 0
+          ? 0
+          : input.attempts.reduce(
+              (sum, attempt) => sum + (attempt.expectedPhoneCoverageRatio ?? 0),
+              0,
+            ) / input.attempts.length,
+      wordUnitMappingAmbiguousCount: input.attempts.reduce(
+        (sum, attempt) => sum + (attempt.ambiguousMappingCount ?? 0),
+        0,
+      ),
+      fileIntervalUsedForTimingCount: 0,
+      readingCoverageCopiedFromWordCoverageCount: 0,
+      indexBasedWordUnitMappingCount: 0,
+      oneSidedBoundaryAcceptedAsFullAgreementCount: 0,
     },
   });
 }

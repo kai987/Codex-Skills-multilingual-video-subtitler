@@ -15,7 +15,7 @@ from typing import Any
 from praatio import textgrid
 
 
-PARSER_VERSION = "c5-17-mfa-json-or-praatio-long-textgrid-v1"
+PARSER_VERSION = "c5-17-1-praatio-lexical-utterance-boundary-v1"
 
 
 def interval_dict(entry: Any) -> dict[str, Any]:
@@ -23,16 +23,19 @@ def interval_dict(entry: Any) -> dict[str, Any]:
     return {"start": float(start), "end": float(end), "label": str(label)}
 
 
-def find_tier(grid: Any, candidates: tuple[str, ...]) -> Any:
+def find_tier(grid: Any, candidates: tuple[str, ...]) -> Any | None:
     by_lower = {name.lower(): name for name in grid.tierNames}
     for candidate in candidates:
         actual = by_lower.get(candidate.lower())
         if actual is not None:
             return grid.getTier(actual)
-    raise ValueError(
-        f"TextGrid is missing required tier; expected one of {candidates}, "
-        f"found {grid.tierNames}."
-    )
+    return None
+
+
+def entries(tier: Any | None) -> list[dict[str, Any]]:
+    if tier is None:
+        return []
+    return [interval_dict(entry) for entry in tier.entries]
 
 
 def main() -> None:
@@ -46,14 +49,20 @@ def main() -> None:
     grid = textgrid.openTextgrid(str(source), includeEmptyIntervals=True)
     words = find_tier(grid, ("words", "word"))
     phones = find_tier(grid, ("phones", "phone"))
+    if words is None and phones is None:
+        raise ValueError(
+            "TextGrid exposes neither a word nor phone interval tier; "
+            f"found {grid.tierNames}."
+        )
     payload = {
         "parserVersion": PARSER_VERSION,
-        "words": [interval_dict(entry) for entry in words.entries],
-        "phones": [interval_dict(entry) for entry in phones.entries],
-        "utterance": {
+        "tierNames": list(grid.tierNames),
+        "words": entries(words),
+        "phones": entries(phones),
+        "fileInterval": {
             "start": float(grid.minTimestamp),
             "end": float(grid.maxTimestamp),
-            "label": "utterance",
+            "label": "file",
         },
     }
     json.dump(payload, sys.stdout, ensure_ascii=False, separators=(",", ":"))

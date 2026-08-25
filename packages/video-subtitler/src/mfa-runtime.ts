@@ -10,6 +10,7 @@ import {
   forcedAlignmentRuntimeCapabilitySchema,
   type ForcedAlignmentModelIdentity,
   type ForcedAlignmentRuntimeCapability,
+  type MicromambaInstallationIdentity,
   type ProcessRunner,
 } from "@mvl/shared";
 import { forcedAlignmentSha256 } from "@mvl/transcription-core";
@@ -30,6 +31,28 @@ export const OFFICIAL_JAPANESE_G2P_CITATION =
   "@techreport{mfa_japanese_katakana_mfa_g2p_2023, title={Japanese (Katakana) MFA G2P model v3.0.0}, year={2023}}";
 
 export type MfaEnvironmentManager = "micromamba" | "mamba" | "conda";
+
+export function selectMfaG2pCommand(input: {
+  g2pHelp: { exitCode: number; output: string };
+  g2pOneHelp: { exitCode: number; output: string };
+}): "g2p" | "g2p_one" {
+  const g2pOneViable =
+    input.g2pOneHelp.exitCode === 0 &&
+    /g2p_one/iu.test(input.g2pOneHelp.output) &&
+    /word|text/iu.test(input.g2pOneHelp.output) &&
+    /g2p.*model/iu.test(input.g2pOneHelp.output);
+  if (g2pOneViable) return "g2p_one";
+  const g2pViable =
+    input.g2pHelp.exitCode === 0 &&
+    /\bg2p\b/iu.test(input.g2pHelp.output) &&
+    /input|corpus|word|text/iu.test(input.g2pHelp.output) &&
+    /output/iu.test(input.g2pHelp.output) &&
+    /g2p.*model/iu.test(input.g2pHelp.output);
+  if (g2pViable) return "g2p";
+  throw new InputError(
+    "MFA 3.4.2 exposes neither a verified g2p_one nor g2p command.",
+  );
+}
 
 function pathEntries(environmentPath = process.env.PATH ?? ""): string[] {
   return environmentPath.split(path.delimiter).filter((entry) => entry !== "");
@@ -198,6 +221,9 @@ interface ModelProbeInput {
   license: string;
   citation: string;
   inspectOutput: string;
+  inspectExitCode: number;
+  listOutput: string;
+  registryMetadata: readonly [string, string, string, string, string, number];
 }
 
 async function modelIdentity(
@@ -209,26 +235,40 @@ async function modelIdentity(
   if (!info.isFile()) {
     throw new InputError(`MFA ${input.modelType} model is not a regular file.`);
   }
-  if (!input.inspectOutput.toLowerCase().includes(input.name.toLowerCase())) {
+  if (!input.listOutput.toLowerCase().includes(input.name.toLowerCase())) {
     throw new InputError(
-      `MFA model inspect did not identify ${input.modelType} ${input.name}.`,
+      `MFA model list did not identify ${input.modelType} ${input.name}.`,
     );
   }
-  if (!input.inspectOutput.includes(input.version)) {
+  const [registryName, releaseTag, registryVersion, downloadUrl, fileName] =
+    input.registryMetadata;
+  if (
+    registryName !== input.name ||
+    registryVersion !== `v${input.version}` ||
+    fileName !== path.basename(input.filePath) ||
+    !downloadUrl.startsWith(
+      "https://api.github.com/repos/MontrealCorpusTools/mfa-models/releases/assets/",
+    )
+  ) {
     throw new InputError(
-      `MFA model inspect did not confirm ${input.modelType} ${input.name} ${input.version}.`,
+      `MFA official registry did not confirm ${input.modelType} ${input.name} ${input.version}.`,
+    );
+  }
+  const knownDictionaryInspectFailure =
+    input.modelType === "dictionary" &&
+    input.inspectExitCode !== 0 &&
+    /PosixPath.*load_dictionary_paths/isu.test(input.inspectOutput);
+  if (input.inspectExitCode !== 0 && !knownDictionaryInspectFailure) {
+    throw new InputError(
+      `MFA model inspect failed for ${input.modelType} ${input.name}.`,
     );
   }
   if (
-    !input.inspectOutput.toLowerCase().includes(input.license.toLowerCase())
+    input.inspectExitCode === 0 &&
+    !input.inspectOutput.toLowerCase().includes(input.name.toLowerCase())
   ) {
     throw new InputError(
-      `MFA model inspect did not confirm the ${input.modelType} license ${input.license}.`,
-    );
-  }
-  if (!/citation/iu.test(input.inspectOutput)) {
-    throw new InputError(
-      `MFA model inspect did not expose citation metadata for ${input.modelType} ${input.name}.`,
+      `MFA model inspect did not identify ${input.modelType} ${input.name}.`,
     );
   }
   return {
@@ -241,9 +281,59 @@ async function modelIdentity(
     license: input.license,
     citation: input.citation,
     metadataSha256: createHash("sha256")
-      .update(input.inspectOutput, "utf8")
+      .update(
+        JSON.stringify({
+          registryMetadata: input.registryMetadata,
+          inspectExitCode: input.inspectExitCode,
+          inspectOutput: input.inspectOutput,
+        }),
+        "utf8",
+      )
       .digest("hex"),
     officialSource: "MontrealCorpusTools",
+    officialReleaseTag: releaseTag,
+    officialDownloadUrl: downloadUrl,
+    inspectStatus: knownDictionaryInspectFailure
+      ? "known-upstream-cli-failure"
+      : "verified",
+    inspectExitCode: input.inspectExitCode,
+    inspectDiagnostic: knownDictionaryInspectFailure
+      ? "MFA 3.4.2 dictionary inspect failed inside upstream pretty_print with PosixPath.load_dictionary_paths; model list, official registry identity, file hash, and real align_one compatibility remain independently verified."
+      : null,
+    phoneset: [
+      ...new Set(
+        [
+          ...input.inspectOutput.matchAll(
+            /(?:phone_set_type|phoneset)\s*[:=]\s*([^\n]+)/giu,
+          ),
+        ]
+          .map((match) => match[1]?.trim())
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ],
+    silencePhones: [
+      ...new Set(
+        [
+          ...input.inspectOutput.matchAll(
+            /silence(?:_phones| phones)?\s*[:=]\s*([^\n]+)/giu,
+          ),
+        ]
+          .flatMap((match) => match[1]?.split(/[\s,]+/u) ?? [])
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    ],
+    tokenizerRequirements: [
+      ...new Set(
+        [
+          ...input.inspectOutput.matchAll(
+            /(?:tokenizer|dependencies?)\s*[:=]\s*([^\n]+)/giu,
+          ),
+        ]
+          .map((match) => match[1]?.trim())
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ],
   };
 }
 
@@ -287,17 +377,41 @@ function parseRuntimeVersions(value: string): PythonRuntimeVersions {
   return record as unknown as PythonRuntimeVersions;
 }
 
+function condaExplicitPackageVersion(
+  spec: Buffer,
+  packageName: string,
+): string | null {
+  const pattern = new RegExp(
+    `/${packageName.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}-([0-9][^-]*)-`,
+    "u",
+  );
+  return pattern.exec(spec.toString("utf8"))?.[1] ?? null;
+}
+
 export interface ProbeMfaRuntimeOptions {
   runner: ProcessRunner;
   mfaExecutable: string;
   pythonExecutable: string;
   explicitSpecPath: string;
-  acousticModel: Omit<ModelProbeInput, "modelType" | "inspectOutput">;
-  dictionaryModel: Omit<ModelProbeInput, "modelType" | "inspectOutput">;
-  g2pModel: Omit<ModelProbeInput, "modelType" | "inspectOutput">;
+  acousticModel: Omit<
+    ModelProbeInput,
+    | "modelType"
+    | "inspectOutput"
+    | "inspectExitCode"
+    | "listOutput"
+    | "registryMetadata"
+  >;
+  dictionaryModel: ProbeMfaRuntimeOptions["acousticModel"];
+  g2pModel: ProbeMfaRuntimeOptions["acousticModel"];
   generatedAt?: string;
   networkUsedDuringPreparation: boolean;
+  micromamba?: MicromambaInstallationIdentity;
   sampleJsonTierProbe?: { wordTier: boolean; phoneTier: boolean };
+  officialRegistry: {
+    acoustic: ModelProbeInput["registryMetadata"];
+    dictionary: ModelProbeInput["registryMetadata"];
+    g2p: ModelProbeInput["registryMetadata"];
+  };
   platform?: string;
   architecture?: string;
 }
@@ -315,27 +429,35 @@ const PYTHON_VERSION_PROBE = [
 export async function probeMfaRuntimeCapability(
   options: ProbeMfaRuntimeOptions,
 ): Promise<ForcedAlignmentRuntimeCapability> {
-  const [versionResult, alignOne, alignOneLegacy, runtimeVersionsResult, spec] =
-    await Promise.all([
-      options.runner.run(options.mfaExecutable, ["version"], {
-        allowNonZero: true,
-      }),
-      options.runner.run(options.mfaExecutable, ["align_one", "--help"], {
-        allowNonZero: true,
-      }),
-      options.runner.run(
-        options.mfaExecutable,
-        ["align_one_legacy", "--help"],
-        { allowNonZero: true },
-      ),
-      options.runner.run(options.pythonExecutable, [
-        "-c",
-        PYTHON_VERSION_PROBE,
-      ]),
-      import("node:fs/promises").then(
-        async ({ readFile }) => await readFile(options.explicitSpecPath),
-      ),
-    ]);
+  const [
+    versionResult,
+    alignOne,
+    alignOneLegacy,
+    g2pHelp,
+    g2pOneHelp,
+    runtimeVersionsResult,
+    spec,
+  ] = await Promise.all([
+    options.runner.run(options.mfaExecutable, ["version"], {
+      allowNonZero: true,
+    }),
+    options.runner.run(options.mfaExecutable, ["align_one", "--help"], {
+      allowNonZero: true,
+    }),
+    options.runner.run(options.mfaExecutable, ["align_one_legacy", "--help"], {
+      allowNonZero: true,
+    }),
+    options.runner.run(options.mfaExecutable, ["g2p", "--help"], {
+      allowNonZero: true,
+    }),
+    options.runner.run(options.mfaExecutable, ["g2p_one", "--help"], {
+      allowNonZero: true,
+    }),
+    options.runner.run(options.pythonExecutable, ["-c", PYTHON_VERSION_PROBE]),
+    import("node:fs/promises").then(
+      async ({ readFile }) => await readFile(options.explicitSpecPath),
+    ),
+  ]);
   const mfaVersion = parseMfaVersion(combinedOutput(versionResult));
   if (mfaVersion !== PINNED_MFA_VERSION) {
     throw new InputError(
@@ -357,6 +479,13 @@ export async function probeMfaRuntimeCapability(
       ? combinedOutput(alignOne)
       : combinedOutput(alignOneLegacy);
   const flags = capabilityFlags(selectedHelp);
+  const g2pCommand = selectMfaG2pCommand({
+    g2pHelp: { exitCode: g2pHelp.exitCode, output: combinedOutput(g2pHelp) },
+    g2pOneHelp: {
+      exitCode: g2pOneHelp.exitCode,
+      output: combinedOutput(g2pOneHelp),
+    },
+  });
   if (!flags.g2pSupported) {
     throw new InputError(
       `MFA ${alignOneCommand} does not expose --g2p_model_path; Japanese OOV handling cannot be verified.`,
@@ -370,27 +499,42 @@ export async function probeMfaRuntimeCapability(
   const inspect = async (
     modelType: "acoustic" | "dictionary" | "g2p",
     model: ProbeMfaRuntimeOptions["acousticModel"],
+    registryMetadata: ModelProbeInput["registryMetadata"],
   ) => {
-    const result = await options.runner.run(
-      options.mfaExecutable,
-      ["model", "inspect", modelType, model.name],
-      { allowNonZero: true },
-    );
-    if (result.exitCode !== 0) {
-      throw new InputError(
-        `MFA could not inspect official ${modelType} model ${model.name}.`,
-      );
+    const [result, list] = await Promise.all([
+      options.runner.run(
+        options.mfaExecutable,
+        ["model", "inspect", modelType, model.name],
+        { allowNonZero: true },
+      ),
+      options.runner.run(options.mfaExecutable, ["model", "list", modelType], {
+        allowNonZero: true,
+      }),
+    ]);
+    if (list.exitCode !== 0) {
+      throw new InputError(`MFA could not list official ${modelType} models.`);
     }
     return await modelIdentity({
       ...model,
       modelType,
       inspectOutput: combinedOutput(result),
+      inspectExitCode: result.exitCode,
+      listOutput: combinedOutput(list),
+      registryMetadata,
     });
   };
   const [acousticModel, dictionaryModel, g2pModel] = await Promise.all([
-    inspect("acoustic", options.acousticModel),
-    inspect("dictionary", options.dictionaryModel),
-    inspect("g2p", options.g2pModel),
+    inspect(
+      "acoustic",
+      options.acousticModel,
+      options.officialRegistry.acoustic,
+    ),
+    inspect(
+      "dictionary",
+      options.dictionaryModel,
+      options.officialRegistry.dictionary,
+    ),
+    inspect("g2p", options.g2pModel, options.officialRegistry.g2p),
   ]);
   if (
     acousticModel.name !== PINNED_JAPANESE_ACOUSTIC_MODEL ||
@@ -405,6 +549,14 @@ export async function probeMfaRuntimeCapability(
     );
   }
   const runtimeVersions = parseRuntimeVersions(runtimeVersionsResult.stdout);
+  if (runtimeVersions.kalpyVersion === "unavailable") {
+    runtimeVersions.kalpyVersion =
+      condaExplicitPackageVersion(spec, "kalpy") ?? "unavailable";
+  }
+  if (runtimeVersions.kaldiVersion === "unavailable") {
+    runtimeVersions.kaldiVersion =
+      condaExplicitPackageVersion(spec, "kaldi") ?? "unavailable";
+  }
   const environmentExplicitSpecSha256 = createHash("sha256")
     .update(spec)
     .digest("hex");
@@ -427,6 +579,7 @@ export async function probeMfaRuntimeCapability(
     ...runtimeVersions,
     alignOneCommand,
     selectedOutputFormat,
+    g2pCommand,
     acousticModel,
     dictionaryModel,
     g2pModel,
@@ -437,7 +590,7 @@ export async function probeMfaRuntimeCapability(
   return forcedAlignmentRuntimeCapabilitySchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "forced-alignment-runtime-capability",
-    runtimeVersion: "C5.17",
+    runtimeVersion: "C5.17.1",
     generatedAt: options.generatedAt ?? new Date().toISOString(),
     backend: "mfa-japanese",
     mfaVersion,
@@ -452,6 +605,8 @@ export async function probeMfaRuntimeCapability(
       jsonHasWordTier: options.sampleJsonTierProbe?.wordTier ?? false,
       jsonHasPhoneTier: options.sampleJsonTierProbe?.phoneTier ?? false,
       g2pSupported: flags.g2pSupported,
+      g2pCommand,
+      g2pHelpVerified: true,
       originalTextSupported: flags.originalTextSupported,
       tokenizationMode: "sudachi",
       speakerAdaptationSkipped: true,
@@ -460,6 +615,9 @@ export async function probeMfaRuntimeCapability(
     dictionaryModel,
     g2pModel,
     environmentExplicitSpecSha256,
+    ...(options.micromamba === undefined
+      ? {}
+      : { micromamba: options.micromamba }),
     runtimeIdentityHash: forcedAlignmentSha256(identityInput),
     platform: options.platform ?? process.platform,
     architecture: options.architecture ?? process.arch,
@@ -487,7 +645,7 @@ export function verifyMfaRuntimeCapability(
   }
   const serialized = JSON.stringify(capability);
   if (
-    /(?:\/(?:Users|home|opt|private|tmp)\/|[A-Za-z]:[\\/]|file:\/\/)/u.test(
+    /(?:^|["'\s(])(?:\/(?:Users|home|opt|private|tmp)\/|[A-Za-z]:[\\/]|file:\/\/)/u.test(
       serialized,
     )
   ) {
@@ -505,8 +663,6 @@ export function mfaCreateEnvironmentArguments(input: {
   const packages = [
     "python=3.11",
     `montreal-forced-aligner=${PINNED_MFA_VERSION}`,
-    "sudachipy=0.6.11",
-    "sudachidict-core=20260428",
     "praatio",
   ];
   return input.manager === "conda"

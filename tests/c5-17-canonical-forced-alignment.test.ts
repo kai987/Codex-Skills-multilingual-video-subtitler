@@ -191,6 +191,17 @@ function alignmentAttempt(
     wordCoverageRatio: input.wordCoverageRatio ?? (failed ? 0 : 1),
     readingCoverageRatio: input.readingCoverageRatio ?? (failed ? 0 : 1),
     phoneCoverageRatio: input.phoneCoverageRatio ?? (failed ? 0 : 1),
+    canonicalUnitCoverageRatio: input.wordCoverageRatio ?? (failed ? 0 : 1),
+    alignedWordCoverageRatio: input.wordCoverageRatio ?? (failed ? 0 : 1),
+    pronunciationUnitCoverageRatio:
+      input.readingCoverageRatio ?? (failed ? 0 : 1),
+    expectedPhoneCoverageRatio: input.phoneCoverageRatio ?? (failed ? 0 : 1),
+    wordWithAnyPhoneRatio: failed ? 0 : 1,
+    alignedPhonePlausibilityRatio: failed ? 0 : 1,
+    expectedPhoneCount: failed ? 0 : 6,
+    alignedExpectedPhoneCount: failed ? 0 : 6,
+    unresolvedMappingCount: 0,
+    ambiguousMappingCount: 0,
     boundaryStart: failed ? null : start,
     boundaryEnd: failed ? null : end,
     startPinnedToWindowEdge: input.pinnedStart ?? false,
@@ -551,6 +562,17 @@ describe("C5.17 MFA parser and window stability", () => {
       },
     },
   };
+  const parserUnits = [
+    {
+      unitId: "unit-1",
+      surface: "おはよう",
+      normalizedSurface: "おはよう",
+      reading: "おはよう",
+      phones: ["o", "h"],
+      punctuation: false,
+      criticalOov: false,
+    },
+  ];
 
   it.each(["json", "long_textgrid", "mock-json"] as const)(
     "parses %s word/phone tiers and preserves local/global coordinates",
@@ -559,7 +581,8 @@ describe("C5.17 MFA parser and window stability", () => {
         value: parsedFixture,
         outputFormat,
         mediaOffsetSeconds: 100,
-        expectedUnitIds: ["unit-1"],
+        canonicalUnits: parserUnits,
+        expectedPhones: ["o", "h"],
       });
       expect(parsed.wordAlignments[0]).toMatchObject({
         label: "おはよう",
@@ -584,16 +607,26 @@ describe("C5.17 MFA parser and window stability", () => {
         value: fixture,
         outputFormat: "json",
         mediaOffsetSeconds: 0,
-        expectedUnitIds: ["unit"],
+        canonicalUnits: parserUnits,
+        expectedPhones: ["o", "h"],
       }).wordAlignments[0]?.oov,
     ).toBe(true);
   });
 
+  it("keeps lexical timing when the phone tier is unavailable", () => {
+    const parsed = parseMfaAlignmentOutput({
+      value: { words: [{ label: "おはよう", start: 0, end: 1 }] },
+      outputFormat: "json",
+      mediaOffsetSeconds: 0,
+      canonicalUnits: parserUnits,
+      expectedPhones: ["o", "h"],
+    });
+    expect(parsed.selectedBoundarySource).toBe("lexical-word-tier");
+    expect(parsed.expectedPhoneCoverageRatio).toBe(0);
+    expect(parsed.warnings).toContain("MFA_PHONE_TIER_UNAVAILABLE");
+  });
+
   it.each([
-    {
-      label: "missing phone tier",
-      value: { words: [{ label: "x", start: 0, end: 1 }] },
-    },
     { label: "empty tiers", value: { words: [], phones: [] } },
     {
       label: "reversed time",
@@ -615,7 +648,8 @@ describe("C5.17 MFA parser and window stability", () => {
         value,
         outputFormat: "json",
         mediaOffsetSeconds: 0,
-        expectedUnitIds: ["unit"],
+        canonicalUnits: parserUnits,
+        expectedPhones: ["o", "h"],
       }),
     ).toThrow();
   });
@@ -626,7 +660,8 @@ describe("C5.17 MFA parser and window stability", () => {
         value: parsedFixture,
         outputFormat: "csv" as "json",
         mediaOffsetSeconds: 0,
-        expectedUnitIds: ["unit"],
+        canonicalUnits: parserUnits,
+        expectedPhones: ["o", "h"],
       }),
     ).toThrow(/Unsupported MFA output format/u);
   });
@@ -655,20 +690,36 @@ describe("C5.17 MFA parser and window stability", () => {
   );
 
   it.each([
-    { narrow: alignmentAttempt(), expanded: null },
+    {
+      narrow: alignmentAttempt(),
+      expanded: null,
+      status: "single-window",
+      blocker: "ALIGNMENT_SINGLE_WINDOW_ONLY",
+    },
     {
       narrow: null,
       expanded: alignmentAttempt({ windowType: "expanded" }),
+      status: "single-window",
+      blocker: "ALIGNMENT_SINGLE_WINDOW_ONLY",
     },
-    { narrow: null, expanded: null },
-  ])("rejects incomplete window pair %#", ({ narrow, expanded }) => {
-    expect(
-      evaluateForcedAlignmentWindowStability({ narrow, expanded }),
-    ).toMatchObject({
-      stable: false,
-      blockers: ["ALIGNMENT_WINDOW_PAIR_INCOMPLETE"],
-    });
-  });
+    {
+      narrow: null,
+      expanded: null,
+      status: "unavailable",
+      blocker: "ALIGNMENT_WINDOW_PAIR_UNAVAILABLE",
+    },
+  ])(
+    "classifies incomplete window pair %#",
+    ({ narrow, expanded, status, blocker }) => {
+      expect(
+        evaluateForcedAlignmentWindowStability({ narrow, expanded }),
+      ).toMatchObject({
+        status,
+        stable: false,
+        blockers: [blocker],
+      });
+    },
+  );
 });
 
 describe("C5.17 Anti-Forcing, occurrence, and timing gates", () => {
@@ -777,13 +828,13 @@ describe("C5.17 Anti-Forcing, occurrence, and timing gates", () => {
       label: "mapped-token conflict",
       mapped: [{ evidenceId: "mapped-token-far", start: 20, end: 21 }],
       vad: undefined,
-      blocker: "MFA_MAPPED_TOKEN_DISAGREEMENT",
+      blocker: "MFA_SIDE_SPECIFIC_EXTERNAL_BOUNDARY_SUPPORT_MISSING",
     },
     {
       label: "Raw VAD conflict",
       mapped: undefined,
       vad: [{ evidenceId: "raw-vad-far", start: 20, end: 21 }],
-      blocker: "MFA_RAW_VAD_DISAGREEMENT",
+      blocker: "MFA_SIDE_SPECIFIC_EXTERNAL_BOUNDARY_SUPPORT_MISSING",
     },
   ])("blocks $label", ({ mapped, vad, blocker }) => {
     const result = gate({
@@ -1152,6 +1203,16 @@ describe("C5.17 runtime and independent cache contracts", () => {
           if (args[0] === "align_one_legacy") {
             return { stdout: "unknown", stderr: "", exitCode: 2 };
           }
+          if (args[0] === "g2p") {
+            return {
+              stdout: "mfa g2p INPUT_PATH G2P_MODEL_PATH OUTPUT_PATH",
+              stderr: "",
+              exitCode: 0,
+            };
+          }
+          if (args[0] === "g2p_one") {
+            return { stdout: "unknown", stderr: "", exitCode: 2 };
+          }
           if (args[0] === "-c") {
             return {
               stdout: JSON.stringify({
@@ -1169,6 +1230,13 @@ describe("C5.17 runtime and independent cache contracts", () => {
           if (args[0] === "model" && args[1] === "inspect") {
             return {
               stdout: `${args[3]} version 3.0.0 license CC BY 4.0 citation official`,
+              stderr: "",
+              exitCode: 0,
+            };
+          }
+          if (args[0] === "model" && args[1] === "list") {
+            return {
+              stdout: `${args[2]} japanese_mfa japanese_katakana_mfa`,
               stderr: "",
               exitCode: 0,
             };
@@ -1201,6 +1269,32 @@ describe("C5.17 runtime and independent cache contracts", () => {
           filePath: paths.g2p,
           license: "CC BY 4.0",
           citation: "Official G2P citation",
+        },
+        officialRegistry: {
+          acoustic: [
+            "japanese_mfa",
+            "acoustic-japanese_mfa-v3.0.0",
+            "v3.0.0",
+            "https://api.github.com/repos/MontrealCorpusTools/mfa-models/releases/assets/1",
+            "japanese_mfa.zip",
+            1,
+          ],
+          dictionary: [
+            "japanese_mfa",
+            "dictionary-japanese_mfa-v3.0.0",
+            "v3.0.0",
+            "https://api.github.com/repos/MontrealCorpusTools/mfa-models/releases/assets/2",
+            "japanese_mfa.dict",
+            1,
+          ],
+          g2p: [
+            "japanese_katakana_mfa",
+            "g2p-japanese_katakana_mfa-v3.0.0",
+            "v3.0.0",
+            "https://api.github.com/repos/MontrealCorpusTools/mfa-models/releases/assets/3",
+            "japanese_katakana_mfa.zip",
+            1,
+          ],
         },
         networkUsedDuringPreparation: true,
       });

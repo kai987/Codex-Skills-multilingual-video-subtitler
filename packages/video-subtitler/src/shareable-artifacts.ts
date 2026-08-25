@@ -9,6 +9,7 @@ import {
   c516StockPatchedRuntimeAbArtifactSchema,
   c517ForcedAlignmentReplaySummarySchema,
   forcedAlignmentRuntimeCapabilitySchema,
+  forcedAlignmentCacheManifestSchema,
   shareableArtifactManifestSchema,
   subtitleFinalizationReportSchema,
   subtitleOverlapAcousticResolutionSchema,
@@ -16,6 +17,11 @@ import {
   subtitleTimestampEvidenceIntegritySchema,
   subtitleCanonicalAlignmentInputSchema,
   subtitleCanonicalForcedAlignmentSchema,
+  subtitleCanonicalPronunciationSchema,
+  sudachiRuntimeCapabilitySchema,
+  mfaSampleProbeSchema,
+  c5171RuntimePreparationSummarySchema,
+  c5171FreshCacheObserveValidationSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -26,6 +32,8 @@ const SHAREABLE_POLICY_VERSION =
   "c5.16.1-shareable-artifact-policy-v1" as const;
 const C517_SHAREABLE_POLICY_VERSION =
   "c5.17-shareable-artifact-policy-v1" as const;
+const C5171_SHAREABLE_POLICY_VERSION =
+  "c5.17.1-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -46,6 +54,14 @@ const artifactSchemas = {
     subtitleCanonicalForcedAlignmentSchema,
   "c5-17-forced-alignment-replay-summary.json":
     c517ForcedAlignmentReplaySummarySchema,
+  "subtitle-canonical-pronunciation.json": subtitleCanonicalPronunciationSchema,
+  "sudachi-runtime-capability.json": sudachiRuntimeCapabilitySchema,
+  "forced-alignment-cache-manifest.json": forcedAlignmentCacheManifestSchema,
+  "mfa-sample-probe.json": mfaSampleProbeSchema,
+  "c5-17-1-runtime-preparation-summary.json":
+    c5171RuntimePreparationSummarySchema,
+  "c5-17-1-fresh-cache-observe-validation.json":
+    c5171FreshCacheObserveValidationSchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -382,6 +398,12 @@ export async function generateC5161ShareableArtifacts(input: {
     canonicalInputPath: string;
     forcedAlignmentPath: string;
     replaySummaryPath: string;
+    pronunciationPath?: string;
+    sudachiRuntimeCapabilityPath?: string;
+    cacheManifestPath?: string;
+    sampleProbePath?: string;
+    runtimePreparationSummaryPath?: string;
+    freshCacheObserveValidationPath?: string;
   };
 }): Promise<{
   outputDirectory: string;
@@ -456,6 +478,33 @@ export async function generateC5161ShareableArtifacts(input: {
         sourcePath: path.resolve(input.c517Artifacts.replaySummaryPath),
       },
     );
+    for (const [name, sourcePath] of [
+      [
+        "subtitle-canonical-pronunciation.json",
+        input.c517Artifacts.pronunciationPath,
+      ],
+      [
+        "sudachi-runtime-capability.json",
+        input.c517Artifacts.sudachiRuntimeCapabilityPath,
+      ],
+      [
+        "forced-alignment-cache-manifest.json",
+        input.c517Artifacts.cacheManifestPath,
+      ],
+      ["mfa-sample-probe.json", input.c517Artifacts.sampleProbePath],
+      [
+        "c5-17-1-runtime-preparation-summary.json",
+        input.c517Artifacts.runtimePreparationSummaryPath,
+      ],
+      [
+        "c5-17-1-fresh-cache-observe-validation.json",
+        input.c517Artifacts.freshCacheObserveValidationPath,
+      ],
+    ] as const) {
+      if (sourcePath !== undefined) {
+        sources.push({ name, sourcePath: path.resolve(sourcePath) });
+      }
+    }
   }
   const sourceHashes = await Promise.all(
     sources.map(async (source) => sha256(await readFile(source.sourcePath))),
@@ -556,7 +605,9 @@ export async function generateC5161ShareableArtifacts(input: {
     policyVersion:
       input.c517Artifacts === undefined
         ? SHAREABLE_POLICY_VERSION
-        : C517_SHAREABLE_POLICY_VERSION,
+        : input.c517Artifacts.pronunciationPath === undefined
+          ? C517_SHAREABLE_POLICY_VERSION
+          : C5171_SHAREABLE_POLICY_VERSION,
     generatedAt: new Date().toISOString(),
     taskIdentityHash,
     pathPolicy: "shareable-relative-only",

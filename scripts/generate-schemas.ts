@@ -84,11 +84,41 @@ import {
   forcedAlignmentCacheManifestSchema,
   c517ForcedAlignmentReplaySummarySchema,
   forcedAlignmentCacheEntrySchema,
+  subtitleCanonicalPronunciationSchema,
+  sudachiRuntimeCapabilitySchema,
+  mfaSampleProbeSchema,
+  c5171RuntimePreparationSummarySchema,
+  c5171FreshCacheObserveValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "subtitle-canonical-pronunciation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-canonical-pronunciation.schema.json",
+    schema: subtitleCanonicalPronunciationSchema,
+  },
+  {
+    fileName: "sudachi-runtime-capability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/sudachi-runtime-capability.schema.json",
+    schema: sudachiRuntimeCapabilitySchema,
+  },
+  {
+    fileName: "mfa-sample-probe.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/mfa-sample-probe.schema.json",
+    schema: mfaSampleProbeSchema,
+  },
+  {
+    fileName: "c5-17-1-runtime-preparation-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-17-1-runtime-preparation-summary.schema.json",
+    schema: c5171RuntimePreparationSummarySchema,
+  },
+  {
+    fileName: "c5-17-1-fresh-cache-observe-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-17-1-fresh-cache-observe-validation.schema.json",
+    schema: c5171FreshCacheObserveValidationSchema,
+  },
   {
     fileName: "subtitle-canonical-alignment-input.schema.json",
     id: "https://schemas.local/multilingual-video-learning/subtitle-canonical-alignment-input.schema.json",

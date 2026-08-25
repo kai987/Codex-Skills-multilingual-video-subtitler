@@ -107,6 +107,7 @@ export interface SubtitleFinalizationOptions {
   forcedAlignment?: ForcedAlignmentMode;
   forcedAlignmentBackend?: ForcedAlignmentBackend;
   forcedAlignmentConfiguration?: Partial<ForcedAlignmentConfiguration>;
+  forcedAlignmentTargetComponentIds?: readonly string[];
   mfaExecutable?: string;
   mfaPythonExecutable?: string;
   mfaRuntimeManifestPath?: string;
@@ -114,6 +115,9 @@ export interface SubtitleFinalizationOptions {
   mfaDictionaryModel?: string;
   mfaG2pModel?: string;
   mfaTemporaryDirectory?: string;
+  sudachiRuntimeManifestPath?: string;
+  sudachiPythonExecutable?: string;
+  sudachiRequirementsPath?: string;
   sudachiHelperPath?: string;
   mfaParserHelperPath?: string;
   forcedAlignmentCacheDirectory?: string;
@@ -168,6 +172,8 @@ export interface SubtitleFinalizationResult {
     canonicalForcedAlignment: string | null;
     forcedAlignmentRuntimeCapability: string | null;
     forcedAlignmentCacheManifest: string | null;
+    canonicalPronunciation: string | null;
+    sudachiRuntimeCapability: string | null;
     humanReviewedBasePackage: string | null;
   };
 }
@@ -227,6 +233,7 @@ export function canonicalForcedAlignmentEvidenceForHash(
       ...artifact.summary,
       cacheHitCount: 0,
       mfaProcessCount: 0,
+      mfaFreshExecuted: true,
     },
   };
 }
@@ -954,6 +961,11 @@ export async function finalizeSubtitleTask(
         ...(options.forcedAlignmentConfiguration === undefined
           ? {}
           : { configuration: options.forcedAlignmentConfiguration }),
+        ...(options.forcedAlignmentTargetComponentIds === undefined
+          ? {}
+          : {
+              targetComponentIds: options.forcedAlignmentTargetComponentIds,
+            }),
         ...(options.mfaExecutable === undefined
           ? {}
           : { mfaExecutable: options.mfaExecutable }),
@@ -975,6 +987,17 @@ export async function finalizeSubtitleTask(
         ...(options.mfaTemporaryDirectory === undefined
           ? {}
           : { mfaTemporaryDirectory: options.mfaTemporaryDirectory }),
+        ...(options.sudachiRuntimeManifestPath === undefined
+          ? {}
+          : {
+              sudachiRuntimeManifestPath: options.sudachiRuntimeManifestPath,
+            }),
+        ...(options.sudachiPythonExecutable === undefined
+          ? {}
+          : { sudachiPythonExecutable: options.sudachiPythonExecutable }),
+        ...(options.sudachiRequirementsPath === undefined
+          ? {}
+          : { sudachiRequirementsPath: options.sudachiRequirementsPath }),
         ...(options.sudachiHelperPath === undefined
           ? {}
           : { sudachiHelperPath: options.sudachiHelperPath }),
@@ -1327,6 +1350,11 @@ export async function finalizeSubtitleTask(
       canonicalForcedAlignmentResult?.outputPaths.runtimeCapability ?? null,
     forcedAlignmentCacheManifest:
       canonicalForcedAlignmentResult?.outputPaths.cacheManifest ?? null,
+    canonicalPronunciation:
+      canonicalForcedAlignmentResult?.outputPaths.pronunciation ?? null,
+    sudachiRuntimeCapability:
+      canonicalForcedAlignmentResult?.outputPaths.sudachiRuntimeCapability ??
+      null,
   };
   const finalPackage = projectStrictSubtitlePackage({
     rawPackage: projectionRawPackage,
@@ -1676,6 +1704,20 @@ export async function finalizeSubtitleTask(
           : relativeFrom(
               located.subtitleDirectory,
               outputPaths.forcedAlignmentCacheManifest,
+            ),
+      canonicalPronunciation:
+        outputPaths.canonicalPronunciation === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              outputPaths.canonicalPronunciation,
+            ),
+      sudachiRuntimeCapability:
+        outputPaths.sudachiRuntimeCapability === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              outputPaths.sudachiRuntimeCapability,
             ),
       subtitledVideo: null,
     },

@@ -5,6 +5,7 @@ import {
   subtitleIntervalSchema,
 } from "./finalization-schemas.js";
 import { schemaVersionSchema } from "./schemas.js";
+import { micromambaInstallationIdentitySchema } from "./c5-17-1-schemas.js";
 
 const hashSchema = z.string().regex(/^[a-f0-9]{64}$/u);
 const relativePathSchema = z
@@ -126,7 +127,7 @@ export const subtitleCanonicalAlignmentInputSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-canonical-alignment-input"),
-    alignmentVersion: z.literal("C5.17"),
+    alignmentVersion: z.enum(["C5.17", "C5.17.1"]),
     generatedAt: z.iso.datetime(),
     baseCueHash: hashSchema,
     baseTimingHash: hashSchema,
@@ -168,6 +169,16 @@ export const forcedAlignmentModelIdentitySchema = z
     citation: z.string().min(1),
     metadataSha256: hashSchema,
     officialSource: z.literal("MontrealCorpusTools"),
+    officialReleaseTag: z.string().min(1).optional(),
+    officialDownloadUrl: z.url().optional(),
+    inspectStatus: z
+      .enum(["verified", "known-upstream-cli-failure"])
+      .optional(),
+    inspectExitCode: z.number().int().optional(),
+    inspectDiagnostic: z.string().min(1).nullable().optional(),
+    phoneset: z.array(z.string().min(1)).optional(),
+    silencePhones: z.array(z.string().min(1)).optional(),
+    tokenizerRequirements: z.array(z.string().min(1)).optional(),
   })
   .strict();
 
@@ -175,7 +186,7 @@ export const forcedAlignmentRuntimeCapabilitySchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("forced-alignment-runtime-capability"),
-    runtimeVersion: z.literal("C5.17"),
+    runtimeVersion: z.enum(["C5.17", "C5.17.1"]),
     generatedAt: z.iso.datetime(),
     backend: z.literal("mfa-japanese"),
     mfaVersion: z.literal("3.4.2"),
@@ -193,6 +204,8 @@ export const forcedAlignmentRuntimeCapabilitySchema = z
         jsonHasWordTier: z.boolean(),
         jsonHasPhoneTier: z.boolean(),
         g2pSupported: z.boolean(),
+        g2pCommand: z.enum(["g2p", "g2p_one"]).optional(),
+        g2pHelpVerified: z.boolean().optional(),
         originalTextSupported: z.boolean(),
         tokenizationMode: z.enum(["sudachi", "mfa-default-japanese"]),
         speakerAdaptationSkipped: z.literal(true),
@@ -202,6 +215,7 @@ export const forcedAlignmentRuntimeCapabilitySchema = z
     dictionaryModel: forcedAlignmentModelIdentitySchema,
     g2pModel: forcedAlignmentModelIdentitySchema,
     environmentExplicitSpecSha256: hashSchema,
+    micromamba: micromambaInstallationIdentitySchema.optional(),
     runtimeIdentityHash: hashSchema,
     platform: z.string().min(1),
     architecture: z.string().min(1),
@@ -219,6 +233,7 @@ export const forcedAlignmentWordIntervalSchema = z
     rawInterval: forcedAlignmentIntervalSchema,
     mappedInterval: forcedAlignmentIntervalSchema,
     oov: z.boolean(),
+    mappingIds: z.array(z.string().min(1)).optional(),
   })
   .strict();
 
@@ -260,6 +275,43 @@ export const forcedAlignmentAttemptSchema = z
     phoneAlignments: z.array(forcedAlignmentPhoneIntervalSchema),
     silenceIntervals: z.array(forcedAlignmentIntervalSchema),
     utteranceInterval: forcedAlignmentIntervalSchema.nullable(),
+    fileInterval: forcedAlignmentIntervalSchema.optional(),
+    lexicalUtteranceInterval: forcedAlignmentIntervalSchema
+      .nullable()
+      .optional(),
+    phoneUtteranceInterval: forcedAlignmentIntervalSchema.nullable().optional(),
+    selectedUtteranceInterval: forcedAlignmentIntervalSchema
+      .nullable()
+      .optional(),
+    selectedBoundarySource: z
+      .enum(["lexical-word-tier", "phone-tier-fallback", "none"])
+      .optional(),
+    wordUnitMappings: z
+      .array(
+        z
+          .object({
+            mappingId: z.string().min(1),
+            canonicalUnitIds: z.array(z.string().min(1)),
+            mfaWordIds: z.array(z.string().min(1)),
+            mappingType: z.enum([
+              "MATCH_1_TO_1",
+              "MATCH_1_TO_MANY",
+              "MATCH_MANY_TO_1",
+              "SKIP_CANONICAL_UNIT",
+              "SKIP_MFA_WORD",
+              "UNRESOLVED_MAPPING",
+            ]),
+            surfaceScore: z.number().min(0).max(1),
+            readingScore: z.number().min(0).max(1).nullable(),
+            phoneScore: z.number().min(0).max(1).nullable(),
+            combinedScore: z.number().min(0).max(1),
+            ambiguityMargin: z.number().min(0).max(1).nullable(),
+            mappingConfidence: z.number().min(0).max(1),
+            blockers: z.array(z.string().min(1)),
+          })
+          .strict(),
+      )
+      .optional(),
     alignedWordCount: z.number().int().nonnegative(),
     expectedWordCount: z.number().int().nonnegative(),
     alignedPhoneCount: z.number().int().nonnegative(),
@@ -267,6 +319,16 @@ export const forcedAlignmentAttemptSchema = z
     wordCoverageRatio: z.number().min(0).max(1),
     readingCoverageRatio: z.number().min(0).max(1),
     phoneCoverageRatio: z.number().min(0).max(1),
+    canonicalUnitCoverageRatio: z.number().min(0).max(1).optional(),
+    alignedWordCoverageRatio: z.number().min(0).max(1).optional(),
+    pronunciationUnitCoverageRatio: z.number().min(0).max(1).optional(),
+    expectedPhoneCoverageRatio: z.number().min(0).max(1).optional(),
+    wordWithAnyPhoneRatio: z.number().min(0).max(1).optional(),
+    alignedPhonePlausibilityRatio: z.number().min(0).max(1).optional(),
+    expectedPhoneCount: z.number().int().nonnegative().optional(),
+    alignedExpectedPhoneCount: z.number().int().nonnegative().optional(),
+    unresolvedMappingCount: z.number().int().nonnegative().optional(),
+    ambiguousMappingCount: z.number().int().nonnegative().optional(),
     boundaryStart: z.number().nonnegative().nullable(),
     boundaryEnd: z.number().nonnegative().nullable(),
     startPinnedToWindowEdge: z.boolean(),
@@ -355,6 +417,25 @@ export const antiForcingMetricsSchema = z
     sourceCuePriorAgreement: z.number().min(0).max(1),
     neighborCueIntrusionRatio: z.number().min(0).max(1),
     duplicateOccurrenceOverlapRatio: z.number().min(0).max(1),
+    canonicalUnitCoverageRatio: z.number().min(0).max(1).optional(),
+    alignedWordCoverageRatio: z.number().min(0).max(1).optional(),
+    pronunciationUnitCoverageRatio: z.number().min(0).max(1).optional(),
+    expectedPhoneCoverageRatio: z.number().min(0).max(1).optional(),
+    wordWithAnyPhoneRatio: z.number().min(0).max(1).optional(),
+    alignedPhonePlausibilityRatio: z.number().min(0).max(1).optional(),
+    startBoundaryDifferenceSeconds: z
+      .number()
+      .nonnegative()
+      .nullable()
+      .optional(),
+    endBoundaryDifferenceSeconds: z
+      .number()
+      .nonnegative()
+      .nullable()
+      .optional(),
+    startBoundaryAgreementScore: z.number().min(0).max(1).optional(),
+    endBoundaryAgreementScore: z.number().min(0).max(1).optional(),
+    fullBoundaryAgreementScore: z.number().min(0).max(1).optional(),
   })
   .strict();
 
@@ -374,6 +455,11 @@ export const forcedAlignmentCueDecisionSchema = z
     antiForcingPassed: z.boolean(),
     blockers: z.array(z.string().min(1)),
     boundaryEvidenceIds: z.array(z.string().min(1)),
+    startBoundaryEvidenceIds: z.array(z.string().min(1)).optional(),
+    endBoundaryEvidenceIds: z.array(z.string().min(1)).optional(),
+    windowPairStatus: z
+      .enum(["unavailable", "single-window", "stable", "unstable"])
+      .optional(),
     boundarySources: z.array(
       z.enum([
         "mfa-narrow",
@@ -424,6 +510,8 @@ export const forcedAlignmentTimingMutationSchema = z
     mfaEvidenceIds: z.array(z.string().min(1)).min(1),
     mappedTokenEvidenceIds: z.array(z.string().min(1)),
     rawVadEvidenceIds: z.array(z.string().min(1)),
+    startBoundaryEvidenceIds: z.array(z.string().min(1)).optional(),
+    endBoundaryEvidenceIds: z.array(z.string().min(1)).optional(),
     textChanged: z.literal(false),
     method: z.literal("evidence-backed-forced-alignment-boundaries"),
   })
@@ -461,6 +549,27 @@ export const forcedAlignmentComponentSchema = z
     appliedMutations: z.array(forcedAlignmentTimingMutationSchema),
     atomicApplicationPassed: z.boolean(),
     resolved: z.boolean(),
+    resolutionStatus: z.enum(["resolved", "unresolved", "blocked"]).optional(),
+    bestActionableHypothesis: forcedAlignmentHypothesisSchema
+      .nullable()
+      .optional(),
+    runnerUpActionableHypothesis: forcedAlignmentHypothesisSchema
+      .nullable()
+      .optional(),
+    bestActionableHypothesisScore: z
+      .number()
+      .min(0)
+      .max(1)
+      .nullable()
+      .optional(),
+    runnerUpActionableHypothesisScore: z
+      .number()
+      .min(0)
+      .max(1)
+      .nullable()
+      .optional(),
+    actionableDecisionMargin: z.number().min(0).max(1).nullable().optional(),
+    unresolvedReasons: z.array(z.string().min(1)).optional(),
     blocking: z.boolean(),
     blockers: z.array(z.string().min(1)),
     reviewRequired: z.boolean(),
@@ -485,9 +594,18 @@ export const forcedAlignmentConfigurationSchema = z
     maximumNeighborIntrusionRatio: z.number().min(0).max(1),
     minimumBestHypothesisScore: z.number().min(0).max(1),
     minimumDecisionMargin: z.number().min(0).max(1),
+    minimumCanonicalUnitCoverageRatio: z.number().min(0).max(1).optional(),
+    minimumPronunciationUnitCoverageRatio: z.number().min(0).max(1).optional(),
+    minimumExpectedPhoneCoverageRatio: z.number().min(0).max(1).optional(),
     antiForcePolicyVersion: z.string().min(1),
     jointAssignmentPolicyVersion: z.string().min(1),
     outputParserVersion: z.string().min(1),
+    textGridLexicalBoundaryPolicyVersion: z.string().min(1).optional(),
+    wordUnitMappingPolicyVersion: z.string().min(1).optional(),
+    pronunciationCoveragePolicyVersion: z.string().min(1).optional(),
+    boundaryAgreementPolicyVersion: z.string().min(1).optional(),
+    g2pPreparationPolicyVersion: z.string().min(1).optional(),
+    sudachiRuntimeIdentityHash: hashSchema.optional(),
     wholeMediaAsrAllowed: z.literal(false),
     whisperPromptAllowed: z.literal(false),
   })
@@ -497,7 +615,7 @@ export const subtitleCanonicalForcedAlignmentSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-canonical-forced-alignment"),
-    alignmentVersion: z.literal("C5.17"),
+    alignmentVersion: z.enum(["C5.17", "C5.17.1"]),
     generatedAt: z.iso.datetime(),
     sourceFingerprint: sourceFingerprintSchema,
     baseCueHash: hashSchema,
@@ -544,6 +662,38 @@ export const subtitleCanonicalForcedAlignmentSchema = z
         characterRatioRepairCount: z.literal(0),
         readingRatioRepairCount: z.literal(0),
         phoneCountRatioRepairCount: z.literal(0),
+        mfaRuntimeVerified: z.boolean().optional(),
+        mfaModelIdentityVerified: z.boolean().optional(),
+        mfaFreshExecuted: z.boolean().optional(),
+        windowPairAvailableCount: z.number().int().nonnegative().optional(),
+        windowPairUnavailableCount: z.number().int().nonnegative().optional(),
+        windowPairStableCount: z.number().int().nonnegative().optional(),
+        windowPairUnstableCount: z.number().int().nonnegative().optional(),
+        singleWindowOnlyCount: z.number().int().nonnegative().optional(),
+        uniqueBlockingComponentCount: z.number().int().nonnegative().optional(),
+        uniqueBlockingCueCount: z.number().int().nonnegative().optional(),
+        diagnosticBlockingFindingCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .optional(),
+        actionableHypothesisAvailableCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .optional(),
+        canonicalUnitCoverageMean: z.number().min(0).max(1).optional(),
+        pronunciationCoverageMean: z.number().min(0).max(1).optional(),
+        expectedPhoneCoverageMean: z.number().min(0).max(1).optional(),
+        wordUnitMappingAmbiguousCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .optional(),
+        fileIntervalUsedForTimingCount: z.literal(0).optional(),
+        readingCoverageCopiedFromWordCoverageCount: z.literal(0).optional(),
+        indexBasedWordUnitMappingCount: z.literal(0).optional(),
+        oneSidedBoundaryAcceptedAsFullAgreementCount: z.literal(0).optional(),
       })
       .strict(),
   })
@@ -553,7 +703,7 @@ export const forcedAlignmentCacheManifestSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("forced-alignment-cache-manifest"),
-    cacheVersion: z.literal("C5.17"),
+    cacheVersion: z.enum(["C5.17", "C5.17.1"]),
     generatedAt: z.iso.datetime(),
     requestType: z.literal("canonical-forced-alignment"),
     cacheRootShareableName: z.string().min(1),
@@ -602,6 +752,12 @@ export const forcedAlignmentCacheIdentitySchema = z
     outputParserVersion: z.string().min(1),
     antiForcePolicyVersion: z.string().min(1),
     jointAssignmentPolicyVersion: z.string().min(1),
+    textGridLexicalBoundaryPolicyVersion: z.string().min(1).optional(),
+    wordUnitMappingPolicyVersion: z.string().min(1).optional(),
+    pronunciationCoveragePolicyVersion: z.string().min(1).optional(),
+    boundaryAgreementPolicyVersion: z.string().min(1).optional(),
+    g2pPreparationPolicyVersion: z.string().min(1).optional(),
+    sudachiRuntimeIdentityHash: hashSchema.optional(),
   })
   .strict();
 
@@ -609,7 +765,7 @@ export const forcedAlignmentCacheEntrySchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("forced-alignment-cache-entry"),
-    cacheVersion: z.literal("C5.17"),
+    cacheVersion: z.enum(["C5.17", "C5.17.1"]),
     requestType: z.literal("canonical-forced-alignment"),
     createdAt: z.iso.datetime(),
     cacheKey: hashSchema,
@@ -622,7 +778,7 @@ export const c517ForcedAlignmentReplaySummarySchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("c5-17-forced-alignment-replay-summary"),
-    replayVersion: z.literal("C5.17"),
+    replayVersion: z.enum(["C5.17", "C5.17.1"]),
     generatedAt: z.iso.datetime(),
     runKind: z.enum(["fresh", "cache-replay", "observe"]),
     inputTaskName: z.string().min(1),
@@ -633,6 +789,7 @@ export const c517ForcedAlignmentReplaySummarySchema = z
     canonicalInputHash: hashSchema,
     alignmentHash: hashSchema,
     componentDecisionHash: hashSchema,
+    mutationHash: hashSchema.optional(),
     outputCueHash: hashSchema,
     sourceSha256Before: hashSchema,
     sourceSha256After: hashSchema,

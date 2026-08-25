@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c5-17-1-runtime-preparation-summary.schema.json",
+  "title": "c5-17-1-runtime-preparation-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c5-17-1-runtime-preparation-summary"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "micromamba": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "const": "2.8.1-0" },
+        "platformAsset": { "type": "string", "const": "micromamba-osx-arm64" },
+        "fileBasename": { "type": "string", "const": "micromamba" },
+        "size": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "expectedSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "downloadUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https:\\/\\/github\\.com\\/mamba-org\\/micromamba-releases\\/releases\\/download\\/2\\.8\\.1-0\\/.*"
+        },
+        "checksumUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https:\\/\\/github\\.com\\/mamba-org\\/micromamba-releases\\/releases\\/download\\/2\\.8\\.1-0\\/.*"
+        },
+        "officialSource": {
+          "type": "string",
+          "const": "mamba-org/micromamba-releases"
+        },
+        "shellProfileModified": { "type": "boolean", "const": false },
+        "sudoUsed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "version",
+        "platformAsset",
+        "fileBasename",
+        "size",
+        "sha256",
+        "expectedSha256",
+        "downloadUrl",
+        "checksumUrl",
+        "officialSource",
+        "shellProfileModified",
+        "sudoUsed"
+      ],
+      "additionalProperties": false
+    },
+    "mfaRuntimeManifest": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+    },
+    "mfaRuntimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mfaVersion": { "type": "string", "const": "3.4.2" },
+    "environmentExplicitSpecSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sudachiRuntimeManifest": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+    },
+    "sudachiRuntimeIdentityHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "acousticModelIdentityHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "dictionaryModelIdentityHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "g2pModelIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "networkUsedDuringPreparation": { "type": "boolean", "const": true },
+    "offlineReplayRequired": { "type": "boolean", "const": true },
+    "shellProfileModified": { "type": "boolean", "const": false },
+    "systemPythonModified": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "generatedAt",
+    "micromamba",
+    "mfaRuntimeManifest",
+    "mfaRuntimeIdentityHash",
+    "mfaVersion",
+    "environmentExplicitSpecSha256",
+    "sudachiRuntimeManifest",
+    "sudachiRuntimeIdentityHash",
+    "acousticModelIdentityHash",
+    "dictionaryModelIdentityHash",
+    "g2pModelIdentityHash",
+    "networkUsedDuringPreparation",
+    "offlineReplayRequired",
+    "shellProfileModified",
+    "systemPythonModified"
+  ],
+  "additionalProperties": false
+}

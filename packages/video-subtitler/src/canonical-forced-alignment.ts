@@ -22,8 +22,10 @@ import {
   type SourceFingerprint,
   type SubtitleCanonicalAlignmentInput,
   type SubtitleCanonicalForcedAlignment,
+  type SubtitleCanonicalPronunciation,
   type SubtitleCue,
   type SubtitleOverlapAcousticResolution,
+  type SudachiRuntimeCapability,
 } from "@mvl/shared";
 import {
   ANTI_FORCE_POLICY_VERSION,
@@ -47,12 +49,18 @@ import {
 } from "./forced-alignment-cache.js";
 import { sha256LocalFile } from "./finalization-support.js";
 import {
+  CANONICAL_PRONUNCIATION_POLICY_VERSION,
+  G2P_PREPARATION_POLICY_VERSION,
+  prepareCanonicalPronunciation,
+} from "./canonical-pronunciation.js";
+import {
   parseMfaAlignmentOutput,
   type ParsedMfaAlignment,
 } from "./mfa-output.js";
 import { verifyMfaRuntimeCapability } from "./mfa-runtime.js";
 import { measureWavDurationFromBuffer } from "./overlap-acoustic.js";
 import { runSudachiMorphemeAnalysis } from "./sudachi-analysis.js";
+import { loadSudachiRuntimeCapability } from "./sudachi-runtime.js";
 
 const MAXIMUM_COMPONENTS = 7;
 const MAXIMUM_CUES = 16;
@@ -83,6 +91,16 @@ export interface MfaAlignmentExecutorInput {
   temporaryDirectory: string;
   mediaOffsetSeconds: number;
   expectedUnitIds: readonly string[];
+  canonicalUnits: readonly {
+    unitId: string;
+    surface: string;
+    normalizedSurface: string;
+    reading: string | null;
+    phones: readonly string[];
+    punctuation: boolean;
+    criticalOov: boolean;
+  }[];
+  expectedPhones: readonly string[];
   capability: ForcedAlignmentRuntimeCapability;
   mfaExecutable: string;
   pythonExecutable: string;
@@ -125,6 +143,9 @@ export interface CanonicalForcedAlignmentOptions {
   mfaDictionaryModel?: string;
   mfaG2pModel?: string;
   mfaTemporaryDirectory?: string;
+  sudachiRuntimeManifestPath?: string;
+  sudachiPythonExecutable?: string;
+  sudachiRequirementsPath?: string;
   sudachiHelperPath?: string;
   parserHelperPath?: string;
   forcedAlignmentCacheDirectory?: string;
@@ -141,15 +162,20 @@ export interface CanonicalForcedAlignmentOptions {
 export interface CanonicalForcedAlignmentResult {
   artifact: SubtitleCanonicalForcedAlignment;
   canonicalInput: SubtitleCanonicalAlignmentInput;
+  pronunciation: SubtitleCanonicalPronunciation | null;
   cacheManifest: ForcedAlignmentCacheManifest;
   cues: SubtitleCue[];
   runtimeCapability: ForcedAlignmentRuntimeCapability | null;
+  sudachiRuntimeCapability: SudachiRuntimeCapability | null;
   dependencyFailure: string | null;
   wallClockSeconds: number;
   outputPaths: {
     canonicalInput: string;
     alignment: string;
+    pronunciation: string | null;
+    pronunciationDictionary: string | null;
     runtimeCapability: string | null;
+    sudachiRuntimeCapability: string | null;
     cacheManifest: string;
   };
 }
@@ -473,6 +499,8 @@ export const defaultMfaAlignmentExecutor: MfaAlignmentExecutor = async (
   const command = input.capability.commandCapabilities.alignOneCommand;
   const outputFormat =
     input.capability.commandCapabilities.selectedOutputFormat;
+  const mfaBinDirectory = path.dirname(input.mfaExecutable);
+  const mfaModelRoot = path.dirname(path.dirname(path.dirname(input.g2pModel)));
   const result = await input.runner.run(
     input.mfaExecutable,
     [
@@ -486,11 +514,21 @@ export const defaultMfaAlignmentExecutor: MfaAlignmentExecutor = async (
       input.g2pModel,
       "--output_format",
       outputFormat,
+      "--no_tokenization",
       "--clean",
       "--temporary_directory",
       input.temporaryDirectory,
     ],
-    { allowNonZero: true, timeoutMs: 180_000 },
+    {
+      allowNonZero: true,
+      timeoutMs: 180_000,
+      environment: {
+        ...process.env,
+        CONDA_PREFIX: path.dirname(mfaBinDirectory),
+        MFA_ROOT_DIR: mfaModelRoot,
+        PATH: `${mfaBinDirectory}${path.delimiter}${process.env.PATH ?? ""}`,
+      },
+    },
   );
   if (result.exitCode !== 0) {
     return {
@@ -516,7 +554,8 @@ export const defaultMfaAlignmentExecutor: MfaAlignmentExecutor = async (
       value: raw,
       outputFormat,
       mediaOffsetSeconds: input.mediaOffsetSeconds,
-      expectedUnitIds: input.expectedUnitIds,
+      canonicalUnits: input.canonicalUnits,
+      expectedPhones: input.expectedPhones,
     }),
     exitCode: 0,
     wallClockSeconds: (performance.now() - started) / 1_000,
@@ -625,6 +664,11 @@ function attemptFailure(input: {
     phoneAlignments: [],
     silenceIntervals: [],
     utteranceInterval: null,
+    lexicalUtteranceInterval: null,
+    phoneUtteranceInterval: null,
+    selectedUtteranceInterval: null,
+    selectedBoundarySource: "none",
+    wordUnitMappings: [],
     alignedWordCount: 0,
     expectedWordCount: 0,
     alignedPhoneCount: 0,
@@ -632,6 +676,16 @@ function attemptFailure(input: {
     wordCoverageRatio: 0,
     readingCoverageRatio: 0,
     phoneCoverageRatio: 0,
+    canonicalUnitCoverageRatio: 0,
+    alignedWordCoverageRatio: 0,
+    pronunciationUnitCoverageRatio: 0,
+    expectedPhoneCoverageRatio: 0,
+    wordWithAnyPhoneRatio: 0,
+    alignedPhonePlausibilityRatio: 0,
+    expectedPhoneCount: 0,
+    alignedExpectedPhoneCount: 0,
+    unresolvedMappingCount: 0,
+    ambiguousMappingCount: 0,
     boundaryStart: null,
     boundaryEnd: null,
     startPinnedToWindowEdge: false,
@@ -665,19 +719,6 @@ function successfulAttempt(input: {
   const alignedWordCount = input.parsed.wordAlignments.filter(
     (word) => !word.oov,
   ).length;
-  const wordsWithPhones = new Set(
-    input.parsed.phoneAlignments.flatMap((phone) =>
-      phone.wordAlignmentId === null ? [] : [phone.wordAlignmentId],
-    ),
-  ).size;
-  const wordCoverageRatio = Math.min(
-    1,
-    alignedWordCount / Math.max(1, input.expectedWordCount),
-  );
-  const phoneCoverageRatio = Math.min(
-    1,
-    wordsWithPhones / Math.max(1, input.expectedWordCount),
-  );
   const edgeTolerance = 0.03;
   return forcedAlignmentAttemptSchema.parse({
     attemptId: input.attemptId,
@@ -714,13 +755,29 @@ function successfulAttempt(input: {
     phoneAlignments: input.parsed.phoneAlignments,
     silenceIntervals: input.parsed.silenceIntervals,
     utteranceInterval: input.parsed.utteranceInterval,
+    fileInterval: input.parsed.fileInterval,
+    lexicalUtteranceInterval: input.parsed.lexicalUtteranceInterval,
+    phoneUtteranceInterval: input.parsed.phoneUtteranceInterval,
+    selectedUtteranceInterval: input.parsed.selectedUtteranceInterval,
+    selectedBoundarySource: input.parsed.selectedBoundarySource,
+    wordUnitMappings: input.parsed.wordUnitMappings,
     alignedWordCount,
     expectedWordCount: input.expectedWordCount,
     alignedPhoneCount: input.parsed.phoneAlignments.length,
     oovCount: input.parsed.wordAlignments.filter((word) => word.oov).length,
-    wordCoverageRatio,
-    readingCoverageRatio: wordCoverageRatio,
-    phoneCoverageRatio,
+    wordCoverageRatio: input.parsed.canonicalUnitCoverageRatio,
+    readingCoverageRatio: input.parsed.pronunciationUnitCoverageRatio,
+    phoneCoverageRatio: input.parsed.expectedPhoneCoverageRatio,
+    canonicalUnitCoverageRatio: input.parsed.canonicalUnitCoverageRatio,
+    alignedWordCoverageRatio: input.parsed.alignedWordCoverageRatio,
+    pronunciationUnitCoverageRatio: input.parsed.pronunciationUnitCoverageRatio,
+    expectedPhoneCoverageRatio: input.parsed.expectedPhoneCoverageRatio,
+    wordWithAnyPhoneRatio: input.parsed.wordWithAnyPhoneRatio,
+    alignedPhonePlausibilityRatio: input.parsed.alignedPhonePlausibilityRatio,
+    expectedPhoneCount: input.parsed.expectedPhoneCount,
+    alignedExpectedPhoneCount: input.parsed.alignedExpectedPhoneCount,
+    unresolvedMappingCount: input.parsed.unresolvedMappingCount,
+    ambiguousMappingCount: input.parsed.ambiguousMappingCount,
     boundaryStart,
     boundaryEnd,
     startPinnedToWindowEdge:
@@ -739,6 +796,7 @@ function cacheIdentity(input: {
   audioSha256: string;
   window: AlignmentWindow;
   cue: SubtitleCanonicalAlignmentInput["cues"][number];
+  pronunciationCue: SubtitleCanonicalPronunciation["cues"][number] | null;
   backend: ForcedAlignmentBackend;
   capability: ForcedAlignmentRuntimeCapability;
   configuration: ForcedAlignmentConfiguration;
@@ -757,11 +815,13 @@ function cacheIdentity(input: {
     },
     canonicalTextSha256: input.cue.canonicalTextSha256,
     alignmentTextSha256: input.cue.alignmentTextSha256,
-    readingManifestSha256: forcedAlignmentSha256({
-      morphemes: input.cue.morphemes,
-      wordUnits: input.cue.wordUnits,
-      normalizedReading: input.cue.normalizedReading,
-    }),
+    readingManifestSha256: forcedAlignmentSha256(
+      input.pronunciationCue ?? {
+        morphemes: input.cue.morphemes,
+        wordUnits: input.cue.wordUnits,
+        normalizedReading: input.cue.normalizedReading,
+      },
+    ),
     backend: input.backend,
     runtimeIdentityHash: input.capability.runtimeIdentityHash,
     environmentExplicitSpecSha256:
@@ -783,21 +843,34 @@ function cacheIdentity(input: {
     antiForcePolicyVersion: input.configuration.antiForcePolicyVersion,
     jointAssignmentPolicyVersion:
       input.configuration.jointAssignmentPolicyVersion,
+    textGridLexicalBoundaryPolicyVersion:
+      input.configuration.textGridLexicalBoundaryPolicyVersion,
+    wordUnitMappingPolicyVersion:
+      input.configuration.wordUnitMappingPolicyVersion,
+    pronunciationCoveragePolicyVersion:
+      input.configuration.pronunciationCoveragePolicyVersion,
+    boundaryAgreementPolicyVersion:
+      input.configuration.boundaryAgreementPolicyVersion,
+    g2pPreparationPolicyVersion:
+      input.configuration.g2pPreparationPolicyVersion,
+    sudachiRuntimeIdentityHash: input.configuration.sudachiRuntimeIdentityHash,
   });
 }
 
 async function defaultMorphemeAnalysis(input: {
   options: CanonicalForcedAlignmentOptions;
   cues: readonly SubtitleCue[];
+  sudachiCapability: SudachiRuntimeCapability | null;
 }): Promise<ReadonlyMap<string, readonly SudachiMorphemeAnalysis[]>> {
   if (
-    input.options.pythonExecutable === undefined ||
+    input.sudachiCapability === null ||
+    input.options.sudachiPythonExecutable === undefined ||
     input.options.sudachiHelperPath === undefined
   ) {
     return new Map();
   }
   const result = await runSudachiMorphemeAnalysis({
-    pythonExecutable: input.options.pythonExecutable,
+    pythonExecutable: input.options.sudachiPythonExecutable,
     helperPath: input.options.sudachiHelperPath,
     items: input.cues.map((cue) => ({
       id: cue.id,
@@ -812,6 +885,41 @@ export async function runCanonicalForcedAlignment(
 ): Promise<CanonicalForcedAlignmentResult> {
   const started = performance.now();
   const generatedAt = options.generatedAt ?? new Date().toISOString();
+  const runtimeCapability = await loadRuntimeCapability({
+    backend: options.backend,
+    ...(options.mfaRuntimeManifestPath === undefined
+      ? {}
+      : { manifestPath: options.mfaRuntimeManifestPath }),
+  });
+  assertMfaOptions(options, runtimeCapability);
+  let sudachiRuntimeCapability: SudachiRuntimeCapability | null = null;
+  if (options.sudachiRuntimeManifestPath !== undefined) {
+    if (
+      options.sudachiPythonExecutable === undefined ||
+      options.sudachiHelperPath === undefined
+    ) {
+      throw new InputError(
+        "Sudachi runtime verification requires its Python executable and helper path.",
+      );
+    }
+    sudachiRuntimeCapability = await loadSudachiRuntimeCapability({
+      manifestPath: options.sudachiRuntimeManifestPath,
+      pythonExecutable: options.sudachiPythonExecutable,
+      helperPath: options.sudachiHelperPath,
+      requirementsPath:
+        options.sudachiRequirementsPath ??
+        path.resolve("scripts/requirements-sudachi.txt"),
+      runner: options.runner,
+    });
+  }
+  if (
+    runtimeCapability?.runtimeVersion === "C5.17.1" &&
+    sudachiRuntimeCapability === null
+  ) {
+    throw new InputError(
+      "C5.17.1 MFA replay requires an independently verified Sudachi runtime.",
+    );
+  }
   const configuration = {
     ...DEFAULT_FORCED_ALIGNMENT_CONFIGURATION,
     ...options.configuration,
@@ -821,6 +929,19 @@ export async function runCanonicalForcedAlignment(
     antiForcePolicyVersion: ANTI_FORCE_POLICY_VERSION,
     jointAssignmentPolicyVersion: JOINT_ASSIGNMENT_POLICY_VERSION,
     outputParserVersion: FORCED_ALIGNMENT_OUTPUT_PARSER_VERSION,
+    textGridLexicalBoundaryPolicyVersion:
+      "c5.17.1-lexical-utterance-boundary-v1",
+    wordUnitMappingPolicyVersion: "c5.17.1-word-unit-sequence-mapping-v1",
+    pronunciationCoveragePolicyVersion:
+      "c5.17.1-pronunciation-phone-coverage-v1",
+    boundaryAgreementPolicyVersion: "c5.17.1-two-sided-boundary-agreement-v1",
+    g2pPreparationPolicyVersion: G2P_PREPARATION_POLICY_VERSION,
+    ...(sudachiRuntimeCapability === null
+      ? {}
+      : {
+          sudachiRuntimeIdentityHash:
+            sudachiRuntimeCapability.runtimeIdentityHash,
+        }),
     wholeMediaAsrAllowed: false,
     whisperPromptAllowed: false,
   } as ForcedAlignmentConfiguration;
@@ -866,16 +987,13 @@ export async function runCanonicalForcedAlignment(
       `Planned ${String(maximumPlannedAttempts)} MFA attempts exceed the configured maximum.`,
     );
   }
-  const runtimeCapability = await loadRuntimeCapability({
-    backend: options.backend,
-    ...(options.mfaRuntimeManifestPath === undefined
-      ? {}
-      : { manifestPath: options.mfaRuntimeManifestPath }),
-  });
-  assertMfaOptions(options, runtimeCapability);
   const morphemesByCueId =
     options.morphemeAnalyzer === undefined
-      ? await defaultMorphemeAnalysis({ options, cues: targetCues })
+      ? await defaultMorphemeAnalysis({
+          options,
+          cues: targetCues,
+          sudachiCapability: sudachiRuntimeCapability,
+        })
       : await options.morphemeAnalyzer(targetCues);
   const baseTimingHash =
     options.baseTimingHash ??
@@ -898,6 +1016,7 @@ export async function runCanonicalForcedAlignment(
     baseCueHash: options.overlapArtifact.baseCueHash,
     baseTimingHash,
     generatedAt,
+    alignmentVersion: runtimeCapability?.runtimeVersion ?? "C5.17",
     sudachiMorphemesByCueId: morphemesByCueId,
   });
   const outputPaths = {
@@ -909,6 +1028,20 @@ export async function runCanonicalForcedAlignment(
       options.subtitleDirectory,
       "subtitle-canonical-forced-alignment.json",
     ),
+    pronunciation:
+      runtimeCapability === null
+        ? null
+        : path.join(
+            options.subtitleDirectory,
+            "subtitle-canonical-pronunciation.json",
+          ),
+    pronunciationDictionary:
+      runtimeCapability === null
+        ? null
+        : path.join(
+            options.subtitleDirectory,
+            "subtitle-canonical-pronunciation.dict",
+          ),
     runtimeCapability:
       runtimeCapability === null
         ? null
@@ -916,17 +1049,90 @@ export async function runCanonicalForcedAlignment(
             options.subtitleDirectory,
             "forced-alignment-runtime-capability.json",
           ),
+    sudachiRuntimeCapability:
+      sudachiRuntimeCapability === null
+        ? null
+        : path.join(
+            options.subtitleDirectory,
+            "sudachi-runtime-capability.json",
+          ),
     cacheManifest: path.join(
       options.subtitleDirectory,
       "forced-alignment-cache-manifest.json",
     ),
   };
+  const preparedPronunciation =
+    runtimeCapability === null || sudachiRuntimeCapability === null
+      ? null
+      : await prepareCanonicalPronunciation({
+          canonicalInput,
+          mfaCapability: runtimeCapability,
+          sudachiCapability: sudachiRuntimeCapability,
+          dictionaryModelPath: options.mfaDictionaryModel,
+          g2pModelPath: options.mfaG2pModel,
+          mfaExecutable: options.mfaExecutable,
+          runner: options.runner,
+          cacheDirectory: path.join(
+            options.forcedAlignmentCacheDirectory ??
+              path.join(options.subtitleDirectory, ".forced-alignment-cache"),
+            "canonical-pronunciation",
+            CANONICAL_PRONUNCIATION_POLICY_VERSION,
+          ),
+          generatedAt,
+        });
+  if (
+    preparedPronunciation !== null &&
+    outputPaths.pronunciationDictionary !== null
+  ) {
+    await atomicWriteFile(
+      outputPaths.pronunciationDictionary,
+      preparedPronunciation.alignmentDictionary,
+      { overwrite: true },
+    );
+  }
+  const effectiveCanonicalCues = canonicalInput.cues.map((cue) => {
+    const pronunciationCue = preparedPronunciation?.artifact.cues.find(
+      (item) => item.cueId === cue.cueId,
+    );
+    if (pronunciationCue === undefined) return cue;
+    const pronunciationByUnit = new Map(
+      pronunciationCue.wordUnits.map((unit) => [unit.unitId, unit]),
+    );
+    const wordUnits = cue.wordUnits.map((unit) => ({
+      ...unit,
+      criticalOov:
+        pronunciationByUnit.get(unit.unitId)?.isCriticalOov ?? unit.criticalOov,
+    }));
+    const lexical = wordUnits.filter((unit) => !unit.punctuation);
+    const unresolvedOov = lexical
+      .filter((unit) => unit.criticalOov)
+      .map((unit) => unit.surface);
+    const resolvedReading = lexical.filter((unit) => unit.reading !== null);
+    return {
+      ...cue,
+      wordUnits,
+      unresolvedOov,
+      readingAvailable:
+        unresolvedOov.length === 0 && resolvedReading.length > 0,
+      readingCoverageRatio:
+        lexical.length === 0 ? 0 : resolvedReading.length / lexical.length,
+      blockers: [
+        ...cue.blockers.filter(
+          (blocker) => blocker !== "CRITICAL_OOV_READING_UNRESOLVED",
+        ),
+        ...(unresolvedOov.length === 0
+          ? []
+          : ["CRITICAL_OOV_PHONE_UNRESOLVED"]),
+      ],
+    };
+  });
   const cache = new ForcedAlignmentCache({
     root:
       options.forcedAlignmentCacheDirectory ??
       path.join(options.subtitleDirectory, ".forced-alignment-cache"),
     importRoots: options.forcedAlignmentCacheImportPaths ?? [],
     mode: options.forcedAlignmentCacheMode ?? "read-write",
+    version: runtimeCapability?.runtimeVersion ?? "C5.17",
   });
   const attempts: ForcedAlignmentAttempt[] = [];
   let mfaProcessCount = 0;
@@ -958,9 +1164,28 @@ export async function runCanonicalForcedAlignment(
             `target cue ${cueId}`,
           );
           const canonicalCue = requiredValue(
-            canonicalInput.cues.find((item) => item.cueId === cueId),
+            effectiveCanonicalCues.find((item) => item.cueId === cueId),
             `canonical cue ${cueId}`,
           );
+          const pronunciationCue =
+            preparedPronunciation?.artifact.cues.find(
+              (item) => item.cueId === cueId,
+            ) ?? null;
+          if (
+            runtimeCapability.runtimeVersion === "C5.17.1" &&
+            pronunciationCue === null
+          ) {
+            throw new InputError(
+              `Missing C5.17.1 canonical pronunciation cue ${cueId}.`,
+            );
+          }
+          const pronunciationUnits =
+            pronunciationCue?.wordUnits ??
+            canonicalCue.wordUnits.map((unit) => ({
+              ...unit,
+              phones: [] as string[],
+              isCriticalOov: unit.criticalOov,
+            }));
           const windows = alignmentWindows({
             cue,
             extractionInterval: component.extractionInterval,
@@ -998,7 +1223,10 @@ export async function runCanonicalForcedAlignment(
             });
             await atomicWriteFile(
               transcriptPath,
-              `${canonicalCue.alignmentText}\n`,
+              `${pronunciationUnits
+                .filter((unit) => !unit.punctuation)
+                .map((unit) => unit.surface)
+                .join(" ")}\n`,
               {
                 overwrite: true,
               },
@@ -1011,6 +1239,7 @@ export async function runCanonicalForcedAlignment(
               audioSha256: audio.sha256,
               window,
               cue: canonicalCue,
+              pronunciationCue,
               backend: options.backend,
               capability: runtimeCapability,
               configuration,
@@ -1043,14 +1272,26 @@ export async function runCanonicalForcedAlignment(
                   options.mfaTemporaryDirectory ??
                   path.join(attemptDirectory, "mfa-temp"),
                 mediaOffsetSeconds: window.mediaStart,
-                expectedUnitIds: canonicalCue.wordUnits
+                expectedUnitIds: pronunciationUnits
                   .filter((unit) => !unit.punctuation)
                   .map((unit) => unit.unitId),
+                canonicalUnits: pronunciationUnits.map((unit) => ({
+                  unitId: unit.unitId,
+                  surface: unit.surface,
+                  normalizedSurface: unit.normalizedSurface,
+                  reading: unit.reading,
+                  phones: unit.phones,
+                  punctuation: unit.punctuation,
+                  criticalOov: unit.isCriticalOov,
+                })),
+                expectedPhones: pronunciationCue?.expectedPhones ?? [],
                 capability: runtimeCapability,
                 mfaExecutable: options.mfaExecutable,
                 pythonExecutable: options.pythonExecutable,
                 acousticModel: options.mfaAcousticModel,
-                dictionaryModel: options.mfaDictionaryModel,
+                dictionaryModel:
+                  outputPaths.pronunciationDictionary ??
+                  options.mfaDictionaryModel,
                 g2pModel: options.mfaG2pModel,
                 runner: options.runner,
                 parserHelperPath:
@@ -1121,7 +1362,7 @@ export async function runCanonicalForcedAlignment(
     await rm(temporaryRoot, { recursive: true, force: true });
   }
   const cueAlignments: ForcedAlignmentCueDecision[] = [];
-  for (const canonicalCue of canonicalInput.cues) {
+  for (const canonicalCue of effectiveCanonicalCues) {
     const cue = requiredValue(
       targetCues.find((item) => item.id === canonicalCue.cueId),
       `target cue ${canonicalCue.cueId}`,
@@ -1189,7 +1430,7 @@ export async function runCanonicalForcedAlignment(
     jointlyAssignForcedAlignmentComponent({
       componentId: component.componentId,
       componentInterval: component.unionInterval,
-      canonicalCues: canonicalInput.cues.filter(
+      canonicalCues: effectiveCanonicalCues.filter(
         (cue) => cue.componentId === component.componentId,
       ),
       cueAlignments: cueAlignments.filter((cue) =>
@@ -1240,6 +1481,15 @@ export async function runCanonicalForcedAlignment(
     atomicWriteJson(outputPaths.canonicalInput, canonicalInput, {
       overwrite: true,
     }),
+    ...(preparedPronunciation === null || outputPaths.pronunciation === null
+      ? []
+      : [
+          atomicWriteJson(
+            outputPaths.pronunciation,
+            preparedPronunciation.artifact,
+            { overwrite: true },
+          ),
+        ]),
     atomicWriteJson(outputPaths.alignment, artifact, { overwrite: true }),
     atomicWriteJson(outputPaths.cacheManifest, cacheManifest, {
       overwrite: true,
@@ -1250,6 +1500,16 @@ export async function runCanonicalForcedAlignment(
           atomicWriteJson(outputPaths.runtimeCapability, runtimeCapability, {
             overwrite: true,
           }),
+        ]),
+    ...(sudachiRuntimeCapability === null ||
+    outputPaths.sudachiRuntimeCapability === null
+      ? []
+      : [
+          atomicWriteJson(
+            outputPaths.sudachiRuntimeCapability,
+            sudachiRuntimeCapability,
+            { overwrite: true },
+          ),
         ]),
   ]);
   options.logger?.log("info", "Canonical forced alignment completed.", {
@@ -1264,9 +1524,11 @@ export async function runCanonicalForcedAlignment(
   return {
     artifact,
     canonicalInput,
+    pronunciation: preparedPronunciation?.artifact ?? null,
     cacheManifest,
     cues: applied.cues,
     runtimeCapability,
+    sudachiRuntimeCapability,
     dependencyFailure,
     wallClockSeconds: (performance.now() - started) / 1_000,
     outputPaths,

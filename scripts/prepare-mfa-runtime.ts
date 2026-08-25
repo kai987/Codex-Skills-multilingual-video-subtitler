@@ -25,6 +25,8 @@ import {
   missingMfaManagerError,
   probeMfaRuntimeCapability,
   verifyMfaRuntimeCapability,
+  installPinnedMicromamba,
+  PINNED_MICROMAMBA_VERSION,
 } from "@mvl/video-subtitler";
 
 import { runCommand } from "./whisper-runtime-common.js";
@@ -32,10 +34,39 @@ import { runCommand } from "./whisper-runtime-common.js";
 const { values } = parseArgs({
   options: {
     "mfa-version": { type: "string", default: PINNED_MFA_VERSION },
+    "micromamba-version": {
+      type: "string",
+      default: PINNED_MICROMAMBA_VERSION,
+    },
+    "install-micromamba": { type: "boolean", default: false },
     "runtime-root": { type: "string" },
     "create-runtime": { type: "boolean", default: false },
     "create-mfa-runtime": { type: "boolean", default: false },
     "fetch-mfa-models": { type: "boolean", default: false },
+    "acoustic-model": {
+      type: "string",
+      default: PINNED_JAPANESE_ACOUSTIC_MODEL,
+    },
+    "acoustic-model-version": {
+      type: "string",
+      default: PINNED_JAPANESE_MODEL_VERSION,
+    },
+    "dictionary-model": {
+      type: "string",
+      default: PINNED_JAPANESE_DICTIONARY_MODEL,
+    },
+    "dictionary-model-version": {
+      type: "string",
+      default: PINNED_JAPANESE_MODEL_VERSION,
+    },
+    "g2p-model": {
+      type: "string",
+      default: PINNED_JAPANESE_G2P_MODEL,
+    },
+    "g2p-model-version": {
+      type: "string",
+      default: PINNED_JAPANESE_MODEL_VERSION,
+    },
   },
   strict: true,
 });
@@ -44,6 +75,37 @@ if (values["mfa-version"] !== PINNED_MFA_VERSION) {
   throw new InputError(
     `C5.17 requires MFA ${PINNED_MFA_VERSION}; received ${values["mfa-version"]}.`,
   );
+}
+if (values["micromamba-version"] !== PINNED_MICROMAMBA_VERSION) {
+  throw new InputError(
+    `C5.17.1 requires Micromamba ${PINNED_MICROMAMBA_VERSION}; received ${values["micromamba-version"]}.`,
+  );
+}
+for (const [name, actual, expected] of [
+  ["acoustic model", values["acoustic-model"], PINNED_JAPANESE_ACOUSTIC_MODEL],
+  [
+    "dictionary model",
+    values["dictionary-model"],
+    PINNED_JAPANESE_DICTIONARY_MODEL,
+  ],
+  ["G2P model", values["g2p-model"], PINNED_JAPANESE_G2P_MODEL],
+] as const) {
+  if (actual !== expected) {
+    throw new InputError(
+      `C5.17.1 requires official ${name} ${expected}; received ${actual}.`,
+    );
+  }
+}
+for (const [name, actual] of [
+  ["acoustic model", values["acoustic-model-version"]],
+  ["dictionary model", values["dictionary-model-version"]],
+  ["G2P model", values["g2p-model-version"]],
+] as const) {
+  if (actual !== PINNED_JAPANESE_MODEL_VERSION) {
+    throw new InputError(
+      `C5.17.1 requires ${name} ${PINNED_JAPANESE_MODEL_VERSION}; received ${actual}.`,
+    );
+  }
 }
 
 const createRuntime = values["create-runtime"] || values["create-mfa-runtime"];
@@ -55,20 +117,46 @@ const paths = mfaRuntimePaths({
 });
 
 if (!createRuntime && !fetchModels) {
-  const existing = verifyMfaRuntimeCapability(
-    JSON.parse(await readFile(paths.manifestPath, "utf8")) as unknown,
-  );
-  process.stdout.write(
-    `${JSON.stringify({ ok: true, offline: true, manifestPath: paths.manifestPath, runtimeIdentityHash: existing.runtimeIdentityHash }, null, 2)}\n`,
-  );
-  process.exit(0);
+  try {
+    const existing = verifyMfaRuntimeCapability(
+      JSON.parse(await readFile(paths.manifestPath, "utf8")) as unknown,
+    );
+    process.stdout.write(
+      `${JSON.stringify({ ok: true, offline: true, manifestPath: paths.manifestPath, runtimeIdentityHash: existing.runtimeIdentityHash }, null, 2)}\n`,
+    );
+    process.exit(0);
+  } catch (error) {
+    if (!(
+      error instanceof Error &&
+      "code" in error &&
+      error.code === "ENOENT"
+    )) {
+      throw error;
+    }
+    // The isolated environment may already be complete while an earlier
+    // capability probe failed. Re-probe it without recreating or downloading.
+  }
 }
 
-const manager = await detectMfaEnvironmentManager();
+const installedMicromamba = values["install-micromamba"]
+  ? await installPinnedMicromamba({ allowDownload: true })
+  : null;
+const manager =
+  installedMicromamba === null
+    ? await detectMfaEnvironmentManager()
+    : {
+        manager: "micromamba" as const,
+        executable: installedMicromamba.executablePath,
+      };
 if (manager === null) throw missingMfaManagerError();
 await mkdir(paths.runtimeDirectory, { recursive: true });
 await mkdir(paths.modelDirectory, { recursive: true });
 await mkdir(paths.temporaryDirectory, { recursive: true });
+const environment = {
+  ...process.env,
+  MFA_ROOT_DIR: paths.modelDirectory,
+  MAMBA_ROOT_PREFIX: path.join(paths.runtimeDirectory, "micromamba-root"),
+};
 
 if (createRuntime) {
   assertMfaNetworkPolicy({
@@ -82,6 +170,7 @@ if (createRuntime) {
       manager: manager.manager,
       environmentDirectory: paths.environmentDirectory,
     }),
+    { environment },
   );
 }
 
@@ -97,11 +186,6 @@ const pythonExecutable = path.join(
   executableDirectory,
   process.platform === "win32" ? "python.exe" : "python",
 );
-const environment = {
-  ...process.env,
-  MFA_ROOT_DIR: paths.modelDirectory,
-};
-
 const explicit = await runCommand(
   manager.executable,
   ["list", "--explicit", "--prefix", paths.environmentDirectory],
@@ -170,6 +254,40 @@ const [acousticPath, dictionaryPath, g2pPath] = await Promise.all([
   findModelArchive("g2p", PINNED_JAPANESE_G2P_MODEL),
 ]);
 
+const officialCache = JSON.parse(
+  await readFile(
+    path.join(paths.modelDirectory, "pretrained_models", "cache.json"),
+    "utf8",
+  ),
+) as Record<string, Record<string, Record<string, unknown>>>;
+function officialRegistryEntry(
+  modelType: "acoustic" | "dictionary" | "g2p",
+  modelName: string,
+): readonly [string, string, string, string, string, number] {
+  const entry =
+    officialCache[modelType]?.[modelName]?.[
+      `v${PINNED_JAPANESE_MODEL_VERSION}`
+    ];
+  if (
+    !Array.isArray(entry) ||
+    entry.length !== 6 ||
+    entry.slice(0, 5).some((value) => typeof value !== "string") ||
+    typeof entry[5] !== "number"
+  ) {
+    throw new InputError(
+      `Official MFA registry has no exact ${modelType} ${modelName} ${PINNED_JAPANESE_MODEL_VERSION} entry.`,
+    );
+  }
+  return entry as unknown as readonly [
+    string,
+    string,
+    string,
+    string,
+    string,
+    number,
+  ];
+}
+
 const oldMfaRoot = process.env.MFA_ROOT_DIR;
 process.env.MFA_ROOT_DIR = paths.modelDirectory;
 try {
@@ -199,11 +317,25 @@ try {
       license: OFFICIAL_MFA_MODEL_LICENSE,
       citation: OFFICIAL_JAPANESE_G2P_CITATION,
     },
+    officialRegistry: {
+      acoustic: officialRegistryEntry(
+        "acoustic",
+        PINNED_JAPANESE_ACOUSTIC_MODEL,
+      ),
+      dictionary: officialRegistryEntry(
+        "dictionary",
+        PINNED_JAPANESE_DICTIONARY_MODEL,
+      ),
+      g2p: officialRegistryEntry("g2p", PINNED_JAPANESE_G2P_MODEL),
+    },
     networkUsedDuringPreparation: createRuntime || fetchModels,
+    ...(installedMicromamba === null
+      ? {}
+      : { micromamba: installedMicromamba.identity }),
   });
   await atomicWriteJson(paths.manifestPath, capability, { overwrite: true });
   process.stdout.write(
-    `${JSON.stringify({ ok: true, manager: manager.manager, manifestPath: paths.manifestPath, runtimeIdentityHash: capability.runtimeIdentityHash, selectedCommand: capability.commandCapabilities.alignOneCommand, selectedOutputFormat: capability.commandCapabilities.selectedOutputFormat }, null, 2)}\n`,
+    `${JSON.stringify({ ok: true, manager: manager.manager, micromamba: installedMicromamba?.identity ?? null, manifestPath: paths.manifestPath, runtimeIdentityHash: capability.runtimeIdentityHash, selectedCommand: capability.commandCapabilities.alignOneCommand, selectedG2pCommand: capability.commandCapabilities.g2pCommand, selectedOutputFormat: capability.commandCapabilities.selectedOutputFormat }, null, 2)}\n`,
   );
 } finally {
   if (oldMfaRoot === undefined) delete process.env.MFA_ROOT_DIR;

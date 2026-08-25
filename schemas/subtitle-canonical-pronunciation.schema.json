@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-canonical-pronunciation.schema.json",
+  "title": "subtitle-canonical-pronunciation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-canonical-pronunciation"
+    },
+    "pronunciationVersion": { "type": "string", "const": "C5.17.1" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalAlignmentInputHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sudachiRuntimeIdentityHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "mfaRuntimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "g2pModelIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "g2pCommand": { "type": "string", "enum": ["g2p", "g2p_one"] },
+    "pronunciationPolicyVersion": {
+      "type": "string",
+      "const": "c5.17.1-canonical-pronunciation-v1"
+    },
+    "canonicalTextMutationCount": { "type": "number", "const": 0 },
+    "cues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "componentId": { "type": "string", "minLength": 1 },
+          "canonicalText": { "type": "string", "minLength": 1 },
+          "canonicalTextSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "alignmentText": { "type": "string", "minLength": 1 },
+          "alignmentTextSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "morphemeCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "wordUnits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "unitId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "surface": { "type": "string", "minLength": 1 },
+                "normalizedSurface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingSource": {
+                  "type": "string",
+                  "enum": [
+                    "terminology-confirmed",
+                    "sudachi-dictionary",
+                    "mfa-dictionary",
+                    "mfa-g2p",
+                    "kana-literal",
+                    "fallback-tokenization",
+                    "unresolved"
+                  ]
+                },
+                "pronunciation": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phones": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "pronunciationSource": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-dictionary",
+                    "mfa-g2p",
+                    "terminology-phone-override",
+                    "unresolved"
+                  ]
+                },
+                "dictionaryLookupStatus": {
+                  "type": "string",
+                  "enum": ["found", "not-found", "not-attempted", "failed"]
+                },
+                "g2pStatus": {
+                  "type": "string",
+                  "enum": [
+                    "resolved",
+                    "not-needed",
+                    "not-attempted",
+                    "failed",
+                    "unresolved"
+                  ]
+                },
+                "modelIdentityHash": {
+                  "anyOf": [
+                    { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                    { "type": "null" }
+                  ]
+                },
+                "modelHash": {
+                  "anyOf": [
+                    { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                    { "type": "null" }
+                  ]
+                },
+                "isOov": { "type": "boolean" },
+                "isCriticalOov": { "type": "boolean" },
+                "punctuation": { "type": "boolean" },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "unitId",
+                "cueId",
+                "surface",
+                "normalizedSurface",
+                "reading",
+                "readingSource",
+                "pronunciation",
+                "phones",
+                "pronunciationSource",
+                "dictionaryLookupStatus",
+                "g2pStatus",
+                "modelIdentityHash",
+                "modelHash",
+                "isOov",
+                "isCriticalOov",
+                "punctuation",
+                "blockers"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "readingUnits": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "pronunciationUnits": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "expectedPhones": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "readingCoverageBeforeG2p": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "readingCoverageAfterG2p": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "pronunciationCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "criticalOovBefore": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "criticalOovAfter": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pronunciationEligibility": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "cueId",
+          "componentId",
+          "canonicalText",
+          "canonicalTextSha256",
+          "alignmentText",
+          "alignmentTextSha256",
+          "morphemeCount",
+          "wordUnits",
+          "readingUnits",
+          "pronunciationUnits",
+          "expectedPhones",
+          "readingCoverageBeforeG2p",
+          "readingCoverageAfterG2p",
+          "pronunciationCoverageRatio",
+          "criticalOovBefore",
+          "criticalOovAfter",
+          "pronunciationEligibility",
+          "blockers"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sudachiResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dictionaryResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "g2pResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kanaLiteralCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "criticalOovBefore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "criticalOovAfter": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "g2pProcessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "g2pCacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextMutationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "cueCount",
+        "unitCount",
+        "sudachiResolvedCount",
+        "dictionaryResolvedCount",
+        "g2pResolvedCount",
+        "kanaLiteralCount",
+        "unresolvedCount",
+        "criticalOovBefore",
+        "criticalOovAfter",
+        "g2pProcessCount",
+        "g2pCacheHitCount",
+        "canonicalTextMutationCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "pronunciationVersion",
+    "generatedAt",
+    "baseCueHash",
+    "canonicalAlignmentInputHash",
+    "sudachiRuntimeIdentityHash",
+    "mfaRuntimeIdentityHash",
+    "g2pModelIdentityHash",
+    "g2pCommand",
+    "pronunciationPolicyVersion",
+    "canonicalTextMutationCount",
+    "cues",
+    "summary"
+  ],
+  "additionalProperties": false
+}

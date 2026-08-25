@@ -9,7 +9,7 @@
       "type": "string",
       "const": "c5-17-forced-alignment-replay-summary"
     },
-    "replayVersion": { "type": "string", "const": "C5.17" },
+    "replayVersion": { "type": "string", "enum": ["C5.17", "C5.17.1"] },
     "generatedAt": {
       "type": "string",
       "format": "date-time",
@@ -38,6 +38,7 @@
     "canonicalInputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "alignmentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "componentDecisionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "sourceSha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "sourceSha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },

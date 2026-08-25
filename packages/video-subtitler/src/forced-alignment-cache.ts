@@ -68,16 +68,19 @@ export class ForcedAlignmentCache {
   readonly #root: string;
   readonly #imports: readonly string[];
   readonly #mode: ForcedAlignmentCacheMode;
+  readonly #version: "C5.17" | "C5.17.1";
   readonly #records: ForcedAlignmentCacheManifest["entries"] = [];
 
   constructor(input: {
     root: string;
     importRoots?: readonly string[];
     mode?: ForcedAlignmentCacheMode;
+    version?: "C5.17" | "C5.17.1";
   }) {
     this.#root = path.resolve(input.root);
     this.#imports = (input.importRoots ?? []).map((root) => path.resolve(root));
     this.#mode = input.mode ?? "read-write";
+    this.#version = input.version ?? "C5.17";
   }
 
   async get(input: {
@@ -140,7 +143,7 @@ export class ForcedAlignmentCache {
     const entry = forcedAlignmentCacheEntrySchema.parse({
       schemaVersion: "1.0.0",
       artifactType: "forced-alignment-cache-entry",
-      cacheVersion: "C5.17",
+      cacheVersion: this.#version,
       requestType: "canonical-forced-alignment",
       createdAt: new Date().toISOString(),
       cacheKey,
@@ -162,7 +165,7 @@ export class ForcedAlignmentCache {
     return forcedAlignmentCacheManifestSchema.parse({
       schemaVersion: "1.0.0",
       artifactType: "forced-alignment-cache-manifest",
-      cacheVersion: "C5.17",
+      cacheVersion: this.#version,
       generatedAt: input.generatedAt ?? new Date().toISOString(),
       requestType: "canonical-forced-alignment",
       cacheRootShareableName: path.basename(this.#root),

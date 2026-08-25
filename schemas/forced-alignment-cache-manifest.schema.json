@@ -9,7 +9,7 @@
       "type": "string",
       "const": "forced-alignment-cache-manifest"
     },
-    "cacheVersion": { "type": "string", "const": "C5.17" },
+    "cacheVersion": { "type": "string", "enum": ["C5.17", "C5.17.1"] },
     "generatedAt": {
       "type": "string",
       "format": "date-time",

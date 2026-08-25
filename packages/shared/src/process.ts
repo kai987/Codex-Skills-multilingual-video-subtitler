@@ -12,6 +12,7 @@ export interface RunProcessOptions {
   cwd?: string;
   allowNonZero?: boolean;
   timeoutMs?: number;
+  environment?: NodeJS.ProcessEnv;
 }
 
 export interface ProcessRunner {
@@ -30,7 +31,7 @@ export class NodeProcessRunner implements ProcessRunner {
   ): Promise<ProcessResult> {
     return await new Promise((resolve, reject) => {
       const child = spawn(executable, args, {
-        env: process.env,
+        env: options.environment ?? process.env,
         shell: false,
         stdio: ["ignore", "pipe", "pipe"],
         ...(options.cwd === undefined ? {} : { cwd: options.cwd }),

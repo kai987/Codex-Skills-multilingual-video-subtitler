@@ -317,6 +317,8 @@ export const subtitleFinalizationReportSchema = z
         forcedAlignmentCacheManifest: relativePathSchema
           .nullable()
           .default(null),
+        canonicalPronunciation: relativePathSchema.nullable().default(null),
+        sudachiRuntimeCapability: relativePathSchema.nullable().default(null),
         subtitledVideo: relativePathSchema.nullable(),
       })
       .strict(),
