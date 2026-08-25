@@ -17,6 +17,7 @@ export const timestampMappingMethodSchema = z.enum([
   "official-mapped-token-getter",
   "verified-segment-relative-offset",
   "verified-vad-timeline-map",
+  "verified-original-audio-local-offset",
   "unmapped",
   "quarantined",
 ]);
@@ -82,6 +83,16 @@ export const timestampIntegrityIntervalSchema = z
     rawEnd: z.number().positive().optional(),
     rawCoordinateSystem: timestampCoordinateSystemSchema.optional(),
     mappingMethod: timestampMappingMethodSchema.optional(),
+    rawVadIntervalHealthStatus: z
+      .enum([
+        "trusted",
+        "overlapping-with-padding",
+        "invalid",
+        "out-of-range",
+        "unavailable",
+      ])
+      .optional(),
+    evidenceLineageId: z.string().min(1).optional(),
   })
   .strict()
   .superRefine((value, context) => {
@@ -165,6 +176,11 @@ export const timestampAttemptMetricsSchema = z
     trustedTokenTimestampsUsed: z.boolean(),
     decodedSegmentIntervalsAvailable: z.boolean(),
     rawVadIntervalsAvailable: z.boolean(),
+    mappedTokenCount: z.number().int().nonnegative().optional(),
+    mappedTokenTrustedCount: z.number().int().nonnegative().optional(),
+    mappedTokenQuarantinedCount: z.number().int().nonnegative().optional(),
+    rawVadTrustedIntervalCount: z.number().int().nonnegative().optional(),
+    rawVadInvalidIntervalCount: z.number().int().nonnegative().optional(),
   })
   .strict();
 
@@ -248,6 +264,33 @@ export const timestampEvidenceIntegritySummarySchema = z
     legacyVadTokenQuarantinedCount: z.number().int().nonnegative(),
     decodedSegmentCount: z.number().int().nonnegative(),
     rawVadIntervalCount: z.number().int().nonnegative(),
+    mappedNoVadTokenCount: z.number().int().nonnegative().optional(),
+    mappedTokenContainmentFailureCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional(),
+    mappedTokenMonotonicityFailureCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional(),
+    mappedTokenQuarantinedCount: z.number().int().nonnegative().optional(),
+    mappedTokenTrustedCount: z.number().int().nonnegative().optional(),
+    rawVadTrustedIntervalCount: z.number().int().nonnegative().optional(),
+    rawVadInvalidIntervalCount: z.number().int().nonnegative().optional(),
+    runtimeCapabilityVerified: z.boolean().optional(),
+    runtimeResponseSchemaVerified: z.boolean().optional(),
+    unknownCoordinateTokenUsedForTimingCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional(),
+    decodedSegmentMislabelledAsRawVadCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional(),
     maximumObservedDriftSeconds: z.number().nonnegative(),
     integrityGateFailures: z.array(z.string().min(1)),
     integrityHash: hashSchema,
@@ -258,7 +301,7 @@ export const subtitleTimestampEvidenceIntegritySchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-timestamp-evidence-integrity"),
-    integrityVersion: z.literal("C5.15.1"),
+    integrityVersion: z.enum(["C5.15.1", "C5.16"]),
     generatedAt: z.iso.datetime(),
     sourceOverlapArtifactHash: hashSchema,
     runtimeCapability: timestampRuntimeCapabilitySchema,

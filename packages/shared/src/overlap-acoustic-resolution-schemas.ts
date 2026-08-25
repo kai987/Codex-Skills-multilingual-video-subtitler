@@ -128,6 +128,39 @@ export const overlapAcousticAttemptSchema = z
     targetCueTextUsedAsPrompt: z.literal(false),
     referenceTranslationUsedAsPrompt: z.literal(false),
     humanReviewedSentenceUsedAsPrompt: z.literal(false),
+    runtimeCapabilityRef: z.string().min(1).optional(),
+    responseSchemaVersion: z.string().min(1).optional(),
+    rawTokens: z
+      .array(
+        z
+          .object({
+            tokenId: z.string().min(1),
+            parentSegmentId: z.string().min(1),
+            text: z.string(),
+            special: z.boolean(),
+            start: z.number().nonnegative(),
+            end: z.number().nonnegative(),
+            coordinateSystem: timestampCoordinateSystemSchema,
+          })
+          .strict(),
+      )
+      .optional(),
+    mappedTokens: z
+      .array(
+        z
+          .object({
+            tokenId: z.string().min(1),
+            parentSegmentId: z.string().min(1),
+            text: z.string(),
+            start: z.number().nonnegative(),
+            end: z.number().nonnegative(),
+            coordinateSystem: z.literal("original-media-global"),
+            mappingMethod: z.literal("official-mapped-token-getter"),
+            timingUsable: z.boolean(),
+          })
+          .strict(),
+      )
+      .optional(),
     rawText: z.string(),
     segments: z.array(overlapAcousticSegmentSchema),
     tokens: z.array(overlapAcousticTokenSchema),
@@ -187,6 +220,9 @@ export const overlapMatchedIntervalSchema = z
     profileConsensusScore: z.number().min(0).max(1).optional(),
     boundaryConfidence: z.number().min(0).max(1).optional(),
     neighborIntrusionRatio: z.number().min(0).max(1).optional(),
+    containmentScore: z.number().min(0).max(1).optional(),
+    sourceTypeSupportCount: z.number().int().nonnegative().optional(),
+    evidenceLineageId: z.string().min(1).optional(),
   })
   .strict()
   .refine((value) => value.end > value.start, {
@@ -216,6 +252,19 @@ export const overlapCueAlignmentSchema = z
     matchedTokenIds: z.array(z.string().min(1)),
     trustedMatchedTokenIds: z.array(z.string().min(1)).optional(),
     quarantinedMatchedTokenIds: z.array(z.string().min(1)).optional(),
+    individuallyTrustedMatchedTokenIds: z.array(z.string().min(1)).optional(),
+    individuallyQuarantinedMatchedTokenIds: z
+      .array(z.string().min(1))
+      .optional(),
+    lexicalOnlySequenceTokenIds: z.array(z.string().min(1)).optional(),
+    sequenceTimingUsable: z.boolean().optional(),
+    sequenceTimingEvidenceIds: z.array(z.string().min(1)).optional(),
+    sequenceQuarantineReasons: z.array(z.string().min(1)).optional(),
+    sequenceParentSegmentIds: z.array(z.string().min(1)).optional(),
+    trustedMappedTokenEvidenceIds: z.array(z.string().min(1)).optional(),
+    trustedRawVadEvidenceIds: z.array(z.string().min(1)).optional(),
+    decodedSegmentEvidenceIds: z.array(z.string().min(1)).optional(),
+    timingEvidenceLineageIds: z.array(z.string().min(1)).optional(),
     trustedTimingEvidenceIds: z.array(z.string().min(1)).optional(),
     lexicalOnlyEvidenceIds: z.array(z.string().min(1)).optional(),
     trustedTimingProfileSupportCount: z.number().int().nonnegative().optional(),
@@ -233,7 +282,36 @@ export const overlapCueAlignmentSchema = z
     blockers: z.array(z.string().min(1)),
     evidence: z.array(z.string().min(1)),
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    const individuallyQuarantined = new Set(
+      value.individuallyQuarantinedMatchedTokenIds ?? [],
+    );
+    if (
+      (value.trustedMappedTokenEvidenceIds ?? []).some((id) =>
+        individuallyQuarantined.has(id),
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["trustedMappedTokenEvidenceIds"],
+        message:
+          "Individually quarantined tokens cannot enter timing evidence.",
+      });
+    }
+    if (
+      value.sequenceTimingUsable === true &&
+      ((value.sequenceTimingEvidenceIds?.length ?? 0) === 0 ||
+        (value.sequenceParentSegmentIds?.length ?? 0) !== 1)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["sequenceTimingUsable"],
+        message:
+          "A timing-usable selected sequence must have evidence and exactly one parent segment.",
+      });
+    }
+  });
 
 export const overlapPairAcousticAssessmentSchema = z
   .object({
@@ -245,6 +323,16 @@ export const overlapPairAcousticAssessmentSchema = z
     sameOccurrenceLikely: z.boolean(),
     simultaneousSpeechSupported: z.boolean(),
     boundaryEvidenceIds: z.array(z.string().min(1)),
+    rawVadBoundaryRelation: z
+      .enum([
+        "pause-supported",
+        "continuous-speech-island",
+        "conflicting",
+        "unavailable",
+      ])
+      .optional(),
+    rawVadProfileSupportCount: z.number().int().nonnegative().optional(),
+    rawVadBoundaryEvidenceIds: z.array(z.string().min(1)).optional(),
     confidence: z.number().min(0).max(1),
   })
   .strict();
@@ -368,7 +456,7 @@ export const subtitleOverlapAcousticResolutionSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-overlap-acoustic-resolution"),
-    resolutionVersion: z.enum(["C5.15", "C5.15.1"]),
+    resolutionVersion: z.enum(["C5.15", "C5.15.1", "C5.16"]),
     generatedAt: z.iso.datetime(),
     sourceFingerprint: z
       .object({

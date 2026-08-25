@@ -85,6 +85,28 @@
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
         },
+        "runtimeType": {
+          "type": "string",
+          "enum": ["stock", "mvl-patched", "legacy-system"]
+        },
+        "runtimeBinarySha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "runtimeSourceCommit": {
+          "anyOf": [
+            { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+            { "type": "null" }
+          ]
+        },
+        "runtimePatchSha256": {
+          "anyOf": [
+            { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            { "type": "null" }
+          ]
+        },
+        "runtimeResponseSchemaVersion": { "type": "string", "minLength": 1 },
+        "rawVadPolicyVersion": { "type": "string", "minLength": 1 },
         "promptSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "decodeConfigurationSha256": {
           "type": "string",

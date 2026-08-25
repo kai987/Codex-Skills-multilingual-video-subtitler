@@ -200,7 +200,7 @@ export const subtitlePresentationResolutionSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-presentation-resolution"),
-    resolutionVersion: z.enum(["C5.14", "C5.15", "C5.15.1"]),
+    resolutionVersion: z.enum(["C5.14", "C5.15", "C5.15.1", "C5.16"]),
     generatedAt: z.string().min(1),
     baseCueHash: hashSchema,
     canonicalCueHash: hashSchema,

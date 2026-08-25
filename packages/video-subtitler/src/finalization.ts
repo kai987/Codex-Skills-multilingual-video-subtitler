@@ -29,6 +29,8 @@ import {
   type TimestampEvidenceIntegrityMode,
   type TokenTimestampPolicy,
   type LegacyOverlapCachePolicy,
+  type RawVadPolicy,
+  type TimestampRuntimePolicy,
   type WhisperExecutionMode,
 } from "@mvl/shared";
 import {
@@ -91,6 +93,11 @@ export interface SubtitleFinalizationOptions {
   audioTrack?: number;
   overlapAcousticConfiguration?: Partial<OverlapAcousticConfiguration>;
   whisperCppPath?: string;
+  whisperServerPath?: string;
+  timestampRuntimePolicy?: TimestampRuntimePolicy;
+  rawVadPolicy?: RawVadPolicy;
+  runtimeCapabilityManifestPath?: string;
+  mvlResponseSchemaVersion?: string;
   localTranscriptionModelPath?: string;
   localTranscriptionModelDirectory?: string;
   localVadModelPath?: string;
@@ -767,6 +774,20 @@ export async function finalizeSubtitleTask(
       ...(options.whisperCppPath === undefined
         ? {}
         : { whisperCppPath: options.whisperCppPath }),
+      ...(options.whisperServerPath === undefined
+        ? {}
+        : { whisperServerPath: options.whisperServerPath }),
+      timestampRuntimePolicy: options.timestampRuntimePolicy ?? "auto",
+      rawVadPolicy: options.rawVadPolicy ?? "auto",
+      ...(options.runtimeCapabilityManifestPath === undefined
+        ? {}
+        : {
+            runtimeCapabilityManifestPath:
+              options.runtimeCapabilityManifestPath,
+          }),
+      ...(options.mvlResponseSchemaVersion === undefined
+        ? {}
+        : { mvlResponseSchemaVersion: options.mvlResponseSchemaVersion }),
       ...(options.localTranscriptionModelPath === undefined
         ? {}
         : { localModelPath: options.localTranscriptionModelPath }),

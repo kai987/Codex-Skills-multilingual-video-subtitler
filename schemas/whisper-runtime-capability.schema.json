@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/whisper-runtime-capability.schema.json",
+  "title": "whisper-runtime-capability",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "whisper-runtime-capability" },
+    "runtimeType": {
+      "type": "string",
+      "enum": ["stock", "mvl-patched", "legacy-system"]
+    },
+    "upstreamRepository": { "type": "string", "const": "ggml-org/whisper.cpp" },
+    "upstreamTag": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "upstreamCommit": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        { "type": "null" }
+      ]
+    },
+    "patchId": {
+      "anyOf": [
+        { "type": "string", "const": "mvl-mapped-token-raw-vad-json-v1" },
+        { "type": "null" }
+      ]
+    },
+    "patchSha256": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "binaryBasename": { "type": "string", "minLength": 1 },
+    "binarySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "buildFlagsHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "capabilityEndpointResponse": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "schema_version": {
+              "type": "string",
+              "const": "mvl-whisper-server-capabilities/1.0.0"
+            },
+            "whisper_cpp_version": { "type": "string", "const": "1.9.3" },
+            "upstream_commit": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{40}$"
+            },
+            "patch_id": {
+              "type": "string",
+              "const": "mvl-mapped-token-raw-vad-json-v1"
+            },
+            "patch_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "mapped_token_getter_available": { "type": "boolean" },
+            "raw_vad_getter_available": { "type": "boolean" },
+            "supported_response_formats": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "json",
+                  "text",
+                  "srt",
+                  "verbose_json",
+                  "vtt",
+                  "mvl_verbose_json_v1"
+                ]
+              }
+            },
+            "time_units": {
+              "minItems": 1,
+              "type": "array",
+              "items": { "type": "string", "enum": ["centiseconds", "seconds"] }
+            },
+            "coordinate_system_contract": {
+              "type": "object",
+              "properties": {
+                "segment": {
+                  "type": "string",
+                  "const": "original-audio-local"
+                },
+                "token_raw_with_vad": {
+                  "type": "string",
+                  "const": "vad-processed-local"
+                },
+                "token_raw_without_vad": {
+                  "type": "string",
+                  "const": "original-audio-local"
+                },
+                "token_mapped": {
+                  "type": "string",
+                  "const": "original-audio-local"
+                },
+                "raw_vad": { "type": "string", "const": "original-audio-local" }
+              },
+              "required": [
+                "segment",
+                "token_raw_with_vad",
+                "token_raw_without_vad",
+                "token_mapped",
+                "raw_vad"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "schema_version",
+            "whisper_cpp_version",
+            "upstream_commit",
+            "patch_id",
+            "patch_sha256",
+            "mapped_token_getter_available",
+            "raw_vad_getter_available",
+            "supported_response_formats",
+            "time_units",
+            "coordinate_system_contract"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "capabilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "behaviorProbeResults": {
+      "type": "object",
+      "properties": {
+        "inferenceResponseCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenResponseCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawVadResponseCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "inferenceResponseCount",
+        "mappedTokenResponseCount",
+        "rawVadResponseCount"
+      ],
+      "additionalProperties": false
+    },
+    "mappedGetterDeclared": { "type": "boolean" },
+    "mappedGetterActuallyUsed": { "type": "boolean" },
+    "rawVadGetterDeclared": { "type": "boolean" },
+    "rawVadGetterActuallyUsed": { "type": "boolean" },
+    "responseSchema": { "type": "string", "minLength": 1 },
+    "verified": { "type": "boolean" },
+    "failures": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runtimeType",
+    "upstreamRepository",
+    "upstreamTag",
+    "upstreamCommit",
+    "patchId",
+    "patchSha256",
+    "binaryBasename",
+    "binarySha256",
+    "buildFlagsHash",
+    "capabilityEndpointResponse",
+    "capabilityHash",
+    "behaviorProbeResults",
+    "mappedGetterDeclared",
+    "mappedGetterActuallyUsed",
+    "rawVadGetterDeclared",
+    "rawVadGetterActuallyUsed",
+    "responseSchema",
+    "verified",
+    "failures"
+  ],
+  "additionalProperties": false
+}

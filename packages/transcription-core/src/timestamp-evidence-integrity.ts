@@ -19,8 +19,10 @@ import {
 } from "@mvl/shared";
 
 export const TIMESTAMP_MAPPING_VERSION =
-  "c5.15.1-original-timeline-v1" as const;
-export const TOKEN_HEALTH_POLICY_VERSION = "c5.15.1-token-health-v1" as const;
+  "c5.16-official-mapped-getter-v1" as const;
+export const TOKEN_HEALTH_POLICY_VERSION = "c5.16-token-health-v1" as const;
+export const RAW_VAD_POLICY_VERSION =
+  "c5.16-whisper-internal-vad-getter-v1" as const;
 
 export const DEFAULT_TIMESTAMP_HEALTH_CONFIGURATION: Readonly<TimestampHealthConfiguration> =
   {
@@ -285,6 +287,60 @@ export function auditTimestampEvidenceAttempt(input: {
   const segmentHealth: TimestampAttemptIntegrity["segmentHealth"] = [];
   const outputSegments: OverlapAcousticAttempt["segments"] = [];
 
+  const rawVadEvaluations = (input.rawVadIntervals ?? []).map(
+    (interval, index, intervals) => {
+      const coordinateSystem =
+        interval.coordinateSystem ?? "original-audio-local";
+      const previous = intervals[index - 1];
+      const finite =
+        Number.isFinite(interval.start) && Number.isFinite(interval.end);
+      const ordered =
+        previous === undefined ||
+        !Number.isFinite(previous.start) ||
+        interval.start >= previous.start;
+      const structurallyValid =
+        finite &&
+        interval.start >= 0 &&
+        interval.end > interval.start &&
+        ordered;
+      const mappedStart =
+        coordinateSystem === "original-audio-local"
+          ? input.extractionInterval.start + interval.start
+          : interval.start;
+      const mappedEnd =
+        coordinateSystem === "original-audio-local"
+          ? input.extractionInterval.start + interval.end
+          : interval.end;
+      const withinExtraction =
+        structurallyValid &&
+        mappedStart >= input.extractionInterval.start - 1e-6 &&
+        mappedEnd <= input.extractionInterval.end + 1e-6;
+      const overlapsPrevious =
+        structurallyValid &&
+        previous !== undefined &&
+        Number.isFinite(previous.end) &&
+        interval.start < previous.end;
+      const healthStatus = !structurallyValid
+        ? ("invalid" as const)
+        : !withinExtraction
+          ? ("out-of-range" as const)
+          : overlapsPrevious
+            ? ("overlapping-with-padding" as const)
+            : ("trusted" as const);
+      return {
+        interval,
+        index,
+        coordinateSystem,
+        mappedStart,
+        mappedEnd,
+        healthStatus,
+        timingUsable:
+          healthStatus === "trusted" ||
+          healthStatus === "overlapping-with-padding",
+      };
+    },
+  );
+
   for (const segment of input.segments) {
     const segmentGlobalStart =
       input.extractionInterval.start + segment.rawStart;
@@ -324,11 +380,26 @@ export function auditTimestampEvidenceAttempt(input: {
           segmentStart: parentStart,
           segmentEnd: parentEnd,
         }),
+        extractionContained:
+          mapping.mappedStart !== null &&
+          mapping.mappedEnd !== null &&
+          mapping.mappedStart >=
+            input.extractionInterval.start -
+              configuration.trustContainmentToleranceSeconds &&
+          mapping.mappedEnd <=
+            input.extractionInterval.end +
+              configuration.trustContainmentToleranceSeconds,
         zero: token.rawEnd <= token.rawStart,
         boundary:
-          token.rawStart <= configuration.auditContainmentToleranceSeconds ||
-          token.rawEnd >=
-            duration - configuration.auditContainmentToleranceSeconds,
+          mapping.mappedStart !== null && mapping.mappedEnd !== null
+            ? mapping.mappedStart - input.extractionInterval.start <=
+                configuration.auditContainmentToleranceSeconds ||
+              input.extractionInterval.end - mapping.mappedEnd <=
+                configuration.auditContainmentToleranceSeconds
+            : token.rawStart <=
+                configuration.auditContainmentToleranceSeconds ||
+              token.rawEnd >=
+                duration - configuration.auditContainmentToleranceSeconds,
       };
     });
     const monotonic = auditSpans.every((item, index) => {
@@ -348,14 +419,16 @@ export function auditTimestampEvidenceAttempt(input: {
         tolerance: configuration.auditContainmentToleranceSeconds,
       }),
     ).length;
-    const containmentTrust = auditSpans.filter((item) =>
-      intervalContained({
-        tokenStart: item.tokenStart,
-        tokenEnd: item.tokenEnd,
-        segmentStart: item.parentStart,
-        segmentEnd: item.parentEnd,
-        tolerance: configuration.trustContainmentToleranceSeconds,
-      }),
+    const containmentTrust = auditSpans.filter(
+      (item) =>
+        item.extractionContained &&
+        intervalContained({
+          tokenStart: item.tokenStart,
+          tokenEnd: item.tokenEnd,
+          segmentStart: item.parentStart,
+          segmentEnd: item.parentEnd,
+          tolerance: configuration.trustContainmentToleranceSeconds,
+        }),
     ).length;
     const zeroCount = auditSpans.filter((item) => item.zero).length;
     const boundaryCount = auditSpans.filter((item) => item.boundary).length;
@@ -368,19 +441,20 @@ export function auditTimestampEvidenceAttempt(input: {
       ...auditSpans.map((item) => item.drift.late),
     );
     const maximumDrift = Math.max(maximumEarly, maximumLate);
-    const mappedGroup = mapped.every(
+    const mappedGroup = lexical.every(
       ({ mapping }) =>
         mapping.mappedStart !== null &&
         mapping.mappedEnd !== null &&
         mapping.mappedCoordinateSystem === "original-media-global",
     );
-    const firstMapping = mapped[0]?.mapping;
+    const firstMapping = lexical[0]?.mapping;
     const prelimUsable = auditSpans.filter(
       (item) =>
         !item.token.text.includes("�") &&
         item.mapping.mappedStart !== null &&
         item.mapping.mappedEnd !== null &&
         item.mapping.mappedEnd > item.mapping.mappedStart &&
+        item.extractionContained &&
         !item.zero &&
         item.drift.maximum <=
           configuration.hardMaximumTokenSegmentDriftSeconds &&
@@ -455,11 +529,22 @@ export function auditTimestampEvidenceAttempt(input: {
           segmentStart: segmentGlobalStart,
           segmentEnd: segmentGlobalEnd,
           tolerance: configuration.trustContainmentToleranceSeconds,
-        });
+        }) &&
+        mapping.mappedStart >=
+          input.extractionInterval.start -
+            configuration.trustContainmentToleranceSeconds &&
+        mapping.mappedEnd <=
+          input.extractionInterval.end +
+            configuration.trustContainmentToleranceSeconds;
       const boundaryClamped =
-        token.rawStart <= configuration.auditContainmentToleranceSeconds ||
-        token.rawEnd >=
-          duration - configuration.auditContainmentToleranceSeconds;
+        mapping.mappedStart !== null && mapping.mappedEnd !== null
+          ? mapping.mappedStart - input.extractionInterval.start <=
+              configuration.auditContainmentToleranceSeconds ||
+            input.extractionInterval.end - mapping.mappedEnd <=
+              configuration.auditContainmentToleranceSeconds
+          : token.rawStart <= configuration.auditContainmentToleranceSeconds ||
+            token.rawEnd >=
+              duration - configuration.auditContainmentToleranceSeconds;
       const timingUsable =
         !special &&
         !invalidText &&
@@ -479,8 +564,8 @@ export function auditTimestampEvidenceAttempt(input: {
               ? ["TOKEN_OUTSIDE_PARENT_SEGMENT"]
               : []),
           ];
-      const mappedStart = timingUsable ? mapping.mappedStart : null;
-      const mappedEnd = timingUsable ? mapping.mappedEnd : null;
+      const mappedStart = mapping.mappedStart;
+      const mappedEnd = mapping.mappedEnd;
       outputTokens.push({
         tokenId: token.tokenId,
         parentSegmentId: segment.segmentId,
@@ -493,10 +578,14 @@ export function auditTimestampEvidenceAttempt(input: {
         rawCoordinateSystem: mapping.rawCoordinateSystem,
         mappedStart,
         mappedEnd,
-        mappedCoordinateSystem: timingUsable
-          ? "original-media-global"
-          : "unknown",
-        mappingMethod: timingUsable ? mapping.mappingMethod : "quarantined",
+        mappedCoordinateSystem:
+          mappedStart === null || mappedEnd === null
+            ? "unknown"
+            : mapping.mappedCoordinateSystem,
+        mappingMethod:
+          mappedStart === null || mappedEnd === null
+            ? "quarantined"
+            : mapping.mappingMethod,
         mappingVersion: configuration.timestampMappingVersion,
         mappingConfidence: timingUsable ? mapping.mappingConfidence : 0,
         textUsable: !special && !invalidText,
@@ -579,6 +668,14 @@ export function auditTimestampEvidenceAttempt(input: {
     (token) => token.textUsable !== false && token.specialToken !== true,
   );
   const groups = segmentHealth.filter((health) => health.lexicalTokenCount > 0);
+  const mappedLexicalTokens = lexicalTokens.filter(
+    (token) =>
+      token.mappingMethod === "official-mapped-token-getter" &&
+      token.mappedStart !== null &&
+      token.mappedStart !== undefined &&
+      token.mappedEnd !== null &&
+      token.mappedEnd !== undefined,
+  );
   const integrity = timestampAttemptIntegritySchema.parse({
     attemptId: input.attemptId,
     profile: input.profile,
@@ -652,6 +749,19 @@ export function auditTimestampEvidenceAttempt(input: {
       trustedTokenTimestampsUsed: false,
       decodedSegmentIntervalsAvailable: outputSegments.length > 0,
       rawVadIntervalsAvailable: (input.rawVadIntervals?.length ?? 0) > 0,
+      mappedTokenCount: mappedLexicalTokens.length,
+      mappedTokenTrustedCount: mappedLexicalTokens.filter(
+        (token) => token.timingUsable === true,
+      ).length,
+      mappedTokenQuarantinedCount: mappedLexicalTokens.filter(
+        (token) => token.timingUsable !== true,
+      ).length,
+      rawVadTrustedIntervalCount: rawVadEvaluations.filter(
+        (evaluation) => evaluation.timingUsable,
+      ).length,
+      rawVadInvalidIntervalCount: rawVadEvaluations.filter(
+        (evaluation) => !evaluation.timingUsable,
+      ).length,
     },
     trustedTokenIds: trustedTokens.map((token) => token.tokenId).toSorted(),
     quarantinedTokenIds: outputTokens
@@ -692,29 +802,10 @@ export function auditTimestampEvidenceAttempt(input: {
             },
           ],
     ),
-    rawVadIntervals: (input.rawVadIntervals ?? []).flatMap((interval) => {
-      if (
-        !Number.isFinite(interval.start) ||
-        !Number.isFinite(interval.end) ||
-        interval.start < 0 ||
-        interval.end <= interval.start
-      )
-        return [];
-      const rawCoordinateSystem =
-        interval.coordinateSystem ?? "original-audio-local";
-      const mappedStart =
-        rawCoordinateSystem === "original-audio-local"
-          ? input.extractionInterval.start + interval.start
-          : interval.start;
-      const mappedEnd =
-        rawCoordinateSystem === "original-audio-local"
-          ? input.extractionInterval.start + interval.end
-          : interval.end;
-      if (
-        mappedStart < input.extractionInterval.start ||
-        mappedEnd > input.extractionInterval.end
-      )
-        return [];
+    rawVadIntervals: rawVadEvaluations.flatMap((evaluation) => {
+      if (!evaluation.timingUsable) return [];
+      const { interval, index, coordinateSystem, mappedStart, mappedEnd } =
+        evaluation;
       return [
         {
           intervalId: interval.intervalId,
@@ -725,8 +816,10 @@ export function auditTimestampEvidenceAttempt(input: {
           timingUsable: true,
           rawStart: interval.start,
           rawEnd: interval.end,
-          rawCoordinateSystem,
-          mappingMethod: "verified-vad-timeline-map" as const,
+          rawCoordinateSystem: coordinateSystem,
+          mappingMethod: "verified-original-audio-local-offset" as const,
+          rawVadIntervalHealthStatus: evaluation.healthStatus,
+          evidenceLineageId: `whisper-internal-vad:${input.attemptId}:${interval.intervalId}:${String(index)}`,
         },
       ];
     }),
@@ -769,7 +862,7 @@ export function buildTimestampEvidenceIntegrityArtifact(input: {
   return subtitleTimestampEvidenceIntegritySchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-timestamp-evidence-integrity",
-    integrityVersion: "C5.15.1",
+    integrityVersion: "C5.16",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     sourceOverlapArtifactHash: input.sourceOverlapArtifactHash,
     runtimeCapability: input.runtimeCapability,
@@ -831,7 +924,10 @@ export function buildTimestampEvidenceIntegrityArtifact(input: {
       mappedVadTokenCount: input.attempts
         .filter((attempt) => attempt.useVad)
         .reduce(
-          (sum, attempt) => sum + attempt.attemptMetrics.trustedTokenCount,
+          (sum, attempt) =>
+            sum +
+            (attempt.attemptMetrics.mappedTokenCount ??
+              attempt.attemptMetrics.trustedTokenCount),
           0,
         ),
       legacyVadTokenQuarantinedCount: input.attempts
@@ -845,6 +941,60 @@ export function buildTimestampEvidenceIntegrityArtifact(input: {
         0,
       ),
       rawVadIntervalCount: input.rawVadIntervalCount ?? 0,
+      mappedNoVadTokenCount: input.attempts
+        .filter((attempt) => !attempt.useVad)
+        .reduce(
+          (sum, attempt) =>
+            sum +
+            (attempt.attemptMetrics.mappedTokenCount ??
+              attempt.attemptMetrics.trustedTokenCount),
+          0,
+        ),
+      mappedTokenContainmentFailureCount: health.filter(
+        (item) =>
+          item.lexicalTokenCount > 0 &&
+          item.tokenSegmentContainmentRatioTrustTolerance < 1,
+      ).length,
+      mappedTokenMonotonicityFailureCount: health.filter(
+        (item) => !item.tokenMonotonicityPassed,
+      ).length,
+      mappedTokenQuarantinedCount: metrics.reduce(
+        (sum, item) =>
+          sum +
+          (item.mappedTokenQuarantinedCount ?? item.quarantinedTokenCount),
+        0,
+      ),
+      mappedTokenTrustedCount: metrics.reduce(
+        (sum, item) =>
+          sum + (item.mappedTokenTrustedCount ?? item.trustedTokenCount),
+        0,
+      ),
+      rawVadTrustedIntervalCount: metrics.reduce(
+        (sum, item) => sum + (item.rawVadTrustedIntervalCount ?? 0),
+        0,
+      ),
+      rawVadInvalidIntervalCount: metrics.reduce(
+        (sum, item) => sum + (item.rawVadInvalidIntervalCount ?? 0),
+        0,
+      ),
+      runtimeCapabilityVerified:
+        input.runtimeCapability.timestampCapabilityStatus ===
+          "mapped-original-timeline" &&
+        input.runtimeCapability.mappedTokenGetterAvailable &&
+        input.runtimeCapability.mappedTokenGetterActuallyUsed &&
+        (!input.runtimeCapability.rawVadGetterAvailable ||
+          input.runtimeCapability.rawVadGetterActuallyUsed),
+      runtimeResponseSchemaVerified:
+        input.runtimeCapability.serverResponseFormat ===
+          "mvl-whisper-server-response/1.0.0" &&
+        input.runtimeCapability.timestampCapabilityStatus ===
+          "mapped-original-timeline",
+      unknownCoordinateTokenUsedForTimingCount: 0,
+      decodedSegmentMislabelledAsRawVadCount: (
+        input.integrityGateFailures ?? []
+      ).includes("DECODED_SEGMENT_MISLABELED_AS_RAW_VAD")
+        ? 1
+        : 0,
       maximumObservedDriftSeconds: round(
         Math.max(
           0,

@@ -107,6 +107,7 @@ interface MatchCandidate {
     | "speech"
     | "vad";
   parentSegmentContainmentPassed: boolean;
+  evidenceLineageId: string;
   surfaceScore: number;
   readingScore: number | null;
   lexicalScore: number;
@@ -353,6 +354,7 @@ function candidateFromText(input: {
   timestampTrustStatus?: MatchCandidate["timestampTrustStatus"];
   evidenceSource?: MatchCandidate["evidenceSource"];
   parentSegmentContainmentPassed?: boolean;
+  evidenceLineageId?: string;
   readingAnalyzer: JapaneseReadingAnalyzer;
 }): MatchCandidate {
   const surfaceScore = overlapAcousticTextSimilarity(
@@ -384,6 +386,9 @@ function candidateFromText(input: {
     evidenceSource: input.evidenceSource ?? input.source,
     parentSegmentContainmentPassed:
       input.parentSegmentContainmentPassed ?? timingUsable,
+    evidenceLineageId:
+      input.evidenceLineageId ??
+      `${input.source}:${hash(input.sourceIds.toSorted()).slice(0, 24)}`,
     surfaceScore,
     readingScore,
     lexicalScore,
@@ -441,12 +446,39 @@ function attemptCandidates(input: {
       const normalizedLength = Array.from(normalizeOverlapSurface(text)).length;
       if (normalizedLength > targetLength * 2.2 + 6) break;
       const sequence = tokens.slice(startIndex, endIndex + 1);
-      const timingUsable = sequence.every(
-        (value) =>
-          (value.timingUsable ?? true) &&
-          value.mappedStart !== null &&
-          value.mappedEnd !== null,
+      const parentSegmentIds = new Set(
+        sequence.flatMap((value) =>
+          value.parentSegmentId === undefined ? [] : [value.parentSegmentId],
+        ),
       );
+      const monotonic = sequence.every((value, index) => {
+        const previous = sequence[index - 1];
+        if (previous === undefined) return true;
+        return (
+          (value.mappedStart ?? value.start) >=
+            (previous.mappedStart ?? previous.start) - 1e-9 &&
+          (value.mappedEnd ?? value.end) >=
+            (previous.mappedEnd ?? previous.end) - 1e-9 &&
+          (value.mappedStart ?? value.start) -
+            (previous.mappedEnd ?? previous.end) <=
+            0.75
+        );
+      });
+      const timestampIntegrityAware =
+        input.attempt.timestampIntegrityRef !== undefined ||
+        sequence.some((value) => value.mappingVersion !== undefined);
+      const timingUsable =
+        (!timestampIntegrityAware || parentSegmentIds.size === 1) &&
+        monotonic &&
+        sequence.every(
+          (value) =>
+            (value.timingUsable ?? true) &&
+            (!timestampIntegrityAware ||
+              (value.mappedStart !== null &&
+                value.mappedStart !== undefined &&
+                value.mappedEnd !== null &&
+                value.mappedEnd !== undefined)),
+        );
       const sequenceStart =
         timingUsable && first.mappedStart !== undefined
           ? (first.mappedStart ?? first.start)
@@ -482,6 +514,9 @@ function attemptCandidates(input: {
                 ? "trusted-mapped-token"
                 : "trusted-no-vad-token",
           parentSegmentContainmentPassed: timingUsable,
+          evidenceLineageId: `mapped-token-sequence:${hash(
+            sequence.map((value) => value.tokenId),
+          ).slice(0, 24)}`,
         }),
       );
     }
@@ -527,7 +562,7 @@ function boundaryConsensus(candidates: readonly MatchCandidate[]): number {
       candidates
         .filter((candidate) => candidate.timingUsable)
         .toSorted((left, right) => right.score - left.score)
-        .map((candidate) => [candidate.attemptId, candidate] as const),
+        .map((candidate) => [candidate.evidenceLineageId, candidate] as const),
     ).values(),
   ];
   if (trusted.length < 2) return trusted.length === 1 ? 0.4 : 0;
@@ -693,22 +728,26 @@ export function alignOverlapComponentCues(input: {
           : []),
         ...(reading.reading === null ? ["READING_UNAVAILABLE"] : []),
       ];
-      const matchedIntervals = trustedTimingSupported.map((candidate) => ({
-        attemptId: candidate.attemptId,
-        source: candidate.evidenceSource,
-        start: candidate.start,
-        end: candidate.end,
-        evidenceId: candidate.sourceIds.join("+"),
-        timingUsable: true,
-        timestampTrustStatus: candidate.timestampTrustStatus,
-        timingTrustScore: round(candidate.timingTrustScore),
-        alignmentScore: round(candidate.score),
-        parentSegmentContainmentPassed:
-          candidate.parentSegmentContainmentPassed,
-        profileConsensusScore: round(profileConsensusScore),
-        boundaryConfidence: round(boundarySupportScore),
-        neighborIntrusionRatio: round(neighborIntrusionRatio),
-      }));
+      const matchedIntervals: OverlapCueAlignment["matchedIntervals"] =
+        trustedTimingSupported.map((candidate) => ({
+          attemptId: candidate.attemptId,
+          source: candidate.evidenceSource,
+          start: candidate.start,
+          end: candidate.end,
+          evidenceId: candidate.sourceIds.join("+"),
+          timingUsable: true,
+          timestampTrustStatus: candidate.timestampTrustStatus,
+          timingTrustScore: round(candidate.timingTrustScore),
+          alignmentScore: round(candidate.score),
+          parentSegmentContainmentPassed:
+            candidate.parentSegmentContainmentPassed,
+          profileConsensusScore: round(profileConsensusScore),
+          boundaryConfidence: round(boundarySupportScore),
+          neighborIntrusionRatio: round(neighborIntrusionRatio),
+          containmentScore: candidate.parentSegmentContainmentPassed ? 1 : 0,
+          sourceTypeSupportCount: trustedTimingSourceTypes.size,
+          evidenceLineageId: candidate.evidenceLineageId,
+        }));
       const lexicalTokenIds = [
         ...new Set(
           supported
@@ -723,10 +762,91 @@ export function alignOverlapComponentCues(input: {
             .flatMap((candidate) => candidate.sourceIds),
         ),
       ].toSorted();
-      const trustedTokenSet = new Set(trustedTokenIds);
-      const quarantinedTokenIds = lexicalTokenIds.filter(
-        (tokenId) => !trustedTokenSet.has(tokenId),
+      const tokenById = new Map(
+        successfulAttempts.flatMap((attempt) =>
+          attempt.tokens.map((token) => [token.tokenId, token] as const),
+        ),
       );
+      const individuallyTrustedTokenIds = lexicalTokenIds.filter(
+        (tokenId) => tokenById.get(tokenId)?.timingUsable === true,
+      );
+      const individuallyQuarantinedTokenIds = lexicalTokenIds.filter(
+        (tokenId) => tokenById.get(tokenId)?.timingUsable !== true,
+      );
+      const trustedTokenSequences = trustedTimingSupported.filter(
+        (candidate) => candidate.source === "token",
+      );
+      const selectedTimingSequence = trustedTokenSequences[0];
+      const sequenceParentSegmentIds = [
+        ...new Set(
+          (selectedTimingSequence?.sourceIds ?? []).flatMap((tokenId) => {
+            const parent = tokenById.get(tokenId)?.parentSegmentId;
+            return parent === undefined ? [] : [parent];
+          }),
+        ),
+      ].toSorted();
+      const lexicalOnlySequences = supported.filter(
+        (candidate) => candidate.source === "token" && !candidate.timingUsable,
+      );
+      const lexicalOnlySequenceTokenIds = [
+        ...new Set(
+          lexicalOnlySequences.flatMap((candidate) => candidate.sourceIds),
+        ),
+      ].toSorted();
+      const sequenceTimingUsable =
+        selectedTimingSequence !== undefined &&
+        sequenceParentSegmentIds.length === 1;
+      const sequenceQuarantineReasons = [
+        ...(lexicalOnlySequences.some((candidate) =>
+          candidate.sourceIds.some(
+            (tokenId) => tokenById.get(tokenId)?.timingUsable !== true,
+          ),
+        )
+          ? ["SEQUENCE_CONTAINS_INDIVIDUALLY_QUARANTINED_TOKEN"]
+          : []),
+        ...(lexicalOnlySequences.some(
+          (candidate) =>
+            new Set(
+              candidate.sourceIds.flatMap((tokenId) => {
+                const parent = tokenById.get(tokenId)?.parentSegmentId;
+                return parent === undefined ? [] : [parent];
+              }),
+            ).size !== 1,
+        )
+          ? ["SEQUENCE_CROSSES_PARENT_SEGMENT"]
+          : []),
+        ...(lexicalOnlySequences.length > 0 &&
+        !lexicalOnlySequences.some((candidate) =>
+          candidate.sourceIds.some(
+            (tokenId) => tokenById.get(tokenId)?.timingUsable !== true,
+          ),
+        )
+          ? ["SEQUENCE_TIMING_HEALTH_FAILED"]
+          : []),
+      ];
+      const rawVadEvidence = [
+        ...new Map(
+          successfulAttempts
+            .flatMap((attempt) =>
+              (attempt.rawVadIntervals ?? []).flatMap((interval) =>
+                interval.timingUsable &&
+                (overlapSeconds(cue, interval) > 0 ||
+                  (timingSelected !== undefined &&
+                    overlapSeconds(timingSelected, interval) > 0))
+                  ? [
+                      {
+                        intervalId: interval.intervalId,
+                        lineageId:
+                          interval.evidenceLineageId ??
+                          `raw-vad:${attempt.attemptId}:${interval.intervalId}`,
+                      },
+                    ]
+                  : [],
+              ),
+            )
+            .map((value) => [value.lineageId, value] as const),
+        ).values(),
+      ];
       return {
         cueId: cue.id,
         canonicalText: cue.text,
@@ -757,11 +877,49 @@ export function alignOverlapComponentCues(input: {
         ].toSorted(),
         matchedTokenIds: lexicalTokenIds,
         trustedMatchedTokenIds: trustedTokenIds,
-        quarantinedMatchedTokenIds: quarantinedTokenIds,
-        trustedTimingEvidenceIds: matchedIntervals.map(
-          (interval) => interval.evidenceId,
+        quarantinedMatchedTokenIds: individuallyQuarantinedTokenIds,
+        individuallyTrustedMatchedTokenIds: individuallyTrustedTokenIds,
+        individuallyQuarantinedMatchedTokenIds: individuallyQuarantinedTokenIds,
+        lexicalOnlySequenceTokenIds,
+        sequenceTimingUsable,
+        sequenceTimingEvidenceIds: sequenceTimingUsable
+          ? [selectedTimingSequence.evidenceLineageId]
+          : [],
+        sequenceQuarantineReasons,
+        sequenceParentSegmentIds,
+        trustedMappedTokenEvidenceIds: matchedIntervals
+          .filter(
+            (interval) =>
+              interval.source === "trusted-mapped-token" ||
+              interval.source === "trusted-no-vad-token",
+          )
+          .flatMap((interval) =>
+            interval.evidenceId === undefined ? [] : [interval.evidenceId],
+          ),
+        trustedRawVadEvidenceIds: rawVadEvidence
+          .map((value) => value.intervalId)
+          .toSorted(),
+        decodedSegmentEvidenceIds: matchedIntervals
+          .filter((interval) => interval.source === "decoded-segment")
+          .flatMap((interval) =>
+            interval.evidenceId === undefined ? [] : [interval.evidenceId],
+          ),
+        timingEvidenceLineageIds: [
+          ...new Set([
+            ...matchedIntervals.flatMap((interval) =>
+              interval.evidenceLineageId === undefined
+                ? []
+                : [interval.evidenceLineageId],
+            ),
+            ...rawVadEvidence.map((value) => value.lineageId),
+          ]),
+        ].toSorted(),
+        trustedTimingEvidenceIds: matchedIntervals.flatMap((interval) =>
+          interval.evidenceId === undefined ? [] : [interval.evidenceId],
         ),
-        lexicalOnlyEvidenceIds: quarantinedTokenIds,
+        lexicalOnlyEvidenceIds: lexicalOnlySequences.map(
+          (candidate) => candidate.evidenceLineageId,
+        ),
         trustedTimingProfileSupportCount: trustedTimingProfiles.size,
         trustedTimingSourceTypeCount: trustedTimingSourceTypes.size,
         trustedTimingModelSupportCount: trustedTimingModels.size,
@@ -781,6 +939,8 @@ export function alignOverlapComponentCues(input: {
           `reading-analyzer:${analyzer.id}`,
           `profile-support:${String(profiles.size)}`,
           `model-support:${String(models.size)}`,
+          `raw-vad-boundary-evidence:${String(rawVadEvidence.length)}`,
+          "raw-vad-speaker-inference:prohibited",
           ...(selected === undefined
             ? []
             : [
@@ -861,6 +1021,105 @@ function representativeInterval(
         );
       })[0] ?? null
   );
+}
+
+function rawVadBoundaryRelation(input: {
+  attempts: readonly OverlapAcousticAttempt[];
+  left: OverlapCueAlignment["matchedIntervals"][number] | null;
+  right: OverlapCueAlignment["matchedIntervals"][number] | null;
+  minimumProfileSupport: number;
+}): {
+  relation:
+    | "pause-supported"
+    | "continuous-speech-island"
+    | "conflicting"
+    | "unavailable";
+  profileSupportCount: number;
+  evidenceIds: string[];
+} {
+  if (input.left === null || input.right === null) {
+    return {
+      relation: "unavailable",
+      profileSupportCount: 0,
+      evidenceIds: [],
+    };
+  }
+  const pauseProfiles = new Set<OverlapAcousticProfile>();
+  const continuousProfiles = new Set<OverlapAcousticProfile>();
+  const pauseIds = new Set<string>();
+  const continuousIds = new Set<string>();
+  for (const attempt of input.attempts) {
+    const intervals = (attempt.rawVadIntervals ?? [])
+      .filter(
+        (interval) =>
+          interval.timingUsable &&
+          (interval.rawVadIntervalHealthStatus === "trusted" ||
+            interval.rawVadIntervalHealthStatus === "overlapping-with-padding"),
+      )
+      .toSorted(
+        (left, right) =>
+          left.start - right.start ||
+          left.intervalId.localeCompare(right.intervalId),
+      );
+    for (const interval of intervals) {
+      // A single island is continuous only when it actually reaches both
+      // observed lexical boundaries. A broad tolerance here would let either
+      // side of a real pause masquerade as a spanning island.
+      if (
+        interval.start <= input.left.end + 0.02 &&
+        interval.end >= input.right.start - 0.02
+      ) {
+        continuousProfiles.add(attempt.profile);
+        continuousIds.add(interval.intervalId);
+      }
+    }
+    for (let index = 1; index < intervals.length; index += 1) {
+      const before = intervals[index - 1];
+      const after = intervals[index];
+      if (before === undefined || after === undefined) continue;
+      if (
+        after.start - before.end >= 0.03 &&
+        Math.abs(before.end - input.left.end) <= 0.45 &&
+        Math.abs(after.start - input.right.start) <= 0.45
+      ) {
+        pauseProfiles.add(attempt.profile);
+        pauseIds.add(before.intervalId);
+        pauseIds.add(after.intervalId);
+      }
+    }
+  }
+  const pauseSupported = pauseProfiles.size >= input.minimumProfileSupport;
+  const continuousSupported =
+    continuousProfiles.size >= input.minimumProfileSupport;
+  if (pauseSupported && continuousSupported) {
+    return {
+      relation: "conflicting",
+      profileSupportCount: Math.max(
+        pauseProfiles.size,
+        continuousProfiles.size,
+      ),
+      evidenceIds: [...new Set([...pauseIds, ...continuousIds])].toSorted(),
+    };
+  }
+  if (pauseSupported) {
+    return {
+      relation: "pause-supported",
+      profileSupportCount: pauseProfiles.size,
+      evidenceIds: [...pauseIds].toSorted(),
+    };
+  }
+  if (continuousSupported) {
+    return {
+      relation: "continuous-speech-island",
+      profileSupportCount: continuousProfiles.size,
+      evidenceIds: [...continuousIds].toSorted(),
+    };
+  }
+  return {
+    relation: "unavailable",
+    profileSupportCount: Math.max(pauseProfiles.size, continuousProfiles.size),
+    evidenceIds: [...new Set([...pauseIds, ...continuousIds])].toSorted(),
+  };
 }
 
 function repeatedCallStructure(value: string): boolean {
@@ -976,11 +1235,11 @@ function atomicTimingProposal(input: {
     rightProposal.start = Math.max(rightProposal.start, rightEvidence.start);
     evidenceByCue.set(left.id, {
       source: mutationBoundarySource(leftEvidence.source),
-      ids: [leftEvidence.attemptId],
+      ids: [leftEvidence.evidenceId ?? leftEvidence.attemptId],
     });
     evidenceByCue.set(right.id, {
       source: mutationBoundarySource(rightEvidence.source),
-      ids: [rightEvidence.attemptId],
+      ids: [rightEvidence.evidenceId ?? rightEvidence.attemptId],
     });
   }
   const byId = new Map(input.allCues.map((cue) => [cue.id, cue]));
@@ -1145,6 +1404,12 @@ export function classifyOverlapAcousticComponent(input: {
       leftInterval === null || rightInterval === null
         ? 0
         : overlapSeconds(leftInterval, rightInterval);
+    const rawVadBoundary = rawVadBoundaryRelation({
+      attempts,
+      left: leftInterval,
+      right: rightInterval,
+      minimumProfileSupport: configuration.minimumIndependentProfileSupport,
+    });
     const sameOccurrenceLikely =
       leftInterval !== null &&
       rightInterval !== null &&
@@ -1169,9 +1434,17 @@ export function classifyOverlapAcousticComponent(input: {
         sameOccurrenceLikely,
         simultaneousSpeechSupported: simultaneouslySupported,
         boundaryEvidenceIds: [
-          ...(leftInterval === null ? [] : [leftInterval.attemptId]),
-          ...(rightInterval === null ? [] : [rightInterval.attemptId]),
+          ...(leftInterval === null
+            ? []
+            : [leftInterval.evidenceId ?? leftInterval.attemptId]),
+          ...(rightInterval === null
+            ? []
+            : [rightInterval.evidenceId ?? rightInterval.attemptId]),
+          ...rawVadBoundary.evidenceIds,
         ],
+        rawVadBoundaryRelation: rawVadBoundary.relation,
+        rawVadProfileSupportCount: rawVadBoundary.profileSupportCount,
+        rawVadBoundaryEvidenceIds: rawVadBoundary.evidenceIds,
         confidence: round(
           Math.min(
             leftAlignment?.alignmentConfidence ?? 0,
@@ -1620,7 +1893,7 @@ export function applyOverlapAcousticResolution(input: {
   const base = input.presentation.artifact;
   const artifact = subtitlePresentationResolutionSchema.parse({
     ...base,
-    resolutionVersion: "C5.15.1",
+    resolutionVersion: "C5.16",
     generatedAt: input.acoustic.generatedAt,
     canonicalCueHash,
     presentationCueHash,
@@ -1679,7 +1952,7 @@ export function buildSubtitleOverlapAcousticResolution(input: {
   return subtitleOverlapAcousticResolutionSchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-overlap-acoustic-resolution",
-    resolutionVersion: "C5.15.1",
+    resolutionVersion: "C5.16",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     sourceFingerprint: input.sourceFingerprint,
     baseCueHash: input.baseCueHash,

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0.0",
+  "repository": "ggml-org/whisper.cpp",
+  "remote": "https://github.com/ggml-org/whisper.cpp.git",
+  "tag": "v1.9.3",
+  "tagObject": "7246b7311e089fe092c4abe7cfad5d0921f8be00",
+  "commit": "371b5a7561823ab2bb32142d2751e35e7534727b",
+  "sourceTree": "3d7ce4f956997cfa325c7556533aba5604278463",
+  "patchId": "mvl-mapped-token-raw-vad-json-v1",
+  "patchSha256": "bba39640e7005a1fdeb62c549d04ba76b6fc0d8aedae43daf9c9de1ab10a735d",
+  "responseSchema": "mvl-whisper-server-response/1.0.0",
+  "expectedFiles": ["examples/server/server.cpp"]
+}

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readdir, stat } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 
@@ -8,6 +8,13 @@ import {
   InputError,
   atomicWriteJson,
   overlapAcousticComponentSchema,
+  mvlWhisperCapabilitySchemaVersion,
+  mvlWhisperPatchId,
+  mvlWhisperResponseSchemaVersion,
+  mvlWhisperServerCapabilitiesSchema,
+  mvlWhisperServerResponseSchema,
+  whisperRuntimeBuildManifestSchema,
+  whisperRuntimeCapabilityArtifactSchema,
   type Logger,
   type OverlapAcousticAttempt,
   type OverlapAcousticProfile,
@@ -22,6 +29,10 @@ import {
   type TimestampRuntimeCapability,
   type TokenTimestampPolicy,
   type LegacyOverlapCachePolicy,
+  type MvlWhisperServerCapabilities,
+  type RawVadPolicy,
+  type TimestampRuntimePolicy,
+  type WhisperRuntimeBuildManifest,
   type WhisperExecutionMetrics,
   type WhisperExecutionMode,
   type WhisperModelCapability,
@@ -49,6 +60,7 @@ import {
   auditTimestampEvidenceAttempt,
   TIMESTAMP_MAPPING_VERSION,
   TOKEN_HEALTH_POLICY_VERSION,
+  RAW_VAD_POLICY_VERSION,
   timestampIntegrityHash,
   evaluateTimestampEvidenceIntegrityGate,
 } from "@mvl/transcription-core";
@@ -73,6 +85,11 @@ export interface TargetedOverlapAcousticOptions {
   ffmpegPath?: string;
   ffprobePath?: string;
   whisperCppPath?: string;
+  whisperServerPath?: string;
+  timestampRuntimePolicy?: TimestampRuntimePolicy;
+  rawVadPolicy?: RawVadPolicy;
+  runtimeCapabilityManifestPath?: string;
+  mvlResponseSchemaVersion?: string;
   localModelPath?: string;
   localModelDirectory?: string;
   vadModelPath?: string;
@@ -98,6 +115,7 @@ export interface TargetedOverlapAcousticResult {
     executionMetrics: string;
     cacheManifest: string;
     timestampIntegrity: string;
+    runtimeCapability: string;
   };
 }
 
@@ -110,6 +128,18 @@ interface RuntimeResolution {
   fullJsonAvailable: boolean;
   logicalCores: number;
   timestampCapability: TimestampRuntimeCapability;
+  serverPath: string;
+  runtimeType: "stock" | "mvl-patched" | "legacy-system";
+  buildManifest: WhisperRuntimeBuildManifest | null;
+  expectedMvlRuntime: {
+    upstreamCommit: string;
+    patchId: string;
+    patchSha256: string;
+    binarySha256: string;
+    buildFlagsHash: string;
+  } | null;
+  responseSchemaVersion: string;
+  capabilityEndpointResponse: MvlWhisperServerCapabilities | null;
 }
 
 interface ExtractedComponentAudio {
@@ -234,6 +264,11 @@ function modelFamily(filePath: string): string {
 async function resolveRuntime(input: {
   runner: ProcessRunner;
   whisperCppPath?: string;
+  whisperServerPath?: string;
+  timestampRuntimePolicy: TimestampRuntimePolicy;
+  rawVadPolicy: RawVadPolicy;
+  runtimeCapabilityManifestPath?: string;
+  mvlResponseSchemaVersion: string;
   localModelPath?: string;
   localModelDirectory?: string;
   vadModelPath?: string;
@@ -251,6 +286,20 @@ async function resolveRuntime(input: {
       : { directory: input.localModelDirectory }),
   });
   if (executablePath === null || modelPath === null) return null;
+  const explicitServerPath =
+    input.whisperServerPath === undefined
+      ? null
+      : await resolveExecutablePath(input.whisperServerPath);
+  if (input.whisperServerPath !== undefined && explicitServerPath === null) {
+    throw new InputError(
+      `Configured whisper-server is unavailable or not executable: ${path.resolve(input.whisperServerPath)}`,
+    );
+  }
+  if (input.mvlResponseSchemaVersion !== mvlWhisperResponseSchemaVersion) {
+    throw new InputError(
+      `Unsupported MVL whisper response schema: ${input.mvlResponseSchemaVersion}`,
+    );
+  }
   const diagnostic = await input.runner.run(executablePath, ["--help"], {
     allowNonZero: true,
     timeoutMs: 30_000,
@@ -296,45 +345,139 @@ async function resolveRuntime(input: {
   const vadModelPath = (await isFile(path.resolve(requestedVadPath)))
     ? path.resolve(requestedVadPath)
     : null;
-  const serverPath = path.join(
+  const derivedServerPath = path.join(
     path.dirname(executablePath),
     process.platform === "win32" ? "whisper-server.exe" : "whisper-server",
   );
-  const runtimeBinaryPath = (await isFile(serverPath))
-    ? serverPath
-    : executablePath;
+  const serverPath =
+    explicitServerPath ??
+    ((await isFile(derivedServerPath)) ? derivedServerPath : executablePath);
+  const runtimeBinaryPath = serverPath;
+  const runtimeBinarySha256 = await sha256LocalFile(runtimeBinaryPath);
+  const buildManifest =
+    input.runtimeCapabilityManifestPath === undefined
+      ? null
+      : whisperRuntimeBuildManifestSchema.parse(
+          JSON.parse(
+            await readFile(
+              path.resolve(input.runtimeCapabilityManifestPath),
+              "utf8",
+            ),
+          ) as unknown,
+        );
+  const runtimeType =
+    buildManifest === null
+      ? "legacy-system"
+      : runtimeBinarySha256 === buildManifest.patched.binarySha256
+        ? "mvl-patched"
+        : runtimeBinarySha256 === buildManifest.stock.binarySha256
+          ? "stock"
+          : null;
+  if (runtimeType === null) {
+    throw new InputError(
+      "Configured whisper-server binary SHA-256 does not match the runtime build manifest.",
+    );
+  }
+  if (
+    input.timestampRuntimePolicy === "require-mapped" &&
+    runtimeType !== "mvl-patched"
+  ) {
+    throw new AppError(
+      "--timestamp-runtime-policy require-mapped requires a patched server and matching build manifest.",
+      { code: "MISSING_DEPENDENCY", exitCode: 4 },
+    );
+  }
+  if (input.rawVadPolicy === "required" && runtimeType !== "mvl-patched") {
+    throw new AppError(
+      "--raw-vad-policy required requires the verified patched whisper runtime.",
+      { code: "MISSING_DEPENDENCY", exitCode: 4 },
+    );
+  }
+  const expectedMvlRuntime =
+    runtimeType === "mvl-patched" && buildManifest !== null
+      ? {
+          upstreamCommit: buildManifest.upstream.commit,
+          patchId: buildManifest.patch.patchId,
+          patchSha256: buildManifest.patch.patchSha256,
+          binarySha256: buildManifest.patched.binarySha256,
+          buildFlagsHash: buildManifest.build.flagsHash,
+        }
+      : null;
   const tokenTimestampControlAvailable =
     /--output-json-full\b/u.test(help) && /--max-len\b/u.test(help);
   const capabilityEvidence = [
-    `whisper.cpp:${whisperCppVersion}`,
-    `server-response:verbose_json`,
+    `whisper.cpp:${runtimeType === "mvl-patched" ? "1.9.3" : whisperCppVersion}`,
+    `server-response:${runtimeType === "mvl-patched" ? input.mvlResponseSchemaVersion : "verbose_json"}`,
     tokenTimestampControlAvailable
       ? "token-timestamp-control:available"
       : "token-timestamp-control:unavailable",
-    "mapped-token-getter:not-exposed-by-server-json",
-    "raw-vad-intervals:not-exposed-by-server-json",
+    runtimeType === "mvl-patched"
+      ? "mapped-token-getter:declared-by-pinned-runtime-manifest"
+      : "mapped-token-getter:not-exposed-by-server-json",
+    runtimeType === "mvl-patched"
+      ? "raw-vad-intervals:declared-by-pinned-runtime-manifest"
+      : "raw-vad-intervals:not-exposed-by-server-json",
   ];
   const capabilityPayload = {
-    whisperCppVersion,
+    whisperCppVersion:
+      runtimeType === "mvl-patched" ? "1.9.3" : whisperCppVersion,
     runtimeBinaryPathRecordedAsBasenameOnly: path.basename(runtimeBinaryPath),
-    runtimeBinarySha256: await sha256LocalFile(runtimeBinaryPath),
-    runtimeSourceCommit: null,
-    serverResponseFormat: "verbose_json",
-    mappedTokenGetterAvailable: false,
+    runtimeBinarySha256,
+    runtimeSourceCommit: buildManifest?.upstream.commit ?? null,
+    serverResponseFormat:
+      runtimeType === "mvl-patched"
+        ? input.mvlResponseSchemaVersion
+        : "verbose_json",
+    mappedTokenGetterAvailable: runtimeType === "mvl-patched",
     mappedTokenGetterActuallyUsed: false,
-    rawVadGetterAvailable: false,
+    rawVadGetterAvailable: runtimeType === "mvl-patched",
     rawVadGetterActuallyUsed: false,
     tokenTimestampControlAvailable,
     timestampCapabilityProbeMethod:
-      "local-binary-help-version-and-observed-server-json-v1",
-    timestampCapabilityStatus: tokenTimestampControlAvailable
-      ? ("legacy-vad-unmapped" as const)
-      : ("token-timestamps-unavailable" as const),
+      runtimeType === "mvl-patched"
+        ? "pinned-build-manifest-plus-required-live-handshake-v1"
+        : "local-binary-help-version-and-observed-server-json-v1",
+    timestampCapabilityStatus:
+      runtimeType === "mvl-patched"
+        ? ("unverified" as const)
+        : tokenTimestampControlAvailable
+          ? ("legacy-vad-unmapped" as const)
+          : ("token-timestamps-unavailable" as const),
     evidence: capabilityEvidence,
   };
+  const expectedCapabilityEndpoint =
+    runtimeType === "mvl-patched" && buildManifest !== null
+      ? mvlWhisperServerCapabilitiesSchema.parse({
+          schema_version: mvlWhisperCapabilitySchemaVersion,
+          whisper_cpp_version: "1.9.3",
+          upstream_commit: buildManifest.upstream.commit,
+          patch_id: mvlWhisperPatchId,
+          patch_sha256: buildManifest.patch.patchSha256,
+          mapped_token_getter_available: true,
+          raw_vad_getter_available: true,
+          supported_response_formats: [
+            "json",
+            "text",
+            "srt",
+            "verbose_json",
+            "vtt",
+            "mvl_verbose_json_v1",
+          ],
+          time_units: ["centiseconds", "seconds"],
+          coordinate_system_contract: {
+            segment: "original-audio-local",
+            token_raw_with_vad: "vad-processed-local",
+            token_raw_without_vad: "original-audio-local",
+            token_mapped: "original-audio-local",
+            raw_vad: "original-audio-local",
+          },
+        })
+      : null;
   const timestampCapability: TimestampRuntimeCapability = {
     ...capabilityPayload,
-    runtimeTimestampCapabilityHash: timestampIntegrityHash(capabilityPayload),
+    runtimeTimestampCapabilityHash: timestampIntegrityHash(
+      expectedCapabilityEndpoint ?? capabilityPayload,
+    ),
   };
   return {
     capability: {
@@ -370,12 +513,40 @@ async function resolveRuntime(input: {
       roles: ["refinement", "fallback"],
     },
     executablePath,
-    whisperCppVersion,
+    whisperCppVersion:
+      runtimeType === "mvl-patched" ? "1.9.3" : whisperCppVersion,
     vadModelPath,
     tokenTimestampsAvailable: tokenTimestampControlAvailable,
     fullJsonAvailable: /--output-json-full\b/u.test(help),
     logicalCores: Math.max(1, Number(process.env.MVL_LOGICAL_CORES ?? 0) || 8),
     timestampCapability,
+    serverPath,
+    runtimeType,
+    buildManifest,
+    expectedMvlRuntime,
+    responseSchemaVersion:
+      runtimeType === "mvl-patched"
+        ? input.mvlResponseSchemaVersion
+        : "verbose_json",
+    capabilityEndpointResponse: null,
+  };
+}
+
+function parsedMvlEnvelope(result: TranscriptionChunkResult): {
+  response: ReturnType<typeof mvlWhisperServerResponseSchema.parse>;
+  capability: MvlWhisperServerCapabilities;
+} | null {
+  if (typeof result.raw !== "object" || result.raw === null) return null;
+  const raw = result.raw as {
+    mvlResponse?: unknown;
+    capabilityHandshake?: unknown;
+  };
+  if (raw.mvlResponse === undefined) return null;
+  return {
+    response: mvlWhisperServerResponseSchema.parse(raw.mvlResponse),
+    capability: mvlWhisperServerCapabilitiesSchema.parse(
+      raw.capabilityHandshake,
+    ),
   };
 }
 
@@ -474,6 +645,19 @@ export function timestampObserveMutationProhibited(
   return mode === "observe" && timingMutationCount > 0;
 }
 
+export function orderOverlapAcousticProfiles(
+  plans: readonly { profiles: readonly OverlapAcousticProfile[] }[],
+): OverlapAcousticProfile[] {
+  const requested = new Set(plans.flatMap((plan) => plan.profiles));
+  // whisper.cpp v1.9.3 retains its latest VAD time map in a reused context.
+  // Running every no-VAD request before any VAD request keeps the official
+  // no-VAD mapped getter on the identity timeline while retaining one model
+  // load and one persistent worker for all 21 requests.
+  return (
+    ["no-vad", "current-sensitive-vad", "extra-sensitive-vad"] as const
+  ).filter((profile) => requested.has(profile));
+}
+
 function mapAttempt(input: {
   result: TranscriptionChunkResult;
   plan: OverlapAcousticComponentPlan;
@@ -486,12 +670,86 @@ function mapAttempt(input: {
   failure?: string | null;
   sourceCues: readonly SubtitleCue[];
   tokenTimestampPolicy: TokenTimestampPolicy;
+  rawVadPolicy: RawVadPolicy;
 }): {
   attempt: OverlapAcousticAttempt;
   legacyAttempt: OverlapAcousticAttempt;
   integrity: TimestampAttemptIntegrity;
 } {
-  const rawSegments = input.result.segments.flatMap((segment, segmentIndex) => {
+  const mvl = parsedMvlEnvelope(input.result);
+  if (mvl !== null) {
+    input.runtime.capabilityEndpointResponse = mvl.capability;
+    input.runtime.timestampCapability.mappedTokenGetterActuallyUsed ||=
+      mvl.response.runtime.capabilities.mapped_token_getter_used;
+    input.runtime.timestampCapability.rawVadGetterActuallyUsed ||=
+      mvl.response.runtime.capabilities.raw_vad_getter_used;
+    if (input.runtime.timestampCapability.mappedTokenGetterActuallyUsed) {
+      input.runtime.timestampCapability.timestampCapabilityStatus =
+        "mapped-original-timeline";
+    }
+    input.runtime.timestampCapability.evidence = [
+      ...new Set([
+        ...input.runtime.timestampCapability.evidence,
+        "capability-endpoint:strict-schema-verified",
+        ...(mvl.response.runtime.capabilities.mapped_token_getter_used
+          ? ["mapped-token-getter:inference-use-proven"]
+          : []),
+        ...(mvl.response.runtime.capabilities.raw_vad_getter_used
+          ? ["raw-vad-getter:inference-use-proven"]
+          : []),
+      ]),
+    ].toSorted();
+  }
+  const sourceSegments =
+    mvl === null
+      ? input.result.segments.map((segment) => ({
+          text: segment.text,
+          start: segment.start,
+          end: segment.end,
+          confidence: segment.confidence,
+          tokens: (segment.tokens ?? []).map((token) => ({
+            text: token.text,
+            rawStart: token.start,
+            rawEnd: token.end,
+            probability: token.probability ?? null,
+            rawCoordinateSystem: undefined,
+            officialMappedStart: undefined,
+            officialMappedEnd: undefined,
+            special: false,
+          })),
+        }))
+      : mvl.response.transcription.map((segment) => ({
+          text: segment.text,
+          start: segment.startSeconds,
+          end: segment.endSeconds,
+          confidence: null,
+          // Individual Whisper tokens can split one UTF-8 code point. The
+          // strict response proves each grouped word's byte membership and
+          // derives its bounds from the first/last official getter result, so
+          // the grouped word is the smallest safe lexical timing unit.
+          tokens: segment.words.flatMap((word) =>
+            word.rawStartCentiseconds === null ||
+            word.rawEndCentiseconds === null ||
+            word.mappedStartCentiseconds === null ||
+            word.mappedEndCentiseconds === null
+              ? []
+              : [
+                  {
+                    text: word.word,
+                    rawStart: word.rawStartCentiseconds * 0.01,
+                    rawEnd: word.rawEndCentiseconds * 0.01,
+                    probability: word.probability,
+                    rawCoordinateSystem: mvl.response.request.vad
+                      ? ("vad-processed-local" as const)
+                      : ("original-audio-local" as const),
+                    officialMappedStart: word.mappedStartCentiseconds * 0.01,
+                    officialMappedEnd: word.mappedEndCentiseconds * 0.01,
+                    special: false,
+                  },
+                ],
+          ),
+        }));
+  const rawSegments = sourceSegments.flatMap((segment, segmentIndex) => {
     if (segment.end <= segment.start) return [];
     const segmentId = deterministicId("overlap-segment", {
       requestId: input.requestId,
@@ -500,23 +758,32 @@ function mapAttempt(input: {
       end: segment.end,
       text: segment.text,
     });
-    const tokens = (segment.tokens ?? []).flatMap((token, tokenIndex) => {
-      if (token.end < token.start) return [];
+    const tokens = segment.tokens.flatMap((token, tokenIndex) => {
+      if (token.rawEnd < token.rawStart) return [];
       const tokenId = deterministicId("overlap-token", {
         requestId: input.requestId,
         segmentIndex,
         tokenIndex,
-        start: token.start,
-        end: token.end,
+        start: token.rawStart,
+        end: token.rawEnd,
         text: token.text,
       });
       return [
         {
           tokenId,
           text: token.text,
-          rawStart: token.start,
-          rawEnd: token.end,
-          probability: token.probability ?? null,
+          rawStart: token.rawStart,
+          rawEnd: token.rawEnd,
+          probability: token.probability,
+          ...(token.rawCoordinateSystem === undefined
+            ? {}
+            : { rawCoordinateSystem: token.rawCoordinateSystem }),
+          ...(token.officialMappedStart === undefined
+            ? {}
+            : { officialMappedStart: token.officialMappedStart }),
+          ...(token.officialMappedEnd === undefined
+            ? {}
+            : { officialMappedEnd: token.officialMappedEnd }),
         },
       ];
     });
@@ -548,14 +815,31 @@ function mapAttempt(input: {
       start: cue.start,
       end: cue.end,
     })),
-    rawVadIntervals: [],
+    rawVadIntervals:
+      input.rawVadPolicy === "off" || mvl === null
+        ? []
+        : mvl.response.vad_segments.map((interval) => ({
+            intervalId: deterministicId("raw-vad", {
+              requestId: input.requestId,
+              index: interval.index,
+              start: interval.startSeconds,
+              end: interval.endSeconds,
+            }),
+            start: interval.startSeconds,
+            end: interval.endSeconds,
+            coordinateSystem: "original-audio-local" as const,
+          })),
     tokenTimestampsRequested: true,
     tokenTimestampPolicy: input.tokenTimestampPolicy,
     mappedTokenGetterActuallyUsed:
+      mvl?.response.runtime.capabilities.mapped_token_getter_used ??
       input.runtime.timestampCapability.mappedTokenGetterActuallyUsed,
   });
   const trustedAvailable = audit.tokens.some(
     (token) => token.timingUsable === true,
+  );
+  const auditedTokenById = new Map(
+    audit.tokens.map((token) => [token.tokenId, token] as const),
   );
   const attempt: OverlapAcousticAttempt = {
     attemptId,
@@ -575,9 +859,64 @@ function mapAttempt(input: {
     targetCueTextUsedAsPrompt: false,
     referenceTranslationUsedAsPrompt: false,
     humanReviewedSentenceUsedAsPrompt: false,
+    runtimeCapabilityRef: "whisper-runtime-capability.json",
+    responseSchemaVersion:
+      mvl?.response.schema_version ?? input.runtime.responseSchemaVersion,
     rawText: input.result.text,
     segments: audit.segments,
     tokens: audit.tokens,
+    rawTokens: audit.tokens.flatMap((token) =>
+      token.parentSegmentId === undefined ||
+      token.rawStart === undefined ||
+      token.rawEnd === undefined
+        ? []
+        : [
+            {
+              tokenId: token.tokenId,
+              parentSegmentId: token.parentSegmentId,
+              text: token.text,
+              special: token.specialToken ?? false,
+              start: token.rawStart,
+              end: token.rawEnd,
+              coordinateSystem: token.rawCoordinateSystem ?? "unknown",
+            },
+          ],
+    ),
+    mappedTokens: rawSegments.flatMap((segment) =>
+      segment.tokens.flatMap((token) => {
+        if (
+          token.officialMappedStart === undefined ||
+          token.officialMappedEnd === undefined
+        ) {
+          return [];
+        }
+        const start =
+          input.plan.extractionInterval.start + token.officialMappedStart;
+        const end =
+          input.plan.extractionInterval.start + token.officialMappedEnd;
+        if (
+          !Number.isFinite(start) ||
+          !Number.isFinite(end) ||
+          start < 0 ||
+          end < start
+        ) {
+          return [];
+        }
+        return [
+          {
+            tokenId: token.tokenId,
+            parentSegmentId: segment.segmentId,
+            text: token.text,
+            start,
+            end,
+            coordinateSystem: "original-media-global" as const,
+            mappingMethod: "official-mapped-token-getter" as const,
+            timingUsable:
+              auditedTokenById.get(token.tokenId)?.timingUsable ?? false,
+          },
+        ];
+      }),
+    ),
     // Deprecated compatibility alias. New evidence selection never treats it
     // as raw VAD or an independent speech detector.
     speechIntervals: audit.decodedSegmentIntervals.map(({ start, end }) => ({
@@ -707,6 +1046,10 @@ export async function runTargetedOverlapAcousticResolution(
     options.timestampEvidenceIntegrity ?? "observe";
   const tokenTimestampPolicy = options.tokenTimestampPolicy ?? "auto";
   const legacyOverlapCachePolicy = options.legacyOverlapCachePolicy ?? "reject";
+  const timestampRuntimePolicy = options.timestampRuntimePolicy ?? "auto";
+  const rawVadPolicy = options.rawVadPolicy ?? "auto";
+  const mvlResponseSchemaVersion =
+    options.mvlResponseSchemaVersion ?? mvlWhisperResponseSchemaVersion;
   const selectedAudio = await selectAudioStream({
     sourceVideoPath: options.sourceVideoPath,
     ...(options.audioStreamIndex === undefined
@@ -743,6 +1086,18 @@ export async function runTargetedOverlapAcousticResolution(
       ...(options.whisperCppPath === undefined
         ? {}
         : { whisperCppPath: options.whisperCppPath }),
+      ...(options.whisperServerPath === undefined
+        ? {}
+        : { whisperServerPath: options.whisperServerPath }),
+      timestampRuntimePolicy,
+      rawVadPolicy,
+      ...(options.runtimeCapabilityManifestPath === undefined
+        ? {}
+        : {
+            runtimeCapabilityManifestPath:
+              options.runtimeCapabilityManifestPath,
+          }),
+      mvlResponseSchemaVersion,
       ...(options.localModelPath === undefined
         ? {}
         : { localModelPath: options.localModelPath }),
@@ -758,7 +1113,13 @@ export async function runTargetedOverlapAcousticResolution(
       dependencyFailure = "LOCAL_WHISPER_LARGE_V3_UNAVAILABLE";
     }
   } catch (error) {
-    if ((options.coreML ?? "auto") === "on") throw error;
+    if (
+      (options.coreML ?? "auto") === "on" ||
+      timestampRuntimePolicy === "require-mapped" ||
+      rawVadPolicy === "required"
+    ) {
+      throw error;
+    }
     dependencyFailure = error instanceof Error ? error.message : String(error);
   }
   const cache = new PortableAsrCache({
@@ -780,8 +1141,12 @@ export async function runTargetedOverlapAcousticResolution(
   const classificationAttempts: OverlapAcousticAttempt[] = [];
   const integrityAttempts: TimestampAttemptIntegrity[] = [];
   if (runtime !== null) {
-    for (const audio of extracted) {
-      for (const profileId of audio.plan.profiles) {
+    const profileExecutionOrder = orderOverlapAcousticProfiles(
+      extracted.map((audio) => audio.plan),
+    );
+    for (const profileId of profileExecutionOrder) {
+      for (const audio of extracted) {
+        if (!audio.plan.profiles.includes(profileId)) continue;
         const profile = adapterProfile(profileId);
         const requestId = deterministicId("overlap-request", {
           audioSha256: audio.sha256,
@@ -814,6 +1179,12 @@ export async function runTargetedOverlapAcousticResolution(
           tokenHealthPolicyVersion: TOKEN_HEALTH_POLICY_VERSION,
           runtimeTimestampCapabilityHash:
             runtime.timestampCapability.runtimeTimestampCapabilityHash,
+          runtimeType: runtime.runtimeType,
+          runtimeBinarySha256: runtime.timestampCapability.runtimeBinarySha256,
+          runtimeSourceCommit: runtime.timestampCapability.runtimeSourceCommit,
+          runtimePatchSha256: runtime.buildManifest?.patch.patchSha256 ?? null,
+          runtimeResponseSchemaVersion: runtime.responseSchemaVersion,
+          rawVadPolicyVersion: RAW_VAD_POLICY_VERSION,
           decodeConfiguration: {
             requestType: "overlap-evidence",
             targetUnionInterval: audio.plan.unionInterval,
@@ -889,6 +1260,13 @@ export async function runTargetedOverlapAcousticResolution(
               tokenTimestampsAvailable: runtime.tokenTimestampsAvailable,
               fullJsonAvailable: runtime.fullJsonAvailable,
               workerPool,
+              serverPath: runtime.serverPath,
+              timestampRuntimePolicy,
+              rawVadPolicy,
+              mvlResponseSchemaVersion,
+              ...(runtime.expectedMvlRuntime === null
+                ? {}
+                : { expectedMvlRuntime: runtime.expectedMvlRuntime }),
             });
             adapters.set(profileId, adapter);
           }
@@ -914,6 +1292,13 @@ export async function runTargetedOverlapAcousticResolution(
               result,
             });
           } catch (error) {
+            if (
+              timestampRuntimePolicy === "require-mapped" ||
+              rawVadPolicy === "required"
+            ) {
+              await workerPool.close();
+              throw error;
+            }
             failure = error instanceof Error ? error.message : String(error);
             result = { text: "", segments: [], raw: null };
           }
@@ -935,6 +1320,7 @@ export async function runTargetedOverlapAcousticResolution(
             lookup.tokenTimingTrust === "legacy-untrusted"
               ? "off"
               : tokenTimestampPolicy,
+          rawVadPolicy,
         });
         const attemptViews = timestampAttemptViewsForMode({
           mode: timestampEvidenceIntegrity,
@@ -1091,6 +1477,72 @@ export async function runTargetedOverlapAcousticResolution(
           ),
           integrityGateFailures,
         });
+  const runtimeCapabilityArtifact =
+    runtime === null
+      ? null
+      : whisperRuntimeCapabilityArtifactSchema.parse({
+          schemaVersion: "1.0.0",
+          artifactType: "whisper-runtime-capability",
+          runtimeType: runtime.runtimeType,
+          upstreamRepository: "ggml-org/whisper.cpp",
+          upstreamTag: runtime.buildManifest?.upstream.tag ?? null,
+          upstreamCommit: runtime.buildManifest?.upstream.commit ?? null,
+          patchId:
+            runtime.runtimeType === "mvl-patched"
+              ? (runtime.buildManifest?.patch.patchId ?? null)
+              : null,
+          patchSha256:
+            runtime.runtimeType === "mvl-patched"
+              ? (runtime.buildManifest?.patch.patchSha256 ?? null)
+              : null,
+          binaryBasename: path.basename(runtime.serverPath),
+          binarySha256: runtime.timestampCapability.runtimeBinarySha256,
+          buildFlagsHash: runtime.buildManifest?.build.flagsHash ?? null,
+          capabilityEndpointResponse: runtime.capabilityEndpointResponse,
+          capabilityHash:
+            runtime.timestampCapability.runtimeTimestampCapabilityHash,
+          behaviorProbeResults: {
+            inferenceResponseCount: finalizedAttempts.length,
+            mappedTokenResponseCount: finalizedAttempts.filter((attempt) =>
+              attempt.tokens.some(
+                (token) =>
+                  token.mappingMethod === "official-mapped-token-getter",
+              ),
+            ).length,
+            rawVadResponseCount: finalizedAttempts.filter(
+              (attempt) => (attempt.rawVadIntervals?.length ?? 0) > 0,
+            ).length,
+          },
+          mappedGetterDeclared:
+            runtime.timestampCapability.mappedTokenGetterAvailable,
+          mappedGetterActuallyUsed:
+            runtime.timestampCapability.mappedTokenGetterActuallyUsed,
+          rawVadGetterDeclared:
+            runtime.timestampCapability.rawVadGetterAvailable,
+          rawVadGetterActuallyUsed:
+            runtime.timestampCapability.rawVadGetterActuallyUsed,
+          responseSchema: runtime.responseSchemaVersion,
+          verified:
+            runtime.runtimeType === "mvl-patched" &&
+            runtime.capabilityEndpointResponse !== null &&
+            runtime.timestampCapability.mappedTokenGetterActuallyUsed &&
+            (rawVadPolicy !== "required" ||
+              runtime.timestampCapability.rawVadGetterActuallyUsed),
+          failures: [
+            ...(runtime.runtimeType === "mvl-patched" &&
+            runtime.capabilityEndpointResponse === null
+              ? ["CAPABILITY_ENDPOINT_NOT_OBSERVED"]
+              : []),
+            ...(timestampRuntimePolicy === "require-mapped" &&
+            !runtime.timestampCapability.mappedTokenGetterActuallyUsed
+              ? ["MAPPED_GETTER_USE_NOT_OBSERVED"]
+              : []),
+            ...(rawVadPolicy === "required" &&
+            !runtime.timestampCapability.rawVadGetterActuallyUsed
+              ? ["RAW_VAD_GETTER_USE_NOT_OBSERVED"]
+              : []),
+          ],
+        });
   const outputPaths = {
     resolution: path.join(
       options.subtitleDirectory,
@@ -1108,6 +1560,10 @@ export async function runTargetedOverlapAcousticResolution(
       options.subtitleDirectory,
       "subtitle-timestamp-evidence-integrity.json",
     ),
+    runtimeCapability: path.join(
+      options.subtitleDirectory,
+      "whisper-runtime-capability.json",
+    ),
   };
   await Promise.all([
     atomicWriteJson(outputPaths.resolution, artifact, { overwrite: true }),
@@ -1123,6 +1579,15 @@ export async function runTargetedOverlapAcousticResolution(
           atomicWriteJson(
             outputPaths.timestampIntegrity,
             timestampIntegrityArtifact,
+            { overwrite: true },
+          ),
+        ]),
+    ...(runtimeCapabilityArtifact === null
+      ? []
+      : [
+          atomicWriteJson(
+            outputPaths.runtimeCapability,
+            runtimeCapabilityArtifact,
             { overwrite: true },
           ),
         ]),

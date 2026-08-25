@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c5-16-stock-patched-runtime-ab.schema.json",
+  "title": "c5-16-stock-patched-runtime-ab",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c5-16-stock-patched-runtime-ab"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "upstream": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string", "const": "ggml-org/whisper.cpp" },
+        "tag": { "type": "string", "const": "v1.9.3" },
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "sourceTree": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
+      },
+      "required": ["repository", "tag", "commit", "sourceTree"],
+      "additionalProperties": false
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "buildIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "buildFlagsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "stockBinarySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "patchedBinarySha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "patchSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sameSource": { "type": "boolean" },
+        "sameBuildConfiguration": { "type": "boolean" }
+      },
+      "required": [
+        "buildIdentityHash",
+        "buildFlagsHash",
+        "stockBinarySha256",
+        "patchedBinarySha256",
+        "patchSha256",
+        "sameSource",
+        "sameBuildConfiguration"
+      ],
+      "additionalProperties": false
+    },
+    "modelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "vadModelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "requestPairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "componentId": { "type": "string", "minLength": 1 },
+          "profile": {
+            "type": "string",
+            "enum": ["current-sensitive-vad", "extra-sensitive-vad", "no-vad"]
+          },
+          "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "requestConfigHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "stockTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "patchedTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "textEqual": { "type": "boolean" },
+          "stockSegmentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "patchedSegmentHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "segmentsEqual": { "type": "boolean" },
+          "stockRawTokenHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "patchedRawTokenHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "rawTokensComparable": { "type": "boolean" },
+          "patchedMappedTokenCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "patchedRawVadIntervalCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "languageEqual": { "type": "boolean" },
+          "requestConfigurationEqual": { "type": "boolean" },
+          "promptEqual": { "type": "boolean" },
+          "stockResponseBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "patchedResponseBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "stockDurationSeconds": { "type": "number", "minimum": 0 },
+          "patchedDurationSeconds": { "type": "number", "minimum": 0 },
+          "failures": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "componentId",
+          "profile",
+          "audioSha256",
+          "requestConfigHash",
+          "stockTextHash",
+          "patchedTextHash",
+          "textEqual",
+          "stockSegmentHash",
+          "patchedSegmentHash",
+          "segmentsEqual",
+          "stockRawTokenHash",
+          "patchedRawTokenHash",
+          "rawTokensComparable",
+          "patchedMappedTokenCount",
+          "patchedRawVadIntervalCount",
+          "languageEqual",
+          "requestConfigurationEqual",
+          "promptEqual",
+          "stockResponseBytes",
+          "patchedResponseBytes",
+          "stockDurationSeconds",
+          "patchedDurationSeconds",
+          "failures"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "perProfile": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "enum": ["current-sensitive-vad", "extra-sensitive-vad", "no-vad"]
+          },
+          "pairCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "textParityCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "segmentParityCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rawTokenParityCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "languageParityCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "patchedMappedTokenCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "patchedRawVadIntervalCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "profile",
+          "pairCount",
+          "textParityCount",
+          "segmentParityCount",
+          "rawTokenParityCount",
+          "languageParityCount",
+          "patchedMappedTokenCount",
+          "patchedRawVadIntervalCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "pairCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "textParityPassed": { "type": "boolean" },
+        "segmentParityPassed": { "type": "boolean" },
+        "rawTokenParityPassed": { "type": "boolean" },
+        "languageParityPassed": { "type": "boolean" },
+        "requestConfigurationParityPassed": { "type": "boolean" },
+        "promptParityPassed": { "type": "boolean" },
+        "stockMappedTokenCount": { "type": "number", "const": 0 },
+        "patchedMappedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "stockRawVadIntervalCount": { "type": "number", "const": 0 },
+        "patchedRawVadIntervalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "stockWallClockSeconds": { "type": "number", "minimum": 0 },
+        "patchedWallClockSeconds": { "type": "number", "minimum": 0 },
+        "stockWorkerStartCount": { "type": "number", "const": 1 },
+        "patchedWorkerStartCount": { "type": "number", "const": 1 },
+        "stockModelLoadCount": { "type": "number", "const": 1 },
+        "patchedModelLoadCount": { "type": "number", "const": 1 },
+        "stockPeakResidentBytes": {
+          "anyOf": [
+            { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            { "type": "null" }
+          ]
+        },
+        "patchedPeakResidentBytes": {
+          "anyOf": [
+            { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            { "type": "null" }
+          ]
+        },
+        "stockResponseBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "patchedResponseBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "accepted": { "type": "boolean" },
+        "failures": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "required": [
+        "pairCount",
+        "freshRequestCount",
+        "textParityPassed",
+        "segmentParityPassed",
+        "rawTokenParityPassed",
+        "languageParityPassed",
+        "requestConfigurationParityPassed",
+        "promptParityPassed",
+        "stockMappedTokenCount",
+        "patchedMappedTokenCount",
+        "stockRawVadIntervalCount",
+        "patchedRawVadIntervalCount",
+        "stockWallClockSeconds",
+        "patchedWallClockSeconds",
+        "stockWorkerStartCount",
+        "patchedWorkerStartCount",
+        "stockModelLoadCount",
+        "patchedModelLoadCount",
+        "stockPeakResidentBytes",
+        "patchedPeakResidentBytes",
+        "stockResponseBytes",
+        "patchedResponseBytes",
+        "accepted",
+        "failures"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "generatedAt",
+    "upstream",
+    "build",
+    "modelSha256",
+    "vadModelSha256",
+    "requestPairs",
+    "perProfile",
+    "summary"
+  ],
+  "additionalProperties": false
+}

@@ -98,6 +98,12 @@ export function buildPortableAsrCacheIdentityV2(input: {
   timestampCoordinateSystem?: string;
   tokenHealthPolicyVersion?: string;
   runtimeTimestampCapabilityHash?: string;
+  runtimeType?: "stock" | "mvl-patched" | "legacy-system";
+  runtimeBinarySha256?: string;
+  runtimeSourceCommit?: string | null;
+  runtimePatchSha256?: string | null;
+  runtimeResponseSchemaVersion?: string;
+  rawVadPolicyVersion?: string;
   prompt?: string;
   decodeConfiguration?: unknown;
 }): PortableAsrCacheIdentityV2 {
@@ -137,6 +143,26 @@ export function buildPortableAsrCacheIdentityV2(input: {
       : {
           runtimeTimestampCapabilityHash: input.runtimeTimestampCapabilityHash,
         }),
+    ...(input.runtimeType === undefined
+      ? {}
+      : { runtimeType: input.runtimeType }),
+    ...(input.runtimeBinarySha256 === undefined
+      ? {}
+      : { runtimeBinarySha256: input.runtimeBinarySha256 }),
+    ...(input.runtimeSourceCommit === undefined
+      ? {}
+      : { runtimeSourceCommit: input.runtimeSourceCommit }),
+    ...(input.runtimePatchSha256 === undefined
+      ? {}
+      : { runtimePatchSha256: input.runtimePatchSha256 }),
+    ...(input.runtimeResponseSchemaVersion === undefined
+      ? {}
+      : {
+          runtimeResponseSchemaVersion: input.runtimeResponseSchemaVersion,
+        }),
+    ...(input.rawVadPolicyVersion === undefined
+      ? {}
+      : { rawVadPolicyVersion: input.rawVadPolicyVersion }),
     promptSha256: hashAsrPrompt(input.prompt),
     decodeConfigurationSha256: hashAsrDecodeConfiguration(
       input.decodeConfiguration ?? {},

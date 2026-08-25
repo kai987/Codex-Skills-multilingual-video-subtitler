@@ -1,0 +1,391 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/mvl-whisper-server-response.schema.json",
+  "title": "mvl-whisper-server-response",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "mvl-whisper-server-response/1.0.0"
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "whisper_cpp_version": { "type": "string", "const": "1.9.3" },
+        "upstream_commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "patch_id": {
+          "type": "string",
+          "const": "mvl-mapped-token-raw-vad-json-v1"
+        },
+        "patch_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "binary_sha256": { "type": "null" },
+        "response_schema": {
+          "type": "string",
+          "const": "mvl-whisper-server-response/1.0.0"
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "mapped_token_getter_available": {
+              "type": "boolean",
+              "const": true
+            },
+            "mapped_token_getter_used": { "type": "boolean" },
+            "raw_vad_getter_available": { "type": "boolean", "const": true },
+            "raw_vad_getter_used": { "type": "boolean" },
+            "raw_and_mapped_token_times_emitted": { "type": "boolean" },
+            "raw_vad_segments_emitted": { "type": "boolean" },
+            "time_unit": { "type": "string", "const": "centiseconds" }
+          },
+          "required": [
+            "mapped_token_getter_available",
+            "mapped_token_getter_used",
+            "raw_vad_getter_available",
+            "raw_vad_getter_used",
+            "raw_and_mapped_token_times_emitted",
+            "raw_vad_segments_emitted",
+            "time_unit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "whisper_cpp_version",
+        "upstream_commit",
+        "patch_id",
+        "patch_sha256",
+        "binary_sha256",
+        "response_schema",
+        "capabilities"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "response_format": { "type": "string", "const": "mvl_verbose_json_v1" },
+        "language": { "type": "string", "minLength": 1 },
+        "translate": { "type": "boolean" },
+        "vad": { "type": "boolean" },
+        "token_timestamps": { "type": "boolean" },
+        "suppress_nst": { "type": "boolean" },
+        "max_len": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "split_on_word": { "type": "boolean" },
+        "prompt_present": { "type": "boolean" }
+      },
+      "required": [
+        "response_format",
+        "language",
+        "translate",
+        "vad",
+        "token_timestamps",
+        "suppress_nst",
+        "max_len",
+        "split_on_word",
+        "prompt_present"
+      ],
+      "additionalProperties": false
+    },
+    "task": { "type": "string", "enum": ["transcribe", "translate"] },
+    "language": { "type": "string", "minLength": 1 },
+    "durationSeconds": { "type": "number", "minimum": 0 },
+    "text": { "type": "string" },
+    "transcription": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "text": { "type": "string" },
+          "startCentiseconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "endCentiseconds": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "startSeconds": { "type": "number", "minimum": 0 },
+          "endSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "coordinateSystem": {
+            "type": "string",
+            "const": "original-audio-local"
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "id": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "text": { "type": "string" },
+                "textBytesHex": {
+                  "type": "string",
+                  "pattern": "^(?:[a-f0-9]{2})*$"
+                },
+                "special": { "type": "boolean" },
+                "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+                "raw": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "startCentiseconds": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "endCentiseconds": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "coordinateSystem": {
+                          "type": "string",
+                          "enum": [
+                            "vad-processed-local",
+                            "original-audio-local"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "startCentiseconds",
+                        "endCentiseconds",
+                        "coordinateSystem"
+                      ],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "mapped": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "startCentiseconds": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "endCentiseconds": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "coordinateSystem": {
+                          "type": "string",
+                          "const": "original-audio-local"
+                        },
+                        "method": {
+                          "type": "string",
+                          "const": "whisper_full_get_token_t0_t1"
+                        }
+                      },
+                      "required": [
+                        "startCentiseconds",
+                        "endCentiseconds",
+                        "coordinateSystem",
+                        "method"
+                      ],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "dtwCentiseconds": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "index",
+                "id",
+                "text",
+                "textBytesHex",
+                "special",
+                "probability",
+                "raw",
+                "mapped",
+                "dtwCentiseconds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "word": { "type": "string" },
+                "wordBytesHex": {
+                  "type": "string",
+                  "pattern": "^(?:[a-f0-9]{2})*$"
+                },
+                "memberTokenIndices": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+                "rawStartCentiseconds": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "rawEndCentiseconds": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "mappedStartCentiseconds": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "mappedEndCentiseconds": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "word",
+                "wordBytesHex",
+                "memberTokenIndices",
+                "probability",
+                "rawStartCentiseconds",
+                "rawEndCentiseconds",
+                "mappedStartCentiseconds",
+                "mappedEndCentiseconds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "temperature": { "type": "number" },
+          "avgLogProbability": { "type": "number" },
+          "noSpeechProbability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "startCentiseconds",
+          "endCentiseconds",
+          "startSeconds",
+          "endSeconds",
+          "coordinateSystem",
+          "tokens",
+          "words",
+          "temperature",
+          "avgLogProbability",
+          "noSpeechProbability"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "vad_segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "startCentiseconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "endCentiseconds": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "startSeconds": { "type": "number", "minimum": 0 },
+          "endSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "coordinateSystem": {
+            "type": "string",
+            "const": "original-audio-local"
+          },
+          "source": { "type": "string", "const": "whisper-internal-vad" }
+        },
+        "required": [
+          "index",
+          "startCentiseconds",
+          "endCentiseconds",
+          "startSeconds",
+          "endSeconds",
+          "coordinateSystem",
+          "source"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "runtime",
+    "request",
+    "task",
+    "language",
+    "durationSeconds",
+    "text",
+    "transcription",
+    "vad_segments"
+  ],
+  "additionalProperties": false
+}

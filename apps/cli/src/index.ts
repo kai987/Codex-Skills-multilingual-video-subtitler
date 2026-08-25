@@ -141,6 +141,11 @@ interface SubtitleCliOptions extends GlobalOptions {
   whisperVadModel?: string;
   whisperVad: boolean;
   whisperCppPath?: string;
+  whisperServerPath?: string;
+  timestampRuntimePolicy?: "auto" | "require-mapped" | "legacy-safe";
+  rawVadPolicy?: "auto" | "required" | "off";
+  runtimeCapabilityManifest?: string;
+  mvlResponseSchemaVersion?: string;
   whisperExecutionMode: "auto" | "persistent" | "batch" | "process";
   reviewGroupGapSeconds: number;
   sceneAnalysis: "off" | "observe" | "route";
@@ -187,6 +192,11 @@ interface FinalizeCliOptions extends GlobalOptions {
   overlapMaxWindowSeconds: number;
   maxOverlapAsrRequests: number;
   whisperCppPath?: string;
+  whisperServerPath?: string;
+  timestampRuntimePolicy: "auto" | "require-mapped" | "legacy-safe";
+  rawVadPolicy: "auto" | "required" | "off";
+  runtimeCapabilityManifest?: string;
+  mvlResponseSchemaVersion: string;
   localTranscriptionModel?: string;
   localTranscriptionModelDirectory?: string;
   whisperVadModel?: string;
@@ -1216,6 +1226,32 @@ program
     21,
   )
   .option("--whisper-cpp-path <path>", "local whisper.cpp executable")
+  .option(
+    "--whisper-server-path <path>",
+    "explicit local whisper-server executable",
+  )
+  .addOption(
+    new Option(
+      "--timestamp-runtime-policy <policy>",
+      "mapped-token runtime capability policy",
+    )
+      .choices(["auto", "require-mapped", "legacy-safe"])
+      .default("auto"),
+  )
+  .addOption(
+    new Option("--raw-vad-policy <policy>", "raw VAD evidence policy")
+      .choices(["auto", "required", "off"])
+      .default("auto"),
+  )
+  .option(
+    "--runtime-capability-manifest <path>",
+    "matching repo-local whisper runtime build manifest",
+  )
+  .option(
+    "--mvl-response-schema-version <version>",
+    "required MVL patched-server response schema",
+    "mvl-whisper-server-response/1.0.0",
+  )
   .option("--local-transcription-model <path>", "local large-v3 model file")
   .option(
     "--local-transcription-model-directory <path>",
@@ -1280,6 +1316,17 @@ program
       ...(options.whisperCppPath === undefined
         ? {}
         : { whisperCppPath: options.whisperCppPath }),
+      ...(options.whisperServerPath === undefined
+        ? {}
+        : { whisperServerPath: options.whisperServerPath }),
+      timestampRuntimePolicy: options.timestampRuntimePolicy,
+      rawVadPolicy: options.rawVadPolicy,
+      ...(options.runtimeCapabilityManifest === undefined
+        ? {}
+        : {
+            runtimeCapabilityManifestPath: options.runtimeCapabilityManifest,
+          }),
+      mvlResponseSchemaVersion: options.mvlResponseSchemaVersion,
       ...(options.localTranscriptionModel === undefined
         ? {}
         : { localTranscriptionModelPath: options.localTranscriptionModel }),

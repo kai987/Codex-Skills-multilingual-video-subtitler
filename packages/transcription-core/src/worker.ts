@@ -8,8 +8,14 @@ import { performance } from "node:perf_hooks";
 
 import {
   AppError,
+  mvlWhisperServerCapabilitiesSchema,
+  mvlWhisperServerResponseSchema,
+  mvlWhisperResponseSchemaVersion,
   whisperExecutionMetricsSchema,
   type LanguageTag,
+  type MvlWhisperServerCapabilities,
+  type RawVadPolicy,
+  type TimestampRuntimePolicy,
   type WhisperExecutionMetrics,
   type WhisperExecutionMode,
 } from "@mvl/shared";
@@ -33,6 +39,133 @@ export interface WhisperWorkerCapability {
   vadProfile: WhisperVadProfile;
   tokenTimestamps: boolean;
   promptConstraint: string;
+  serverPath?: string | undefined;
+  timestampRuntimePolicy?: TimestampRuntimePolicy | undefined;
+  rawVadPolicy?: RawVadPolicy | undefined;
+  mvlResponseSchemaVersion?: string | undefined;
+  expectedMvlRuntime?:
+    | {
+        upstreamCommit: string;
+        patchId: string;
+        patchSha256: string;
+        binarySha256: string;
+        buildFlagsHash: string;
+      }
+    | undefined;
+}
+
+export interface MvlCapabilityHandshakeEvaluation {
+  verified: boolean;
+  capability: MvlWhisperServerCapabilities | null;
+  failures: string[];
+}
+
+export interface MvlRuntimeSelection {
+  responseFormat: "verbose_json" | "mvl_verbose_json_v1";
+  capability: MvlWhisperServerCapabilities | null;
+  fallbackReason: string | null;
+}
+
+export function selectMvlRuntimeResponseFormat(input: {
+  timestampRuntimePolicy: TimestampRuntimePolicy;
+  rawVadPolicy: RawVadPolicy;
+  evaluation: MvlCapabilityHandshakeEvaluation;
+}): MvlRuntimeSelection {
+  if (input.timestampRuntimePolicy === "legacy-safe") {
+    if (input.rawVadPolicy === "required") {
+      throw new AppError(
+        "--raw-vad-policy required is incompatible with legacy-safe runtime selection.",
+        { code: "TRANSCRIPTION_FAILED", exitCode: 4 },
+      );
+    }
+    return {
+      responseFormat: "verbose_json",
+      capability: null,
+      fallbackReason: "LEGACY_SAFE_POLICY",
+    };
+  }
+  if (input.evaluation.verified) {
+    if (input.evaluation.capability === null) {
+      throw new Error(
+        "Verified MVL capability evaluation returned no capability.",
+      );
+    }
+    return {
+      responseFormat: "mvl_verbose_json_v1",
+      capability: input.evaluation.capability,
+      fallbackReason: null,
+    };
+  }
+  if (
+    input.timestampRuntimePolicy === "require-mapped" ||
+    input.rawVadPolicy === "required"
+  ) {
+    throw new AppError(
+      "The explicitly required mapped-token whisper runtime failed its capability handshake.",
+      {
+        code: "TRANSCRIPTION_FAILED",
+        exitCode: 4,
+        details: { failures: input.evaluation.failures },
+      },
+    );
+  }
+  return {
+    responseFormat: "verbose_json",
+    capability: null,
+    fallbackReason: input.evaluation.failures.join(","),
+  };
+}
+
+export function evaluateMvlCapabilityHandshake(input: {
+  rawCapabilities: unknown;
+  expectedRuntime: WhisperWorkerCapability["expectedMvlRuntime"];
+  actualBinarySha256: string | null;
+  expectedResponseSchema?: string;
+}): MvlCapabilityHandshakeEvaluation {
+  const parsed = mvlWhisperServerCapabilitiesSchema.safeParse(
+    input.rawCapabilities,
+  );
+  const expectedSchema =
+    input.expectedResponseSchema ?? mvlWhisperResponseSchemaVersion;
+  const failures: string[] = [];
+  if (!parsed.success) failures.push("CAPABILITY_ENDPOINT_SCHEMA_INVALID");
+  if (input.expectedRuntime === undefined) {
+    failures.push("RUNTIME_MANIFEST_IDENTITY_MISSING");
+  }
+  if (parsed.success && input.expectedRuntime !== undefined) {
+    if (parsed.data.upstream_commit !== input.expectedRuntime.upstreamCommit) {
+      failures.push("UPSTREAM_COMMIT_MISMATCH");
+    }
+    if (parsed.data.patch_id !== input.expectedRuntime.patchId) {
+      failures.push("PATCH_ID_MISMATCH");
+    }
+    if (parsed.data.patch_sha256 !== input.expectedRuntime.patchSha256) {
+      failures.push("PATCH_SHA256_MISMATCH");
+    }
+    if (
+      input.actualBinarySha256 === null ||
+      input.actualBinarySha256 !== input.expectedRuntime.binarySha256
+    ) {
+      failures.push("BINARY_SHA256_MISMATCH");
+    }
+    if (!parsed.data.mapped_token_getter_available) {
+      failures.push("MAPPED_TOKEN_GETTER_UNAVAILABLE");
+    }
+    if (!parsed.data.raw_vad_getter_available) {
+      failures.push("RAW_VAD_GETTER_UNAVAILABLE");
+    }
+    if (
+      !parsed.data.supported_response_formats.includes("mvl_verbose_json_v1") ||
+      expectedSchema !== mvlWhisperResponseSchemaVersion
+    ) {
+      failures.push("MVL_RESPONSE_SCHEMA_UNSUPPORTED");
+    }
+  }
+  return {
+    verified: failures.length === 0,
+    capability: parsed.success ? parsed.data : null,
+    failures: [...new Set(failures)].toSorted(),
+  };
 }
 
 export interface WhisperWorkerRequest {
@@ -62,7 +195,10 @@ export interface WhisperWorker {
 }
 
 export interface WhisperWorkerFactory {
-  serverPathFor(executablePath: string): Promise<string | null>;
+  serverPathFor(
+    executablePath: string,
+    explicitServerPath?: string,
+  ): Promise<string | null>;
   create(input: {
     batchKey: string;
     mode: "persistent" | "batch";
@@ -243,6 +379,134 @@ function parseVerboseJson(
   };
 }
 
+function parseMvlVerboseJson(
+  value: unknown,
+  request: WhisperWorkerRequest,
+  capabilityHandshake: MvlWhisperServerCapabilities,
+): TranscriptionChunkResult {
+  const response = mvlWhisperServerResponseSchema.parse(value);
+  const expected = request.capability.expectedMvlRuntime;
+  if (
+    response.runtime.upstream_commit !== expected?.upstreamCommit ||
+    response.runtime.patch_id !== expected.patchId ||
+    response.runtime.patch_sha256 !== expected.patchSha256 ||
+    response.runtime.response_schema !==
+      (request.capability.mvlResponseSchemaVersion ??
+        mvlWhisperResponseSchemaVersion)
+  ) {
+    throw new AppError(
+      "Patched whisper-server inference identity did not match the verified runtime manifest.",
+      {
+        code: "TRANSCRIPTION_FAILED",
+        exitCode: 4,
+        details: {
+          requestId: request.requestId,
+          upstreamCommit: response.runtime.upstream_commit,
+          patchId: response.runtime.patch_id,
+          patchSha256: response.runtime.patch_sha256,
+          responseSchema: response.runtime.response_schema,
+        },
+      },
+    );
+  }
+  if (
+    request.capability.timestampRuntimePolicy === "require-mapped" &&
+    request.request.tokenTimestamps === true &&
+    response.transcription.some((segment) =>
+      segment.tokens.some((token) => !token.special),
+    ) &&
+    !response.runtime.capabilities.mapped_token_getter_used
+  ) {
+    throw new AppError(
+      "The patched runtime declared mapped-token support but did not prove getter use for this inference.",
+      { code: "TRANSCRIPTION_FAILED", exitCode: 4 },
+    );
+  }
+  if (
+    request.capability.rawVadPolicy === "required" &&
+    request.capability.useVad &&
+    (!response.runtime.capabilities.raw_vad_getter_used ||
+      (response.transcription.length > 0 && response.vad_segments.length === 0))
+  ) {
+    throw new AppError(
+      "The patched runtime did not provide required raw VAD boundary evidence.",
+      { code: "TRANSCRIPTION_FAILED", exitCode: 4 },
+    );
+  }
+  const segments = response.transcription.flatMap((segment) => {
+    const interval = clampWhisperSegmentInterval({
+      start: segment.startSeconds,
+      end: segment.endSeconds,
+      duration: request.request.chunk.duration,
+    });
+    if (interval === null || segment.text.trim() === "") return [];
+    const tokens = segment.tokens.flatMap((token) => {
+      if (token.special || token.raw === null || token.mapped === null)
+        return [];
+      return [
+        {
+          text: token.text,
+          start: token.mapped.startCentiseconds * 0.01,
+          end: token.mapped.endCentiseconds * 0.01,
+          probability: token.probability,
+        },
+      ];
+    });
+    return [
+      {
+        start: interval.start,
+        end: interval.end,
+        text: segment.text.trim(),
+        speaker: null,
+        confidence: null,
+        ...(tokens.length === 0 ? {} : { tokens }),
+        metrics: {
+          averageLogProbability: segment.avgLogProbability,
+          noSpeechProbability: segment.noSpeechProbability,
+          tokenProbability:
+            tokens.length === 0
+              ? null
+              : tokens.reduce((sum, token) => sum + token.probability, 0) /
+                tokens.length,
+          entropy: null,
+          decoderFallback: null,
+          detectedLanguage: null,
+        },
+      },
+    ];
+  });
+  const text = response.text.trim();
+  const chunkSegments =
+    request.request.timestampStrategy === "chunk" && text !== ""
+      ? [
+          {
+            start: 0,
+            end: request.request.chunk.duration,
+            text,
+            speaker: null,
+            confidence: null,
+          },
+        ]
+      : segments;
+  return {
+    text,
+    segments: chunkSegments,
+    raw: {
+      provider: "whisper-cpp",
+      executionMode: "persistent",
+      globalStartSeconds: request.request.chunk.start,
+      tokenTimestampsRequested: request.request.tokenTimestamps === true,
+      tokenTimestampsUsed: segments.some(
+        (segment) => (segment.tokens?.length ?? 0) > 0,
+      ),
+      capabilityHandshake,
+      runtimeBinarySha256: expected.binarySha256,
+      buildFlagsHash: expected.buildFlagsHash,
+      mvlResponse: response,
+    },
+  };
+}
+
 function silentWarmupWav(): Buffer {
   const sampleRate = 16_000;
   const sampleCount = 1_600;
@@ -325,6 +589,8 @@ class WhisperCppServerWorker implements WhisperWorker {
   #coreMLWarmupSeconds = 0;
   #transcriptionSeconds = 0;
   #exitReason: string | null = null;
+  #mvlCapabilities: MvlWhisperServerCapabilities | null = null;
+  #responseFormat: "verbose_json" | "mvl_verbose_json_v1" = "verbose_json";
 
   constructor(input: {
     batchKey: string;
@@ -419,6 +685,7 @@ class WhisperCppServerWorker implements WhisperWorker {
         `whisper-server did not become healthy within ${String(initializationTimeoutMs / 1000)}s.`,
       );
     }
+    await this.#negotiateRuntimeCapability();
     this.#modelLoadSeconds = (performance.now() - started) / 1000;
     if (this.#capability.coreML && !/Core ML model loaded/i.test(this.#logs)) {
       await this.close();
@@ -458,6 +725,55 @@ class WhisperCppServerWorker implements WhisperWorker {
     this.#initializationSeconds = (performance.now() - started) / 1000;
   }
 
+  async #negotiateRuntimeCapability(): Promise<void> {
+    if (this.#baseUrl === null) {
+      throw new Error("whisper-server worker is not initialized.");
+    }
+    const policy = this.#capability.timestampRuntimePolicy ?? "auto";
+    if (policy === "legacy-safe") {
+      const selection = selectMvlRuntimeResponseFormat({
+        timestampRuntimePolicy: policy,
+        rawVadPolicy: this.#capability.rawVadPolicy ?? "auto",
+        evaluation: {
+          verified: false,
+          capability: null,
+          failures: ["CAPABILITY_PROBE_SKIPPED_BY_LEGACY_SAFE_POLICY"],
+        },
+      });
+      this.#responseFormat = selection.responseFormat;
+      return;
+    }
+    let rawCapabilities: unknown = null;
+    try {
+      const response = await fetch(`${this.#baseUrl}/mvl/capabilities`, {
+        signal: AbortSignal.timeout(2_000),
+      });
+      if (response.ok) rawCapabilities = (await response.json()) as unknown;
+    } catch {
+      rawCapabilities = null;
+    }
+    const actualBinarySha256 = await readFile(this.#serverPath)
+      .then((binary) => createHash("sha256").update(binary).digest("hex"))
+      .catch(() => null);
+    const evaluation = evaluateMvlCapabilityHandshake({
+      rawCapabilities,
+      expectedRuntime: this.#capability.expectedMvlRuntime,
+      actualBinarySha256,
+      ...(this.#capability.mvlResponseSchemaVersion === undefined
+        ? {}
+        : {
+            expectedResponseSchema: this.#capability.mvlResponseSchemaVersion,
+          }),
+    });
+    const selection = selectMvlRuntimeResponseFormat({
+      timestampRuntimePolicy: policy,
+      rawVadPolicy: this.#capability.rawVadPolicy ?? "auto",
+      evaluation,
+    });
+    this.#mvlCapabilities = selection.capability;
+    this.#responseFormat = selection.responseFormat;
+  }
+
   async #postInference(input: {
     audio: Buffer;
     filename: string;
@@ -477,7 +793,7 @@ class WhisperCppServerWorker implements WhisperWorker {
       new Blob([input.audio], { type: "audio/wav" }),
       input.filename,
     );
-    form.append("response_format", "verbose_json");
+    form.append("response_format", this.#responseFormat);
     form.append("language", input.language);
     form.append("no_language_probabilities", "true");
     form.append("suppress_nst", "true");
@@ -533,6 +849,14 @@ class WhisperCppServerWorker implements WhisperWorker {
     });
     this.#requestCount += 1;
     this.#transcriptionSeconds += (performance.now() - started) / 1000;
+    if (this.#responseFormat === "mvl_verbose_json_v1") {
+      if (this.#mvlCapabilities === null) {
+        throw new Error(
+          "MVL response selected without a verified capability handshake.",
+        );
+      }
+      return parseMvlVerboseJson(response, request, this.#mvlCapabilities);
+    }
     return parseVerboseJson(response, request);
   }
 
@@ -575,7 +899,16 @@ class WhisperCppServerWorker implements WhisperWorker {
 }
 
 export const defaultWhisperWorkerFactory: WhisperWorkerFactory = {
-  async serverPathFor(executablePath) {
+  async serverPathFor(executablePath, explicitServerPath) {
+    if (explicitServerPath !== undefined) {
+      const explicit = path.resolve(explicitServerPath);
+      try {
+        await access(explicit, constants.X_OK);
+        return explicit;
+      } catch {
+        return null;
+      }
+    }
     const candidate = path.join(
       path.dirname(executablePath),
       process.platform === "win32" ? "whisper-server.exe" : "whisper-server",
@@ -607,6 +940,13 @@ export function buildWorkerBatchKey(
     timestampMode: "dynamic:segment+token",
     promptConstraints: capability.promptConstraint,
     threads: capability.threads,
+    serverBinarySha256: capability.expectedMvlRuntime?.binarySha256 ?? null,
+    upstreamCommit: capability.expectedMvlRuntime?.upstreamCommit ?? null,
+    patchSha256: capability.expectedMvlRuntime?.patchSha256 ?? null,
+    responseSchema:
+      capability.mvlResponseSchemaVersion ?? "legacy-verbose-json",
+    timestampRuntimePolicy: capability.timestampRuntimePolicy ?? "auto",
+    rawVadPolicy: capability.rawVadPolicy ?? "auto",
   });
   return createHash("sha256").update(payload).digest("hex");
 }
@@ -667,6 +1007,7 @@ export class WhisperCppWorkerPool {
     }
     const serverPath = await this.#factory.serverPathFor(
       input.capability.executablePath,
+      input.capability.serverPath,
     );
     if (serverPath === null) {
       const message =

@@ -1047,6 +1047,23 @@ export const portableAsrCacheIdentityV2Schema = z
       .string()
       .regex(/^[a-f0-9]{64}$/u)
       .optional(),
+    runtimeType: z.enum(["stock", "mvl-patched", "legacy-system"]).optional(),
+    runtimeBinarySha256: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/u)
+      .optional(),
+    runtimeSourceCommit: z
+      .string()
+      .regex(/^[a-f0-9]{40}$/u)
+      .nullable()
+      .optional(),
+    runtimePatchSha256: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/u)
+      .nullable()
+      .optional(),
+    runtimeResponseSchemaVersion: z.string().min(1).optional(),
+    rawVadPolicyVersion: z.string().min(1).optional(),
     promptSha256: z.string().regex(/^[a-f0-9]{64}$/u),
     decodeConfigurationSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   })

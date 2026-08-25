@@ -73,6 +73,10 @@ import {
   subtitleReviewPackageSchema,
   whisperExecutionMetricsSchema,
   whisperBenchmarkSchema,
+  mvlWhisperServerResponseSchema,
+  whisperRuntimeCapabilityArtifactSchema,
+  c516StockPatchedRuntimeAbArtifactSchema,
+  whisperRuntimeBuildManifestSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -107,6 +111,26 @@ const schemas = [
     fileName: "subtitle-timestamp-evidence-integrity.schema.json",
     id: "https://schemas.local/multilingual-video-learning/subtitle-timestamp-evidence-integrity.schema.json",
     schema: subtitleTimestampEvidenceIntegritySchema,
+  },
+  {
+    fileName: "mvl-whisper-server-response.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/mvl-whisper-server-response.schema.json",
+    schema: mvlWhisperServerResponseSchema,
+  },
+  {
+    fileName: "whisper-runtime-capability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/whisper-runtime-capability.schema.json",
+    schema: whisperRuntimeCapabilityArtifactSchema,
+  },
+  {
+    fileName: "whisper-runtime-build-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/whisper-runtime-build-manifest.schema.json",
+    schema: whisperRuntimeBuildManifestSchema,
+  },
+  {
+    fileName: "c5-16-stock-patched-runtime-ab.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-16-stock-patched-runtime-ab.schema.json",
+    schema: c516StockPatchedRuntimeAbArtifactSchema,
   },
   {
     fileName: "subtitle-review-package.schema.json",

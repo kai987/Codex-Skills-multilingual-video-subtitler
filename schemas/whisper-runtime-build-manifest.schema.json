@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/whisper-runtime-build-manifest.schema.json",
+  "title": "whisper-runtime-build-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "whisper-runtime-build-manifest"
+    },
+    "upstream": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string", "const": "ggml-org/whisper.cpp" },
+        "remote": {
+          "type": "string",
+          "const": "https://github.com/ggml-org/whisper.cpp.git"
+        },
+        "tag": { "type": "string", "const": "v1.9.3" },
+        "tagObject": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "sourceTree": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
+      },
+      "required": [
+        "repository",
+        "remote",
+        "tag",
+        "tagObject",
+        "commit",
+        "sourceTree"
+      ],
+      "additionalProperties": false
+    },
+    "patch": {
+      "type": "object",
+      "properties": {
+        "patchId": {
+          "type": "string",
+          "const": "mvl-mapped-token-raw-vad-json-v1"
+        },
+        "patchSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "responseSchema": {
+          "type": "string",
+          "const": "mvl-whisper-server-response/1.0.0"
+        },
+        "expectedFiles": {
+          "minItems": 1,
+          "maxItems": 1,
+          "type": "array",
+          "items": { "type": "string", "const": "examples/server/server.cpp" }
+        }
+      },
+      "required": ["patchId", "patchSha256", "responseSchema", "expectedFiles"],
+      "additionalProperties": false
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "buildId": { "type": "string", "pattern": "^[a-f0-9]{24}$" },
+        "compiler": { "type": "string", "minLength": 1 },
+        "compilerVersion": { "type": "string", "minLength": 1 },
+        "cmakeVersion": { "type": "string", "minLength": 1 },
+        "generator": { "type": "string", "minLength": 1 },
+        "buildType": { "type": "string", "const": "Release" },
+        "flags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "flagsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "hostArchitecture": { "type": "string", "minLength": 1 },
+        "operatingSystem": { "type": "string", "minLength": 1 },
+        "deploymentTarget": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "stockPatchedSameConfiguration": { "type": "boolean", "const": true },
+        "serializerIdentityCompileDefinition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        }
+      },
+      "required": [
+        "buildId",
+        "compiler",
+        "compilerVersion",
+        "cmakeVersion",
+        "generator",
+        "buildType",
+        "flags",
+        "flagsHash",
+        "hostArchitecture",
+        "operatingSystem",
+        "deploymentTarget",
+        "stockPatchedSameConfiguration",
+        "serializerIdentityCompileDefinition",
+        "startedAt",
+        "completedAt"
+      ],
+      "additionalProperties": false
+    },
+    "stock": {
+      "type": "object",
+      "properties": {
+        "runtimeType": { "type": "string", "const": "stock" },
+        "binaryRelativePath": {
+          "type": "string",
+          "const": "stock/bin/whisper-server"
+        },
+        "binarySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "linkedLibraries": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "required": [
+        "runtimeType",
+        "binaryRelativePath",
+        "binarySha256",
+        "linkedLibraries"
+      ],
+      "additionalProperties": false
+    },
+    "patched": {
+      "type": "object",
+      "properties": {
+        "runtimeType": { "type": "string", "const": "mvl-patched" },
+        "binaryRelativePath": {
+          "type": "string",
+          "const": "patched/bin/whisper-server-mvl"
+        },
+        "binarySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "linkedLibraries": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "required": [
+        "runtimeType",
+        "binaryRelativePath",
+        "binarySha256",
+        "linkedLibraries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "upstream",
+    "patch",
+    "build",
+    "stock",
+    "patched"
+  ],
+  "additionalProperties": false
+}

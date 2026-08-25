@@ -19,6 +19,8 @@ import {
   type LanguageTag,
   type ProcessRunner,
   type WhisperModelCapability,
+  type RawVadPolicy,
+  type TimestampRuntimePolicy,
 } from "@mvl/shared";
 import { parseSrt } from "@mvl/subtitle-core";
 
@@ -337,6 +339,19 @@ export class WhisperCppTranscriptionAdapter implements TranscriptionAdapter {
   readonly #coreML: boolean;
   readonly #tokenTimestampsAvailable: boolean;
   readonly #fullJsonAvailable: boolean;
+  readonly #serverPath: string | undefined;
+  readonly #timestampRuntimePolicy: TimestampRuntimePolicy;
+  readonly #rawVadPolicy: RawVadPolicy;
+  readonly #mvlResponseSchemaVersion: string | undefined;
+  readonly #expectedMvlRuntime:
+    | {
+        upstreamCommit: string;
+        patchId: string;
+        patchSha256: string;
+        binarySha256: string;
+        buildFlagsHash: string;
+      }
+    | undefined;
   readonly runtime:
     | {
         modelPath: string;
@@ -364,6 +379,17 @@ export class WhisperCppTranscriptionAdapter implements TranscriptionAdapter {
     useVad?: boolean;
     vadProfile?: WhisperVadProfile;
     workerPool?: WhisperCppWorkerPool;
+    serverPath?: string;
+    timestampRuntimePolicy?: TimestampRuntimePolicy;
+    rawVadPolicy?: RawVadPolicy;
+    mvlResponseSchemaVersion?: string;
+    expectedMvlRuntime?: {
+      upstreamCommit: string;
+      patchId: string;
+      patchSha256: string;
+      binarySha256: string;
+      buildFlagsHash: string;
+    };
   }) {
     this.#executablePath = options.executablePath;
     this.#modelPath = options.modelPath;
@@ -375,6 +401,11 @@ export class WhisperCppTranscriptionAdapter implements TranscriptionAdapter {
     this.#coreML = options.coreML ?? false;
     this.#tokenTimestampsAvailable = options.tokenTimestampsAvailable ?? false;
     this.#fullJsonAvailable = options.fullJsonAvailable ?? false;
+    this.#serverPath = options.serverPath;
+    this.#timestampRuntimePolicy = options.timestampRuntimePolicy ?? "auto";
+    this.#rawVadPolicy = options.rawVadPolicy ?? "auto";
+    this.#mvlResponseSchemaVersion = options.mvlResponseSchemaVersion;
+    this.#expectedMvlRuntime = options.expectedMvlRuntime;
     this.#threads = Math.max(
       1,
       options.threads ?? Math.min(8, Math.max(1, os.cpus().length - 2)),
@@ -458,6 +489,17 @@ export class WhisperCppTranscriptionAdapter implements TranscriptionAdapter {
         tokenTimestamps:
           this.#tokenTimestampsAvailable && this.#fullJsonAvailable,
         promptConstraint: "confirmed-names-v1",
+        ...(this.#serverPath === undefined
+          ? {}
+          : { serverPath: this.#serverPath }),
+        timestampRuntimePolicy: this.#timestampRuntimePolicy,
+        rawVadPolicy: this.#rawVadPolicy,
+        ...(this.#mvlResponseSchemaVersion === undefined
+          ? {}
+          : { mvlResponseSchemaVersion: this.#mvlResponseSchemaVersion }),
+        ...(this.#expectedMvlRuntime === undefined
+          ? {}
+          : { expectedMvlRuntime: this.#expectedMvlRuntime }),
       },
       initialPrompt,
       processFallback: async () =>
@@ -629,6 +671,17 @@ export async function createWhisperCppAdapterForCapability(input: {
   tokenTimestampsAvailable?: boolean;
   fullJsonAvailable?: boolean;
   workerPool?: WhisperCppWorkerPool;
+  serverPath?: string;
+  timestampRuntimePolicy?: TimestampRuntimePolicy;
+  rawVadPolicy?: RawVadPolicy;
+  mvlResponseSchemaVersion?: string;
+  expectedMvlRuntime?: {
+    upstreamCommit: string;
+    patchId: string;
+    patchSha256: string;
+    binarySha256: string;
+    buildFlagsHash: string;
+  };
 }): Promise<WhisperCppTranscriptionAdapter> {
   if (
     input.capability.runtime === "coreml" &&
@@ -685,6 +738,15 @@ export async function createWhisperCppAdapterForCapability(input: {
     useVad: input.useVad ?? true,
     vadProfile: input.vadProfile ?? "sensitive-v2",
     ...(input.workerPool === undefined ? {} : { workerPool: input.workerPool }),
+    ...(input.serverPath === undefined ? {} : { serverPath: input.serverPath }),
+    timestampRuntimePolicy: input.timestampRuntimePolicy ?? "auto",
+    rawVadPolicy: input.rawVadPolicy ?? "auto",
+    ...(input.mvlResponseSchemaVersion === undefined
+      ? {}
+      : { mvlResponseSchemaVersion: input.mvlResponseSchemaVersion }),
+    ...(input.expectedMvlRuntime === undefined
+      ? {}
+      : { expectedMvlRuntime: input.expectedMvlRuntime }),
   });
 }
 

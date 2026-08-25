@@ -31,6 +31,14 @@ const { values } = parseArgs({
     "overlap-max-window-seconds": { type: "string", default: "20" },
     "max-overlap-asr-requests": { type: "string", default: "21" },
     "whisper-cpp-path": { type: "string" },
+    "whisper-server-path": { type: "string" },
+    "timestamp-runtime-policy": { type: "string", default: "auto" },
+    "raw-vad-policy": { type: "string", default: "auto" },
+    "runtime-capability-manifest": { type: "string" },
+    "mvl-response-schema-version": {
+      type: "string",
+      default: "mvl-whisper-server-response/1.0.0",
+    },
     "local-transcription-model": { type: "string" },
     "local-transcription-model-directory": { type: "string" },
     "whisper-vad-model": { type: "string" },
@@ -101,6 +109,16 @@ const legacyOverlapCachePolicy = choice(
   ["reject", "text-only"] as const,
   "--legacy-overlap-cache-policy",
 );
+const timestampRuntimePolicy = choice(
+  values["timestamp-runtime-policy"],
+  ["auto", "require-mapped", "legacy-safe"] as const,
+  "--timestamp-runtime-policy",
+);
+const rawVadPolicy = choice(
+  values["raw-vad-policy"],
+  ["auto", "required", "off"] as const,
+  "--raw-vad-policy",
+);
 const overlapResolution = choice(
   values["overlap-resolution"],
   ["conservative", "balanced"] as const,
@@ -160,9 +178,11 @@ async function collisionSafeTarget(): Promise<string> {
   }
   const sourceName = path.basename(sourceTask);
   const stage =
-    timestampEvidenceIntegrity === "enforce"
-      ? "c5-15-1-timestamp-integrity"
-      : "c5-15-targeted-acoustic-overlap-resolution";
+    timestampRuntimePolicy === "require-mapped"
+      ? "c5-16-verified-mapped-token-raw-vad"
+      : timestampEvidenceIntegrity === "enforce"
+        ? "c5-15-1-timestamp-integrity"
+        : "c5-15-targeted-acoustic-overlap-resolution";
   const preferredName = /c5-1[45][^/]*/u.test(sourceName)
     ? sourceName.replace(/c5-1[45][^/]*/u, stage)
     : `${sourceName}-${stage}`;
@@ -224,6 +244,7 @@ await Promise.all(
       copied.subtitleDirectory,
       "subtitle-timestamp-evidence-integrity.json",
     ),
+    path.join(copied.subtitleDirectory, "whisper-runtime-capability.json"),
   ].map(async (derivedPath) => {
     await rm(derivedPath, { recursive: true, force: true });
   }),
@@ -259,6 +280,17 @@ const result = await finalizeSubtitleTask({
   ...(values["whisper-cpp-path"] === undefined
     ? {}
     : { whisperCppPath: values["whisper-cpp-path"] }),
+  ...(values["whisper-server-path"] === undefined
+    ? {}
+    : { whisperServerPath: values["whisper-server-path"] }),
+  timestampRuntimePolicy,
+  rawVadPolicy,
+  ...(values["runtime-capability-manifest"] === undefined
+    ? {}
+    : {
+        runtimeCapabilityManifestPath: values["runtime-capability-manifest"],
+      }),
+  mvlResponseSchemaVersion: values["mvl-response-schema-version"],
   ...(values["local-transcription-model"] === undefined
     ? {}
     : { localTranscriptionModelPath: values["local-transcription-model"] }),
@@ -308,18 +340,22 @@ const readonlyEqual = (
   before.mtimeMs === after.mtimeMs;
 const summaryPath = path.join(
   outputTask,
-  timestampEvidenceIntegrity === "enforce"
-    ? "c5-15-1-timestamp-integrity-replay-summary.json"
-    : "c5-15-overlap-replay-summary.json",
+  timestampRuntimePolicy === "require-mapped"
+    ? "c5-16-mapped-vad-replay-summary.json"
+    : timestampEvidenceIntegrity === "enforce"
+      ? "c5-15-1-timestamp-integrity-replay-summary.json"
+      : "c5-15-overlap-replay-summary.json",
 );
 await atomicWriteJson(
   summaryPath,
   {
     schemaVersion: "1.0.0",
     runType:
-      timestampEvidenceIntegrity === "enforce"
-        ? "C5.15.1 timestamp evidence integrity replay"
-        : "C5.15 targeted acoustic overlap replay",
+      timestampRuntimePolicy === "require-mapped"
+        ? "C5.16 verified mapped token and raw VAD replay"
+        : timestampEvidenceIntegrity === "enforce"
+          ? "C5.15.1 timestamp evidence integrity replay"
+          : "C5.15 targeted acoustic overlap replay",
     generatedAt: new Date().toISOString(),
     inputTaskName: path.basename(sourceTask),
     outputTaskName: path.basename(outputTask),
@@ -328,6 +364,9 @@ await atomicWriteJson(
       timestampEvidenceIntegrity,
       tokenTimestampPolicy,
       legacyOverlapCachePolicy,
+      timestampRuntimePolicy,
+      rawVadPolicy,
+      mvlResponseSchemaVersion: values["mvl-response-schema-version"],
       presentationResolution,
       overlapResolution,
       audioTrack: acoustic.configuration.audioStreamIndex,
@@ -389,6 +428,10 @@ await atomicWriteJson(
       timestampEvidenceIntegrity: path.join(
         result.subtitleDirectory,
         "subtitle-timestamp-evidence-integrity.json",
+      ),
+      runtimeCapability: path.join(
+        result.subtitleDirectory,
+        "whisper-runtime-capability.json",
       ),
       reviewPackage: result.outputPaths.reviewPackage,
     },

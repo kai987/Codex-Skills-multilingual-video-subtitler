@@ -327,7 +327,9 @@ describe("C5.15.1 token timestamp health", () => {
         rawStart: 1.25,
         rawEnd: 2.5,
         rawCoordinateSystem: "original-audio-local",
-        mappingMethod: "verified-vad-timeline-map",
+        mappingMethod: "verified-original-audio-local-offset",
+        rawVadIntervalHealthStatus: "trusted",
+        evidenceLineageId: "whisper-internal-vad:raw-vad-attempt:raw-vad-1:0",
       },
     ]);
     expect(result.integrity.attemptMetrics.rawVadIntervalsAvailable).toBe(true);
