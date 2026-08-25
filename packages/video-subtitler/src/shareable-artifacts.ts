@@ -7,11 +7,15 @@ import {
   atomicWriteJson,
   c5161ShareableExecutionSummarySchema,
   c516StockPatchedRuntimeAbArtifactSchema,
+  c517ForcedAlignmentReplaySummarySchema,
+  forcedAlignmentRuntimeCapabilitySchema,
   shareableArtifactManifestSchema,
   subtitleFinalizationReportSchema,
   subtitleOverlapAcousticResolutionSchema,
   subtitlePresentationResolutionSchema,
   subtitleTimestampEvidenceIntegritySchema,
+  subtitleCanonicalAlignmentInputSchema,
+  subtitleCanonicalForcedAlignmentSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -20,6 +24,8 @@ import type { z } from "zod";
 
 const SHAREABLE_POLICY_VERSION =
   "c5.16.1-shareable-artifact-policy-v1" as const;
+const C517_SHAREABLE_POLICY_VERSION =
+  "c5.17-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -32,6 +38,14 @@ const artifactSchemas = {
   "c5-16-stock-patched-runtime-ab.json":
     c516StockPatchedRuntimeAbArtifactSchema,
   "execution-summary.json": c5161ShareableExecutionSummarySchema,
+  "forced-alignment-runtime-capability.json":
+    forcedAlignmentRuntimeCapabilitySchema,
+  "subtitle-canonical-alignment-input.json":
+    subtitleCanonicalAlignmentInputSchema,
+  "subtitle-canonical-forced-alignment.json":
+    subtitleCanonicalForcedAlignmentSchema,
+  "c5-17-forced-alignment-replay-summary.json":
+    c517ForcedAlignmentReplaySummarySchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -363,6 +377,12 @@ export async function generateC5161ShareableArtifacts(input: {
   stockPatchedRuntimeAbPath: string;
   outputDirectory?: string;
   externalFiles: readonly { role: string; filePath: string }[];
+  c517Artifacts?: {
+    runtimeCapabilityPath: string;
+    canonicalInputPath: string;
+    forcedAlignmentPath: string;
+    replaySummaryPath: string;
+  };
 }): Promise<{
   outputDirectory: string;
   manifestPath: string;
@@ -417,6 +437,26 @@ export async function generateC5161ShareableArtifacts(input: {
       sourcePath: path.resolve(input.stockPatchedRuntimeAbPath),
     },
   ];
+  if (input.c517Artifacts !== undefined) {
+    sources.push(
+      {
+        name: "forced-alignment-runtime-capability.json",
+        sourcePath: path.resolve(input.c517Artifacts.runtimeCapabilityPath),
+      },
+      {
+        name: "subtitle-canonical-alignment-input.json",
+        sourcePath: path.resolve(input.c517Artifacts.canonicalInputPath),
+      },
+      {
+        name: "subtitle-canonical-forced-alignment.json",
+        sourcePath: path.resolve(input.c517Artifacts.forcedAlignmentPath),
+      },
+      {
+        name: "c5-17-forced-alignment-replay-summary.json",
+        sourcePath: path.resolve(input.c517Artifacts.replaySummaryPath),
+      },
+    );
+  }
   const sourceHashes = await Promise.all(
     sources.map(async (source) => sha256(await readFile(source.sourcePath))),
   );
@@ -513,7 +553,10 @@ export async function generateC5161ShareableArtifacts(input: {
   const manifest = shareableArtifactManifestSchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "shareable-artifact-manifest",
-    policyVersion: SHAREABLE_POLICY_VERSION,
+    policyVersion:
+      input.c517Artifacts === undefined
+        ? SHAREABLE_POLICY_VERSION
+        : C517_SHAREABLE_POLICY_VERSION,
     generatedAt: new Date().toISOString(),
     taskIdentityHash,
     pathPolicy: "shareable-relative-only",

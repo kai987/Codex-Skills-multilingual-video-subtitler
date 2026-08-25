@@ -27,7 +27,10 @@ export const shareableArtifactManifestSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("shareable-artifact-manifest"),
-    policyVersion: z.literal("c5.16.1-shareable-artifact-policy-v1"),
+    policyVersion: z.enum([
+      "c5.16.1-shareable-artifact-policy-v1",
+      "c5.17-shareable-artifact-policy-v1",
+    ]),
     generatedAt: z.iso.datetime(),
     taskIdentityHash: hashSchema,
     pathPolicy: z.literal("shareable-relative-only"),

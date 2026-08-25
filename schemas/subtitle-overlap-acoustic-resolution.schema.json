@@ -11,7 +11,7 @@
     },
     "resolutionVersion": {
       "type": "string",
-      "enum": ["C5.15", "C5.15.1", "C5.16", "C5.16.1"]
+      "enum": ["C5.15", "C5.15.1", "C5.16", "C5.16.1", "C5.17"]
     },
     "generatedAt": {
       "type": "string",
@@ -1075,7 +1075,8 @@
                     "trusted-no-vad-token",
                     "decoded-segment",
                     "raw-vad",
-                    "source-cue"
+                    "source-cue",
+                    "canonical-forced-alignment"
                   ]
                 },
                 "evidenceIds": {
@@ -1192,7 +1193,17 @@
           "reasons": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 }
-          }
+          },
+          "forcedAlignmentComponentId": { "type": "string", "minLength": 1 },
+          "forcedAlignmentEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forcedAlignmentBlockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forcedAlignmentResolved": { "type": "boolean" }
         },
         "required": [
           "componentId",
@@ -1298,7 +1309,22 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
-        "untrustedTokenUsedForTimingCount": { "type": "number", "const": 0 }
+        "untrustedTokenUsedForTimingCount": { "type": "number", "const": 0 },
+        "forcedAlignmentAnalyzedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentTimingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
       },
       "required": [
         "componentCount",

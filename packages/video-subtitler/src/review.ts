@@ -18,6 +18,7 @@ import {
   type ProcessRunner,
   type SourceFingerprint,
   type SubtitleCue,
+  type SubtitleCanonicalForcedAlignment,
   type SubtitlePackage,
   type SubtitleReviewPackage,
 } from "@mvl/shared";
@@ -221,7 +222,7 @@ function reviewJavascript(): string {
   return String.raw`const state={data:null,index:0,resolutions:new Map(),loop:false};
 const q=(s,r=document)=>r.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function resolution(item,action){const base={resolutionId:'resolution-'+item.reviewId,reviewId:item.reviewId,action,selectedCandidateId:null,correctedText:null,start:null,end:null,splitParts:[],mergeCueIds:[],reviewerNotes:null,errorTypes:[],confirmedReading:null,terminologyHints:[],dialectHints:[]};if(action==='ACCEPT_SUGGESTION')base.selectedCandidateId=item.machineDecision.selectedCandidateId;if(action==='EDIT_TEXT'){const v=prompt('Corrected text',item.currentText);if(!v)return;base.correctedText=v}if(action==='EDIT_TIMING'){base.start=Number(prompt('Start',item.currentStart));base.end=Number(prompt('End',item.currentEnd))}if(action==='DELETE_CUE'){const n=prompt('Deletion reason (required)');if(!n)return;base.reviewerNotes=n}if(action==='SPLIT_CUE'){const raw=prompt('Parts as JSON [{"text":"...","start":0,"end":1}]');if(!raw)return;try{base.splitParts=JSON.parse(raw)}catch{return alert('Invalid JSON')}}if(action==='MERGE_CUES'){const ids=prompt('Adjacent cue IDs, comma separated',item.targetCueIds.join(','));const text=prompt('Merged text',item.currentText);if(!ids||!text)return;base.mergeCueIds=ids.split(',').map(x=>x.trim()).filter(Boolean);base.correctedText=text}state.resolutions.set(item.reviewId,base);render()}
-function render(){const item=state.data.items[state.index];q('#position').textContent=(state.index+1)+' / '+state.data.items.length;if(!item){q('#items').innerHTML='<p>No review items.</p>';return}const suggestions=esc(JSON.stringify(item.candidateSuggestions.map(c=>({id:c.candidateId,coverage:c.coverageMetrics,evidence:c.sourceEvidenceIds})),null,2));const audio=item.audioClipPath?'<audio controls src="'+esc(item.audioClipPath)+'"></audio>':'<p>'+esc(item.audioError??'No audio')+'</p>';const union=item.componentUnionInterval??item.interval;const audioEvidence=item.audioRequestedInterval?'<p>Component union: '+union.start.toFixed(3)+' → '+union.end.toFixed(3)+' · Audio: '+item.audioRequestedInterval.start.toFixed(3)+' → '+item.audioRequestedInterval.end.toFixed(3)+' · Complete: '+String(item.audioFullyCoversComponent)+'</p>':'';const buttons=item.allowedHumanActions.map(a=>'<button data-action="'+a+'">'+a+'</button>').join('');q('#items').innerHTML='<article class="item"><div class="grid"><section><div class="label">Current subtitle</div><div class="text">'+esc(item.currentText)+'</div><p>'+union.start.toFixed(3)+' → '+union.end.toFixed(3)+'</p></section><section><div class="label">Machine recommendation</div><div class="text">'+esc(item.machineDecision.proposedText??'KEEP')+'</div><p>'+esc(item.candidateSuggestions[0]?.associationType??'none')+'</p></section><section><div class="label">Previous</div><div>'+esc(item.previousCue?.text??'—')+'</div><div class="label">Next</div><div>'+esc(item.nextCue?.text??'—')+'</div></section><section><div class="label">Coverage / evidence</div><pre>'+suggestions+'</pre></section></div><div class="label blocker">Blockers</div><div class="blocker">'+esc(item.blockers.join(', ')||'none')+'</div>'+audioEvidence+audio+'<div class="actions">'+buttons+'</div><p>Selected: '+esc(state.resolutions.get(item.reviewId)?.action??'none')+'</p></article>';document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>resolution(item,b.dataset.action));}
+function render(){const item=state.data.items[state.index];q('#position').textContent=(state.index+1)+' / '+state.data.items.length;if(!item){q('#items').innerHTML='<p>No review items.</p>';return}const suggestions=esc(JSON.stringify(item.candidateSuggestions.map(c=>({id:c.candidateId,coverage:c.coverageMetrics,evidence:c.sourceEvidenceIds})),null,2));const forced=item.forcedAlignmentEvidence?'<section class="forced"><div class="label">C5.17 forced-alignment evidence</div><p>'+esc(item.forcedAlignmentEvidence.disclaimer)+'</p><pre>'+esc(JSON.stringify(item.forcedAlignmentEvidence,null,2))+'</pre></section>':'';const audio=item.audioClipPath?'<audio controls src="'+esc(item.audioClipPath)+'"></audio>':'<p>'+esc(item.audioError??'No audio')+'</p>';const union=item.componentUnionInterval??item.interval;const audioEvidence=item.audioRequestedInterval?'<p>Component union: '+union.start.toFixed(3)+' → '+union.end.toFixed(3)+' · Audio: '+item.audioRequestedInterval.start.toFixed(3)+' → '+item.audioRequestedInterval.end.toFixed(3)+' · Complete: '+String(item.audioFullyCoversComponent)+'</p>':'';const buttons=item.allowedHumanActions.map(a=>'<button data-action="'+a+'">'+a+'</button>').join('');q('#items').innerHTML='<article class="item"><div class="grid"><section><div class="label">Current subtitle / human timing</div><div class="text">'+esc(item.currentText)+'</div><p>'+union.start.toFixed(3)+' → '+union.end.toFixed(3)+'</p></section><section><div class="label">Machine recommendation</div><div class="text">'+esc(item.machineDecision.proposedText??'KEEP')+'</div><p>'+esc(item.candidateSuggestions[0]?.associationType??'none')+'</p></section><section><div class="label">Previous</div><div>'+esc(item.previousCue?.text??'—')+'</div><div class="label">Next</div><div>'+esc(item.nextCue?.text??'—')+'</div></section><section><div class="label">Whisper candidate evidence</div><pre>'+suggestions+'</pre></section></div>'+forced+'<div class="label blocker">Blockers</div><div class="blocker">'+esc(item.blockers.join(', ')||'none')+'</div>'+audioEvidence+audio+'<div class="actions">'+buttons+'</div><p>Selected: '+esc(state.resolutions.get(item.reviewId)?.action??'none')+'</p></article>';document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>resolution(item,b.dataset.action));}
 function move(delta){if(!state.data.items.length)return;state.index=(state.index+delta+state.data.items.length)%state.data.items.length;render()}
 q('#previous').onclick=()=>move(-1);q('#next').onclick=()=>move(1);q('#download').onclick=()=>{const d=state.data;const body={schemaVersion:'1.0.0',resolutionType:'human-review-resolutions',reviewVersion:d.reviewVersion,sourceFingerprint:d.sourceFingerprint,baseSubtitlePackageHash:d.baseSubtitlePackageHash,baseCueHash:d.baseCueHash,inputEvidenceHash:d.inputEvidenceHash,resolutions:[...state.resolutions.values()].sort((a,b)=>a.reviewId.localeCompare(b.reviewId))};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)+'\\n'],{type:'application/json'}));a.download='human-review-resolutions.json';a.click();URL.revokeObjectURL(a.href)};
 document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea'))return;if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);const item=state.data.items[state.index];if(!item)return;if(e.key==='a')resolution(item,'ACCEPT_SUGGESTION');if(e.key==='k')resolution(item,'KEEP');if(e.key==='u')resolution(item,'MARK_UNRESOLVED');if(e.key===' '){e.preventDefault();const a=q('audio');if(a){if(a.paused)a.play();else a.pause()}}if(e.key==='l'){state.loop=!state.loop;const a=q('audio');if(a)a.loop=state.loop}});
@@ -252,6 +253,7 @@ export async function prepareSubtitleReviewPackage(input: {
   contextSeconds?: number;
   maximumClipSeconds?: number;
   audioStreamIndex?: number;
+  forcedAlignment?: SubtitleCanonicalForcedAlignment;
 }): Promise<{
   reviewPackage: SubtitleReviewPackage;
   packagePath: string;
@@ -275,6 +277,12 @@ export async function prepareSubtitleReviewPackage(input: {
         (cueIndex.get(right.targetCueIds[0] ?? "") ?? Number.MAX_SAFE_INTEGER),
     );
   const items: SubtitleReviewPackage["items"] = [];
+  const forcedAttemptById = new Map(
+    input.forcedAlignment?.attempts.map((attempt) => [
+      attempt.attemptId,
+      attempt,
+    ]) ?? [],
+  );
   for (const decision of reviewDecisions) {
     const indexes = decision.targetCueIds
       .map((cueId) => cueIndex.get(cueId))
@@ -332,6 +340,103 @@ export async function prepareSubtitleReviewPackage(input: {
     const relatedFindings = input.findings.filter((item) =>
       item.cueIds.some((cueId) => decision.targetCueIds.includes(cueId)),
     );
+    const forcedAlignment = input.forcedAlignment;
+    const forcedComponent = forcedAlignment?.components.find((component) =>
+      component.cueIds.some((cueId) => decision.targetCueIds.includes(cueId)),
+    );
+    const forcedAlignmentEvidence =
+      forcedComponent === undefined || forcedAlignment === undefined
+        ? undefined
+        : {
+            disclaimer:
+              "MFA boundaries are machine evidence, not confirmed ground truth." as const,
+            componentId: forcedComponent.componentId,
+            cues: forcedComponent.cueAlignments.map((alignment) => {
+              const canonical = forcedAlignment.cueAlignments.find(
+                (item) => item.cueId === alignment.cueId,
+              );
+              if (canonical === undefined) {
+                throw new InputError(
+                  `Missing forced-alignment cue ${alignment.cueId}.`,
+                );
+              }
+              const original = forcedAlignment.components
+                .flatMap((component) => component.proposedMutations)
+                .find((mutation) => mutation.cueId === alignment.cueId);
+              const narrow =
+                alignment.narrowAttemptId === null
+                  ? undefined
+                  : forcedAttemptById.get(alignment.narrowAttemptId);
+              const expanded =
+                alignment.expandedAttemptId === null
+                  ? undefined
+                  : forcedAttemptById.get(alignment.expandedAttemptId);
+              const boundary = (attempt: typeof narrow) =>
+                attempt?.boundaryStart === null ||
+                attempt?.boundaryStart === undefined ||
+                attempt.boundaryEnd === null
+                  ? null
+                  : {
+                      start: attempt.boundaryStart,
+                      end: attempt.boundaryEnd,
+                    };
+              const targetCue = input.cues.find(
+                (cue) => cue.id === alignment.cueId,
+              );
+              return {
+                cueId: alignment.cueId,
+                canonicalText: alignment.canonicalText,
+                alignmentText: alignment.alignmentText,
+                normalizedReading: alignment.normalizedReading,
+                unresolvedOov: alignment.unresolvedOov,
+                originalTiming:
+                  original === undefined
+                    ? {
+                        start: targetCue?.start ?? 0,
+                        end: targetCue?.end ?? 0.001,
+                      }
+                    : {
+                        start: original.beforeStart,
+                        end: original.beforeEnd,
+                      },
+                suggestedTiming: alignment.selectedBoundary,
+                mfaNarrowBoundary: boundary(narrow),
+                mfaExpandedBoundary: boundary(expanded),
+                evidenceDpBoundary:
+                  canonical.evidenceDp.startBoundary === null ||
+                  canonical.evidenceDp.endBoundary === null
+                    ? null
+                    : {
+                        start: canonical.evidenceDp.startBoundary,
+                        end: canonical.evidenceDp.endBoundary,
+                      },
+                mappedTokenBoundary:
+                  canonical.evidenceDp.startBoundary === null ||
+                  canonical.evidenceDp.endBoundary === null
+                    ? null
+                    : {
+                        start: canonical.evidenceDp.startBoundary,
+                        end: canonical.evidenceDp.endBoundary,
+                      },
+                rawVadBoundary: null,
+                windowStabilityScore:
+                  alignment.antiForcingMetrics.windowStabilityScore,
+                wordCoverageRatio:
+                  alignment.antiForcingMetrics.wordCoverageRatio,
+                phoneCoverageRatio:
+                  alignment.antiForcingMetrics.phoneCoverageRatio,
+                readingCoverageRatio:
+                  alignment.antiForcingMetrics.readingCoverageRatio,
+                antiForcingBlockers: alignment.blockers,
+              };
+            }),
+            bestHypothesis: forcedComponent.bestHypothesis.relationship,
+            runnerUpHypothesis: forcedComponent.runnerUpHypothesis.relationship,
+            decisionMargin: forcedComponent.decisionMargin,
+            duplicateOccurrenceConflictCount:
+              forcedComponent.duplicateOccurrenceConflicts.length,
+            blocking: forcedComponent.blocking,
+          };
     items.push({
       reviewId,
       targetCueIds: decision.targetCueIds,
@@ -369,6 +474,9 @@ export async function prepareSubtitleReviewPackage(input: {
       audioSha256: audio.sha256,
       audioContextSeconds: input.contextSeconds ?? 1.5,
       audioFullyCoversComponent: audio.fullyCoversComponent,
+      ...(forcedAlignmentEvidence === undefined
+        ? {}
+        : { forcedAlignmentEvidence }),
       requiresHumanReview: true,
     });
   }
@@ -381,6 +489,7 @@ export async function prepareSubtitleReviewPackage(input: {
       targetCueIds: item.targetCueIds,
       componentUnionInterval: item.componentUnionInterval ?? item.interval,
       audioRequestedInterval: item.audioRequestedInterval,
+      forcedAlignmentEvidence: item.forcedAlignmentEvidence ?? null,
     })),
   }).slice(0, 24)}`;
   const reviewPackage = subtitleReviewPackageSchema.parse({

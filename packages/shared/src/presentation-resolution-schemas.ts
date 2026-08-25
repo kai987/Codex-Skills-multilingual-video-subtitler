@@ -122,7 +122,13 @@ export const timingMutationSchema = z
     cueId: z.string().min(1),
     before: intervalSchema,
     after: intervalSchema,
-    boundarySource: z.enum(["token", "speech", "vad", "source"]),
+    boundarySource: z.enum([
+      "token",
+      "speech",
+      "vad",
+      "source",
+      "canonical-forced-alignment",
+    ]),
   })
   .strict();
 
@@ -186,7 +192,11 @@ export const overlapDecisionSchema = z
     reasons: z.array(z.string().min(1)),
     blocking: z.boolean(),
     resolutionSource: z
-      .enum(["presentation-only", "targeted-acoustic"])
+      .enum([
+        "presentation-only",
+        "targeted-acoustic",
+        "canonical-forced-alignment",
+      ])
       .default("presentation-only"),
     acousticEvidenceIds: z.array(z.string().min(1)).default([]),
     classificationConfidence: z.number().min(0).max(1).nullable().default(null),
@@ -206,6 +216,7 @@ export const subtitlePresentationResolutionSchema = z
       "C5.15.1",
       "C5.16",
       "C5.16.1",
+      "C5.17",
     ]),
     generatedAt: z.string().min(1),
     baseCueHash: hashSchema,

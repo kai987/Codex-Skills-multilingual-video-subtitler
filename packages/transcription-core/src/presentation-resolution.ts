@@ -7,6 +7,7 @@ import {
   type PresentationResolutionMode,
   type SubtitleCue,
   type SubtitlePresentationResolution,
+  type VttCuePresentationSetting,
 } from "@mvl/shared";
 import {
   resolveDisplayLayout,
@@ -39,6 +40,25 @@ export function presentationResolutionHash(value: unknown): string {
   return createHash("sha256")
     .update(JSON.stringify(sortJson(value)))
     .digest("hex");
+}
+
+export function buildPresentationCueHash(input: {
+  cues: readonly SubtitleCue[];
+  displayTextByCueId: ReadonlyMap<string, string>;
+  assEventOverrides: readonly AssEventPresentationOverride[];
+  vttCueSettings: readonly VttCuePresentationSetting[];
+}): string {
+  return presentationResolutionHash({
+    cues: input.cues.map((cue) => ({
+      id: cue.id,
+      start: cue.start,
+      end: cue.end,
+      canonicalText: cue.text,
+      displayText: input.displayTextByCueId.get(cue.id) ?? cue.text,
+    })),
+    assEventOverrides: input.assEventOverrides,
+    vttCueSettings: input.vttCueSettings,
+  });
 }
 
 export interface SubtitlePresentationResolutionResult {
@@ -189,14 +209,9 @@ export function buildSubtitlePresentationResolution(
     presentationResolution === "enforce"
       ? overlap.decisions.flatMap((decision) => decision.vttCueSettings)
       : [];
-  const presentationCueHash = presentationResolutionHash({
-    cues: cues.map((cue) => ({
-      id: cue.id,
-      start: cue.start,
-      end: cue.end,
-      canonicalText: cue.text,
-      displayText: displayTextByCueId.get(cue.id) ?? cue.text,
-    })),
+  const presentationCueHash = buildPresentationCueHash({
+    cues,
+    displayTextByCueId,
     assEventOverrides: serializedAssOverrides,
     vttCueSettings: serializedVttSettings,
   });

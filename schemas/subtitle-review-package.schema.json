@@ -458,6 +458,198 @@
             "minimum": 0
           },
           "audioFullyCoversComponent": { "default": false, "type": "boolean" },
+          "forcedAlignmentEvidence": {
+            "type": "object",
+            "properties": {
+              "disclaimer": {
+                "type": "string",
+                "const": "MFA boundaries are machine evidence, not confirmed ground truth."
+              },
+              "componentId": { "type": "string", "minLength": 1 },
+              "cues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cueId": { "type": "string", "minLength": 1 },
+                    "canonicalText": { "type": "string", "minLength": 1 },
+                    "alignmentText": { "type": "string", "minLength": 1 },
+                    "normalizedReading": {
+                      "anyOf": [
+                        { "type": "string", "minLength": 1 },
+                        { "type": "null" }
+                      ]
+                    },
+                    "unresolvedOov": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "originalTiming": {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    "suggestedTiming": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "mfaNarrowBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "mfaExpandedBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "evidenceDpBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "mappedTokenBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "rawVadBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "windowStabilityScore": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "wordCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "phoneCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "readingCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "antiForcingBlockers": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    }
+                  },
+                  "required": [
+                    "cueId",
+                    "canonicalText",
+                    "alignmentText",
+                    "normalizedReading",
+                    "unresolvedOov",
+                    "originalTiming",
+                    "suggestedTiming",
+                    "mfaNarrowBoundary",
+                    "mfaExpandedBoundary",
+                    "evidenceDpBoundary",
+                    "mappedTokenBoundary",
+                    "rawVadBoundary",
+                    "windowStabilityScore",
+                    "wordCoverageRatio",
+                    "phoneCoverageRatio",
+                    "readingCoverageRatio",
+                    "antiForcingBlockers"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "bestHypothesis": { "type": "string", "minLength": 1 },
+              "runnerUpHypothesis": { "type": "string", "minLength": 1 },
+              "decisionMargin": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "duplicateOccurrenceConflictCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "blocking": { "type": "boolean" }
+            },
+            "required": [
+              "disclaimer",
+              "componentId",
+              "cues",
+              "bestHypothesis",
+              "runnerUpHypothesis",
+              "decisionMargin",
+              "duplicateOccurrenceConflictCount",
+              "blocking"
+            ],
+            "additionalProperties": false
+          },
           "requiresHumanReview": { "type": "boolean" }
         },
         "required": [

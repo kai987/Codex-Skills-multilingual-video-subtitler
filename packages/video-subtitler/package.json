@@ -14,6 +14,7 @@
     "@mvl/shared": "0.1.0",
     "@mvl/subtitle-search": "0.1.0",
     "@mvl/subtitle-core": "0.1.0",
-    "@mvl/transcription-core": "0.1.0"
+    "@mvl/transcription-core": "0.1.0",
+    "zod": "4.4.3"
   }
 }

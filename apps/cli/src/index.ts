@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import path from "node:path";
+
 import { Command, InvalidArgumentError, Option } from "commander";
 
 import {
@@ -184,6 +186,21 @@ interface FinalizeCliOptions extends GlobalOptions {
   presentationResolution: "off" | "observe" | "enforce";
   overlapResolution: "conservative" | "balanced";
   overlapAcousticResolution: "off" | "observe" | "enforce";
+  forcedAlignment: "off" | "observe" | "enforce";
+  forcedAlignmentBackend: "evidence-dp" | "mfa-japanese" | "hybrid";
+  mfaExecutable?: string;
+  mfaRuntimeManifest?: string;
+  mfaAcousticModel?: string;
+  mfaDictionaryModel?: string;
+  mfaG2pModel?: string;
+  mfaTemporaryDirectory?: string;
+  forcedAlignmentNarrowContext: number;
+  forcedAlignmentExpandedContext: number;
+  maxForcedAlignmentAttempts: number;
+  forcedAlignmentConcurrency: number;
+  forcedAlignmentCacheDir?: string;
+  forcedAlignmentCacheImport?: string[];
+  forcedAlignmentCacheMode: "off" | "read" | "read-write";
   timestampEvidenceIntegrity: "off" | "observe" | "enforce";
   tokenTimestampPolicy: "auto" | "mapped-only" | "validated-legacy" | "off";
   legacyOverlapCachePolicy: "reject" | "text-only";
@@ -1184,6 +1201,83 @@ program
   )
   .addOption(
     new Option(
+      "--forced-alignment <mode>",
+      "canonical transcript-constrained local forced alignment",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("off"),
+  )
+  .addOption(
+    new Option(
+      "--forced-alignment-backend <backend>",
+      "forced-alignment evidence backend",
+    )
+      .choices(["evidence-dp", "mfa-japanese", "hybrid"])
+      .default("hybrid"),
+  )
+  .option("--mfa-executable <path>", "isolated MFA 3.4.2 executable")
+  .option(
+    "--mfa-runtime-manifest <path>",
+    "verified forced-alignment runtime capability manifest",
+  )
+  .option(
+    "--mfa-acoustic-model <path-or-name>",
+    "official japanese_mfa acoustic model 3.0.0",
+  )
+  .option(
+    "--mfa-dictionary-model <path-or-name>",
+    "official japanese_mfa dictionary 3.0.0",
+  )
+  .option(
+    "--mfa-g2p-model <path-or-name>",
+    "verified compatible official Japanese G2P model 3.0.0",
+  )
+  .option(
+    "--mfa-temporary-directory <path>",
+    "local-only MFA temporary directory",
+  )
+  .option(
+    "--forced-alignment-narrow-context <seconds>",
+    "narrow cue alignment context (maximum 1.0)",
+    nonNegativeNumber,
+    0.5,
+  )
+  .option(
+    "--forced-alignment-expanded-context <seconds>",
+    "expanded cue alignment context (maximum 2.0)",
+    nonNegativeNumber,
+    1,
+  )
+  .option(
+    "--max-forced-alignment-attempts <count>",
+    "bounded MFA attempt count (hard maximum 40)",
+    positiveOneBasedInteger,
+    32,
+  )
+  .option(
+    "--forced-alignment-concurrency <count>",
+    "MFA concurrency (hard maximum 2)",
+    positiveOneBasedInteger,
+    1,
+  )
+  .option(
+    "--forced-alignment-cache-dir <path>",
+    "independent canonical-forced-alignment cache",
+  )
+  .option(
+    "--forced-alignment-cache-import <paths...>",
+    "read-only forced-alignment cache import roots",
+  )
+  .addOption(
+    new Option(
+      "--forced-alignment-cache-mode <mode>",
+      "forced-alignment cache access mode",
+    )
+      .choices(["off", "read", "read-write"])
+      .default("read-write"),
+  )
+  .addOption(
+    new Option(
       "--timestamp-evidence-integrity <mode>",
       "token timestamp integrity policy",
     )
@@ -1312,6 +1406,16 @@ program
         "--raw-vad-boundary-tolerance cannot exceed 0.10 seconds.",
       );
     }
+    if (
+      options.maxForcedAlignmentAttempts > 40 ||
+      options.forcedAlignmentConcurrency > 2 ||
+      options.forcedAlignmentNarrowContext > 1 ||
+      options.forcedAlignmentExpandedContext > 2
+    ) {
+      throw new InputError(
+        "Forced alignment hard limits are: 40 attempts, concurrency 2, narrow context 1.0s, expanded context 2.0s.",
+      );
+    }
     const globals = command.optsWithGlobals<GlobalOptions>();
     const logger = new ConsoleLogger(
       globals.jsonLogs ?? false,
@@ -1333,6 +1437,47 @@ program
       presentationResolution: options.presentationResolution,
       overlapResolution: options.overlapResolution,
       overlapAcousticResolution: options.overlapAcousticResolution,
+      forcedAlignment: options.forcedAlignment,
+      forcedAlignmentBackend: options.forcedAlignmentBackend,
+      forcedAlignmentConfiguration: {
+        narrowContextSeconds: options.forcedAlignmentNarrowContext,
+        expandedContextSeconds: options.forcedAlignmentExpandedContext,
+        maximumTotalAlignmentAttempts: options.maxForcedAlignmentAttempts,
+        concurrency: options.forcedAlignmentConcurrency,
+      },
+      ...(options.mfaExecutable === undefined
+        ? {}
+        : {
+            mfaExecutable: options.mfaExecutable,
+            mfaPythonExecutable: path.join(
+              path.dirname(options.mfaExecutable),
+              process.platform === "win32" ? "python.exe" : "python",
+            ),
+          }),
+      ...(options.mfaRuntimeManifest === undefined
+        ? {}
+        : { mfaRuntimeManifestPath: options.mfaRuntimeManifest }),
+      ...(options.mfaAcousticModel === undefined
+        ? {}
+        : { mfaAcousticModel: options.mfaAcousticModel }),
+      ...(options.mfaDictionaryModel === undefined
+        ? {}
+        : { mfaDictionaryModel: options.mfaDictionaryModel }),
+      ...(options.mfaG2pModel === undefined
+        ? {}
+        : { mfaG2pModel: options.mfaG2pModel }),
+      ...(options.mfaTemporaryDirectory === undefined
+        ? {}
+        : { mfaTemporaryDirectory: options.mfaTemporaryDirectory }),
+      sudachiHelperPath: path.resolve("scripts/sudachi-readings.py"),
+      mfaParserHelperPath: path.resolve("scripts/parse-mfa-output.py"),
+      ...(options.forcedAlignmentCacheDir === undefined
+        ? {}
+        : {
+            forcedAlignmentCacheDirectory: options.forcedAlignmentCacheDir,
+          }),
+      forcedAlignmentCacheImportPaths: options.forcedAlignmentCacheImport ?? [],
+      forcedAlignmentCacheMode: options.forcedAlignmentCacheMode,
       timestampEvidenceIntegrity: options.timestampEvidenceIntegrity,
       tokenTimestampPolicy: options.tokenTimestampPolicy,
       legacyOverlapCachePolicy: options.legacyOverlapCachePolicy,

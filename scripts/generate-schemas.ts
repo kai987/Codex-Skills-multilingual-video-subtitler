@@ -78,11 +78,47 @@ import {
   c516StockPatchedRuntimeAbArtifactSchema,
   whisperRuntimeBuildManifestSchema,
   shareableArtifactManifestSchema,
+  subtitleCanonicalAlignmentInputSchema,
+  subtitleCanonicalForcedAlignmentSchema,
+  forcedAlignmentRuntimeCapabilitySchema,
+  forcedAlignmentCacheManifestSchema,
+  c517ForcedAlignmentReplaySummarySchema,
+  forcedAlignmentCacheEntrySchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "subtitle-canonical-alignment-input.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-canonical-alignment-input.schema.json",
+    schema: subtitleCanonicalAlignmentInputSchema,
+  },
+  {
+    fileName: "subtitle-canonical-forced-alignment.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-canonical-forced-alignment.schema.json",
+    schema: subtitleCanonicalForcedAlignmentSchema,
+  },
+  {
+    fileName: "forced-alignment-runtime-capability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/forced-alignment-runtime-capability.schema.json",
+    schema: forcedAlignmentRuntimeCapabilitySchema,
+  },
+  {
+    fileName: "forced-alignment-cache-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/forced-alignment-cache-manifest.schema.json",
+    schema: forcedAlignmentCacheManifestSchema,
+  },
+  {
+    fileName: "forced-alignment-cache-entry.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/forced-alignment-cache-entry.schema.json",
+    schema: forcedAlignmentCacheEntrySchema,
+  },
+  {
+    fileName: "c5-17-forced-alignment-replay-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-17-forced-alignment-replay-summary.schema.json",
+    schema: c517ForcedAlignmentReplaySummarySchema,
+  },
   {
     fileName: "media-identity.schema.json",
     id: "https://schemas.local/multilingual-video-learning/media-identity.schema.json",

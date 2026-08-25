@@ -1,6 +1,7 @@
 export * from "./errors.js";
 export * from "./files.js";
 export * from "./finalization-schemas.js";
+export * from "./forced-alignment-schemas.js";
 export * from "./language.js";
 export * from "./logger.js";
 export * from "./mvl-whisper-server-response-schemas.js";

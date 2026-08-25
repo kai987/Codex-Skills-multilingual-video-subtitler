@@ -510,6 +510,47 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
+        },
+        "forcedAlignmentAnalyzedCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentAttemptCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentCacheHitCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentMfaProcessCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentResolvedComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentUnresolvedComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "untrustedForcedAlignmentTimingUseCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
         }
       },
       "required": [
@@ -561,7 +602,14 @@
         "automaticStructuralDecisionCount",
         "automaticCanonicalMutationDecisionCount",
         "automaticTimingMutationDecisionCount",
-        "reviewAudioCoverageFailureCount"
+        "reviewAudioCoverageFailureCount",
+        "forcedAlignmentAnalyzedCueCount",
+        "forcedAlignmentAttemptCount",
+        "forcedAlignmentCacheHitCount",
+        "forcedAlignmentMfaProcessCount",
+        "forcedAlignmentResolvedComponentCount",
+        "forcedAlignmentUnresolvedComponentCount",
+        "untrustedForcedAlignmentTimingUseCount"
       ],
       "additionalProperties": false
     },
@@ -696,6 +744,50 @@
             { "type": "null" }
           ]
         },
+        "canonicalAlignmentInput": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "canonicalForcedAlignment": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "forcedAlignmentRuntimeCapability": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "forcedAlignmentCacheManifest": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
         "subtitledVideo": {
           "anyOf": [
             {
@@ -718,6 +810,10 @@
         "presentationResolution",
         "overlapAcousticResolution",
         "overlapWhisperExecutionMetrics",
+        "canonicalAlignmentInput",
+        "canonicalForcedAlignment",
+        "forcedAlignmentRuntimeCapability",
+        "forcedAlignmentCacheManifest",
         "subtitledVideo"
       ],
       "additionalProperties": false

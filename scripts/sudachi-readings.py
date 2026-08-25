@@ -93,52 +93,71 @@ def parse_request() -> list[dict[str, str]]:
     return parsed
 
 
-def analyze_reading(tokenizer: Any, text: str) -> tuple[str | None, list[str]]:
+def analyze_reading(
+    tokenizer: Any, text: str
+) -> tuple[str | None, list[str], list[dict[str, Any]]]:
     reading_parts: list[str] = []
     unresolved_oov: list[str] = []
+    morphemes: list[dict[str, Any]] = []
 
     for morpheme in tokenizer.tokenize(text, SplitMode.C):
         surface = morpheme.surface()
+        reading: str | None = None
         if morpheme.is_oov():
             if can_preserve_oov_literal(surface):
                 # Kana, whitespace, punctuation, and symbols can be preserved
                 # literally without inventing a pronunciation.
-                reading_parts.append(katakana_to_hiragana(surface))
+                reading = katakana_to_hiragana(surface)
+                reading_parts.append(reading)
             else:
                 unresolved_oov.append(surface)
-            continue
-
-        reading = morpheme.reading_form()
-        if reading and reading != "*":
-            reading_parts.append(katakana_to_hiragana(reading))
-        elif KANJI_PATTERN.search(surface):
-            unresolved_oov.append(surface)
         else:
-            reading_parts.append(katakana_to_hiragana(surface))
+            reading_form = morpheme.reading_form()
+            if reading_form and reading_form != "*":
+                reading = katakana_to_hiragana(reading_form)
+                reading_parts.append(reading)
+            elif KANJI_PATTERN.search(surface):
+                unresolved_oov.append(surface)
+            else:
+                reading = katakana_to_hiragana(surface)
+                reading_parts.append(reading)
+        morphemes.append(
+            {
+                "surface": surface,
+                "normalizedSurface": morpheme.normalized_form(),
+                "dictionaryForm": morpheme.dictionary_form(),
+                "reading": reading,
+                "partOfSpeech": list(morpheme.part_of_speech()),
+                "isOov": morpheme.is_oov(),
+                "startCharacter": morpheme.begin(),
+                "endCharacter": morpheme.end(),
+            }
+        )
 
     if unresolved_oov:
-        return None, unresolved_oov
-    reading = "".join(reading_parts)
-    return (reading if reading else None), []
+        return None, unresolved_oov, morphemes
+    combined_reading = "".join(reading_parts)
+    return (combined_reading if combined_reading else None), [], morphemes
 
 
 def main() -> None:
     validate_runtime_versions()
     items = parse_request()
     tokenizer = Dictionary(dict="core").create()
-    cached: dict[str, tuple[str | None, list[str]]] = {}
+    cached: dict[str, tuple[str | None, list[str], list[dict[str, Any]]]] = {}
     results: list[dict[str, Any]] = []
 
     for item in items:
         text = item["text"]
         if text not in cached:
             cached[text] = analyze_reading(tokenizer, text)
-        reading, unresolved_oov = cached[text]
+        reading, unresolved_oov, morphemes = cached[text]
         results.append(
             {
                 "id": item["id"],
                 "reading": reading,
                 "unresolvedOov": unresolved_oov,
+                "morphemes": morphemes,
             }
         )
 

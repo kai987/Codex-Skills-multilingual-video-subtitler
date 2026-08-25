@@ -8,6 +8,7 @@ import {
   atomicWriteFile,
   atomicWriteJson,
   finalizationThresholdsSchema,
+  subtitleOverlapAcousticResolutionSchema,
   subtitleFinalizationReportSchema,
   type CueDecision,
   type FinalizationCandidate,
@@ -16,6 +17,9 @@ import {
   type FinalizationMode,
   type FinalizationStatus,
   type FinalizationThresholds,
+  type ForcedAlignmentBackend,
+  type ForcedAlignmentConfiguration,
+  type ForcedAlignmentMode,
   type Logger,
   type OverlapAcousticResolutionMode,
   type OverlapResolutionMode,
@@ -25,6 +29,7 @@ import {
   type SubtitleCue,
   type SubtitleFinalizationReport,
   type SubtitleOverlapAcousticResolution,
+  type SubtitleCanonicalForcedAlignment,
   type SubtitlePackage,
   type TimestampEvidenceIntegrityMode,
   type TokenTimestampPolicy,
@@ -40,6 +45,8 @@ import {
   applyAutomaticCueDecisions,
   buildSubtitlePresentationResolution,
   applyOverlapAcousticResolution,
+  applyForcedAlignmentEvidenceToOverlapArtifact,
+  applyForcedAlignmentToPresentation,
   type AsrCacheMode,
   type OverlapAcousticConfiguration,
   normalizeFinalizationText,
@@ -74,6 +81,12 @@ import {
   type TargetedOverlapAcousticOptions,
   type TargetedOverlapAcousticResult,
 } from "./overlap-acoustic.js";
+import {
+  runCanonicalForcedAlignment,
+  type CanonicalForcedAlignmentOptions,
+  type CanonicalForcedAlignmentResult,
+} from "./canonical-forced-alignment.js";
+import type { ForcedAlignmentCacheMode } from "./forced-alignment-cache.js";
 
 export interface SubtitleFinalizationOptions {
   taskDirectory: string;
@@ -91,6 +104,21 @@ export interface SubtitleFinalizationOptions {
   presentationResolution?: PresentationResolutionMode;
   overlapResolution?: OverlapResolutionMode;
   overlapAcousticResolution?: OverlapAcousticResolutionMode;
+  forcedAlignment?: ForcedAlignmentMode;
+  forcedAlignmentBackend?: ForcedAlignmentBackend;
+  forcedAlignmentConfiguration?: Partial<ForcedAlignmentConfiguration>;
+  mfaExecutable?: string;
+  mfaPythonExecutable?: string;
+  mfaRuntimeManifestPath?: string;
+  mfaAcousticModel?: string;
+  mfaDictionaryModel?: string;
+  mfaG2pModel?: string;
+  mfaTemporaryDirectory?: string;
+  sudachiHelperPath?: string;
+  mfaParserHelperPath?: string;
+  forcedAlignmentCacheDirectory?: string;
+  forcedAlignmentCacheImportPaths?: readonly string[];
+  forcedAlignmentCacheMode?: ForcedAlignmentCacheMode;
   audioTrack?: number;
   overlapAcousticConfiguration?: Partial<OverlapAcousticConfiguration>;
   whisperCppPath?: string;
@@ -116,6 +144,9 @@ export interface SubtitleFinalizationOptions {
   overlapAcousticExecutor?: (
     options: TargetedOverlapAcousticOptions,
   ) => Promise<TargetedOverlapAcousticResult>;
+  canonicalForcedAlignmentExecutor?: (
+    options: CanonicalForcedAlignmentOptions,
+  ) => Promise<CanonicalForcedAlignmentResult>;
 }
 
 export interface SubtitleFinalizationResult {
@@ -133,6 +164,10 @@ export interface SubtitleFinalizationResult {
     reviewPage: string | null;
     correctionFeedback: string | null;
     presentationResolution: string;
+    canonicalAlignmentInput: string | null;
+    canonicalForcedAlignment: string | null;
+    forcedAlignmentRuntimeCapability: string | null;
+    forcedAlignmentCacheManifest: string | null;
     humanReviewedBasePackage: string | null;
   };
 }
@@ -175,6 +210,27 @@ export function overlapAcousticEvidenceForHash(
   };
 }
 
+export function canonicalForcedAlignmentEvidenceForHash(
+  artifact: SubtitleCanonicalForcedAlignment,
+): unknown {
+  return {
+    ...artifact,
+    generatedAt: null,
+    attempts: artifact.attempts
+      .toSorted((left, right) => left.attemptId.localeCompare(right.attemptId))
+      .map((attempt) => ({
+        ...attempt,
+        cacheHit: false,
+        wallClockSeconds: 0,
+      })),
+    summary: {
+      ...artifact.summary,
+      cacheHitCount: 0,
+      mfaProcessCount: 0,
+    },
+  };
+}
+
 function finalizationArtifactStem(sourceFileName: string): string {
   const stem = subtitleArtifactStem(sourceFileName);
   let output = "";
@@ -206,6 +262,25 @@ async function existingFile(filePath: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function loadExistingOverlapAcousticArtifact(
+  subtitleDirectory: string,
+): Promise<{
+  artifact: SubtitleOverlapAcousticResolution;
+  path: string;
+} | null> {
+  const artifactPath = path.join(
+    subtitleDirectory,
+    "subtitle-overlap-acoustic-resolution.json",
+  );
+  if (!(await existingFile(artifactPath))) return null;
+  return {
+    artifact: subtitleOverlapAcousticResolutionSchema.parse(
+      JSON.parse(await readFile(artifactPath, "utf8")) as unknown,
+    ),
+    path: artifactPath,
+  };
 }
 
 async function discoverSourceVideo(input: {
@@ -577,6 +652,8 @@ export async function finalizeSubtitleTask(
   const overlapResolutionMode = options.overlapResolution ?? "conservative";
   const overlapAcousticResolutionMode =
     options.overlapAcousticResolution ?? "off";
+  const forcedAlignmentMode = options.forcedAlignment ?? "off";
+  const forcedAlignmentBackend = options.forcedAlignmentBackend ?? "hybrid";
   const runner = options.runner ?? new NodeProcessRunner();
   const located = await locateSubtitlePackage(options.taskDirectory);
   const rawPackage = JSON.parse(
@@ -762,6 +839,10 @@ export async function finalizeSubtitleTask(
   let presentation = resolvePresentation(workingCues);
   workingCues = presentation.cues;
   let overlapAcousticResult: TargetedOverlapAcousticResult | null = null;
+  let existingOverlapArtifact: {
+    artifact: SubtitleOverlapAcousticResolution;
+    path: string;
+  } | null = null;
   if (
     overlapAcousticResolutionMode !== "off" &&
     sourceVideoPath !== null &&
@@ -842,6 +923,102 @@ export async function finalizeSubtitleTask(
     });
   }
 
+  if (forcedAlignmentMode !== "off" && overlapAcousticResult === null) {
+    existingOverlapArtifact = await loadExistingOverlapAcousticArtifact(
+      located.subtitleDirectory,
+    );
+  }
+  let canonicalForcedAlignmentResult: CanonicalForcedAlignmentResult | null =
+    null;
+  let c517OverlapArtifact: SubtitleOverlapAcousticResolution | null = null;
+  if (
+    forcedAlignmentMode !== "off" &&
+    sourceVideoPath !== null &&
+    options.dryRun !== true
+  ) {
+    const overlapForForced =
+      overlapAcousticResult?.artifact ?? existingOverlapArtifact?.artifact;
+    if (overlapForForced !== undefined) {
+      const executeForcedAlignment =
+        options.canonicalForcedAlignmentExecutor ?? runCanonicalForcedAlignment;
+      canonicalForcedAlignmentResult = await executeForcedAlignment({
+        mode: forcedAlignmentMode,
+        backend: forcedAlignmentBackend,
+        subtitleDirectory: located.subtitleDirectory,
+        sourceVideoPath,
+        sourceFingerprint: beforeSource.fingerprint,
+        cues: workingCues,
+        overlapArtifact: overlapForForced,
+        runner,
+        ffmpegPath: options.ffmpegPath ?? "ffmpeg",
+        ...(options.forcedAlignmentConfiguration === undefined
+          ? {}
+          : { configuration: options.forcedAlignmentConfiguration }),
+        ...(options.mfaExecutable === undefined
+          ? {}
+          : { mfaExecutable: options.mfaExecutable }),
+        ...(options.mfaPythonExecutable === undefined
+          ? {}
+          : { pythonExecutable: options.mfaPythonExecutable }),
+        ...(options.mfaRuntimeManifestPath === undefined
+          ? {}
+          : { mfaRuntimeManifestPath: options.mfaRuntimeManifestPath }),
+        ...(options.mfaAcousticModel === undefined
+          ? {}
+          : { mfaAcousticModel: options.mfaAcousticModel }),
+        ...(options.mfaDictionaryModel === undefined
+          ? {}
+          : { mfaDictionaryModel: options.mfaDictionaryModel }),
+        ...(options.mfaG2pModel === undefined
+          ? {}
+          : { mfaG2pModel: options.mfaG2pModel }),
+        ...(options.mfaTemporaryDirectory === undefined
+          ? {}
+          : { mfaTemporaryDirectory: options.mfaTemporaryDirectory }),
+        ...(options.sudachiHelperPath === undefined
+          ? {}
+          : { sudachiHelperPath: options.sudachiHelperPath }),
+        ...(options.mfaParserHelperPath === undefined
+          ? {}
+          : { parserHelperPath: options.mfaParserHelperPath }),
+        ...(options.forcedAlignmentCacheDirectory === undefined
+          ? {}
+          : {
+              forcedAlignmentCacheDirectory:
+                options.forcedAlignmentCacheDirectory,
+            }),
+        forcedAlignmentCacheImportPaths:
+          options.forcedAlignmentCacheImportPaths ?? [],
+        forcedAlignmentCacheMode:
+          options.forcedAlignmentCacheMode ?? "read-write",
+        generatedAt,
+        ...(options.logger === undefined ? {} : { logger: options.logger }),
+      });
+      workingCues = canonicalForcedAlignmentResult.cues;
+      presentation = applyForcedAlignmentToPresentation({
+        presentation,
+        forcedAlignment: canonicalForcedAlignmentResult.artifact,
+        cues: workingCues,
+      });
+      c517OverlapArtifact = applyForcedAlignmentEvidenceToOverlapArtifact({
+        overlap: overlapForForced,
+        forcedAlignment: canonicalForcedAlignmentResult.artifact,
+      });
+      if (overlapAcousticResult !== null) {
+        overlapAcousticResult = {
+          ...overlapAcousticResult,
+          artifact: c517OverlapArtifact,
+        };
+      }
+      effectiveInputEvidenceHash = sha256Value({
+        inputEvidenceHash: effectiveInputEvidenceHash,
+        canonicalForcedAlignment: canonicalForcedAlignmentEvidenceForHash(
+          canonicalForcedAlignmentResult.artifact,
+        ),
+      });
+    }
+  }
+
   const baseValidation =
     humanReviewedBaseline === null
       ? basePackageValidation(rawPackage)
@@ -886,6 +1063,55 @@ export async function finalizeSubtitleTask(
         "warning",
       ),
     );
+  }
+  if (forcedAlignmentMode !== "off" && sourceVideoPath === null) {
+    findings.push(
+      finding(
+        "FORCED_ALIGNMENT_SOURCE_UNAVAILABLE",
+        [],
+        "Canonical forced alignment was requested, but the source video is unavailable.",
+        "warning",
+      ),
+    );
+  }
+  if (
+    forcedAlignmentMode !== "off" &&
+    overlapAcousticResult === null &&
+    existingOverlapArtifact === null
+  ) {
+    findings.push(
+      finding(
+        "FORCED_ALIGNMENT_BASE_EVIDENCE_UNAVAILABLE",
+        [],
+        "Canonical forced alignment requires the C5.16.1 overlap evidence artifact.",
+      ),
+    );
+  }
+  if (
+    canonicalForcedAlignmentResult?.dependencyFailure !== null &&
+    canonicalForcedAlignmentResult?.dependencyFailure !== undefined
+  ) {
+    findings.push(
+      finding(
+        "FORCED_ALIGNMENT_DEPENDENCY_UNAVAILABLE",
+        [],
+        `Canonical forced alignment remained unresolved: ${canonicalForcedAlignmentResult.dependencyFailure}`,
+        "warning",
+      ),
+    );
+  }
+  if (canonicalForcedAlignmentResult !== null) {
+    for (const component of canonicalForcedAlignmentResult.artifact
+      .components) {
+      if (!component.blocking) continue;
+      findings.push(
+        finding(
+          "FORCED_ALIGNMENT_COMPONENT_UNRESOLVED",
+          component.cueIds,
+          `Component ${component.componentId} remains unresolved after C5.17 Anti-Forcing and joint assignment: ${component.blockers.join(", ")}.`,
+        ),
+      );
+    }
   }
   if (
     overlapAcousticResult?.dependencyFailure !== null &&
@@ -957,6 +1183,13 @@ export async function finalizeSubtitleTask(
         ),
     );
     presentation = resolvePresentation(workingCues);
+    if (canonicalForcedAlignmentResult !== null) {
+      presentation = applyForcedAlignmentToPresentation({
+        presentation,
+        forcedAlignment: canonicalForcedAlignmentResult.artifact,
+        cues: workingCues,
+      });
+    }
     workingCues = presentation.cues;
     quality = evaluateFinalCueQuality({
       cues: workingCues,
@@ -1086,6 +1319,14 @@ export async function finalizeSubtitleTask(
       located.subtitleDirectory,
       "subtitle-presentation-resolution.json",
     ),
+    canonicalAlignmentInput:
+      canonicalForcedAlignmentResult?.outputPaths.canonicalInput ?? null,
+    canonicalForcedAlignment:
+      canonicalForcedAlignmentResult?.outputPaths.alignment ?? null,
+    forcedAlignmentRuntimeCapability:
+      canonicalForcedAlignmentResult?.outputPaths.runtimeCapability ?? null,
+    forcedAlignmentCacheManifest:
+      canonicalForcedAlignmentResult?.outputPaths.cacheManifest ?? null,
   };
   const finalPackage = projectStrictSubtitlePackage({
     rawPackage: projectionRawPackage,
@@ -1137,6 +1378,9 @@ export async function finalizeSubtitleTask(
             item.code !== "BASE_PACKAGE_NEEDS_REVIEW",
         ) ||
         decisions.every((decision) => !decision.requiresHumanReview),
+      ...(canonicalForcedAlignmentResult === null
+        ? {}
+        : { forcedAlignment: canonicalForcedAlignmentResult.artifact }),
     });
     reviewPackagePath = review.packagePath;
     reviewPagePath = review.pagePath;
@@ -1168,6 +1412,8 @@ export async function finalizeSubtitleTask(
     correctionFeedback === null
       ? null
       : path.join(located.subtitleDirectory, "correction-feedback.json");
+  const effectiveOverlapArtifact =
+    overlapAcousticResult?.artifact ?? c517OverlapArtifact;
   const outputHash = sha256Value({
     package: finalPackage,
     // generatedAt is provenance, not output semantics. Normalizing it keeps
@@ -1179,8 +1425,16 @@ export async function finalizeSubtitleTask(
     },
     overlapAcousticResolution:
       overlapAcousticResult === null
-        ? null
+        ? c517OverlapArtifact === null
+          ? null
+          : overlapAcousticEvidenceForHash(c517OverlapArtifact)
         : overlapAcousticEvidenceForHash(overlapAcousticResult.artifact),
+    canonicalForcedAlignment:
+      canonicalForcedAlignmentResult === null
+        ? null
+        : canonicalForcedAlignmentEvidenceForHash(
+            canonicalForcedAlignmentResult.artifact,
+          ),
     srt: quality.serialized.srt,
     vtt: quality.serialized.vtt,
     ass: quality.serialized.ass,
@@ -1201,7 +1455,11 @@ export async function finalizeSubtitleTask(
     schemaVersion: "1.0.0",
     reportType: "subtitle-finalization-report",
     finalizationVersion:
-      overlapAcousticResult === null ? "1.2.0-C5.14" : "1.3.0-C5.15",
+      canonicalForcedAlignmentResult !== null
+        ? "1.4.0-C5.17"
+        : overlapAcousticResult === null
+          ? "1.2.0-C5.14"
+          : "1.3.0-C5.15",
     generatedAt,
     mode,
     status: state.status,
@@ -1270,13 +1528,13 @@ export async function finalizeSubtitleTask(
       overlapComponentCount:
         presentation.artifact.summary.overlapComponentCount,
       overlapAcousticAnalyzedCount:
-        overlapAcousticResult?.artifact.summary.componentCount ?? 0,
+        effectiveOverlapArtifact?.summary.componentCount ?? 0,
       overlapAcousticResolvedCount:
-        overlapAcousticResult?.artifact.summary.resolvedCount ?? 0,
+        effectiveOverlapArtifact?.summary.resolvedCount ?? 0,
       overlapTimingOnlyResolvedCount:
-        overlapAcousticResult?.artifact.summary.timingOnlyResolvedCount ?? 0,
+        effectiveOverlapArtifact?.summary.timingOnlyResolvedCount ?? 0,
       legalOverlapResolvedCount:
-        overlapAcousticResult?.artifact.summary.legalOverlapResolvedCount ?? 0,
+        effectiveOverlapArtifact?.summary.legalOverlapResolvedCount ?? 0,
       unresolvedOverlapCount:
         presentation.artifact.summary.overlapBlockingCount,
       overlapAsrRequestCount:
@@ -1299,11 +1557,26 @@ export async function finalizeSubtitleTask(
         presentation.artifact.summary.overlapResolvedCount,
       automaticCanonicalMutationDecisionCount: 0,
       automaticTimingMutationDecisionCount:
-        overlapAcousticResult?.artifact.components.filter(
+        effectiveOverlapArtifact?.components.filter(
           (component) =>
             !component.blocking && component.timingMutations.length > 0,
         ).length ?? 0,
       reviewAudioCoverageFailureCount,
+      forcedAlignmentAnalyzedCueCount:
+        canonicalForcedAlignmentResult?.artifact.summary.cueCount ?? 0,
+      forcedAlignmentAttemptCount:
+        canonicalForcedAlignmentResult?.artifact.summary.attemptCount ?? 0,
+      forcedAlignmentCacheHitCount:
+        canonicalForcedAlignmentResult?.artifact.summary.cacheHitCount ?? 0,
+      forcedAlignmentMfaProcessCount:
+        canonicalForcedAlignmentResult?.artifact.summary.mfaProcessCount ?? 0,
+      forcedAlignmentResolvedComponentCount:
+        canonicalForcedAlignmentResult?.artifact.summary
+          .autoResolvedComponentCount ?? 0,
+      forcedAlignmentUnresolvedComponentCount:
+        canonicalForcedAlignmentResult?.artifact.summary
+          .unresolvedComponentCount ?? 0,
+      untrustedForcedAlignmentTimingUseCount: 0,
     },
     qualityGate: {
       passed: qualityPassed,
@@ -1354,18 +1627,55 @@ export async function finalizeSubtitleTask(
         outputPaths.presentationResolution,
       ),
       overlapAcousticResolution:
-        overlapAcousticResult === null
-          ? null
-          : relativeFrom(
+        overlapAcousticResult !== null
+          ? relativeFrom(
               located.subtitleDirectory,
               overlapAcousticResult.outputPaths.resolution,
-            ),
+            )
+          : c517OverlapArtifact === null
+            ? null
+            : relativeFrom(
+                located.subtitleDirectory,
+                existingOverlapArtifact?.path ??
+                  path.join(
+                    located.subtitleDirectory,
+                    "subtitle-overlap-acoustic-resolution.json",
+                  ),
+              ),
       overlapWhisperExecutionMetrics:
         overlapAcousticResult === null
           ? null
           : relativeFrom(
               located.subtitleDirectory,
               overlapAcousticResult.outputPaths.executionMetrics,
+            ),
+      canonicalAlignmentInput:
+        outputPaths.canonicalAlignmentInput === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              outputPaths.canonicalAlignmentInput,
+            ),
+      canonicalForcedAlignment:
+        outputPaths.canonicalForcedAlignment === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              outputPaths.canonicalForcedAlignment,
+            ),
+      forcedAlignmentRuntimeCapability:
+        outputPaths.forcedAlignmentRuntimeCapability === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              outputPaths.forcedAlignmentRuntimeCapability,
+            ),
+      forcedAlignmentCacheManifest:
+        outputPaths.forcedAlignmentCacheManifest === null
+          ? null
+          : relativeFrom(
+              located.subtitleDirectory,
+              outputPaths.forcedAlignmentCacheManifest,
             ),
       subtitledVideo: null,
     },
@@ -1390,6 +1700,20 @@ export async function finalizeSubtitleTask(
         presentation.artifact,
         { overwrite: true },
       ),
+      ...(c517OverlapArtifact === null
+        ? []
+        : [
+            atomicWriteJson(
+              overlapAcousticResult?.outputPaths.resolution ??
+                existingOverlapArtifact?.path ??
+                path.join(
+                  located.subtitleDirectory,
+                  "subtitle-overlap-acoustic-resolution.json",
+                ),
+              c517OverlapArtifact,
+              { overwrite: true },
+            ),
+          ]),
       ...(correctionFeedbackPath === null || correctionFeedback === null
         ? []
         : [

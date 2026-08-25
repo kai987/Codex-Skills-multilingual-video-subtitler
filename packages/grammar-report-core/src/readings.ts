@@ -37,6 +37,22 @@ const readingResponseSchema = z
           id: z.string().min(1),
           reading: z.string().min(1).nullable(),
           unresolvedOov: z.array(z.string().min(1)),
+          morphemes: z
+            .array(
+              z
+                .object({
+                  surface: z.string().min(1),
+                  normalizedSurface: z.string().min(1),
+                  dictionaryForm: z.string().min(1),
+                  reading: z.string().min(1).nullable(),
+                  partOfSpeech: z.array(z.string()).min(1),
+                  isOov: z.boolean(),
+                  startCharacter: z.number().int().nonnegative(),
+                  endCharacter: z.number().int().positive(),
+                })
+                .strict(),
+            )
+            .optional(),
         })
         .strict(),
     ),

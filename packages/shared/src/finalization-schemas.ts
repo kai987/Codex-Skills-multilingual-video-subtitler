@@ -224,6 +224,21 @@ export const finalizationMetricsSchema = z
       .nonnegative()
       .default(0),
     reviewAudioCoverageFailureCount: z.number().int().nonnegative().default(0),
+    forcedAlignmentAnalyzedCueCount: z.number().int().nonnegative().default(0),
+    forcedAlignmentAttemptCount: z.number().int().nonnegative().default(0),
+    forcedAlignmentCacheHitCount: z.number().int().nonnegative().default(0),
+    forcedAlignmentMfaProcessCount: z.number().int().nonnegative().default(0),
+    forcedAlignmentResolvedComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    forcedAlignmentUnresolvedComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    untrustedForcedAlignmentTimingUseCount: z.literal(0).default(0),
   })
   .strict();
 
@@ -294,6 +309,14 @@ export const subtitleFinalizationReportSchema = z
         overlapWhisperExecutionMetrics: relativePathSchema
           .nullable()
           .default(null),
+        canonicalAlignmentInput: relativePathSchema.nullable().default(null),
+        canonicalForcedAlignment: relativePathSchema.nullable().default(null),
+        forcedAlignmentRuntimeCapability: relativePathSchema
+          .nullable()
+          .default(null),
+        forcedAlignmentCacheManifest: relativePathSchema
+          .nullable()
+          .default(null),
         subtitledVideo: relativePathSchema.nullable(),
       })
       .strict(),
@@ -356,6 +379,43 @@ export const subtitleReviewItemSchema = z
     audioSha256: hashSchema.nullable().default(null),
     audioContextSeconds: z.number().nonnegative().default(0),
     audioFullyCoversComponent: z.boolean().default(false),
+    forcedAlignmentEvidence: z
+      .object({
+        disclaimer: z.literal(
+          "MFA boundaries are machine evidence, not confirmed ground truth.",
+        ),
+        componentId: z.string().min(1),
+        cues: z.array(
+          z
+            .object({
+              cueId: z.string().min(1),
+              canonicalText: z.string().min(1),
+              alignmentText: z.string().min(1),
+              normalizedReading: z.string().min(1).nullable(),
+              unresolvedOov: z.array(z.string().min(1)),
+              originalTiming: subtitleIntervalSchema,
+              suggestedTiming: subtitleIntervalSchema.nullable(),
+              mfaNarrowBoundary: subtitleIntervalSchema.nullable(),
+              mfaExpandedBoundary: subtitleIntervalSchema.nullable(),
+              evidenceDpBoundary: subtitleIntervalSchema.nullable(),
+              mappedTokenBoundary: subtitleIntervalSchema.nullable(),
+              rawVadBoundary: subtitleIntervalSchema.nullable(),
+              windowStabilityScore: z.number().min(0).max(1),
+              wordCoverageRatio: z.number().min(0).max(1),
+              phoneCoverageRatio: z.number().min(0).max(1),
+              readingCoverageRatio: z.number().min(0).max(1),
+              antiForcingBlockers: z.array(z.string().min(1)),
+            })
+            .strict(),
+        ),
+        bestHypothesis: z.string().min(1),
+        runnerUpHypothesis: z.string().min(1),
+        decisionMargin: z.number().min(0).max(1),
+        duplicateOccurrenceConflictCount: z.number().int().nonnegative(),
+        blocking: z.boolean(),
+      })
+      .strict()
+      .optional(),
     requiresHumanReview: z.boolean(),
   })
   .strict();

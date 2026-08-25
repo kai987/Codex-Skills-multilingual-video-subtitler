@@ -5,6 +5,7 @@ export * from "./anchors.js";
 export * from "./audio.js";
 export * from "./benchmark.js";
 export * from "./canonical.js";
+export * from "./canonical-forced-alignment.js";
 export * from "./coverage-recovery.js";
 export * from "./candidate-atomization.js";
 export * from "./integrity.js";

@@ -374,6 +374,7 @@ export const overlapAcousticTimingMutationSchema = z
       "decoded-segment",
       "raw-vad",
       "source-cue",
+      "canonical-forced-alignment",
     ]),
     evidenceIds: z.array(z.string().min(1)).min(1),
     textChanged: z.literal(false),
@@ -462,6 +463,10 @@ export const overlapAcousticComponentSchema = z
     vttCueSettings: z.array(vttCuePresentationSettingSchema),
     blocking: z.boolean(),
     reasons: z.array(z.string().min(1)),
+    forcedAlignmentComponentId: z.string().min(1).optional(),
+    forcedAlignmentEvidenceIds: z.array(z.string().min(1)).optional(),
+    forcedAlignmentBlockers: z.array(z.string().min(1)).optional(),
+    forcedAlignmentResolved: z.boolean().optional(),
   })
   .strict();
 
@@ -469,7 +474,13 @@ export const subtitleOverlapAcousticResolutionSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-overlap-acoustic-resolution"),
-    resolutionVersion: z.enum(["C5.15", "C5.15.1", "C5.16", "C5.16.1"]),
+    resolutionVersion: z.enum([
+      "C5.15",
+      "C5.15.1",
+      "C5.16",
+      "C5.16.1",
+      "C5.17",
+    ]),
     generatedAt: z.iso.datetime(),
     sourceFingerprint: z
       .object({
@@ -539,6 +550,13 @@ export const subtitleOverlapAcousticResolutionSchema = z
         trustedTokenCount: z.number().int().nonnegative().optional(),
         quarantinedTokenCount: z.number().int().nonnegative().optional(),
         untrustedTokenUsedForTimingCount: z.literal(0).optional(),
+        forcedAlignmentAnalyzedCount: z.number().int().nonnegative().optional(),
+        forcedAlignmentResolvedCount: z.number().int().nonnegative().optional(),
+        forcedAlignmentTimingMutationCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .optional(),
       })
       .strict(),
   })
