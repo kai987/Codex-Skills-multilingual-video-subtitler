@@ -224,6 +224,80 @@ interface ModelProbeInput {
   inspectExitCode: number;
   listOutput: string;
   registryMetadata: readonly [string, string, string, string, string, number];
+  archiveMetadata: ModelArchiveMetadata;
+}
+
+interface ModelArchiveMetadata {
+  metadataSha256: string;
+  phoneset: string[];
+  silencePhones: string[];
+  tokenizerRequirements: string[];
+}
+
+function uniqueSorted(values: readonly string[]): string[] {
+  return [...new Set(values)].sort((left, right) =>
+    left.localeCompare(right, "en"),
+  );
+}
+
+function parseModelArchiveMetadata(
+  value: string,
+  modelType: ModelProbeInput["modelType"],
+): ModelArchiveMetadata {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value) as unknown;
+  } catch (error) {
+    throw new InputError(
+      `MFA ${modelType} model metadata probe returned invalid JSON.`,
+      { cause: String(error) },
+    );
+  }
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new InputError(
+      `MFA ${modelType} model metadata probe did not return an object.`,
+    );
+  }
+  const record = parsed as Record<string, unknown>;
+  if (
+    typeof record.metadataSha256 !== "string" ||
+    !/^[a-f0-9]{64}$/u.test(record.metadataSha256)
+  ) {
+    throw new InputError(
+      `MFA ${modelType} model metadata probe returned an invalid metadata SHA-256.`,
+    );
+  }
+  const array = (key: keyof ModelArchiveMetadata): string[] => {
+    const candidate = record[key];
+    if (
+      !Array.isArray(candidate) ||
+      candidate.some((item) => typeof item !== "string" || item === "")
+    ) {
+      throw new InputError(
+        `MFA ${modelType} model metadata probe returned invalid ${key}.`,
+      );
+    }
+    return uniqueSorted(candidate as string[]);
+  };
+  const phoneset = array("phoneset");
+  const silencePhones = array("silencePhones");
+  const tokenizerRequirements = array("tokenizerRequirements");
+  if (phoneset.length === 0 || tokenizerRequirements.length === 0) {
+    throw new InputError(
+      `MFA ${modelType} model metadata did not expose a phoneset and tokenizer requirements.`,
+    );
+  }
+  if (modelType !== "g2p" && silencePhones.length === 0) {
+    throw new InputError(
+      `MFA ${modelType} model metadata did not expose silence phones.`,
+    );
+  }
+  return {
+    metadataSha256: record.metadataSha256,
+    phoneset,
+    silencePhones,
+    tokenizerRequirements,
+  };
 }
 
 async function modelIdentity(
@@ -257,7 +331,8 @@ async function modelIdentity(
   const knownDictionaryInspectFailure =
     input.modelType === "dictionary" &&
     input.inspectExitCode !== 0 &&
-    /PosixPath.*load_dictionary_paths/isu.test(input.inspectOutput);
+    /PosixPath/iu.test(input.inspectOutput) &&
+    /load_dictionary_paths/iu.test(input.inspectOutput);
   if (input.inspectExitCode !== 0 && !knownDictionaryInspectFailure) {
     throw new InputError(
       `MFA model inspect failed for ${input.modelType} ${input.name}.`,
@@ -280,16 +355,7 @@ async function modelIdentity(
     sha256: await sha256LocalFile(input.filePath),
     license: input.license,
     citation: input.citation,
-    metadataSha256: createHash("sha256")
-      .update(
-        JSON.stringify({
-          registryMetadata: input.registryMetadata,
-          inspectExitCode: input.inspectExitCode,
-          inspectOutput: input.inspectOutput,
-        }),
-        "utf8",
-      )
-      .digest("hex"),
+    metadataSha256: input.archiveMetadata.metadataSha256,
     officialSource: "MontrealCorpusTools",
     officialReleaseTag: releaseTag,
     officialDownloadUrl: downloadUrl,
@@ -300,40 +366,9 @@ async function modelIdentity(
     inspectDiagnostic: knownDictionaryInspectFailure
       ? "MFA 3.4.2 dictionary inspect failed inside upstream pretty_print with PosixPath.load_dictionary_paths; model list, official registry identity, file hash, and real align_one compatibility remain independently verified."
       : null,
-    phoneset: [
-      ...new Set(
-        [
-          ...input.inspectOutput.matchAll(
-            /(?:phone_set_type|phoneset)\s*[:=]\s*([^\n]+)/giu,
-          ),
-        ]
-          .map((match) => match[1]?.trim())
-          .filter((value): value is string => Boolean(value)),
-      ),
-    ],
-    silencePhones: [
-      ...new Set(
-        [
-          ...input.inspectOutput.matchAll(
-            /silence(?:_phones| phones)?\s*[:=]\s*([^\n]+)/giu,
-          ),
-        ]
-          .flatMap((match) => match[1]?.split(/[\s,]+/u) ?? [])
-          .map((value) => value.trim())
-          .filter(Boolean),
-      ),
-    ],
-    tokenizerRequirements: [
-      ...new Set(
-        [
-          ...input.inspectOutput.matchAll(
-            /(?:tokenizer|dependencies?)\s*[:=]\s*([^\n]+)/giu,
-          ),
-        ]
-          .map((match) => match[1]?.trim())
-          .filter((value): value is string => Boolean(value)),
-      ),
-    ],
+    phoneset: input.archiveMetadata.phoneset,
+    silencePhones: input.archiveMetadata.silencePhones,
+    tokenizerRequirements: input.archiveMetadata.tokenizerRequirements,
   };
 }
 
@@ -400,6 +435,7 @@ export interface ProbeMfaRuntimeOptions {
     | "inspectExitCode"
     | "listOutput"
     | "registryMetadata"
+    | "archiveMetadata"
   >;
   dictionaryModel: ProbeMfaRuntimeOptions["acousticModel"];
   g2pModel: ProbeMfaRuntimeOptions["acousticModel"];
@@ -425,6 +461,80 @@ const PYTHON_VERSION_PROBE = [
   "  return 'unavailable'",
   "print(json.dumps({'pythonVersion': platform.python_version(), 'kalpyVersion': v('kalpy'), 'kaldiVersion': v('kaldi-native-fbank','kaldi'), 'pyniniVersion': v('pynini'), 'sudachiVersion': v('SudachiPy'), 'praatioVersion': v('praatio')}))",
 ].join("\n");
+
+const PYTHON_MODEL_METADATA_PROBE = [
+  "import hashlib, json, sys, zipfile",
+  "model_type, model_path = sys.argv[1], sys.argv[2]",
+  "def ordered(values): return sorted(set(str(value) for value in values if isinstance(value, str) and value))",
+  "def setting(name, value):",
+  "  if isinstance(value, bool): value = str(value).lower()",
+  "  return f'{name}:{value}'",
+  "phones, silence, requirements = [], [], ['external-tokenizer:sudachi']",
+  "if model_type in ('acoustic', 'g2p'):",
+  "  with zipfile.ZipFile(model_path) as archive:",
+  "    candidates = sorted(name for name in archive.namelist() if name.endswith('/meta.json'))",
+  "    if len(candidates) != 1: raise RuntimeError(f'expected one embedded meta.json, found {len(candidates)}')",
+  "    metadata_bytes = archive.read(candidates[0])",
+  "  metadata = json.loads(metadata_bytes.decode('utf-8'))",
+  "  metadata_sha256 = hashlib.sha256(metadata_bytes).hexdigest()",
+  "  phones = ordered(metadata.get('phones', []))",
+  "  if model_type == 'acoustic':",
+  "    silence = ordered([metadata.get('optional_silence_phone'), metadata.get('oov_phone')])",
+  "    dictionaries = metadata.get('dictionaries') or {}",
+  "    requirements.extend(setting('compatible-dictionary', name) for name in dictionaries.get('names', []))",
+  "    if dictionaries.get('default'): requirements.append(setting('default-dictionary', dictionaries['default']))",
+  "    if 'position_dependent_phones' in dictionaries: requirements.append(setting('position-dependent-phones', dictionaries['position_dependent_phones']))",
+  "    if 'use_g2p' in dictionaries: requirements.append(setting('use-g2p', dictionaries['use_g2p']))",
+  "  else:",
+  "    requirements.extend([setting('architecture', metadata.get('architecture', 'unavailable')), setting('grapheme-inventory-size', len(metadata.get('graphemes', []))), setting('sequence-separator', metadata.get('sequence_separator', 'unavailable')), 'input:sudachi-reading'])",
+  "else:",
+  "  silence_words = {'[laughter]', '<cutoff>', '<unk>', '<eps>'}",
+  "  silence_set = set()",
+  "  phone_set = set()",
+  "  with open(model_path, 'r', encoding='utf-8') as dictionary:",
+  "    for raw_line in dictionary:",
+  "      fields = raw_line.rstrip('\\r\\n').split('\\t')",
+  "      if len(fields) < 2: continue",
+  "      pronunciation = fields[-1].split()",
+  "      phone_set.update(pronunciation)",
+  "      if fields[0] in silence_words: silence_set.update(pronunciation)",
+  "  phones, silence = ordered(phone_set), ordered(silence_set)",
+  "  requirements.extend(['lexicon-format:mfa-tab-separated', 'lookup:surface-or-sudachi-reading', 'pronunciation-field:last-tab-field'])",
+  "  canonical_metadata = {'phoneset': phones, 'silencePhones': silence, 'tokenizerRequirements': ordered(requirements)}",
+  "  metadata_bytes = json.dumps(canonical_metadata, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')",
+  "  metadata_sha256 = hashlib.sha256(metadata_bytes).hexdigest()",
+  "print(json.dumps({'metadataSha256': metadata_sha256, 'phoneset': phones, 'silencePhones': silence, 'tokenizerRequirements': ordered(requirements)}, ensure_ascii=False, sort_keys=True))",
+].join("\n");
+
+function assertJapaneseModelCompatibility(input: {
+  acoustic: ForcedAlignmentModelIdentity;
+  dictionary: ForcedAlignmentModelIdentity;
+  g2p: ForcedAlignmentModelIdentity;
+}): void {
+  const supportedPhones = new Set([
+    ...(input.acoustic.phoneset ?? []),
+    ...(input.acoustic.silencePhones ?? []),
+  ]);
+  for (const model of [input.dictionary, input.g2p]) {
+    const unsupported = (model.phoneset ?? []).filter(
+      (phone) => !supportedPhones.has(phone),
+    );
+    if (unsupported.length > 0) {
+      throw new InputError(
+        `MFA ${model.modelType} model contains phones unsupported by the acoustic model: ${unsupported.join(", ")}.`,
+      );
+    }
+  }
+  if (
+    !input.acoustic.tokenizerRequirements?.includes(
+      `compatible-dictionary:${input.dictionary.name}`,
+    )
+  ) {
+    throw new InputError(
+      "MFA acoustic metadata does not declare compatibility with the pinned Japanese dictionary.",
+    );
+  }
+}
 
 export async function probeMfaRuntimeCapability(
   options: ProbeMfaRuntimeOptions,
@@ -501,7 +611,7 @@ export async function probeMfaRuntimeCapability(
     model: ProbeMfaRuntimeOptions["acousticModel"],
     registryMetadata: ModelProbeInput["registryMetadata"],
   ) => {
-    const [result, list] = await Promise.all([
+    const [result, list, archiveMetadataResult] = await Promise.all([
       options.runner.run(
         options.mfaExecutable,
         ["model", "inspect", modelType, model.name],
@@ -510,6 +620,12 @@ export async function probeMfaRuntimeCapability(
       options.runner.run(options.mfaExecutable, ["model", "list", modelType], {
         allowNonZero: true,
       }),
+      options.runner.run(options.pythonExecutable, [
+        "-c",
+        PYTHON_MODEL_METADATA_PROBE,
+        modelType,
+        model.filePath,
+      ]),
     ]);
     if (list.exitCode !== 0) {
       throw new InputError(`MFA could not list official ${modelType} models.`);
@@ -521,6 +637,10 @@ export async function probeMfaRuntimeCapability(
       inspectExitCode: result.exitCode,
       listOutput: combinedOutput(list),
       registryMetadata,
+      archiveMetadata: parseModelArchiveMetadata(
+        archiveMetadataResult.stdout,
+        modelType,
+      ),
     });
   };
   const [acousticModel, dictionaryModel, g2pModel] = await Promise.all([
@@ -536,6 +656,11 @@ export async function probeMfaRuntimeCapability(
     ),
     inspect("g2p", options.g2pModel, options.officialRegistry.g2p),
   ]);
+  assertJapaneseModelCompatibility({
+    acoustic: acousticModel,
+    dictionary: dictionaryModel,
+    g2p: g2pModel,
+  });
   if (
     acousticModel.name !== PINNED_JAPANESE_ACOUSTIC_MODEL ||
     dictionaryModel.name !== PINNED_JAPANESE_DICTIONARY_MODEL ||

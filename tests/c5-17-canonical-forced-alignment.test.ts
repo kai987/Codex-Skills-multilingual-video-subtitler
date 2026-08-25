@@ -1214,6 +1214,29 @@ describe("C5.17 runtime and independent cache contracts", () => {
             return { stdout: "unknown", stderr: "", exitCode: 2 };
           }
           if (args[0] === "-c") {
+            if (args.length > 2) {
+              const modelType = args[2];
+              const phoneset =
+                modelType === "dictionary" ? ["a", "spn"] : ["a"];
+              return {
+                stdout: JSON.stringify({
+                  metadataSha256: createHash("sha256")
+                    .update(`metadata:${modelType}`)
+                    .digest("hex"),
+                  phoneset,
+                  silencePhones: modelType === "g2p" ? [] : ["spn"],
+                  tokenizerRequirements:
+                    modelType === "acoustic"
+                      ? [
+                          "compatible-dictionary:japanese_mfa",
+                          "external-tokenizer:sudachi",
+                        ]
+                      : ["external-tokenizer:sudachi"],
+                }),
+                stderr: "",
+                exitCode: 0,
+              };
+            }
             return {
               stdout: JSON.stringify({
                 pythonVersion: "3.11.9",
@@ -1228,6 +1251,14 @@ describe("C5.17 runtime and independent cache contracts", () => {
             };
           }
           if (args[0] === "model" && args[1] === "inspect") {
+            if (args[2] === "dictionary") {
+              return {
+                stdout: "",
+                stderr:
+                  "dictionary.dictionary_setup called load_dictionary_paths before AttributeError: 'PosixPath' object has no attribute 'load_dictionary_paths'",
+                exitCode: 1,
+              };
+            }
             return {
               stdout: `${args[3]} version 3.0.0 license CC BY 4.0 citation official`,
               stderr: "",
@@ -1307,6 +1338,14 @@ describe("C5.17 runtime and independent cache contracts", () => {
         speakerAdaptationSkipped: true,
       });
       expect(probed.g2pModel.name).toBe("japanese_katakana_mfa");
+      expect(probed.dictionaryModel.inspectStatus).toBe(
+        "known-upstream-cli-failure",
+      );
+      expect(probed.acousticModel.phoneset).toEqual(["a"]);
+      expect(probed.dictionaryModel.silencePhones).toEqual(["spn"]);
+      expect(probed.g2pModel.tokenizerRequirements).toEqual([
+        "external-tokenizer:sudachi",
+      ]);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }

@@ -35,11 +35,10 @@ if (
   values["mfa-dictionary-model"] === undefined ||
   values["mfa-g2p-model"] === undefined ||
   values["mfa-sample-probe"] === undefined ||
-  values["runtime-preparation-summary"] === undefined ||
-  values["fresh-cache-observe-validation"] === undefined
+  values["runtime-preparation-summary"] === undefined
 ) {
   throw new InputError(
-    "Usage: npm run emit:c5-17-1-shareable-artifacts -- --task <task> --stock-patched-ab <json> --source-video <video> --human-reviewed-subtitle <ass> --mfa-runtime-manifest <json> --mfa-acoustic-model <zip> --mfa-dictionary-model <dict> --mfa-g2p-model <zip> --mfa-sample-probe <json> --runtime-preparation-summary <json> --fresh-cache-observe-validation <json>",
+    "Usage: npm run emit:c5-17-1-shareable-artifacts -- --task <task> --stock-patched-ab <json> --source-video <video> --human-reviewed-subtitle <ass> --mfa-runtime-manifest <json> --mfa-acoustic-model <zip> --mfa-dictionary-model <dict> --mfa-g2p-model <zip> --mfa-sample-probe <json> --runtime-preparation-summary <json> [--fresh-cache-observe-validation <json>]",
   );
 }
 
@@ -105,9 +104,13 @@ const generated = await generateC5161ShareableArtifacts({
     runtimePreparationSummaryPath: path.resolve(
       values["runtime-preparation-summary"],
     ),
-    freshCacheObserveValidationPath: path.resolve(
-      values["fresh-cache-observe-validation"],
-    ),
+    ...(values["fresh-cache-observe-validation"] === undefined
+      ? {}
+      : {
+          freshCacheObserveValidationPath: path.resolve(
+            values["fresh-cache-observe-validation"],
+          ),
+        }),
   },
 });
 process.stdout.write(
