@@ -69,6 +69,7 @@ import {
   subtitleFinalizationReportSchema,
   subtitlePresentationResolutionSchema,
   subtitleOverlapAcousticResolutionSchema,
+  subtitleTimestampEvidenceIntegritySchema,
   subtitleReviewPackageSchema,
   whisperExecutionMetricsSchema,
   whisperBenchmarkSchema,
@@ -101,6 +102,11 @@ const schemas = [
     fileName: "subtitle-overlap-acoustic-resolution.schema.json",
     id: "https://schemas.local/multilingual-video-learning/subtitle-overlap-acoustic-resolution.schema.json",
     schema: subtitleOverlapAcousticResolutionSchema,
+  },
+  {
+    fileName: "subtitle-timestamp-evidence-integrity.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-timestamp-evidence-integrity.schema.json",
+    schema: subtitleTimestampEvidenceIntegritySchema,
   },
   {
     fileName: "subtitle-review-package.schema.json",

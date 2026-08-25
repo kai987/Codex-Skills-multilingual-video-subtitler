@@ -47,6 +47,7 @@ export interface OverlapAcousticConfiguration {
   minimumBoundaryConfidence: number;
   minimumAlignmentConfidence: number;
   minimumIndependentProfileSupport: number;
+  minimumDecisionMargin: number;
   scoringWeights: OverlapAcousticScoringWeights;
 }
 
@@ -63,6 +64,7 @@ export const DEFAULT_OVERLAP_ACOUSTIC_CONFIGURATION: Readonly<OverlapAcousticCon
     minimumBoundaryConfidence: 0.72,
     minimumAlignmentConfidence: 0.72,
     minimumIndependentProfileSupport: 2,
+    minimumDecisionMargin: 0.1,
     // These generic weights favor lexical/token evidence and require timing
     // and cross-profile support before a component can become non-blocking.
     scoringWeights: {
@@ -93,6 +95,18 @@ interface MatchCandidate {
   text: string;
   start: number;
   end: number;
+  timingUsable: boolean;
+  timingTrustScore: number;
+  timestampTrustStatus: OverlapAcousticAttempt["tokens"][number]["tokenTimelineStatus"];
+  evidenceSource:
+    | "trusted-mapped-token"
+    | "trusted-no-vad-token"
+    | "decoded-segment"
+    | "token"
+    | "segment"
+    | "speech"
+    | "vad";
+  parentSegmentContainmentPassed: boolean;
   surfaceScore: number;
   readingScore: number | null;
   lexicalScore: number;
@@ -334,6 +348,11 @@ function candidateFromText(input: {
   text: string;
   start: number;
   end: number;
+  timingUsable?: boolean;
+  timingTrustScore?: number;
+  timestampTrustStatus?: MatchCandidate["timestampTrustStatus"];
+  evidenceSource?: MatchCandidate["evidenceSource"];
+  parentSegmentContainmentPassed?: boolean;
   readingAnalyzer: JapaneseReadingAnalyzer;
 }): MatchCandidate {
   const surfaceScore = overlapAcousticTextSimilarity(
@@ -346,7 +365,10 @@ function candidateFromText(input: {
       ? null
       : overlapAcousticTextSimilarity(input.cueReading, evidenceReading);
   const lexicalScore = Math.max(surfaceScore, readingScore ?? 0);
-  const temporalScore = temporalCandidateScore(input.cue, input);
+  const timingUsable = input.timingUsable ?? true;
+  const temporalScore = timingUsable
+    ? temporalCandidateScore(input.cue, input)
+    : 0;
   return {
     attemptId: input.attempt.attemptId,
     profile: input.attempt.profile,
@@ -356,6 +378,12 @@ function candidateFromText(input: {
     text: input.text,
     start: input.start,
     end: input.end,
+    timingUsable,
+    timingTrustScore: input.timingTrustScore ?? (timingUsable ? 0.7 : 0),
+    timestampTrustStatus: input.timestampTrustStatus,
+    evidenceSource: input.evidenceSource ?? input.source,
+    parentSegmentContainmentPassed:
+      input.parentSegmentContainmentPassed ?? timingUsable,
     surfaceScore,
     readingScore,
     lexicalScore,
@@ -380,10 +408,21 @@ function attemptCandidates(input: {
         text: segment.text,
         start: segment.start,
         end: segment.end,
+        timingUsable: segment.timingUsable ?? true,
+        timingTrustScore: segment.timingUsable === false ? 0 : 0.65,
+        evidenceSource:
+          input.attempt.decodedSegmentIntervals === undefined
+            ? input.attempt.useVad
+              ? "vad"
+              : "speech"
+            : "decoded-segment",
+        parentSegmentContainmentPassed: true,
       }),
     );
   }
-  const tokens = input.attempt.tokens;
+  const tokens = input.attempt.tokens.filter(
+    (token) => token.textUsable !== false && token.specialToken !== true,
+  );
   const targetLength = Math.max(
     1,
     Array.from(normalizeOverlapSurface(input.cue.text)).length,
@@ -401,16 +440,48 @@ function attemptCandidates(input: {
       text += token.text;
       const normalizedLength = Array.from(normalizeOverlapSurface(text)).length;
       if (normalizedLength > targetLength * 2.2 + 6) break;
+      const sequence = tokens.slice(startIndex, endIndex + 1);
+      const timingUsable = sequence.every(
+        (value) =>
+          (value.timingUsable ?? true) &&
+          value.mappedStart !== null &&
+          value.mappedEnd !== null,
+      );
+      const sequenceStart =
+        timingUsable && first.mappedStart !== undefined
+          ? (first.mappedStart ?? first.start)
+          : first.start;
+      const sequenceEnd =
+        timingUsable && token.mappedEnd !== undefined
+          ? (token.mappedEnd ?? token.end)
+          : token.end;
       output.push(
         candidateFromText({
           ...input,
           source: "token",
-          sourceIds: tokens
-            .slice(startIndex, endIndex + 1)
-            .map((value) => value.tokenId),
+          sourceIds: sequence.map((value) => value.tokenId),
           text,
-          start: first.start,
-          end: token.end,
+          start: sequenceStart,
+          end: sequenceEnd,
+          timingUsable,
+          timingTrustScore: timingUsable
+            ? Math.min(
+                ...sequence.map(
+                  (value) => value.tokenTimelineTrustScore ?? 0.7,
+                ),
+              )
+            : 0,
+          timestampTrustStatus: timingUsable
+            ? sequence[0]?.tokenTimelineStatus
+            : (sequence.find((value) => value.timingUsable === false)
+                ?.tokenTimelineStatus ?? "untrusted"),
+          evidenceSource:
+            input.attempt.decodedSegmentIntervals === undefined
+              ? "token"
+              : input.attempt.useVad
+                ? "trusted-mapped-token"
+                : "trusted-no-vad-token",
+          parentSegmentContainmentPassed: timingUsable,
         }),
       );
     }
@@ -428,7 +499,17 @@ function intervalsForSpeech(
   attempts: readonly OverlapAcousticAttempt[],
   cue: SubtitleCue,
 ): number {
-  const unique = attempts.flatMap((attempt) => attempt.speechIntervals);
+  const unique = attempts.flatMap(
+    (attempt) =>
+      attempt.decodedSegmentIntervals ??
+      attempt.speechIntervals.map((interval, index) => ({
+        ...interval,
+        intervalId: `${attempt.attemptId}:legacy-speech:${String(index)}`,
+        source: "decoded-segment" as const,
+        coordinateSystem: "original-media-global" as const,
+        timingUsable: true,
+      })),
+  );
   const covered = unique.reduce(
     (sum, interval) => sum + overlapSeconds(cue, interval),
     0,
@@ -441,12 +522,20 @@ function intervalsForSpeech(
 }
 
 function boundaryConsensus(candidates: readonly MatchCandidate[]): number {
-  if (candidates.length < 2) return candidates.length === 1 ? 0.4 : 0;
+  const trusted = [
+    ...new Map(
+      candidates
+        .filter((candidate) => candidate.timingUsable)
+        .toSorted((left, right) => right.score - left.score)
+        .map((candidate) => [candidate.attemptId, candidate] as const),
+    ).values(),
+  ];
+  if (trusted.length < 2) return trusted.length === 1 ? 0.4 : 0;
   const pairs: number[] = [];
-  for (let index = 0; index < candidates.length; index += 1) {
-    for (let other = index + 1; other < candidates.length; other += 1) {
-      const left = candidates[index];
-      const right = candidates[other];
+  for (let index = 0; index < trusted.length; index += 1) {
+    for (let other = index + 1; other < trusted.length; other += 1) {
+      const left = trusted[index];
+      const right = trusted[other];
       if (left === undefined || right === undefined) continue;
       const difference =
         Math.abs(left.start - right.start) + Math.abs(left.end - right.end);
@@ -504,8 +593,26 @@ export function alignOverlapComponentCues(input: {
         );
       const selected =
         supported[0] ?? bestByAttempt.toSorted((a, b) => b.score - a.score)[0];
+      const trustedTimingSupported = supported.filter(
+        (candidate) => candidate.timingUsable,
+      );
+      const timingSelected = trustedTimingSupported.toSorted(
+        (left, right) =>
+          right.timingTrustScore - left.timingTrustScore ||
+          right.score - left.score ||
+          left.attemptId.localeCompare(right.attemptId),
+      )[0];
       const profiles = new Set(supported.map((candidate) => candidate.profile));
       const models = new Set(supported.map((candidate) => candidate.modelHash));
+      const trustedTimingProfiles = new Set(
+        trustedTimingSupported.map((candidate) => candidate.profile),
+      );
+      const trustedTimingModels = new Set(
+        trustedTimingSupported.map((candidate) => candidate.modelHash),
+      );
+      const trustedTimingSourceTypes = new Set(
+        trustedTimingSupported.map((candidate) => candidate.evidenceSource),
+      );
       const profileConsensusScore = clamp(
         profiles.size /
           Math.max(
@@ -531,7 +638,7 @@ export function alignOverlapComponentCues(input: {
               ...tokenMatches.map((candidate) => candidate.lexicalScore),
             );
       const temporalCoverageRatio =
-        selected === undefined ? 0 : coverage(cue, selected);
+        timingSelected === undefined ? 0 : coverage(cue, timingSelected);
       const localSpeechCoverageRatio = intervalsForSpeech(
         successfulAttempts,
         cue,
@@ -545,17 +652,17 @@ export function alignOverlapComponentCues(input: {
         Math.max(0, ...(neighborScores.length === 0 ? [0] : neighborScores)) -
         (selected?.lexicalScore ?? 0);
       const temporalOutside =
-        selected === undefined
+        timingSelected === undefined
           ? 1
           : 1 -
             clamp(
-              overlapSeconds(cue, selected) /
-                Math.max(0.001, selected.end - selected.start),
+              overlapSeconds(cue, timingSelected) /
+                Math.max(0.001, timingSelected.end - timingSelected.start),
             );
       const neighborIntrusionRatio = clamp(
         Math.max(0, neighborLexicalAdvantage) * 0.65 + temporalOutside * 0.35,
       );
-      const boundarySupportScore = boundaryConsensus(supported);
+      const boundarySupportScore = boundaryConsensus(trustedTimingSupported);
       const lexical = Math.max(
         surfaceAlignmentScore,
         readingAlignmentScore ?? 0,
@@ -574,6 +681,10 @@ export function alignOverlapComponentCues(input: {
         ...(profiles.size < configuration.minimumIndependentProfileSupport
           ? ["INSUFFICIENT_PROFILE_SUPPORT"]
           : []),
+        ...(trustedTimingProfiles.size <
+        configuration.minimumIndependentProfileSupport
+          ? ["INSUFFICIENT_TRUSTED_TIMING_PROFILE_SUPPORT"]
+          : []),
         ...(alignmentConfidence < configuration.minimumAlignmentConfidence
           ? ["LOW_ALIGNMENT_CONFIDENCE"]
           : []),
@@ -582,19 +693,40 @@ export function alignOverlapComponentCues(input: {
           : []),
         ...(reading.reading === null ? ["READING_UNAVAILABLE"] : []),
       ];
-      const matchedIntervals = supported.map((candidate) => ({
+      const matchedIntervals = trustedTimingSupported.map((candidate) => ({
         attemptId: candidate.attemptId,
-        source:
-          candidate.source === "token"
-            ? ("token" as const)
-            : successfulAttempts.find(
-                  (attempt) => attempt.attemptId === candidate.attemptId,
-                )?.useVad === true
-              ? ("vad" as const)
-              : ("speech" as const),
+        source: candidate.evidenceSource,
         start: candidate.start,
         end: candidate.end,
+        evidenceId: candidate.sourceIds.join("+"),
+        timingUsable: true,
+        timestampTrustStatus: candidate.timestampTrustStatus,
+        timingTrustScore: round(candidate.timingTrustScore),
+        alignmentScore: round(candidate.score),
+        parentSegmentContainmentPassed:
+          candidate.parentSegmentContainmentPassed,
+        profileConsensusScore: round(profileConsensusScore),
+        boundaryConfidence: round(boundarySupportScore),
+        neighborIntrusionRatio: round(neighborIntrusionRatio),
       }));
+      const lexicalTokenIds = [
+        ...new Set(
+          supported
+            .filter((candidate) => candidate.source === "token")
+            .flatMap((candidate) => candidate.sourceIds),
+        ),
+      ].toSorted();
+      const trustedTokenIds = [
+        ...new Set(
+          trustedTimingSupported
+            .filter((candidate) => candidate.source === "token")
+            .flatMap((candidate) => candidate.sourceIds),
+        ),
+      ].toSorted();
+      const trustedTokenSet = new Set(trustedTokenIds);
+      const quarantinedTokenIds = lexicalTokenIds.filter(
+        (tokenId) => !trustedTokenSet.has(tokenId),
+      );
       return {
         cueId: cue.id,
         canonicalText: cue.text,
@@ -623,13 +755,16 @@ export function alignOverlapComponentCues(input: {
               .flatMap((candidate) => candidate.sourceIds),
           ),
         ].toSorted(),
-        matchedTokenIds: [
-          ...new Set(
-            supported
-              .filter((candidate) => candidate.source === "token")
-              .flatMap((candidate) => candidate.sourceIds),
-          ),
-        ].toSorted(),
+        matchedTokenIds: lexicalTokenIds,
+        trustedMatchedTokenIds: trustedTokenIds,
+        quarantinedMatchedTokenIds: quarantinedTokenIds,
+        trustedTimingEvidenceIds: matchedIntervals.map(
+          (interval) => interval.evidenceId,
+        ),
+        lexicalOnlyEvidenceIds: quarantinedTokenIds,
+        trustedTimingProfileSupportCount: trustedTimingProfiles.size,
+        trustedTimingSourceTypeCount: trustedTimingSourceTypes.size,
+        trustedTimingModelSupportCount: trustedTimingModels.size,
         matchedIntervals,
         alignmentMethod:
           selected === undefined
@@ -660,14 +795,71 @@ export function alignOverlapComponentCues(input: {
 function representativeInterval(
   alignment: OverlapCueAlignment,
 ): OverlapCueAlignment["matchedIntervals"][number] | null {
+  const legacySources = new Set([
+    "token",
+    "segment",
+    "speech",
+    "vad",
+    "source",
+  ]);
+  if (
+    alignment.matchedIntervals.length > 0 &&
+    alignment.matchedIntervals.every((interval) =>
+      legacySources.has(interval.source),
+    )
+  ) {
+    const priority: Record<string, number> = {
+      token: 0,
+      segment: 1,
+      speech: 2,
+      vad: 3,
+      source: 4,
+    };
+    return (
+      alignment.matchedIntervals.toSorted(
+        (left, right) =>
+          (priority[left.source] ?? 99) - (priority[right.source] ?? 99) ||
+          left.attemptId.localeCompare(right.attemptId),
+      )[0] ?? null
+    );
+  }
   return (
-    alignment.matchedIntervals.toSorted((left, right) => {
-      const priority = { token: 0, segment: 1, speech: 2, vad: 3, source: 4 };
-      return (
-        priority[left.source] - priority[right.source] ||
-        left.attemptId.localeCompare(right.attemptId)
-      );
-    })[0] ?? null
+    alignment.matchedIntervals
+      .filter((interval) => interval.timingUsable !== false)
+      .toSorted((left, right) => {
+        const priority: Record<
+          OverlapCueAlignment["matchedIntervals"][number]["source"],
+          number
+        > = {
+          "trusted-mapped-token": 0,
+          "trusted-no-vad-token": 1,
+          "raw-vad": 2,
+          "decoded-segment": 3,
+          "source-cue": 4,
+          pause: 5,
+          token: 1,
+          segment: 3,
+          speech: 3,
+          vad: 4,
+          source: 4,
+          "legacy-token-untrusted": 99,
+        };
+        return (
+          priority[left.source] - priority[right.source] ||
+          (right.timingTrustScore ?? 0) - (left.timingTrustScore ?? 0) ||
+          (right.alignmentScore ?? 0) - (left.alignmentScore ?? 0) ||
+          Number(right.parentSegmentContainmentPassed ?? false) -
+            Number(left.parentSegmentContainmentPassed ?? false) ||
+          (right.profileConsensusScore ?? 0) -
+            (left.profileConsensusScore ?? 0) ||
+          (right.boundaryConfidence ?? 0) - (left.boundaryConfidence ?? 0) ||
+          (left.neighborIntrusionRatio ?? 1) -
+            (right.neighborIntrusionRatio ?? 1) ||
+          (left.evidenceId ?? left.attemptId).localeCompare(
+            right.evidenceId ?? right.attemptId,
+          )
+        );
+      })[0] ?? null
   );
 }
 
@@ -687,6 +879,9 @@ function supportedAlignment(
     alignment.boundaryConfidence >= configuration.minimumBoundaryConfidence &&
     alignment.independentProfileSupportCount >=
       configuration.minimumIndependentProfileSupport &&
+    (alignment.trustedTimingProfileSupportCount ??
+      alignment.independentProfileSupportCount) >=
+      configuration.minimumIndependentProfileSupport &&
     alignment.neighborIntrusionRatio <=
       configuration.maximumNeighborIntrusionRatio
   );
@@ -694,8 +889,17 @@ function supportedAlignment(
 
 function mutationBoundarySource(
   source: OverlapCueAlignment["matchedIntervals"][number]["source"],
-): "token" | "speech" | "vad" | "source" | "pause" {
-  return source === "segment" ? "speech" : source;
+): OverlapAcousticComponent["timingMutations"][number]["boundarySource"] {
+  if (source === "segment" || source === "speech") return "speech";
+  if (source === "token") return "token";
+  if (source === "vad") return "vad";
+  if (source === "source") return "source-cue";
+  if (source === "legacy-token-untrusted") {
+    throw new Error(
+      "Untrusted token evidence cannot source a timing mutation.",
+    );
+  }
+  return source;
 }
 
 function atomicTimingProposal(input: {
@@ -905,6 +1109,9 @@ export function classifyOverlapAcousticComponent(input: {
   const attempts = input.attempts.filter(
     (attempt) => attempt.componentId === input.plan.componentId,
   );
+  const timestampIntegrityAware = attempts.some(
+    (attempt) => attempt.timestampIntegrityRef !== undefined,
+  );
   const alignments = alignOverlapComponentCues({
     cues: componentCues,
     attempts,
@@ -1068,6 +1275,22 @@ export function classifyOverlapAcousticComponent(input: {
     evidenceIds: pairAssessments.flatMap((pair) => pair.boundaryEvidenceIds),
     blockers: allSupported ? [] : ["INSUFFICIENT_ACOUSTIC_ALIGNMENT"],
   }));
+  const rankedHypotheses = [...counterfactuals].toSorted(
+    (left, right) =>
+      right.score - left.score ||
+      left.hypothesis.localeCompare(right.hypothesis),
+  );
+  const bestHypothesis = rankedHypotheses[0];
+  const runnerUpHypothesis = rankedHypotheses[1] ?? null;
+  if (bestHypothesis === undefined) {
+    throw new Error("Overlap classification produced no hypotheses.");
+  }
+  const decisionMargin = round(
+    Math.max(0, bestHypothesis.score - (runnerUpHypothesis?.score ?? 0)),
+  );
+  const decisionMarginSufficient =
+    !timestampIntegrityAware ||
+    decisionMargin >= configuration.minimumDecisionMargin;
   let relationship: OverlapRelationship = "unresolved";
   let recommendedAction: OverlapAcousticComponent["recommendedAction"] =
     "review";
@@ -1082,7 +1305,7 @@ export function classifyOverlapAcousticComponent(input: {
     relationship = "same-utterance-alternative";
     recommendedAction = "select-alternative";
     reasons.push("same-acoustic-occurrence-requires-human-selection");
-  } else if (crowdCall && nestedScore >= 0.75) {
+  } else if (crowdCall && nestedScore >= 0.75 && decisionMarginSufficient) {
     relationship = "crowd-call-plus-dialogue";
     recommendedAction = "preserve-overlap";
     safeAutomaticAction = "presentation-only";
@@ -1090,7 +1313,12 @@ export function classifyOverlapAcousticComponent(input: {
     reasons.push(
       "repeated-call-and-independent-nested-lexical-speech-supported",
     );
-  } else if (nestedPair && nestedScore >= 0.8 && simultaneous) {
+  } else if (
+    nestedPair &&
+    nestedScore >= 0.8 &&
+    simultaneous &&
+    decisionMarginSufficient
+  ) {
     relationship = "nested-background-speech";
     recommendedAction = "preserve-overlap";
     safeAutomaticAction = "presentation-only";
@@ -1098,14 +1326,19 @@ export function classifyOverlapAcousticComponent(input: {
     reasons.push("nested-background-and-foreground-acoustic-support");
   } else if (
     simultaneousScore >= 0.85 &&
-    simultaneousScore > orderedNoOverlapScore + 0.08
+    simultaneousScore > orderedNoOverlapScore + 0.08 &&
+    decisionMarginSufficient
   ) {
     relationship = "true-simultaneous-speech";
     recommendedAction = "preserve-overlap";
     safeAutomaticAction = "presentation-only";
     blocking = false;
     reasons.push("two-acoustically-supported-matched-intervals-overlap");
-  } else if (orderedNoOverlapScore >= 0.85 && originalOverlapTotal > 0) {
+  } else if (
+    orderedNoOverlapScore >= 0.85 &&
+    originalOverlapTotal > 0 &&
+    decisionMarginSufficient
+  ) {
     const proposal = atomicTimingProposal({
       componentId: input.plan.componentId,
       allCues: input.allCues,
@@ -1124,7 +1357,8 @@ export function classifyOverlapAcousticComponent(input: {
   } else if (
     rapidTurnScore >= 0.85 &&
     maximumOriginalPairOverlap <= 0.75 &&
-    !simultaneous
+    !simultaneous &&
+    decisionMarginSufficient
   ) {
     relationship = "rapid-turn-taking";
     recommendedAction = "preserve-overlap";
@@ -1133,6 +1367,46 @@ export function classifyOverlapAcousticComponent(input: {
     reasons.push("small-ordered-overlap-supported-as-rapid-turn-taking");
   } else {
     reasons.push("acoustic-evidence-insufficient-or-conflicting");
+    if (!decisionMarginSufficient) {
+      reasons.push("uncalibrated-hypothesis-decision-margin-insufficient");
+    }
+  }
+  const timestampIntegrityGateFailures = [
+    ...(alignments.some((alignment) =>
+      alignment.matchedIntervals.some(
+        (interval) =>
+          interval.source === "legacy-token-untrusted" ||
+          interval.timingUsable === false,
+      ),
+    )
+      ? ["UNTRUSTED_TOKEN_USED_FOR_TIMING"]
+      : []),
+    ...(alignments.some((alignment) =>
+      alignment.matchedIntervals.some(
+        (interval) =>
+          interval.timestampTrustStatus !== undefined &&
+          !interval.timestampTrustStatus.startsWith("trusted") &&
+          (interval.source === "trusted-mapped-token" ||
+            interval.source === "trusted-no-vad-token"),
+      ),
+    )
+      ? ["UNKNOWN_COORDINATE_TOKEN_USED_FOR_TIMING"]
+      : []),
+    ...(alignments.some((alignment) =>
+      alignment.matchedIntervals.some(
+        (interval) => interval.parentSegmentContainmentPassed === false,
+      ),
+    )
+      ? ["TOKEN_OUTSIDE_PARENT_SEGMENT_USED"]
+      : []),
+  ];
+  if (timestampIntegrityGateFailures.length > 0) {
+    relationship = "unresolved";
+    recommendedAction = "review";
+    safeAutomaticAction = "none";
+    timingMutations = [];
+    blocking = true;
+    reasons.push(...timestampIntegrityGateFailures);
   }
   if (input.mode !== "enforce") {
     if (relationship !== "unresolved") {
@@ -1146,9 +1420,7 @@ export function classifyOverlapAcousticComponent(input: {
     !blocking && safeAutomaticAction === "presentation-only"
       ? legalOverlapPresentationOverrides(componentCues)
       : { ass: [], vtt: [] };
-  const classificationConfidence = Math.max(
-    ...counterfactuals.map((value) => value.score),
-  );
+  const classificationConfidence = bestHypothesis.score;
   return overlapAcousticComponentSchema.parse({
     componentId: input.plan.componentId,
     sourceOverlapDecisionId: input.plan.sourceOverlapDecisionId,
@@ -1165,6 +1437,13 @@ export function classifyOverlapAcousticComponent(input: {
     counterfactuals,
     finalRelationship: relationship,
     classificationConfidence: round(classificationConfidence),
+    bestHypothesis: bestHypothesis.hypothesis,
+    bestHypothesisScore: bestHypothesis.score,
+    runnerUpHypothesis: runnerUpHypothesis?.hypothesis ?? null,
+    runnerUpHypothesisScore: runnerUpHypothesis?.score ?? null,
+    decisionMargin,
+    scoreCalibrationStatus: "uncalibrated-heuristic",
+    timestampIntegrityGateFailures,
     recommendedAction,
     safeAutomaticAction,
     timingMutations,
@@ -1245,9 +1524,17 @@ export function applyOverlapAcousticResolution(input: {
                   end: mutation.afterEnd,
                 },
                 boundarySource:
-                  mutation.boundarySource === "pause"
+                  mutation.boundarySource === "pause" ||
+                  mutation.boundarySource === "decoded-segment"
                     ? ("speech" as const)
-                    : mutation.boundarySource,
+                    : mutation.boundarySource === "trusted-mapped-token" ||
+                        mutation.boundarySource === "trusted-no-vad-token"
+                      ? ("token" as const)
+                      : mutation.boundarySource === "raw-vad"
+                        ? ("vad" as const)
+                        : mutation.boundarySource === "source-cue"
+                          ? ("source" as const)
+                          : mutation.boundarySource,
               }))
             : [],
         assEventOverrides:
@@ -1333,7 +1620,7 @@ export function applyOverlapAcousticResolution(input: {
   const base = input.presentation.artifact;
   const artifact = subtitlePresentationResolutionSchema.parse({
     ...base,
-    resolutionVersion: "C5.15",
+    resolutionVersion: "C5.15.1",
     generatedAt: input.acoustic.generatedAt,
     canonicalCueHash,
     presentationCueHash,
@@ -1392,7 +1679,7 @@ export function buildSubtitleOverlapAcousticResolution(input: {
   return subtitleOverlapAcousticResolutionSchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-overlap-acoustic-resolution",
-    resolutionVersion: "C5.15",
+    resolutionVersion: "C5.15.1",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     sourceFingerprint: input.sourceFingerprint,
     baseCueHash: input.baseCueHash,
@@ -1443,6 +1730,22 @@ export function buildSubtitleOverlapAcousticResolution(input: {
       wholeMediaAsrRequestCount: 0,
       midpointRepairCount: 0,
       characterRatioRepairCount: 0,
+      trustedTokenCount: input.attempts.reduce(
+        (sum, attempt) =>
+          sum +
+          attempt.tokens.filter((token) => token.timingUsable === true).length,
+        0,
+      ),
+      quarantinedTokenCount: input.attempts.reduce(
+        (sum, attempt) =>
+          sum +
+          attempt.tokens.filter(
+            (token) =>
+              token.textUsable !== false && token.timingUsable === false,
+          ).length,
+        0,
+      ),
+      untrustedTokenUsedForTimingCount: 0,
     },
   });
 }

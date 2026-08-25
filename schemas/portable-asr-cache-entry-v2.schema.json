@@ -78,6 +78,13 @@
         "vadMode": { "type": "string", "minLength": 1 },
         "timestampStrategy": { "type": "string", "minLength": 1 },
         "tokenTimestamps": { "type": "boolean" },
+        "timestampMappingVersion": { "type": "string", "minLength": 1 },
+        "timestampCoordinateSystem": { "type": "string", "minLength": 1 },
+        "tokenHealthPolicyVersion": { "type": "string", "minLength": 1 },
+        "runtimeTimestampCapabilityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
         "promptSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "decodeConfigurationSha256": {
           "type": "string",

@@ -179,6 +179,9 @@ interface FinalizeCliOptions extends GlobalOptions {
   presentationResolution: "off" | "observe" | "enforce";
   overlapResolution: "conservative" | "balanced";
   overlapAcousticResolution: "off" | "observe" | "enforce";
+  timestampEvidenceIntegrity: "off" | "observe" | "enforce";
+  tokenTimestampPolicy: "auto" | "mapped-only" | "validated-legacy" | "off";
+  legacyOverlapCachePolicy: "reject" | "text-only";
   audioTrack?: number;
   overlapContextSeconds: number;
   overlapMaxWindowSeconds: number;
@@ -1165,6 +1168,30 @@ program
       .choices(["off", "observe", "enforce"])
       .default("off"),
   )
+  .addOption(
+    new Option(
+      "--timestamp-evidence-integrity <mode>",
+      "token timestamp integrity policy",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("observe"),
+  )
+  .addOption(
+    new Option(
+      "--token-timestamp-policy <policy>",
+      "trusted token timestamp admission policy",
+    )
+      .choices(["auto", "mapped-only", "validated-legacy", "off"])
+      .default("auto"),
+  )
+  .addOption(
+    new Option(
+      "--legacy-overlap-cache-policy <policy>",
+      "legacy overlap cache timing policy",
+    )
+      .choices(["reject", "text-only"])
+      .default("reject"),
+  )
   .option(
     "--audio-track <index>",
     "global ffprobe audio stream index",
@@ -1239,6 +1266,9 @@ program
       presentationResolution: options.presentationResolution,
       overlapResolution: options.overlapResolution,
       overlapAcousticResolution: options.overlapAcousticResolution,
+      timestampEvidenceIntegrity: options.timestampEvidenceIntegrity,
+      tokenTimestampPolicy: options.tokenTimestampPolicy,
+      legacyOverlapCachePolicy: options.legacyOverlapCachePolicy,
       ...(options.audioTrack === undefined
         ? {}
         : { audioTrack: options.audioTrack }),

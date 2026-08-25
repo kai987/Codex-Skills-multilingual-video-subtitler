@@ -7,6 +7,7 @@ import {
   AppError,
   InputError,
   atomicWriteJson,
+  overlapAcousticComponentSchema,
   type Logger,
   type OverlapAcousticAttempt,
   type OverlapAcousticProfile,
@@ -15,6 +16,12 @@ import {
   type SourceFingerprint,
   type SubtitleCue,
   type SubtitleOverlapAcousticResolution,
+  type SubtitleTimestampEvidenceIntegrity,
+  type TimestampAttemptIntegrity,
+  type TimestampEvidenceIntegrityMode,
+  type TimestampRuntimeCapability,
+  type TokenTimestampPolicy,
+  type LegacyOverlapCachePolicy,
   type WhisperExecutionMetrics,
   type WhisperExecutionMode,
   type WhisperModelCapability,
@@ -25,6 +32,7 @@ import {
   WhisperCppWorkerPool,
   buildPortableAsrCacheIdentityV2,
   buildSubtitleOverlapAcousticResolution,
+  buildTimestampEvidenceIntegrityArtifact,
   classifyOverlapAcousticComponent,
   createWhisperCppAdapterForCapability,
   hashAsrPrompt,
@@ -38,6 +46,11 @@ import {
   type TranscriptionAdapter,
   type TranscriptionChunkResult,
   type WhisperVadProfile,
+  auditTimestampEvidenceAttempt,
+  TIMESTAMP_MAPPING_VERSION,
+  TOKEN_HEALTH_POLICY_VERSION,
+  timestampIntegrityHash,
+  evaluateTimestampEvidenceIntegrityGate,
 } from "@mvl/transcription-core";
 
 import { probeMedia } from "./probe.js";
@@ -68,10 +81,14 @@ export interface TargetedOverlapAcousticOptions {
   asrCacheDirectory?: string;
   asrCacheImportPaths?: readonly string[];
   asrCacheMode?: AsrCacheMode;
+  timestampEvidenceIntegrity?: TimestampEvidenceIntegrityMode;
+  tokenTimestampPolicy?: TokenTimestampPolicy;
+  legacyOverlapCachePolicy?: LegacyOverlapCachePolicy;
 }
 
 export interface TargetedOverlapAcousticResult {
   artifact: SubtitleOverlapAcousticResolution;
+  timestampIntegrity: SubtitleTimestampEvidenceIntegrity | null;
   executionMetrics: WhisperExecutionMetrics;
   audioStreamIndex: number;
   dependencyFailure: string | null;
@@ -80,6 +97,7 @@ export interface TargetedOverlapAcousticResult {
     resolution: string;
     executionMetrics: string;
     cacheManifest: string;
+    timestampIntegrity: string;
   };
 }
 
@@ -91,6 +109,7 @@ interface RuntimeResolution {
   tokenTimestampsAvailable: boolean;
   fullJsonAvailable: boolean;
   logicalCores: number;
+  timestampCapability: TimestampRuntimeCapability;
 }
 
 interface ExtractedComponentAudio {
@@ -277,6 +296,46 @@ async function resolveRuntime(input: {
   const vadModelPath = (await isFile(path.resolve(requestedVadPath)))
     ? path.resolve(requestedVadPath)
     : null;
+  const serverPath = path.join(
+    path.dirname(executablePath),
+    process.platform === "win32" ? "whisper-server.exe" : "whisper-server",
+  );
+  const runtimeBinaryPath = (await isFile(serverPath))
+    ? serverPath
+    : executablePath;
+  const tokenTimestampControlAvailable =
+    /--output-json-full\b/u.test(help) && /--max-len\b/u.test(help);
+  const capabilityEvidence = [
+    `whisper.cpp:${whisperCppVersion}`,
+    `server-response:verbose_json`,
+    tokenTimestampControlAvailable
+      ? "token-timestamp-control:available"
+      : "token-timestamp-control:unavailable",
+    "mapped-token-getter:not-exposed-by-server-json",
+    "raw-vad-intervals:not-exposed-by-server-json",
+  ];
+  const capabilityPayload = {
+    whisperCppVersion,
+    runtimeBinaryPathRecordedAsBasenameOnly: path.basename(runtimeBinaryPath),
+    runtimeBinarySha256: await sha256LocalFile(runtimeBinaryPath),
+    runtimeSourceCommit: null,
+    serverResponseFormat: "verbose_json",
+    mappedTokenGetterAvailable: false,
+    mappedTokenGetterActuallyUsed: false,
+    rawVadGetterAvailable: false,
+    rawVadGetterActuallyUsed: false,
+    tokenTimestampControlAvailable,
+    timestampCapabilityProbeMethod:
+      "local-binary-help-version-and-observed-server-json-v1",
+    timestampCapabilityStatus: tokenTimestampControlAvailable
+      ? ("legacy-vad-unmapped" as const)
+      : ("token-timestamps-unavailable" as const),
+    evidence: capabilityEvidence,
+  };
+  const timestampCapability: TimestampRuntimeCapability = {
+    ...capabilityPayload,
+    runtimeTimestampCapabilityHash: timestampIntegrityHash(capabilityPayload),
+  };
   return {
     capability: {
       id: `${family}:full:${useCoreML ? "coreml" : "cpu"}`,
@@ -313,10 +372,10 @@ async function resolveRuntime(input: {
     executablePath,
     whisperCppVersion,
     vadModelPath,
-    tokenTimestampsAvailable:
-      /--output-json-full\b/u.test(help) && /--max-len\b/u.test(help),
+    tokenTimestampsAvailable: tokenTimestampControlAvailable,
     fullJsonAvailable: /--output-json-full\b/u.test(help),
     logicalCores: Math.max(1, Number(process.env.MVL_LOGICAL_CORES ?? 0) || 8),
+    timestampCapability,
   };
 }
 
@@ -392,6 +451,29 @@ export function mapOverlapLocalTimestampToGlobal(
   return Math.min(extraction.end, Math.max(extraction.start, value));
 }
 
+export function timestampAttemptViewsForMode(input: {
+  mode: TimestampEvidenceIntegrityMode;
+  auditedAttempt: OverlapAcousticAttempt;
+  legacyAttempt: OverlapAcousticAttempt;
+}): {
+  artifactAttempt: OverlapAcousticAttempt;
+  classificationAttempt: OverlapAcousticAttempt;
+} {
+  return {
+    artifactAttempt:
+      input.mode === "off" ? input.legacyAttempt : input.auditedAttempt,
+    classificationAttempt:
+      input.mode === "enforce" ? input.auditedAttempt : input.legacyAttempt,
+  };
+}
+
+export function timestampObserveMutationProhibited(
+  mode: TimestampEvidenceIntegrityMode,
+  timingMutationCount: number,
+): boolean {
+  return mode === "observe" && timingMutationCount > 0;
+}
+
 function mapAttempt(input: {
   result: TranscriptionChunkResult;
   plan: OverlapAcousticComponentPlan;
@@ -402,75 +484,81 @@ function mapAttempt(input: {
   prompt: string | undefined;
   durationSeconds: number;
   failure?: string | null;
-}): OverlapAcousticAttempt {
-  const offset = input.plan.extractionInterval.start;
-  const tokens: OverlapAcousticAttempt["tokens"] = [];
-  const segments = input.result.segments.flatMap((segment, segmentIndex) => {
-    const start = mapOverlapLocalTimestampToGlobal(
-      offset + segment.start,
-      input.plan.extractionInterval,
-    );
-    const end = mapOverlapLocalTimestampToGlobal(
-      offset + segment.end,
-      input.plan.extractionInterval,
-    );
-    if (end <= start) return [];
+  sourceCues: readonly SubtitleCue[];
+  tokenTimestampPolicy: TokenTimestampPolicy;
+}): {
+  attempt: OverlapAcousticAttempt;
+  legacyAttempt: OverlapAcousticAttempt;
+  integrity: TimestampAttemptIntegrity;
+} {
+  const rawSegments = input.result.segments.flatMap((segment, segmentIndex) => {
+    if (segment.end <= segment.start) return [];
     const segmentId = deterministicId("overlap-segment", {
       requestId: input.requestId,
       segmentIndex,
-      start,
-      end,
+      start: segment.start,
+      end: segment.end,
       text: segment.text,
     });
-    const tokenIds = (segment.tokens ?? []).flatMap((token, tokenIndex) => {
-      const tokenStart = mapOverlapLocalTimestampToGlobal(
-        offset + token.start,
-        input.plan.extractionInterval,
-      );
-      const tokenEnd = mapOverlapLocalTimestampToGlobal(
-        offset + token.end,
-        input.plan.extractionInterval,
-      );
-      if (tokenEnd < tokenStart) return [];
+    const tokens = (segment.tokens ?? []).flatMap((token, tokenIndex) => {
+      if (token.end < token.start) return [];
       const tokenId = deterministicId("overlap-token", {
         requestId: input.requestId,
         segmentIndex,
         tokenIndex,
-        start: tokenStart,
-        end: tokenEnd,
+        start: token.start,
+        end: token.end,
         text: token.text,
       });
-      tokens.push({
-        tokenId,
-        text: token.text,
-        start: tokenStart,
-        end: tokenEnd,
-        probability: token.probability ?? null,
-      });
-      return [tokenId];
+      return [
+        {
+          tokenId,
+          text: token.text,
+          rawStart: token.start,
+          rawEnd: token.end,
+          probability: token.probability ?? null,
+        },
+      ];
     });
     return [
       {
         segmentId,
         text: segment.text,
-        start,
-        end,
+        rawStart: segment.start,
+        rawEnd: segment.end,
         confidence: segment.confidence,
-        tokenIds,
+        tokens,
       },
     ];
   });
-  const speechIntervals = segments.map((segment) => ({
-    start: segment.start,
-    end: segment.end,
-  }));
   const profile = adapterProfile(input.profile);
-  return {
-    attemptId: deterministicId("overlap-attempt", {
-      componentId: input.plan.componentId,
-      profile: input.profile,
-      requestId: input.requestId,
-    }),
+  const attemptId = deterministicId("overlap-attempt", {
+    componentId: input.plan.componentId,
+    profile: input.profile,
+    requestId: input.requestId,
+  });
+  const audit = auditTimestampEvidenceAttempt({
+    attemptId,
+    profile: input.profile,
+    useVad: profile.useVad,
+    extractionInterval: input.plan.extractionInterval,
+    segments: rawSegments,
+    sourceCueIntervals: input.sourceCues.map((cue) => ({
+      intervalId: cue.id,
+      start: cue.start,
+      end: cue.end,
+    })),
+    rawVadIntervals: [],
+    tokenTimestampsRequested: true,
+    tokenTimestampPolicy: input.tokenTimestampPolicy,
+    mappedTokenGetterActuallyUsed:
+      input.runtime.timestampCapability.mappedTokenGetterActuallyUsed,
+  });
+  const trustedAvailable = audit.tokens.some(
+    (token) => token.timingUsable === true,
+  );
+  const attempt: OverlapAcousticAttempt = {
+    attemptId,
     componentId: input.plan.componentId,
     profile: input.profile,
     requestId: input.requestId,
@@ -488,20 +576,93 @@ function mapAttempt(input: {
     referenceTranslationUsedAsPrompt: false,
     humanReviewedSentenceUsedAsPrompt: false,
     rawText: input.result.text,
-    segments,
-    tokens,
-    speechIntervals,
+    segments: audit.segments,
+    tokens: audit.tokens,
+    // Deprecated compatibility alias. New evidence selection never treats it
+    // as raw VAD or an independent speech detector.
+    speechIntervals: audit.decodedSegmentIntervals.map(({ start, end }) => ({
+      start,
+      end,
+    })),
+    timestampIntegrityRef: `subtitle-timestamp-evidence-integrity.json#attempt:${attemptId}`,
+    decodedSegmentIntervals: audit.decodedSegmentIntervals,
+    mappedTrustedTokenIntervals: audit.mappedTrustedTokenIntervals,
+    rawVadIntervals: audit.rawVadIntervals,
+    sourceCueIntervals: audit.sourceCueIntervals,
     metrics: {
       durationSeconds: input.durationSeconds,
-      segmentCount: segments.length,
-      tokenCount: tokens.length,
-      speechIntervalCount: speechIntervals.length,
+      segmentCount: audit.segments.length,
+      tokenCount: audit.tokens.length,
+      speechIntervalCount: audit.decodedSegmentIntervals.length,
       tokenTimestampsRequested: true,
-      tokenTimestampsUsed: tokens.length > 0,
+      tokenTimestampsReturned: audit.tokens.length > 0,
+      trustedTokenTimestampsAvailable: trustedAvailable,
+      trustedTokenTimestampsUsed: false,
+      tokenTimestampsUsed: false,
     },
     language: "ja",
     failure: input.failure ?? null,
   };
+  const legacyTokens: OverlapAcousticAttempt["tokens"] = rawSegments.flatMap(
+    (segment) =>
+      segment.tokens.map((token) => ({
+        tokenId: token.tokenId,
+        text: token.text,
+        start: mapOverlapLocalTimestampToGlobal(
+          input.plan.extractionInterval.start + token.rawStart,
+          input.plan.extractionInterval,
+        ),
+        end: mapOverlapLocalTimestampToGlobal(
+          input.plan.extractionInterval.start + token.rawEnd,
+          input.plan.extractionInterval,
+        ),
+        probability: token.probability,
+      })),
+  );
+  const legacyAttempt: OverlapAcousticAttempt = {
+    attemptId,
+    componentId: input.plan.componentId,
+    profile: input.profile,
+    requestId: input.requestId,
+    requestType: "overlap-evidence",
+    useVad: profile.useVad,
+    vadProfile: profile.useVad ? profile.vadProfile : "no-vad",
+    model: path.basename(input.runtime.capability.modelPath),
+    modelHash: input.runtime.capability.modelHash,
+    modelFamily: input.runtime.capability.modelFamily,
+    coreML: input.runtime.capability.runtime === "coreml",
+    whisperCppVersion: input.runtime.whisperCppVersion,
+    cacheHit: input.cacheHit,
+    promptSha256: hashAsrPrompt(input.prompt),
+    targetCueTextUsedAsPrompt: false,
+    referenceTranslationUsedAsPrompt: false,
+    humanReviewedSentenceUsedAsPrompt: false,
+    rawText: input.result.text,
+    segments: audit.segments.map((segment) => ({
+      segmentId: segment.segmentId,
+      text: segment.text,
+      start: segment.start,
+      end: segment.end,
+      confidence: segment.confidence,
+      tokenIds: segment.tokenIds,
+    })),
+    tokens: legacyTokens,
+    speechIntervals: audit.segments.map((segment) => ({
+      start: segment.start,
+      end: segment.end,
+    })),
+    metrics: {
+      durationSeconds: input.durationSeconds,
+      segmentCount: audit.segments.length,
+      tokenCount: legacyTokens.length,
+      speechIntervalCount: audit.segments.length,
+      tokenTimestampsRequested: true,
+      tokenTimestampsUsed: legacyTokens.length > 0,
+    },
+    language: "ja",
+    failure: input.failure ?? null,
+  };
+  return { attempt, legacyAttempt, integrity: audit.integrity };
 }
 
 function emptyExecutionMetrics(
@@ -542,6 +703,10 @@ export async function runTargetedOverlapAcousticResolution(
       ...options.configuration?.scoringWeights,
     },
   };
+  const timestampEvidenceIntegrity =
+    options.timestampEvidenceIntegrity ?? "observe";
+  const tokenTimestampPolicy = options.tokenTimestampPolicy ?? "auto";
+  const legacyOverlapCachePolicy = options.legacyOverlapCachePolicy ?? "reject";
   const selectedAudio = await selectAudioStream({
     sourceVideoPath: options.sourceVideoPath,
     ...(options.audioStreamIndex === undefined
@@ -612,6 +777,8 @@ export async function runTargetedOverlapAcousticResolution(
   const workerPool = new WhisperCppWorkerPool({ mode: requestedExecutionMode });
   const adapters = new Map<OverlapAcousticProfile, TranscriptionAdapter>();
   const attempts: OverlapAcousticAttempt[] = [];
+  const classificationAttempts: OverlapAcousticAttempt[] = [];
+  const integrityAttempts: TimestampAttemptIntegrity[] = [];
   if (runtime !== null) {
     for (const audio of extracted) {
       for (const profileId of audio.plan.profiles) {
@@ -640,6 +807,43 @@ export async function runTargetedOverlapAcousticResolution(
           vadMode: profile.useVad ? profile.vadProfile : "no-vad",
           timestampStrategy: "segment+token",
           tokenTimestamps: true,
+          timestampMappingVersion: TIMESTAMP_MAPPING_VERSION,
+          timestampCoordinateSystem: profile.useVad
+            ? "vad-processed-local"
+            : "original-audio-local",
+          tokenHealthPolicyVersion: TOKEN_HEALTH_POLICY_VERSION,
+          runtimeTimestampCapabilityHash:
+            runtime.timestampCapability.runtimeTimestampCapabilityHash,
+          decodeConfiguration: {
+            requestType: "overlap-evidence",
+            targetUnionInterval: audio.plan.unionInterval,
+            profile: profileId,
+            useVad: profile.useVad,
+            vadProfile: profile.vadProfile,
+            language: "ja",
+            tokenTimestamps: true,
+            suppressNonSpeechTokens: true,
+            timestampEvidenceIntegrity,
+            tokenTimestampPolicy,
+            legacyOverlapCachePolicy,
+          },
+        });
+        const legacyIdentity = buildPortableAsrCacheIdentityV2({
+          audioContentSha256: audio.sha256,
+          interval: audio.plan.extractionInterval,
+          sampleRate: 16_000,
+          channels: 1,
+          codec: "pcm_s16le",
+          adapterId: "whisper-cpp",
+          model: path.basename(runtime.capability.modelPath),
+          modelHash: runtime.capability.modelHash,
+          modelFamily: runtime.capability.modelFamily,
+          coreML: runtime.capability.runtime === "coreml",
+          whisperCppVersion: runtime.whisperCppVersion,
+          language: "ja",
+          vadMode: profile.useVad ? profile.vadProfile : "no-vad",
+          timestampStrategy: "segment+token",
+          tokenTimestamps: true,
           decodeConfiguration: {
             requestType: "overlap-evidence",
             targetUnionInterval: audio.plan.unionInterval,
@@ -651,10 +855,18 @@ export async function runTargetedOverlapAcousticResolution(
             suppressNonSpeechTokens: true,
           },
         });
+        const activeIdentity =
+          timestampEvidenceIntegrity === "off" ? legacyIdentity : identity;
         const lookup = await cache.lookup({
           requestId,
           requestType: "overlap-evidence",
-          identity,
+          identity: activeIdentity,
+          ...(timestampEvidenceIntegrity === "off"
+            ? {}
+            : {
+                legacyV2Identity: legacyIdentity,
+                legacyV2Policy: legacyOverlapCachePolicy,
+              }),
         });
         let result = lookup.result;
         let failure: string | null = null;
@@ -698,7 +910,7 @@ export async function runTargetedOverlapAcousticResolution(
             await cache.store({
               requestId,
               requestType: "overlap-evidence",
-              identity,
+              identity: activeIdentity,
               result,
             });
           } catch (error) {
@@ -706,19 +918,32 @@ export async function runTargetedOverlapAcousticResolution(
             result = { text: "", segments: [], raw: null };
           }
         }
-        attempts.push(
-          mapAttempt({
-            result: result ?? { text: "", segments: [], raw: null },
-            plan: audio.plan,
-            profile: profileId,
-            runtime,
-            requestId,
-            cacheHit: lookup.hit,
-            prompt,
-            durationSeconds: audio.durationSeconds,
-            failure,
-          }),
-        );
+        const mappedAttempt = mapAttempt({
+          result: result ?? { text: "", segments: [], raw: null },
+          plan: audio.plan,
+          profile: profileId,
+          runtime,
+          requestId,
+          cacheHit: lookup.hit,
+          prompt,
+          durationSeconds: audio.durationSeconds,
+          failure,
+          sourceCues: options.cues.filter((cue) =>
+            audio.plan.cueIds.includes(cue.id),
+          ),
+          tokenTimestampPolicy:
+            lookup.tokenTimingTrust === "legacy-untrusted"
+              ? "off"
+              : tokenTimestampPolicy,
+        });
+        const attemptViews = timestampAttemptViewsForMode({
+          mode: timestampEvidenceIntegrity,
+          auditedAttempt: mappedAttempt.attempt,
+          legacyAttempt: mappedAttempt.legacyAttempt,
+        });
+        attempts.push(attemptViews.artifactAttempt);
+        classificationAttempts.push(attemptViews.classificationAttempt);
+        integrityAttempts.push(mappedAttempt.integrity);
       }
     }
   }
@@ -740,11 +965,11 @@ export async function runTargetedOverlapAcousticResolution(
         `Missing source overlap decision ${audio.plan.sourceOverlapDecisionId}.`,
       );
     }
-    return classifyOverlapAcousticComponent({
+    const component = classifyOverlapAcousticComponent({
       plan: audio.plan,
       allCues: options.cues,
       sourceDecision,
-      attempts,
+      attempts: classificationAttempts,
       mode: options.mode,
       configuration,
       audioPath: audio.relativePath,
@@ -752,7 +977,89 @@ export async function runTargetedOverlapAcousticResolution(
       audioDurationSeconds: audio.durationSeconds,
       audioFullyCoversComponent: audio.fullyCoversComponent,
     });
+    if (timestampEvidenceIntegrity === "off") return component;
+    const gateFailures = evaluateTimestampEvidenceIntegrityGate({
+      attempts: classificationAttempts.filter(
+        (attempt) => attempt.componentId === audio.plan.componentId,
+      ),
+      alignments: component.cueAlignments,
+      ...(runtime === null
+        ? {}
+        : { runtimeCapability: runtime.timestampCapability }),
+    });
+    const observationWouldMutate = timestampObserveMutationProhibited(
+      timestampEvidenceIntegrity,
+      component.timingMutations.length,
+    );
+    return gateFailures.length === 0 && !observationWouldMutate
+      ? component
+      : overlapAcousticComponentSchema.parse({
+          ...component,
+          finalRelationship: "unresolved",
+          recommendedAction: "review",
+          safeAutomaticAction: "none",
+          timingMutations: [],
+          assEventOverrides: [],
+          vttCueSettings: [],
+          blocking: true,
+          timestampIntegrityGateFailures: gateFailures,
+          reasons: [
+            ...new Set([
+              ...component.reasons,
+              ...gateFailures,
+              ...(observationWouldMutate
+                ? ["TIMESTAMP_INTEGRITY_OBSERVE_MUTATION_PROHIBITED"]
+                : []),
+            ]),
+          ],
+        });
   });
+  const integrityGateFailures = [
+    ...new Set(
+      components.flatMap(
+        (component) => component.timestampIntegrityGateFailures ?? [],
+      ),
+    ),
+  ].toSorted();
+  const timingTokenIdsUsed = new Set(
+    components.flatMap((component) =>
+      component.cueAlignments.flatMap(
+        (alignment) => alignment.trustedMatchedTokenIds ?? [],
+      ),
+    ),
+  );
+  const admittedTokenIds = new Set(
+    integrityAttempts.flatMap((attempt) => attempt.trustedTokenIds),
+  );
+  const trustedTokenIdsUsed = new Set(
+    [...timingTokenIdsUsed].filter((tokenId) => admittedTokenIds.has(tokenId)),
+  );
+  const untrustedTokenIdsUsed = new Set(
+    [...timingTokenIdsUsed].filter((tokenId) => !admittedTokenIds.has(tokenId)),
+  );
+  const finalizedAttempts = attempts.map((attempt) => {
+    if (timestampEvidenceIntegrity === "off") return attempt;
+    const used = attempt.tokens.some((token) =>
+      trustedTokenIdsUsed.has(token.tokenId),
+    );
+    return {
+      ...attempt,
+      metrics: {
+        ...attempt.metrics,
+        trustedTokenTimestampsUsed: used,
+        tokenTimestampsUsed: used,
+      },
+    };
+  });
+  const finalizedIntegrityAttempts = integrityAttempts.map((attempt) => ({
+    ...attempt,
+    attemptMetrics: {
+      ...attempt.attemptMetrics,
+      trustedTokenTimestampsUsed: attempt.trustedTokenIds.some((tokenId) =>
+        trustedTokenIdsUsed.has(tokenId),
+      ),
+    },
+  }));
   const artifact = buildSubtitleOverlapAcousticResolution({
     sourceFingerprint: options.sourceFingerprint,
     baseCueHash: options.baseCueHash,
@@ -763,9 +1070,27 @@ export async function runTargetedOverlapAcousticResolution(
     mode: options.mode,
     audioStreamIndex: selectedAudio.index,
     configuration,
-    attempts,
+    attempts: finalizedAttempts,
     components,
   });
+  const timestampIntegrityArtifact =
+    runtime === null || timestampEvidenceIntegrity === "off"
+      ? null
+      : buildTimestampEvidenceIntegrityArtifact({
+          sourceOverlapArtifactHash: timestampIntegrityHash(artifact),
+          runtimeCapability: runtime.timestampCapability,
+          mode: timestampEvidenceIntegrity,
+          tokenTimestampPolicy,
+          legacyOverlapCachePolicy,
+          attempts: finalizedIntegrityAttempts,
+          trustedTokenUsedForTimingIds: trustedTokenIdsUsed,
+          untrustedTokenUsedForTimingIds: untrustedTokenIdsUsed,
+          rawVadIntervalCount: finalizedAttempts.reduce(
+            (sum, attempt) => sum + (attempt.rawVadIntervals?.length ?? 0),
+            0,
+          ),
+          integrityGateFailures,
+        });
   const outputPaths = {
     resolution: path.join(
       options.subtitleDirectory,
@@ -779,6 +1104,10 @@ export async function runTargetedOverlapAcousticResolution(
       options.subtitleDirectory,
       "overlap-asr-cache-manifest.json",
     ),
+    timestampIntegrity: path.join(
+      options.subtitleDirectory,
+      "subtitle-timestamp-evidence-integrity.json",
+    ),
   };
   await Promise.all([
     atomicWriteJson(outputPaths.resolution, artifact, { overwrite: true }),
@@ -788,6 +1117,15 @@ export async function runTargetedOverlapAcousticResolution(
     atomicWriteJson(outputPaths.cacheManifest, cache.manifest(), {
       overwrite: true,
     }),
+    ...(timestampIntegrityArtifact === null
+      ? []
+      : [
+          atomicWriteJson(
+            outputPaths.timestampIntegrity,
+            timestampIntegrityArtifact,
+            { overwrite: true },
+          ),
+        ]),
   ]);
   const wallClockSeconds = (performance.now() - started) / 1000;
   options.logger?.log("info", "Targeted overlap acoustic analysis completed.", {
@@ -801,6 +1139,7 @@ export async function runTargetedOverlapAcousticResolution(
   });
   return {
     artifact,
+    timestampIntegrity: timestampIntegrityArtifact,
     executionMetrics,
     audioStreamIndex: selectedAudio.index,
     dependencyFailure,

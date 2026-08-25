@@ -79,6 +79,24 @@ npm run subtitle-finalize -- \
 
 The stage writes `subtitle-overlap-acoustic-resolution.json`, `overlap-whisper-execution-metrics.json`, and `overlap-asr-cache-manifest.json`. The default is `--overlap-acoustic-resolution off`; the request budget defaults to 21 and cannot exceed 28.
 
+C5.15.1 adds a strict timestamp-evidence integrity layer. Use `--timestamp-evidence-integrity enforce` to quarantine token timing whose coordinate system cannot be proven, while retaining its text for lexical matching. With the Homebrew whisper.cpp 1.9.1 server, VAD-profile word timestamps are treated as VAD-processed local coordinates and are never added directly to the extraction offset; health-validated no-VAD tokens remain eligible. Decoded segments, trusted tokens, raw VAD intervals, and source cues are stored as distinct evidence classes in `subtitle-timestamp-evidence-integrity.json`. Cache identity includes mapping, health-policy, coordinate-system, and runtime-capability versions. Legacy overlap cache timing defaults to `reject`; `text-only` may reuse text but always quarantines its token timing.
+
+```bash
+npm run replay:c5-15-1-timestamp-integrity -- \
+  --task "/path/to/c5-15-task" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
+  --source-video "/path/to/source-video.mkv" \
+  --audio-track 1 \
+  --timestamp-evidence-integrity enforce \
+  --token-timestamp-policy auto \
+  --legacy-overlap-cache-policy reject \
+  --local-transcription-model "/path/to/ggml-large-v3.bin" \
+  --whisper-vad-model "/path/to/ggml-silero-v6.2.0.bin" \
+  --asr-cache-dir "/path/to/c5-15-1-cache"
+```
+
+Audit a legacy C5.15 artifact with `npm run audit:c5-15-token-timestamps -- --artifact <artifact.json>`. The command reports containment, zero-duration, boundary-clamp, and maximum-drift evidence without modifying the artifact.
+
 Replay an existing human-reviewed task into a collision-safe sibling directory without ASR, subtitle lookup, network access, or model/API calls:
 
 ```bash

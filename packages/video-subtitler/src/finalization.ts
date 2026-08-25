@@ -26,6 +26,9 @@ import {
   type SubtitleFinalizationReport,
   type SubtitleOverlapAcousticResolution,
   type SubtitlePackage,
+  type TimestampEvidenceIntegrityMode,
+  type TokenTimestampPolicy,
+  type LegacyOverlapCachePolicy,
   type WhisperExecutionMode,
 } from "@mvl/shared";
 import {
@@ -96,6 +99,9 @@ export interface SubtitleFinalizationOptions {
   asrCacheDirectory?: string;
   asrCacheImportPaths?: readonly string[];
   asrCacheMode?: AsrCacheMode;
+  timestampEvidenceIntegrity?: TimestampEvidenceIntegrityMode;
+  tokenTimestampPolicy?: TokenTimestampPolicy;
+  legacyOverlapCachePolicy?: LegacyOverlapCachePolicy;
   overlapAcousticExecutor?: (
     options: TargetedOverlapAcousticOptions,
   ) => Promise<TargetedOverlapAcousticResult>;
@@ -777,6 +783,10 @@ export async function finalizeSubtitleTask(
         : { asrCacheDirectory: options.asrCacheDirectory }),
       asrCacheImportPaths: options.asrCacheImportPaths ?? [],
       asrCacheMode: options.asrCacheMode ?? "read-write",
+      timestampEvidenceIntegrity:
+        options.timestampEvidenceIntegrity ?? "observe",
+      tokenTimestampPolicy: options.tokenTimestampPolicy ?? "auto",
+      legacyOverlapCachePolicy: options.legacyOverlapCachePolicy ?? "reject",
       ...(options.logger === undefined ? {} : { logger: options.logger }),
     });
     presentation = applyOverlapAcousticResolution({

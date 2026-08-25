@@ -22,6 +22,9 @@ const { values } = parseArgs({
     output: { type: "string" },
     "audio-track": { type: "string" },
     "overlap-acoustic-resolution": { type: "string", default: "enforce" },
+    "timestamp-evidence-integrity": { type: "string", default: "enforce" },
+    "token-timestamp-policy": { type: "string", default: "auto" },
+    "legacy-overlap-cache-policy": { type: "string", default: "reject" },
     "presentation-resolution": { type: "string", default: "enforce" },
     "overlap-resolution": { type: "string", default: "conservative" },
     "overlap-context-seconds": { type: "string", default: "1.5" },
@@ -83,6 +86,21 @@ const presentationResolution = choice(
   ["off", "observe", "enforce"] as const,
   "--presentation-resolution",
 );
+const timestampEvidenceIntegrity = choice(
+  values["timestamp-evidence-integrity"],
+  ["off", "observe", "enforce"] as const,
+  "--timestamp-evidence-integrity",
+);
+const tokenTimestampPolicy = choice(
+  values["token-timestamp-policy"],
+  ["auto", "mapped-only", "validated-legacy", "off"] as const,
+  "--token-timestamp-policy",
+);
+const legacyOverlapCachePolicy = choice(
+  values["legacy-overlap-cache-policy"],
+  ["reject", "text-only"] as const,
+  "--legacy-overlap-cache-policy",
+);
 const overlapResolution = choice(
   values["overlap-resolution"],
   ["conservative", "balanced"] as const,
@@ -141,14 +159,13 @@ async function collisionSafeTarget(): Promise<string> {
     return explicit;
   }
   const sourceName = path.basename(sourceTask);
-  const preferredName = sourceName.includes(
-    "c5-14-presentation-safe-auto-resolution",
-  )
-    ? sourceName.replace(
-        "c5-14-presentation-safe-auto-resolution",
-        "c5-15-targeted-acoustic-overlap-resolution",
-      )
-    : `${sourceName}-c5-15-targeted-acoustic-overlap-resolution`;
+  const stage =
+    timestampEvidenceIntegrity === "enforce"
+      ? "c5-15-1-timestamp-integrity"
+      : "c5-15-targeted-acoustic-overlap-resolution";
+  const preferredName = /c5-1[45][^/]*/u.test(sourceName)
+    ? sourceName.replace(/c5-1[45][^/]*/u, stage)
+    : `${sourceName}-${stage}`;
   const parent = path.dirname(sourceTask);
   for (let suffix = 0; suffix < 1000; suffix += 1) {
     const target = path.join(
@@ -203,6 +220,10 @@ await Promise.all(
       "overlap-whisper-execution-metrics.json",
     ),
     path.join(copied.subtitleDirectory, "overlap-asr-cache-manifest.json"),
+    path.join(
+      copied.subtitleDirectory,
+      "subtitle-timestamp-evidence-integrity.json",
+    ),
   ].map(async (derivedPath) => {
     await rm(derivedPath, { recursive: true, force: true });
   }),
@@ -218,6 +239,9 @@ const result = await finalizeSubtitleTask({
   presentationResolution,
   overlapResolution,
   overlapAcousticResolution,
+  timestampEvidenceIntegrity,
+  tokenTimestampPolicy,
+  legacyOverlapCachePolicy,
   ...(audioTrack === undefined ? {} : { audioTrack }),
   overlapAcousticConfiguration: {
     contextSeconds: numberValue(
@@ -282,17 +306,28 @@ const readonlyEqual = (
   before.sha256 === after.sha256 &&
   before.size === after.size &&
   before.mtimeMs === after.mtimeMs;
-const summaryPath = path.join(outputTask, "c5-15-overlap-replay-summary.json");
+const summaryPath = path.join(
+  outputTask,
+  timestampEvidenceIntegrity === "enforce"
+    ? "c5-15-1-timestamp-integrity-replay-summary.json"
+    : "c5-15-overlap-replay-summary.json",
+);
 await atomicWriteJson(
   summaryPath,
   {
     schemaVersion: "1.0.0",
-    runType: "C5.15 targeted acoustic overlap replay",
+    runType:
+      timestampEvidenceIntegrity === "enforce"
+        ? "C5.15.1 timestamp evidence integrity replay"
+        : "C5.15 targeted acoustic overlap replay",
     generatedAt: new Date().toISOString(),
     inputTaskName: path.basename(sourceTask),
     outputTaskName: path.basename(outputTask),
     configuration: {
       overlapAcousticResolution,
+      timestampEvidenceIntegrity,
+      tokenTimestampPolicy,
+      legacyOverlapCachePolicy,
       presentationResolution,
       overlapResolution,
       audioTrack: acoustic.configuration.audioStreamIndex,
@@ -350,6 +385,10 @@ await atomicWriteJson(
       overlapWhisperExecutionMetrics: path.join(
         result.subtitleDirectory,
         "overlap-whisper-execution-metrics.json",
+      ),
+      timestampEvidenceIntegrity: path.join(
+        result.subtitleDirectory,
+        "subtitle-timestamp-evidence-integrity.json",
       ),
       reviewPackage: result.outputPaths.reviewPackage,
     },

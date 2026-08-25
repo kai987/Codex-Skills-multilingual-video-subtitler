@@ -41,6 +41,8 @@ export interface PortableAsrCacheLookup {
   identity: PortableAsrCacheIdentityV2;
   legacyKeys?: readonly string[];
   legacyFileNames?: readonly string[];
+  legacyV2Identity?: PortableAsrCacheIdentityV2;
+  legacyV2Policy?: "reject" | "text-only";
 }
 
 export interface PortableAsrCacheLookupResult {
@@ -49,6 +51,7 @@ export interface PortableAsrCacheLookupResult {
   hitType: "portable" | "task-local-v2" | "legacy" | "miss" | "off";
   result: TranscriptionChunkResult | null;
   selectedPath: string | null;
+  tokenTimingTrust: "current-identity" | "legacy-untrusted";
 }
 
 function sha256(value: string | Uint8Array): string {
@@ -91,6 +94,10 @@ export function buildPortableAsrCacheIdentityV2(input: {
   vadMode: string;
   timestampStrategy: string;
   tokenTimestamps: boolean;
+  timestampMappingVersion?: string;
+  timestampCoordinateSystem?: string;
+  tokenHealthPolicyVersion?: string;
+  runtimeTimestampCapabilityHash?: string;
   prompt?: string;
   decodeConfiguration?: unknown;
 }): PortableAsrCacheIdentityV2 {
@@ -116,6 +123,20 @@ export function buildPortableAsrCacheIdentityV2(input: {
     vadMode: input.vadMode,
     timestampStrategy: input.timestampStrategy,
     tokenTimestamps: input.tokenTimestamps,
+    ...(input.timestampMappingVersion === undefined
+      ? {}
+      : { timestampMappingVersion: input.timestampMappingVersion }),
+    ...(input.timestampCoordinateSystem === undefined
+      ? {}
+      : { timestampCoordinateSystem: input.timestampCoordinateSystem }),
+    ...(input.tokenHealthPolicyVersion === undefined
+      ? {}
+      : { tokenHealthPolicyVersion: input.tokenHealthPolicyVersion }),
+    ...(input.runtimeTimestampCapabilityHash === undefined
+      ? {}
+      : {
+          runtimeTimestampCapabilityHash: input.runtimeTimestampCapabilityHash,
+        }),
     promptSha256: hashAsrPrompt(input.prompt),
     decodeConfigurationSha256: hashAsrDecodeConfiguration(
       input.decodeConfiguration ?? {},
@@ -315,6 +336,7 @@ export class PortableAsrCache {
         hitType: "off",
         result: null,
         selectedPath: null,
+        tokenTimingTrust: "current-identity",
       };
     }
     const portablePath = cachePath(this.portableRoot, key);
@@ -336,6 +358,7 @@ export class PortableAsrCache {
         hitType: "portable",
         result: portable.result,
         selectedPath: portablePath,
+        tokenTimingTrust: "current-identity",
       };
     }
     if (this.taskLocalRoot !== null) {
@@ -358,6 +381,61 @@ export class PortableAsrCache {
           hitType: "task-local-v2",
           result: task.result,
           selectedPath: taskPath,
+          tokenTimingTrust: "current-identity",
+        };
+      }
+    }
+    if (input.legacyV2Identity !== undefined) {
+      const legacyIdentity = portableAsrCacheIdentityV2Schema.parse(
+        input.legacyV2Identity,
+      );
+      const legacyKey = buildPortableAsrCacheKey(legacyIdentity);
+      const roots = [
+        this.portableRoot,
+        ...(this.taskLocalRoot === null ? [] : [this.taskLocalRoot]),
+        ...this.importRoots,
+      ];
+      for (const root of [...new Set(roots)]) {
+        const legacyPath = cachePath(root, legacyKey);
+        const legacy = await this.readV2(legacyPath, legacyIdentity, legacyKey);
+        if (legacy === null) continue;
+        if ((input.legacyV2Policy ?? "reject") === "reject") {
+          this.rejectedLegacyEntryCount += 1;
+          this.legacyAuditEntries.push({
+            requestId: input.requestId,
+            legacyKey,
+            legacyPath,
+            currentKey: key,
+            status: "rejected",
+            checks: [
+              "legacy-v2-identity-exact-match",
+              "timestamp-semantics-unversioned",
+              "legacy-overlap-cache-policy-reject",
+            ],
+          });
+          continue;
+        }
+        this.entries.push({
+          requestId: input.requestId,
+          requestType: input.requestType,
+          currentKey: key,
+          legacyKeysTried: [legacyKey],
+          selectedPath: legacyPath,
+          hitType: "legacy",
+          compatibilityChecks: [
+            ...legacy.checks,
+            "timestamp-semantics-unversioned",
+            "token-timing-quarantined-text-only",
+          ],
+          migrationStatus: "not-needed",
+        });
+        return {
+          key,
+          hit: true,
+          hitType: "legacy",
+          result: legacy.result,
+          selectedPath: legacyPath,
+          tokenTimingTrust: "legacy-untrusted",
         };
       }
     }
@@ -443,6 +521,7 @@ export class PortableAsrCache {
         hitType: "legacy",
         result,
         selectedPath: legacyPath,
+        tokenTimingTrust: "legacy-untrusted",
       };
     }
     this.entries.push({
@@ -465,6 +544,7 @@ export class PortableAsrCache {
       hitType: "miss",
       result: null,
       selectedPath: null,
+      tokenTimingTrust: "current-identity",
     };
   }
 

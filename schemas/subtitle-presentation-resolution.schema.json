@@ -9,7 +9,10 @@
       "type": "string",
       "const": "subtitle-presentation-resolution"
     },
-    "resolutionVersion": { "type": "string", "enum": ["C5.14", "C5.15"] },
+    "resolutionVersion": {
+      "type": "string",
+      "enum": ["C5.14", "C5.15", "C5.15.1"]
+    },
     "generatedAt": { "type": "string", "minLength": 1 },
     "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },

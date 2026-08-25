@@ -1040,6 +1040,13 @@ export const portableAsrCacheIdentityV2Schema = z
     vadMode: z.string().min(1),
     timestampStrategy: z.string().min(1),
     tokenTimestamps: z.boolean(),
+    timestampMappingVersion: z.string().min(1).optional(),
+    timestampCoordinateSystem: z.string().min(1).optional(),
+    tokenHealthPolicyVersion: z.string().min(1).optional(),
+    runtimeTimestampCapabilityHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/u)
+      .optional(),
     promptSha256: z.string().regex(/^[a-f0-9]{64}$/u),
     decodeConfigurationSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   })

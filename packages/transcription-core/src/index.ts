@@ -39,6 +39,7 @@ export * from "./repetition-classification.js";
 export * from "./refinement.js";
 export * from "./song.js";
 export * from "./terminology.js";
+export * from "./timestamp-evidence-integrity.js";
 export * from "./text-integrity.js";
 export * from "./text-integrity-repair.js";
 export * from "./types.js";

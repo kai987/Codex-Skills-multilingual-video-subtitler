@@ -7,6 +7,12 @@ import {
 } from "./presentation-resolution-schemas.js";
 import { languageTagSchema } from "./language.js";
 import { schemaVersionSchema } from "./schemas.js";
+import {
+  timestampCoordinateSystemSchema,
+  timestampIntegrityIntervalSchema,
+  timestampMappingMethodSchema,
+  tokenTimelineStatusSchema,
+} from "./timestamp-evidence-integrity-schemas.js";
 
 const hashSchema = z.string().regex(/^[a-f0-9]{64}$/u);
 const relativePathSchema = z
@@ -43,10 +49,45 @@ export const overlapAcousticTokenSchema = z
     start: z.number().nonnegative(),
     end: z.number().nonnegative(),
     probability: z.number().min(0).max(1).nullable(),
+    parentSegmentId: z.string().min(1).optional(),
+    rawStart: z.number().nonnegative().optional(),
+    rawEnd: z.number().nonnegative().optional(),
+    rawCoordinateSystem: timestampCoordinateSystemSchema.optional(),
+    mappedStart: z.number().nonnegative().nullable().optional(),
+    mappedEnd: z.number().nonnegative().nullable().optional(),
+    mappedCoordinateSystem: timestampCoordinateSystemSchema.optional(),
+    mappingMethod: timestampMappingMethodSchema.optional(),
+    mappingVersion: z.string().min(1).optional(),
+    mappingConfidence: z.number().min(0).max(1).optional(),
+    textUsable: z.boolean().optional(),
+    timingUsable: z.boolean().optional(),
+    tokenTimelineStatus: tokenTimelineStatusSchema.optional(),
+    tokenTimelineTrustScore: z.number().min(0).max(1).optional(),
+    quarantineReasons: z.array(z.string().min(1)).optional(),
+    specialToken: z.boolean().optional(),
+    boundaryClamped: z.boolean().optional(),
   })
   .strict()
   .refine((value) => value.end >= value.start, {
     message: "Token end must be at or after start.",
+  })
+  .superRefine((value, context) => {
+    if (
+      value.timingUsable === true &&
+      (value.mappedStart === null ||
+        value.mappedStart === undefined ||
+        value.mappedEnd === null ||
+        value.mappedEnd === undefined ||
+        value.mappedCoordinateSystem !== "original-media-global" ||
+        !value.tokenTimelineStatus?.startsWith("trusted"))
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["timingUsable"],
+        message:
+          "A timing-usable token requires trusted mapped original-media-global timestamps.",
+      });
+    }
   });
 
 export const overlapAcousticSegmentSchema = z
@@ -57,6 +98,11 @@ export const overlapAcousticSegmentSchema = z
     end: z.number().positive(),
     confidence: z.number().min(0).max(1).nullable(),
     tokenIds: z.array(z.string().min(1)),
+    rawStart: z.number().nonnegative().optional(),
+    rawEnd: z.number().positive().optional(),
+    rawCoordinateSystem: timestampCoordinateSystemSchema.optional(),
+    mappedCoordinateSystem: timestampCoordinateSystemSchema.optional(),
+    timingUsable: z.boolean().optional(),
   })
   .strict()
   .refine((value) => value.end > value.start, {
@@ -86,6 +132,15 @@ export const overlapAcousticAttemptSchema = z
     segments: z.array(overlapAcousticSegmentSchema),
     tokens: z.array(overlapAcousticTokenSchema),
     speechIntervals: z.array(overlapAcousticIntervalSchema),
+    timestampIntegrityRef: z.string().min(1).nullable().optional(),
+    decodedSegmentIntervals: z
+      .array(timestampIntegrityIntervalSchema)
+      .optional(),
+    mappedTrustedTokenIntervals: z
+      .array(timestampIntegrityIntervalSchema)
+      .optional(),
+    rawVadIntervals: z.array(timestampIntegrityIntervalSchema).optional(),
+    sourceCueIntervals: z.array(timestampIntegrityIntervalSchema).optional(),
     metrics: z
       .object({
         durationSeconds: z.number().nonnegative(),
@@ -93,6 +148,9 @@ export const overlapAcousticAttemptSchema = z
         tokenCount: z.number().int().nonnegative(),
         speechIntervalCount: z.number().int().nonnegative(),
         tokenTimestampsRequested: z.boolean(),
+        tokenTimestampsReturned: z.boolean().optional(),
+        trustedTokenTimestampsAvailable: z.boolean().optional(),
+        trustedTokenTimestampsUsed: z.boolean().optional(),
         tokenTimestampsUsed: z.boolean(),
       })
       .strict(),
@@ -104,9 +162,31 @@ export const overlapAcousticAttemptSchema = z
 export const overlapMatchedIntervalSchema = z
   .object({
     attemptId: z.string().min(1),
-    source: z.enum(["token", "segment", "speech", "vad", "source"]),
+    source: z.enum([
+      "token",
+      "segment",
+      "speech",
+      "vad",
+      "source",
+      "trusted-mapped-token",
+      "trusted-no-vad-token",
+      "decoded-segment",
+      "raw-vad",
+      "source-cue",
+      "pause",
+      "legacy-token-untrusted",
+    ]),
     start: z.number().nonnegative(),
     end: z.number().positive(),
+    evidenceId: z.string().min(1).optional(),
+    timingUsable: z.boolean().optional(),
+    timestampTrustStatus: tokenTimelineStatusSchema.optional(),
+    timingTrustScore: z.number().min(0).max(1).optional(),
+    alignmentScore: z.number().min(0).max(1).optional(),
+    parentSegmentContainmentPassed: z.boolean().optional(),
+    profileConsensusScore: z.number().min(0).max(1).optional(),
+    boundaryConfidence: z.number().min(0).max(1).optional(),
+    neighborIntrusionRatio: z.number().min(0).max(1).optional(),
   })
   .strict()
   .refine((value) => value.end > value.start, {
@@ -134,6 +214,13 @@ export const overlapCueAlignmentSchema = z
     matchedAttemptIds: z.array(z.string().min(1)),
     matchedSegmentIds: z.array(z.string().min(1)),
     matchedTokenIds: z.array(z.string().min(1)),
+    trustedMatchedTokenIds: z.array(z.string().min(1)).optional(),
+    quarantinedMatchedTokenIds: z.array(z.string().min(1)).optional(),
+    trustedTimingEvidenceIds: z.array(z.string().min(1)).optional(),
+    lexicalOnlyEvidenceIds: z.array(z.string().min(1)).optional(),
+    trustedTimingProfileSupportCount: z.number().int().nonnegative().optional(),
+    trustedTimingSourceTypeCount: z.number().int().nonnegative().optional(),
+    trustedTimingModelSupportCount: z.number().int().nonnegative().optional(),
     matchedIntervals: z.array(overlapMatchedIntervalSchema),
     alignmentMethod: z.enum([
       "surface-token-sequence",
@@ -188,7 +275,18 @@ export const overlapAcousticTimingMutationSchema = z
     afterEnd: z.number().positive(),
     startDelta: z.number(),
     endDelta: z.number(),
-    boundarySource: z.enum(["token", "speech", "vad", "source", "pause"]),
+    boundarySource: z.enum([
+      "token",
+      "speech",
+      "vad",
+      "source",
+      "pause",
+      "trusted-mapped-token",
+      "trusted-no-vad-token",
+      "decoded-segment",
+      "raw-vad",
+      "source-cue",
+    ]),
     evidenceIds: z.array(z.string().min(1)).min(1),
     textChanged: z.literal(false),
   })
@@ -216,6 +314,32 @@ export const overlapAcousticComponentSchema = z
     counterfactuals: z.array(overlapCounterfactualSchema),
     finalRelationship: overlapRelationshipSchema,
     classificationConfidence: z.number().min(0).max(1),
+    bestHypothesis: z
+      .enum([
+        "ordered-no-overlap",
+        "rapid-turn-taking",
+        "nested-background-foreground",
+        "true-simultaneous-speech",
+        "same-utterance-alternative",
+      ])
+      .optional(),
+    bestHypothesisScore: z.number().min(0).max(1).optional(),
+    runnerUpHypothesis: z
+      .enum([
+        "ordered-no-overlap",
+        "rapid-turn-taking",
+        "nested-background-foreground",
+        "true-simultaneous-speech",
+        "same-utterance-alternative",
+      ])
+      .nullable()
+      .optional(),
+    runnerUpHypothesisScore: z.number().min(0).max(1).nullable().optional(),
+    decisionMargin: z.number().min(0).max(1).optional(),
+    scoreCalibrationStatus: z
+      .enum(["uncalibrated-heuristic", "holdout-calibrated"])
+      .optional(),
+    timestampIntegrityGateFailures: z.array(z.string().min(1)).optional(),
     recommendedAction: z.enum([
       "preserve-overlap",
       "delete-duplicate",
@@ -244,7 +368,7 @@ export const subtitleOverlapAcousticResolutionSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-overlap-acoustic-resolution"),
-    resolutionVersion: z.literal("C5.15"),
+    resolutionVersion: z.enum(["C5.15", "C5.15.1"]),
     generatedAt: z.iso.datetime(),
     sourceFingerprint: z
       .object({
@@ -271,6 +395,7 @@ export const subtitleOverlapAcousticResolutionSchema = z
         minimumBoundaryConfidence: z.number().min(0).max(1),
         minimumAlignmentConfidence: z.number().min(0).max(1),
         minimumIndependentProfileSupport: z.number().int().positive(),
+        minimumDecisionMargin: z.number().min(0).max(1).optional(),
         scoringWeights: z
           .object({
             surfaceOrReading: z.number().nonnegative(),
@@ -303,6 +428,9 @@ export const subtitleOverlapAcousticResolutionSchema = z
         wholeMediaAsrRequestCount: z.literal(0),
         midpointRepairCount: z.literal(0),
         characterRatioRepairCount: z.literal(0),
+        trustedTokenCount: z.number().int().nonnegative().optional(),
+        quarantinedTokenCount: z.number().int().nonnegative().optional(),
+        untrustedTokenUsedForTimingCount: z.literal(0).optional(),
       })
       .strict(),
   })
