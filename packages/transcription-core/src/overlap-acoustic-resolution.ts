@@ -48,6 +48,9 @@ export interface OverlapAcousticConfiguration {
   minimumAlignmentConfidence: number;
   minimumIndependentProfileSupport: number;
   minimumDecisionMargin: number;
+  rawVadBoundaryNormalizationToleranceSeconds: number;
+  workerStateIsolationPolicyVersion: string;
+  requestOrder: "standard" | "adversarial";
   scoringWeights: OverlapAcousticScoringWeights;
 }
 
@@ -65,6 +68,9 @@ export const DEFAULT_OVERLAP_ACOUSTIC_CONFIGURATION: Readonly<OverlapAcousticCon
     minimumAlignmentConfidence: 0.72,
     minimumIndependentProfileSupport: 2,
     minimumDecisionMargin: 0.1,
+    rawVadBoundaryNormalizationToleranceSeconds: 0.05,
+    workerStateIsolationPolicyVersion: "c5.16.1-worker-state-isolation-v1",
+    requestOrder: "standard",
     // These generic weights favor lexical/token evidence and require timing
     // and cross-profile support before a component can become non-blocking.
     scoringWeights: {
@@ -1054,6 +1060,8 @@ function rawVadBoundaryRelation(input: {
         (interval) =>
           interval.timingUsable &&
           (interval.rawVadIntervalHealthStatus === "trusted" ||
+            interval.rawVadIntervalHealthStatus ===
+              "trusted-with-boundary-normalization" ||
             interval.rawVadIntervalHealthStatus === "overlapping-with-padding"),
       )
       .toSorted(
@@ -1349,6 +1357,15 @@ export function classifyOverlapAcousticComponent(input: {
   audioPath: string | null;
   audioSha256: string | null;
   audioDurationSeconds: number | null;
+  nominalExtractionInterval?: { start: number; end: number } | undefined;
+  nominalDurationSeconds?: number | undefined;
+  actualAudioDurationSeconds?: number | undefined;
+  actualAudioLocalEndSeconds?: number | undefined;
+  actualMediaGlobalEndSeconds?: number | undefined;
+  durationDifferenceSeconds?: number | undefined;
+  durationMeasurementMethod?: string | undefined;
+  ffprobeDurationSeconds?: number | null | undefined;
+  durationCrossCheckDeltaSeconds?: number | null | undefined;
   audioFullyCoversComponent: boolean;
   readingAnalyzer?: JapaneseReadingAnalyzer;
 }): OverlapAcousticComponent {
@@ -1700,9 +1717,38 @@ export function classifyOverlapAcousticComponent(input: {
     cueIds: input.plan.cueIds,
     unionInterval: input.plan.unionInterval,
     extractionInterval: input.plan.extractionInterval,
+    ...(input.nominalExtractionInterval === undefined
+      ? {}
+      : { nominalExtractionInterval: input.nominalExtractionInterval }),
+    ...(input.nominalDurationSeconds === undefined
+      ? {}
+      : { nominalDurationSeconds: input.nominalDurationSeconds }),
     audioPath: input.audioPath,
     audioSha256: input.audioSha256,
     audioDurationSeconds: input.audioDurationSeconds,
+    ...(input.actualAudioDurationSeconds === undefined
+      ? {}
+      : { actualAudioDurationSeconds: input.actualAudioDurationSeconds }),
+    ...(input.actualAudioLocalEndSeconds === undefined
+      ? {}
+      : { actualAudioLocalEndSeconds: input.actualAudioLocalEndSeconds }),
+    ...(input.actualMediaGlobalEndSeconds === undefined
+      ? {}
+      : { actualMediaGlobalEndSeconds: input.actualMediaGlobalEndSeconds }),
+    ...(input.durationDifferenceSeconds === undefined
+      ? {}
+      : { durationDifferenceSeconds: input.durationDifferenceSeconds }),
+    ...(input.durationMeasurementMethod === undefined
+      ? {}
+      : { durationMeasurementMethod: input.durationMeasurementMethod }),
+    ...(input.ffprobeDurationSeconds === undefined
+      ? {}
+      : { ffprobeDurationSeconds: input.ffprobeDurationSeconds }),
+    ...(input.durationCrossCheckDeltaSeconds === undefined
+      ? {}
+      : {
+          durationCrossCheckDeltaSeconds: input.durationCrossCheckDeltaSeconds,
+        }),
     audioFullyCoversComponent: input.audioFullyCoversComponent,
     profileAttemptIds: attempts.map((attempt) => attempt.attemptId).toSorted(),
     cueAlignments: alignments,
@@ -1893,7 +1939,7 @@ export function applyOverlapAcousticResolution(input: {
   const base = input.presentation.artifact;
   const artifact = subtitlePresentationResolutionSchema.parse({
     ...base,
-    resolutionVersion: "C5.16",
+    resolutionVersion: "C5.16.1",
     generatedAt: input.acoustic.generatedAt,
     canonicalCueHash,
     presentationCueHash,
@@ -1952,7 +1998,7 @@ export function buildSubtitleOverlapAcousticResolution(input: {
   return subtitleOverlapAcousticResolutionSchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-overlap-acoustic-resolution",
-    resolutionVersion: "C5.16",
+    resolutionVersion: "C5.16.1",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     sourceFingerprint: input.sourceFingerprint,
     baseCueHash: input.baseCueHash,

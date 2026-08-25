@@ -11,7 +11,7 @@
     },
     "resolutionVersion": {
       "type": "string",
-      "enum": ["C5.14", "C5.15", "C5.15.1", "C5.16"]
+      "enum": ["C5.14", "C5.15", "C5.15.1", "C5.16", "C5.16.1"]
     },
     "generatedAt": { "type": "string", "minLength": 1 },
     "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },

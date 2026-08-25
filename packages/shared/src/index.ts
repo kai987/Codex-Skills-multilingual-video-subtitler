@@ -10,6 +10,7 @@ export * from "./overlap-acoustic-resolution-schemas.js";
 export * from "./reference-schemas.js";
 export * from "./schema-validation.js";
 export * from "./schemas.js";
+export * from "./shareable-artifact-schemas.js";
 export * from "./text-quality-schemas.js";
 export * from "./c4-schemas.js";
 export * from "./timing.js";

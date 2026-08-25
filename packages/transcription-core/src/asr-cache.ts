@@ -104,6 +104,8 @@ export function buildPortableAsrCacheIdentityV2(input: {
   runtimePatchSha256?: string | null;
   runtimeResponseSchemaVersion?: string;
   rawVadPolicyVersion?: string;
+  rawVadBoundaryPolicyVersion?: string;
+  workerStateIsolationPolicyVersion?: string;
   prompt?: string;
   decodeConfiguration?: unknown;
 }): PortableAsrCacheIdentityV2 {
@@ -163,6 +165,15 @@ export function buildPortableAsrCacheIdentityV2(input: {
     ...(input.rawVadPolicyVersion === undefined
       ? {}
       : { rawVadPolicyVersion: input.rawVadPolicyVersion }),
+    ...(input.rawVadBoundaryPolicyVersion === undefined
+      ? {}
+      : { rawVadBoundaryPolicyVersion: input.rawVadBoundaryPolicyVersion }),
+    ...(input.workerStateIsolationPolicyVersion === undefined
+      ? {}
+      : {
+          workerStateIsolationPolicyVersion:
+            input.workerStateIsolationPolicyVersion,
+        }),
     promptSha256: hashAsrPrompt(input.prompt),
     decodeConfigurationSha256: hashAsrDecodeConfiguration(
       input.decodeConfiguration ?? {},

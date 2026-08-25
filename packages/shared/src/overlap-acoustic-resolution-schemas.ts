@@ -392,9 +392,22 @@ export const overlapAcousticComponentSchema = z
     cueIds: z.array(z.string().min(1)).min(2),
     unionInterval: overlapAcousticIntervalSchema,
     extractionInterval: overlapAcousticIntervalSchema,
+    nominalExtractionInterval: overlapAcousticIntervalSchema.optional(),
+    nominalDurationSeconds: z.number().positive().optional(),
     audioPath: relativePathSchema.nullable(),
     audioSha256: hashSchema.nullable(),
     audioDurationSeconds: z.number().nonnegative().nullable(),
+    actualAudioDurationSeconds: z.number().positive().optional(),
+    actualAudioLocalEndSeconds: z.number().positive().optional(),
+    actualMediaGlobalEndSeconds: z.number().positive().optional(),
+    durationDifferenceSeconds: z.number().optional(),
+    durationMeasurementMethod: z.string().min(1).optional(),
+    ffprobeDurationSeconds: z.number().positive().nullable().optional(),
+    durationCrossCheckDeltaSeconds: z
+      .number()
+      .nonnegative()
+      .nullable()
+      .optional(),
     audioFullyCoversComponent: z.boolean(),
     profileAttemptIds: z.array(z.string().min(1)),
     cueAlignments: z.array(overlapCueAlignmentSchema),
@@ -456,7 +469,7 @@ export const subtitleOverlapAcousticResolutionSchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-overlap-acoustic-resolution"),
-    resolutionVersion: z.enum(["C5.15", "C5.15.1", "C5.16"]),
+    resolutionVersion: z.enum(["C5.15", "C5.15.1", "C5.16", "C5.16.1"]),
     generatedAt: z.iso.datetime(),
     sourceFingerprint: z
       .object({
@@ -484,6 +497,13 @@ export const subtitleOverlapAcousticResolutionSchema = z
         minimumAlignmentConfidence: z.number().min(0).max(1),
         minimumIndependentProfileSupport: z.number().int().positive(),
         minimumDecisionMargin: z.number().min(0).max(1).optional(),
+        rawVadBoundaryNormalizationToleranceSeconds: z
+          .number()
+          .nonnegative()
+          .max(0.1)
+          .optional(),
+        workerStateIsolationPolicyVersion: z.string().min(1).optional(),
+        requestOrder: z.enum(["standard", "adversarial"]).optional(),
         scoringWeights: z
           .object({
             surfaceOrReading: z.number().nonnegative(),

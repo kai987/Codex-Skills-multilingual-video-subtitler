@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/shareable-artifact-manifest.schema.json",
+  "title": "shareable-artifact-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "shareable-artifact-manifest"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c5.16.1-shareable-artifact-policy-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "taskIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "pathPolicy": { "type": "string", "const": "shareable-relative-only" },
+    "shareable": { "type": "boolean", "const": true },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sourceArtifactName": { "type": "string", "minLength": 1 },
+          "sourceArtifactHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "shareablePath": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+          },
+          "shareableHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "schemaName": { "type": "string", "minLength": 1 },
+          "pathReplacementCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "secretRedactionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "absolutePathLeakCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "prohibitedSecretCount": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "validationPassed": { "type": "boolean" }
+        },
+        "required": [
+          "sourceArtifactName",
+          "sourceArtifactHash",
+          "shareablePath",
+          "shareableHash",
+          "schemaName",
+          "pathReplacementCount",
+          "secretRedactionCount",
+          "absolutePathLeakCount",
+          "prohibitedSecretCount",
+          "validationPassed"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "artifactCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "validationPassedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "absolutePathLeakCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "prohibitedSecretCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pathReplacementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "secretRedactionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "artifactCount",
+        "validationPassedCount",
+        "absolutePathLeakCount",
+        "prohibitedSecretCount",
+        "pathReplacementCount",
+        "secretRedactionCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "generatedAt",
+    "taskIdentityHash",
+    "pathPolicy",
+    "shareable",
+    "items",
+    "summary"
+  ],
+  "additionalProperties": false
+}

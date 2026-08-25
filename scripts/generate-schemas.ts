@@ -77,6 +77,7 @@ import {
   whisperRuntimeCapabilityArtifactSchema,
   c516StockPatchedRuntimeAbArtifactSchema,
   whisperRuntimeBuildManifestSchema,
+  shareableArtifactManifestSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -131,6 +132,11 @@ const schemas = [
     fileName: "c5-16-stock-patched-runtime-ab.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c5-16-stock-patched-runtime-ab.schema.json",
     schema: c516StockPatchedRuntimeAbArtifactSchema,
+  },
+  {
+    fileName: "shareable-artifact-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/shareable-artifact-manifest.schema.json",
+    schema: shareableArtifactManifestSchema,
   },
   {
     fileName: "subtitle-review-package.schema.json",

@@ -32,6 +32,7 @@ import {
   type RawVadPolicy,
   type TimestampRuntimePolicy,
   type WhisperExecutionMode,
+  type WorkerStateIsolationMode,
 } from "@mvl/shared";
 import {
   DEFAULT_FINALIZATION_THRESHOLDS,
@@ -109,6 +110,9 @@ export interface SubtitleFinalizationOptions {
   timestampEvidenceIntegrity?: TimestampEvidenceIntegrityMode;
   tokenTimestampPolicy?: TokenTimestampPolicy;
   legacyOverlapCachePolicy?: LegacyOverlapCachePolicy;
+  rawVadBoundaryNormalizationToleranceSeconds?: number;
+  workerStateIsolation?: WorkerStateIsolationMode;
+  overlapRequestOrder?: "standard" | "adversarial";
   overlapAcousticExecutor?: (
     options: TargetedOverlapAcousticOptions,
   ) => Promise<TargetedOverlapAcousticResult>;
@@ -149,10 +153,20 @@ export function overlapAcousticEvidenceForHash(
   return {
     ...artifact,
     generatedAt: null,
-    attempts: artifact.attempts.map((attempt) => ({
-      ...attempt,
-      cacheHit: false,
-    })),
+    configuration: {
+      ...artifact.configuration,
+      requestOrder: null,
+    },
+    attempts: artifact.attempts
+      .toSorted((left, right) => {
+        const leftKey = `${left.componentId}\u0000${left.profile}\u0000${left.attemptId}`;
+        const rightKey = `${right.componentId}\u0000${right.profile}\u0000${right.attemptId}`;
+        return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
+      })
+      .map((attempt) => ({
+        ...attempt,
+        cacheHit: false,
+      })),
     summary: {
       ...artifact.summary,
       asrRequestCount: 0,
@@ -808,6 +822,10 @@ export async function finalizeSubtitleTask(
         options.timestampEvidenceIntegrity ?? "observe",
       tokenTimestampPolicy: options.tokenTimestampPolicy ?? "auto",
       legacyOverlapCachePolicy: options.legacyOverlapCachePolicy ?? "reject",
+      rawVadBoundaryNormalizationToleranceSeconds:
+        options.rawVadBoundaryNormalizationToleranceSeconds ?? 0.05,
+      workerStateIsolation: options.workerStateIsolation ?? "require-safe",
+      requestOrder: options.overlapRequestOrder ?? "standard",
       ...(options.logger === undefined ? {} : { logger: options.logger }),
     });
     presentation = applyOverlapAcousticResolution({

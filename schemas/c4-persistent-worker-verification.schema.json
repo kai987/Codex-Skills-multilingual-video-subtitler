@@ -70,6 +70,118 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "requestStateIsolationStrategy": {
+          "type": "string",
+          "enum": [
+            "verified-per-request-reset",
+            "restart-on-vad-to-no-vad",
+            "mode-segregated-workers",
+            "profile-major-order-only",
+            "unknown"
+          ]
+        },
+        "requestOrderPlan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestKey": { "type": "string", "minLength": 1 },
+              "vadMode": { "type": "string", "enum": ["vad", "no-vad"] },
+              "profile": { "type": "string", "minLength": 1 },
+              "cacheHit": { "type": "boolean" },
+              "workerId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "contextGeneration": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "isolationAction": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "reset",
+                  "restart",
+                  "segregated-route",
+                  "process",
+                  "cache-hit"
+                ]
+              }
+            },
+            "required": [
+              "sequence",
+              "requestKey",
+              "vadMode",
+              "profile",
+              "cacheHit",
+              "workerId",
+              "contextGeneration",
+              "isolationAction"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "requestOrderHash": {
+          "anyOf": [
+            { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            { "type": "null" }
+          ]
+        },
+        "unsafeTransitionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsafeWorkerTransitionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "preventedUnsafeTransitionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "preventedUnsafeWorkerTransitionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "workerRestartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "workerStateResetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modeSegregatedWorkerCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requestOrderIndependencePassed": {
+          "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+        },
+        "cleanProcessParityPassed": {
+          "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+        },
         "requests": {
           "type": "array",
           "items": {
@@ -102,6 +214,34 @@
                 "anyOf": [
                   { "type": "string", "minLength": 1 },
                   { "type": "null" }
+                ]
+              },
+              "vadMode": { "type": "string", "enum": ["vad", "no-vad"] },
+              "profile": { "type": "string", "minLength": 1 },
+              "workerId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "contextGeneration": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "stateIsolationAction": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "reset",
+                  "restart",
+                  "segregated-route",
+                  "process"
                 ]
               }
             },
@@ -146,6 +286,56 @@
                   { "type": "string", "minLength": 1 },
                   { "type": "null" }
                 ]
+              },
+              "workerId": { "type": "string", "minLength": 1 },
+              "contextGeneration": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "runtimeIdentityHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "currentStateClass": { "type": "string", "minLength": 1 },
+              "hasProcessedVadRequest": { "type": "boolean" },
+              "hasProcessedNoVadRequest": { "type": "boolean" },
+              "lastRequestVadMode": {
+                "anyOf": [
+                  { "type": "string", "enum": ["vad", "no-vad"] },
+                  { "type": "null" }
+                ]
+              },
+              "lastProfile": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "stateIsolationStrategy": {
+                "type": "string",
+                "enum": [
+                  "verified-per-request-reset",
+                  "restart-on-vad-to-no-vad",
+                  "mode-segregated-workers",
+                  "profile-major-order-only",
+                  "unknown"
+                ]
+              },
+              "stateResetCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "unsafeTransitionCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "restartCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
               }
             },
             "required": [

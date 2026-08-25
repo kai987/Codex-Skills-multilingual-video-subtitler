@@ -9,7 +9,10 @@
       "type": "string",
       "const": "subtitle-timestamp-evidence-integrity"
     },
-    "integrityVersion": { "type": "string", "enum": ["C5.15.1", "C5.16"] },
+    "integrityVersion": {
+      "type": "string",
+      "enum": ["C5.15.1", "C5.16", "C5.16.1"]
+    },
     "generatedAt": {
       "type": "string",
       "format": "date-time",
@@ -108,6 +111,12 @@
         },
         "timestampMappingVersion": { "type": "string", "minLength": 1 },
         "tokenHealthPolicyVersion": { "type": "string", "minLength": 1 },
+        "rawVadBoundaryNormalizationToleranceSeconds": {
+          "default": 0.05,
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.1
+        },
         "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
         "tokenTimestampPolicy": {
           "type": "string",
@@ -128,6 +137,7 @@
         "minimumDecisionMargin",
         "timestampMappingVersion",
         "tokenHealthPolicyVersion",
+        "rawVadBoundaryNormalizationToleranceSeconds",
         "mode",
         "tokenTimestampPolicy",
         "legacyOverlapCachePolicy"
@@ -383,10 +393,19 @@
                 "minimum": 0,
                 "maximum": 9007199254740991
               },
+              "rawVadBoundaryNormalizedIntervalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
               "rawVadInvalidIntervalCount": {
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 9007199254740991
+              },
+              "rawVadMaximumNormalizationDeltaSeconds": {
+                "type": "number",
+                "minimum": 0
               }
             },
             "required": [
@@ -421,6 +440,111 @@
           "quarantineReasons": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 }
+          },
+          "nominalExtractionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "nominalDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "actualAudioDurationSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "actualAudioLocalEndSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "actualMediaGlobalEndSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "durationDifferenceSeconds": { "type": "number" },
+          "durationMeasurementMethod": { "type": "string", "minLength": 1 },
+          "rawVadEvaluations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "intervalId": { "type": "string", "minLength": 1 },
+                "rawStart": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "rawEnd": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "rawCoordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "original-audio-local",
+                    "original-media-global",
+                    "vad-processed-local",
+                    "segment-relative",
+                    "unknown"
+                  ]
+                },
+                "normalizedStart": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedEnd": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": { "type": "boolean" },
+                "normalizationDeltaStart": { "type": "number", "minimum": 0 },
+                "normalizationDeltaEnd": { "type": "number", "minimum": 0 },
+                "normalizationReason": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "type": "string",
+                  "enum": [
+                    "trusted",
+                    "trusted-with-boundary-normalization",
+                    "overlapping-with-padding",
+                    "invalid",
+                    "out-of-range",
+                    "unavailable"
+                  ]
+                },
+                "timingTrustScore": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "timingUsable": { "type": "boolean" },
+                "evidenceLineageId": { "type": "string", "minLength": 1 }
+              },
+              "required": [
+                "intervalId",
+                "rawStart",
+                "rawEnd",
+                "rawCoordinateSystem",
+                "normalizedStart",
+                "normalizedEnd",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "normalizationReason",
+                "healthStatus",
+                "timingTrustScore",
+                "timingUsable",
+                "evidenceLineageId"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
@@ -553,10 +677,24 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "rawVadFullyTrustedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawVadBoundaryNormalizedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
         "rawVadInvalidIntervalCount": {
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
+        },
+        "rawVadMaximumNormalizationDeltaSeconds": {
+          "type": "number",
+          "minimum": 0
         },
         "runtimeCapabilityVerified": { "type": "boolean" },
         "runtimeResponseSchemaVerified": { "type": "boolean" },

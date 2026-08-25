@@ -51,6 +51,15 @@ export const tokenTimestampPolicySchema = z.enum([
 
 export const legacyOverlapCachePolicySchema = z.enum(["reject", "text-only"]);
 
+export const rawVadIntervalHealthStatusSchema = z.enum([
+  "trusted",
+  "trusted-with-boundary-normalization",
+  "overlapping-with-padding",
+  "invalid",
+  "out-of-range",
+  "unavailable",
+]);
+
 export const timestampHealthConfigurationSchema = z
   .object({
     auditContainmentToleranceSeconds: z.number().nonnegative(),
@@ -62,6 +71,11 @@ export const timestampHealthConfigurationSchema = z
     minimumDecisionMargin: z.number().min(0).max(1),
     timestampMappingVersion: z.string().min(1),
     tokenHealthPolicyVersion: z.string().min(1),
+    rawVadBoundaryNormalizationToleranceSeconds: z
+      .number()
+      .nonnegative()
+      .max(0.1)
+      .default(0.05),
   })
   .strict();
 
@@ -79,19 +93,19 @@ export const timestampIntegrityIntervalSchema = z
     start: z.number().nonnegative(),
     end: z.number().positive(),
     timingUsable: z.boolean(),
-    rawStart: z.number().nonnegative().optional(),
-    rawEnd: z.number().positive().optional(),
+    rawStart: z.number().optional(),
+    rawEnd: z.number().optional(),
+    normalizedStart: z.number().nonnegative().optional(),
+    normalizedEnd: z.number().positive().optional(),
+    normalizationApplied: z.boolean().optional(),
+    normalizationDeltaStart: z.number().nonnegative().optional(),
+    normalizationDeltaEnd: z.number().nonnegative().optional(),
+    normalizationReason: z.string().min(1).nullable().optional(),
     rawCoordinateSystem: timestampCoordinateSystemSchema.optional(),
     mappingMethod: timestampMappingMethodSchema.optional(),
-    rawVadIntervalHealthStatus: z
-      .enum([
-        "trusted",
-        "overlapping-with-padding",
-        "invalid",
-        "out-of-range",
-        "unavailable",
-      ])
-      .optional(),
+    rawVadIntervalHealthStatus: rawVadIntervalHealthStatusSchema.optional(),
+    healthStatus: rawVadIntervalHealthStatusSchema.optional(),
+    timingTrustScore: z.number().min(0).max(1).optional(),
     evidenceLineageId: z.string().min(1).optional(),
   })
   .strict()
@@ -132,7 +146,45 @@ export const timestampIntegrityIntervalSchema = z
           "Timing-usable evidence must be mapped to original-media-global.",
       });
     }
-  });
+  })
+  .transform((value) =>
+    value.source === "raw-vad"
+      ? {
+          ...value,
+          normalizedStart:
+            value.normalizedStart ?? value.rawStart ?? value.start,
+          normalizedEnd: value.normalizedEnd ?? value.rawEnd ?? value.end,
+          normalizationApplied: value.normalizationApplied ?? false,
+          normalizationDeltaStart: value.normalizationDeltaStart ?? 0,
+          normalizationDeltaEnd: value.normalizationDeltaEnd ?? 0,
+          normalizationReason: value.normalizationReason ?? null,
+          healthStatus:
+            value.healthStatus ??
+            value.rawVadIntervalHealthStatus ??
+            "unavailable",
+          timingTrustScore: value.timingTrustScore ?? 0,
+        }
+      : value,
+  );
+
+export const rawVadIntervalEvaluationSchema = z
+  .object({
+    intervalId: z.string().min(1),
+    rawStart: z.number().nullable(),
+    rawEnd: z.number().nullable(),
+    rawCoordinateSystem: timestampCoordinateSystemSchema,
+    normalizedStart: z.number().nonnegative().nullable(),
+    normalizedEnd: z.number().nonnegative().nullable(),
+    normalizationApplied: z.boolean(),
+    normalizationDeltaStart: z.number().nonnegative(),
+    normalizationDeltaEnd: z.number().nonnegative(),
+    normalizationReason: z.string().min(1).nullable(),
+    healthStatus: rawVadIntervalHealthStatusSchema,
+    timingTrustScore: z.number().min(0).max(1),
+    timingUsable: z.boolean(),
+    evidenceLineageId: z.string().min(1),
+  })
+  .strict();
 
 export const timestampSegmentHealthSchema = z
   .object({
@@ -180,7 +232,13 @@ export const timestampAttemptMetricsSchema = z
     mappedTokenTrustedCount: z.number().int().nonnegative().optional(),
     mappedTokenQuarantinedCount: z.number().int().nonnegative().optional(),
     rawVadTrustedIntervalCount: z.number().int().nonnegative().optional(),
+    rawVadBoundaryNormalizedIntervalCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional(),
     rawVadInvalidIntervalCount: z.number().int().nonnegative().optional(),
+    rawVadMaximumNormalizationDeltaSeconds: z.number().nonnegative().optional(),
   })
   .strict();
 
@@ -198,6 +256,20 @@ export const timestampAttemptIntegritySchema = z
     trustedTokenIds: z.array(z.string().min(1)),
     quarantinedTokenIds: z.array(z.string().min(1)),
     quarantineReasons: z.array(z.string().min(1)),
+    nominalExtractionInterval: z
+      .object({
+        start: z.number().nonnegative(),
+        end: z.number().positive(),
+      })
+      .strict()
+      .optional(),
+    nominalDurationSeconds: z.number().positive().optional(),
+    actualAudioDurationSeconds: z.number().positive().optional(),
+    actualAudioLocalEndSeconds: z.number().positive().optional(),
+    actualMediaGlobalEndSeconds: z.number().positive().optional(),
+    durationDifferenceSeconds: z.number().optional(),
+    durationMeasurementMethod: z.string().min(1).optional(),
+    rawVadEvaluations: z.array(rawVadIntervalEvaluationSchema).optional(),
   })
   .strict();
 
@@ -278,7 +350,10 @@ export const timestampEvidenceIntegritySummarySchema = z
     mappedTokenQuarantinedCount: z.number().int().nonnegative().optional(),
     mappedTokenTrustedCount: z.number().int().nonnegative().optional(),
     rawVadTrustedIntervalCount: z.number().int().nonnegative().optional(),
+    rawVadFullyTrustedCount: z.number().int().nonnegative().optional(),
+    rawVadBoundaryNormalizedCount: z.number().int().nonnegative().optional(),
     rawVadInvalidIntervalCount: z.number().int().nonnegative().optional(),
+    rawVadMaximumNormalizationDeltaSeconds: z.number().nonnegative().optional(),
     runtimeCapabilityVerified: z.boolean().optional(),
     runtimeResponseSchemaVerified: z.boolean().optional(),
     unknownCoordinateTokenUsedForTimingCount: z
@@ -301,7 +376,7 @@ export const subtitleTimestampEvidenceIntegritySchema = z
   .object({
     schemaVersion: schemaVersionSchema,
     artifactType: z.literal("subtitle-timestamp-evidence-integrity"),
-    integrityVersion: z.enum(["C5.15.1", "C5.16"]),
+    integrityVersion: z.enum(["C5.15.1", "C5.16", "C5.16.1"]),
     generatedAt: z.iso.datetime(),
     sourceOverlapArtifactHash: hashSchema,
     runtimeCapability: timestampRuntimeCapabilitySchema,

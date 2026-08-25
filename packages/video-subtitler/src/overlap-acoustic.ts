@@ -35,6 +35,7 @@ import {
   type WhisperRuntimeBuildManifest,
   type WhisperExecutionMetrics,
   type WhisperExecutionMode,
+  type WorkerStateIsolationMode,
   type WhisperModelCapability,
 } from "@mvl/shared";
 import {
@@ -101,6 +102,9 @@ export interface TargetedOverlapAcousticOptions {
   timestampEvidenceIntegrity?: TimestampEvidenceIntegrityMode;
   tokenTimestampPolicy?: TokenTimestampPolicy;
   legacyOverlapCachePolicy?: LegacyOverlapCachePolicy;
+  rawVadBoundaryNormalizationToleranceSeconds?: number;
+  workerStateIsolation?: WorkerStateIsolationMode;
+  requestOrder?: "standard" | "adversarial";
 }
 
 export interface TargetedOverlapAcousticResult {
@@ -147,8 +151,157 @@ interface ExtractedComponentAudio {
   absolutePath: string;
   relativePath: string;
   sha256: string;
+  nominalDurationSeconds: number;
   durationSeconds: number;
+  actualAudioLocalEndSeconds: number;
+  actualMediaGlobalEndSeconds: number;
+  durationDifferenceSeconds: number;
+  durationMeasurementMethod: string;
+  ffprobeDurationSeconds: number | null;
+  durationCrossCheckDeltaSeconds: number | null;
   fullyCoversComponent: boolean;
+}
+
+export interface WavDurationMeasurement {
+  frameCount: number;
+  sampleRate: number;
+  channels: number;
+  blockAlign: number;
+  dataByteLength: number;
+  durationSeconds: number;
+}
+
+export function measureWavDurationFromBuffer(
+  buffer: Buffer,
+): WavDurationMeasurement {
+  if (
+    buffer.length < 44 ||
+    buffer.toString("ascii", 0, 4) !== "RIFF" ||
+    buffer.toString("ascii", 8, 12) !== "WAVE"
+  ) {
+    throw new InputError("Extracted overlap audio is not a RIFF/WAVE file.");
+  }
+  let offset = 12;
+  let sampleRate: number | null = null;
+  let channels: number | null = null;
+  let blockAlign: number | null = null;
+  let dataByteLength: number | null = null;
+  while (offset + 8 <= buffer.length) {
+    const chunkId = buffer.toString("ascii", offset, offset + 4);
+    const chunkSize = buffer.readUInt32LE(offset + 4);
+    const payloadOffset = offset + 8;
+    if (payloadOffset + chunkSize > buffer.length) {
+      throw new InputError("Extracted WAV contains a truncated chunk.");
+    }
+    if (chunkId === "fmt " && chunkSize >= 16) {
+      channels = buffer.readUInt16LE(payloadOffset + 2);
+      sampleRate = buffer.readUInt32LE(payloadOffset + 4);
+      blockAlign = buffer.readUInt16LE(payloadOffset + 12);
+    } else if (chunkId === "data") {
+      dataByteLength = chunkSize;
+    }
+    offset = payloadOffset + chunkSize + (chunkSize % 2);
+  }
+  if (
+    sampleRate === null ||
+    sampleRate <= 0 ||
+    channels === null ||
+    channels <= 0 ||
+    blockAlign === null ||
+    blockAlign <= 0 ||
+    dataByteLength === null ||
+    dataByteLength < 0 ||
+    dataByteLength % blockAlign !== 0
+  ) {
+    throw new InputError(
+      "Extracted WAV does not expose an integral PCM frame count.",
+    );
+  }
+  const frameCount = dataByteLength / blockAlign;
+  return {
+    frameCount,
+    sampleRate,
+    channels,
+    blockAlign,
+    dataByteLength,
+    durationSeconds: frameCount / sampleRate,
+  };
+}
+
+async function measureExtractedAudioDuration(input: {
+  audioPath: string;
+  runner: ProcessRunner;
+  ffprobePath: string;
+}): Promise<{
+  durationSeconds: number;
+  method: string;
+  ffprobeDurationSeconds: number | null;
+  crossCheckDeltaSeconds: number | null;
+}> {
+  const wav = measureWavDurationFromBuffer(await readFile(input.audioPath));
+  let ffprobeDurationSeconds: number | null = null;
+  try {
+    const result = await input.runner.run(
+      input.ffprobePath,
+      [
+        "-v",
+        "error",
+        "-select_streams",
+        "a:0",
+        "-show_entries",
+        "stream=sample_rate,duration_ts,time_base,duration",
+        "-of",
+        "json",
+        input.audioPath,
+      ],
+      { timeoutMs: 30_000 },
+    );
+    const parsed = JSON.parse(result.stdout) as {
+      streams?: {
+        sample_rate?: string;
+        duration_ts?: number;
+        time_base?: string;
+        duration?: string;
+      }[];
+    };
+    const stream = parsed.streams?.[0];
+    const sampleRate = Number(stream?.sample_rate);
+    const durationTs = Number(stream?.duration_ts);
+    const duration = Number(stream?.duration);
+    if (
+      Number.isFinite(sampleRate) &&
+      sampleRate > 0 &&
+      Number.isFinite(durationTs) &&
+      durationTs >= 0
+    ) {
+      ffprobeDurationSeconds = durationTs / sampleRate;
+    } else if (Number.isFinite(duration) && duration >= 0) {
+      ffprobeDurationSeconds = duration;
+    }
+  } catch {
+    ffprobeDurationSeconds = null;
+  }
+  const crossCheckDeltaSeconds =
+    ffprobeDurationSeconds === null
+      ? null
+      : Math.abs(ffprobeDurationSeconds - wav.durationSeconds);
+  if (
+    crossCheckDeltaSeconds !== null &&
+    crossCheckDeltaSeconds > 1 / wav.sampleRate + 1e-6
+  ) {
+    throw new InputError(
+      `WAV frame duration and ffprobe duration disagree by ${crossCheckDeltaSeconds.toFixed(6)} seconds.`,
+    );
+  }
+  return {
+    durationSeconds: wav.durationSeconds,
+    method:
+      ffprobeDurationSeconds === null
+        ? "wav-frame-count/sample-rate"
+        : "wav-frame-count/sample-rate+ffprobe-cross-check",
+    ffprobeDurationSeconds,
+    crossCheckDeltaSeconds,
+  };
 }
 
 function stable(value: unknown): string {
@@ -163,7 +316,7 @@ function stable(value: unknown): string {
   return JSON.stringify(value);
 }
 
-function deterministicId(prefix: string, value: unknown): string {
+export function deterministicId(prefix: string, value: unknown): string {
   return `${prefix}-${createHash("sha256").update(stable(value)).digest("hex").slice(0, 20)}`;
 }
 
@@ -557,6 +710,7 @@ async function extractComponentAudio(input: {
   audioStreamIndex: number;
   runner: ProcessRunner;
   ffmpegPath: string;
+  ffprobePath: string;
 }): Promise<ExtractedComponentAudio> {
   const relativePath = path.posix.join(
     "audio",
@@ -565,7 +719,7 @@ async function extractComponentAudio(input: {
   );
   const absolutePath = path.join(input.subtitleDirectory, relativePath);
   await mkdir(path.dirname(absolutePath), { recursive: true });
-  const duration =
+  const nominalDuration =
     input.plan.extractionInterval.end - input.plan.extractionInterval.start;
   await input.runner.run(input.ffmpegPath, [
     "-hide_banner",
@@ -579,7 +733,7 @@ async function extractComponentAudio(input: {
     "-map",
     `0:${input.audioStreamIndex}`,
     "-t",
-    duration.toFixed(3),
+    nominalDuration.toFixed(3),
     "-vn",
     "-ac",
     "1",
@@ -589,12 +743,25 @@ async function extractComponentAudio(input: {
     "pcm_s16le",
     absolutePath,
   ]);
+  const measured = await measureExtractedAudioDuration({
+    audioPath: absolutePath,
+    runner: input.runner,
+    ffprobePath: input.ffprobePath,
+  });
   return {
     plan: input.plan,
     absolutePath,
     relativePath,
     sha256: await sha256LocalFile(absolutePath),
-    durationSeconds: duration,
+    nominalDurationSeconds: nominalDuration,
+    durationSeconds: measured.durationSeconds,
+    actualAudioLocalEndSeconds: measured.durationSeconds,
+    actualMediaGlobalEndSeconds:
+      input.plan.extractionInterval.start + measured.durationSeconds,
+    durationDifferenceSeconds: measured.durationSeconds - nominalDuration,
+    durationMeasurementMethod: measured.method,
+    ffprobeDurationSeconds: measured.ffprobeDurationSeconds,
+    durationCrossCheckDeltaSeconds: measured.crossCheckDeltaSeconds,
     fullyCoversComponent:
       input.plan.extractionInterval.start <= input.plan.unionInterval.start &&
       input.plan.extractionInterval.end >= input.plan.unionInterval.end,
@@ -667,6 +834,8 @@ function mapAttempt(input: {
   cacheHit: boolean;
   prompt: string | undefined;
   durationSeconds: number;
+  durationMeasurementMethod: string;
+  rawVadBoundaryNormalizationToleranceSeconds: number;
   failure?: string | null;
   sourceCues: readonly SubtitleCue[];
   tokenTimestampPolicy: TokenTimestampPolicy;
@@ -834,6 +1003,12 @@ function mapAttempt(input: {
     mappedTokenGetterActuallyUsed:
       mvl?.response.runtime.capabilities.mapped_token_getter_used ??
       input.runtime.timestampCapability.mappedTokenGetterActuallyUsed,
+    actualAudioDurationSeconds: input.durationSeconds,
+    durationMeasurementMethod: input.durationMeasurementMethod,
+    configuration: {
+      rawVadBoundaryNormalizationToleranceSeconds:
+        input.rawVadBoundaryNormalizationToleranceSeconds,
+    },
   });
   const trustedAvailable = audit.tokens.some(
     (token) => token.timingUsable === true,
@@ -1022,6 +1197,18 @@ function emptyExecutionMetrics(
     transcriptionSeconds: 0,
     totalWorkerSeconds: 0,
     fallbackProcessCount: 0,
+    requestStateIsolationStrategy: "restart-on-vad-to-no-vad",
+    requestOrderPlan: [],
+    requestOrderHash: createHash("sha256").update("[]").digest("hex"),
+    unsafeTransitionCount: 0,
+    unsafeWorkerTransitionCount: 0,
+    preventedUnsafeTransitionCount: 0,
+    preventedUnsafeWorkerTransitionCount: 0,
+    workerRestartCount: 0,
+    workerStateResetCount: 0,
+    modeSegregatedWorkerCount: 0,
+    requestOrderIndependencePassed: null,
+    cleanProcessParityPassed: null,
     requests: [],
     workers: [],
     fallbackReason: null,
@@ -1034,14 +1221,26 @@ export async function runTargetedOverlapAcousticResolution(
   const started = performance.now();
   const ffmpegPath = options.ffmpegPath ?? "ffmpeg";
   const ffprobePath = options.ffprobePath ?? "ffprobe";
+  const workerStateIsolation = options.workerStateIsolation ?? "require-safe";
+  const requestOrder = options.requestOrder ?? "standard";
   const configuration: OverlapAcousticConfiguration = {
     ...DEFAULT_OVERLAP_ACOUSTIC_CONFIGURATION,
     ...options.configuration,
+    rawVadBoundaryNormalizationToleranceSeconds:
+      options.rawVadBoundaryNormalizationToleranceSeconds ??
+      options.configuration?.rawVadBoundaryNormalizationToleranceSeconds ??
+      DEFAULT_OVERLAP_ACOUSTIC_CONFIGURATION.rawVadBoundaryNormalizationToleranceSeconds,
+    requestOrder,
     scoringWeights: {
       ...DEFAULT_OVERLAP_ACOUSTIC_CONFIGURATION.scoringWeights,
       ...options.configuration?.scoringWeights,
     },
   };
+  if (configuration.rawVadBoundaryNormalizationToleranceSeconds > 0.1) {
+    throw new InputError(
+      "--raw-vad-boundary-tolerance cannot exceed the 0.10 second hard maximum.",
+    );
+  }
   const timestampEvidenceIntegrity =
     options.timestampEvidenceIntegrity ?? "observe";
   const tokenTimestampPolicy = options.tokenTimestampPolicy ?? "auto";
@@ -1074,6 +1273,7 @@ export async function runTargetedOverlapAcousticResolution(
         audioStreamIndex: selectedAudio.index,
         runner: options.runner,
         ffmpegPath,
+        ffprobePath,
       }),
     );
   }
@@ -1135,7 +1335,10 @@ export async function runTargetedOverlapAcousticResolution(
     mode: options.asrCacheMode ?? "read-write",
     sourceOutputDirectory: options.subtitleDirectory,
   });
-  const workerPool = new WhisperCppWorkerPool({ mode: requestedExecutionMode });
+  const workerPool = new WhisperCppWorkerPool({
+    mode: requestedExecutionMode,
+    stateIsolation: workerStateIsolation,
+  });
   const adapters = new Map<OverlapAcousticProfile, TranscriptionAdapter>();
   const attempts: OverlapAcousticAttempt[] = [];
   const classificationAttempts: OverlapAcousticAttempt[] = [];
@@ -1144,193 +1347,225 @@ export async function runTargetedOverlapAcousticResolution(
     const profileExecutionOrder = orderOverlapAcousticProfiles(
       extracted.map((audio) => audio.plan),
     );
-    for (const profileId of profileExecutionOrder) {
-      for (const audio of extracted) {
-        if (!audio.plan.profiles.includes(profileId)) continue;
-        const profile = adapterProfile(profileId);
-        const requestId = deterministicId("overlap-request", {
-          audioSha256: audio.sha256,
-          extractionInterval: audio.plan.extractionInterval,
-          unionInterval: audio.plan.unionInterval,
-          profile: profileId,
-          modelHash: runtime.capability.modelHash,
-        });
-        const prompt = undefined;
-        const identity = buildPortableAsrCacheIdentityV2({
-          audioContentSha256: audio.sha256,
-          interval: audio.plan.extractionInterval,
-          sampleRate: 16_000,
-          channels: 1,
-          codec: "pcm_s16le",
-          adapterId: "whisper-cpp",
-          model: path.basename(runtime.capability.modelPath),
-          modelHash: runtime.capability.modelHash,
-          modelFamily: runtime.capability.modelFamily,
-          coreML: runtime.capability.runtime === "coreml",
-          whisperCppVersion: runtime.whisperCppVersion,
-          language: "ja",
-          vadMode: profile.useVad ? profile.vadProfile : "no-vad",
-          timestampStrategy: "segment+token",
-          tokenTimestamps: true,
-          timestampMappingVersion: TIMESTAMP_MAPPING_VERSION,
-          timestampCoordinateSystem: profile.useVad
-            ? "vad-processed-local"
-            : "original-audio-local",
-          tokenHealthPolicyVersion: TOKEN_HEALTH_POLICY_VERSION,
-          runtimeTimestampCapabilityHash:
-            runtime.timestampCapability.runtimeTimestampCapabilityHash,
-          runtimeType: runtime.runtimeType,
-          runtimeBinarySha256: runtime.timestampCapability.runtimeBinarySha256,
-          runtimeSourceCommit: runtime.timestampCapability.runtimeSourceCommit,
-          runtimePatchSha256: runtime.buildManifest?.patch.patchSha256 ?? null,
-          runtimeResponseSchemaVersion: runtime.responseSchemaVersion,
-          rawVadPolicyVersion: RAW_VAD_POLICY_VERSION,
-          decodeConfiguration: {
-            requestType: "overlap-evidence",
-            targetUnionInterval: audio.plan.unionInterval,
-            profile: profileId,
-            useVad: profile.useVad,
-            vadProfile: profile.vadProfile,
-            language: "ja",
-            tokenTimestamps: true,
-            suppressNonSpeechTokens: true,
-            timestampEvidenceIntegrity,
-            tokenTimestampPolicy,
-            legacyOverlapCachePolicy,
-          },
-        });
-        const legacyIdentity = buildPortableAsrCacheIdentityV2({
-          audioContentSha256: audio.sha256,
-          interval: audio.plan.extractionInterval,
-          sampleRate: 16_000,
-          channels: 1,
-          codec: "pcm_s16le",
-          adapterId: "whisper-cpp",
-          model: path.basename(runtime.capability.modelPath),
-          modelHash: runtime.capability.modelHash,
-          modelFamily: runtime.capability.modelFamily,
-          coreML: runtime.capability.runtime === "coreml",
-          whisperCppVersion: runtime.whisperCppVersion,
-          language: "ja",
-          vadMode: profile.useVad ? profile.vadProfile : "no-vad",
-          timestampStrategy: "segment+token",
-          tokenTimestamps: true,
-          decodeConfiguration: {
-            requestType: "overlap-evidence",
-            targetUnionInterval: audio.plan.unionInterval,
-            profile: profileId,
-            useVad: profile.useVad,
-            vadProfile: profile.vadProfile,
-            language: "ja",
-            tokenTimestamps: true,
-            suppressNonSpeechTokens: true,
-          },
-        });
-        const activeIdentity =
-          timestampEvidenceIntegrity === "off" ? legacyIdentity : identity;
-        const lookup = await cache.lookup({
-          requestId,
+    const requestPlan =
+      requestOrder === "standard"
+        ? profileExecutionOrder.flatMap((profileId) =>
+            extracted.flatMap((audio) =>
+              audio.plan.profiles.includes(profileId)
+                ? [{ profileId, audio }]
+                : [],
+            ),
+          )
+        : extracted.flatMap((audio) =>
+            (
+              [
+                "current-sensitive-vad",
+                "no-vad",
+                "extra-sensitive-vad",
+              ] as const
+            ).flatMap((profileId) =>
+              audio.plan.profiles.includes(profileId)
+                ? [{ profileId, audio }]
+                : [],
+            ),
+          );
+    for (const { profileId, audio } of requestPlan) {
+      const profile = adapterProfile(profileId);
+      const requestId = deterministicId("overlap-request", {
+        audioSha256: audio.sha256,
+        extractionInterval: audio.plan.extractionInterval,
+        unionInterval: audio.plan.unionInterval,
+        profile: profileId,
+        modelHash: runtime.capability.modelHash,
+      });
+      const prompt = undefined;
+      const identity = buildPortableAsrCacheIdentityV2({
+        audioContentSha256: audio.sha256,
+        interval: audio.plan.extractionInterval,
+        sampleRate: 16_000,
+        channels: 1,
+        codec: "pcm_s16le",
+        adapterId: "whisper-cpp",
+        model: path.basename(runtime.capability.modelPath),
+        modelHash: runtime.capability.modelHash,
+        modelFamily: runtime.capability.modelFamily,
+        coreML: runtime.capability.runtime === "coreml",
+        whisperCppVersion: runtime.whisperCppVersion,
+        language: "ja",
+        vadMode: profile.useVad ? profile.vadProfile : "no-vad",
+        timestampStrategy: "segment+token",
+        tokenTimestamps: true,
+        timestampMappingVersion: TIMESTAMP_MAPPING_VERSION,
+        timestampCoordinateSystem: profile.useVad
+          ? "vad-processed-local"
+          : "original-audio-local",
+        tokenHealthPolicyVersion: TOKEN_HEALTH_POLICY_VERSION,
+        runtimeTimestampCapabilityHash:
+          runtime.timestampCapability.runtimeTimestampCapabilityHash,
+        runtimeType: runtime.runtimeType,
+        runtimeBinarySha256: runtime.timestampCapability.runtimeBinarySha256,
+        runtimeSourceCommit: runtime.timestampCapability.runtimeSourceCommit,
+        runtimePatchSha256: runtime.buildManifest?.patch.patchSha256 ?? null,
+        runtimeResponseSchemaVersion: runtime.responseSchemaVersion,
+        rawVadPolicyVersion: RAW_VAD_POLICY_VERSION,
+        rawVadBoundaryPolicyVersion: "c5.16.1-vad-boundary-normalization-v1",
+        workerStateIsolationPolicyVersion: "c5.16.1-worker-state-isolation-v1",
+        decodeConfiguration: {
           requestType: "overlap-evidence",
-          identity: activeIdentity,
-          ...(timestampEvidenceIntegrity === "off"
-            ? {}
-            : {
-                legacyV2Identity: legacyIdentity,
-                legacyV2Policy: legacyOverlapCachePolicy,
-              }),
-        });
-        let result = lookup.result;
-        let failure: string | null = null;
-        if (lookup.hit) {
-          workerPool.recordCacheHits(1);
-        } else {
-          let adapter = adapters.get(profileId);
-          if (adapter === undefined) {
-            adapter = await createWhisperCppAdapterForCapability({
-              capability: runtime.capability,
-              executablePath: runtime.executablePath,
-              runner: options.runner,
-              whisperCppVersion: runtime.whisperCppVersion,
-              ...(runtime.vadModelPath === null
-                ? {}
-                : { vadModelPath: runtime.vadModelPath }),
-              useVad: profile.useVad,
-              vadProfile: profile.vadProfile,
-              logicalCores: runtime.logicalCores,
-              tokenTimestampsAvailable: runtime.tokenTimestampsAvailable,
-              fullJsonAvailable: runtime.fullJsonAvailable,
-              workerPool,
-              serverPath: runtime.serverPath,
-              timestampRuntimePolicy,
-              rawVadPolicy,
-              mvlResponseSchemaVersion,
-              ...(runtime.expectedMvlRuntime === null
-                ? {}
-                : { expectedMvlRuntime: runtime.expectedMvlRuntime }),
-            });
-            adapters.set(profileId, adapter);
-          }
-          try {
-            result = await adapter.transcribe({
-              audioPath: audio.absolutePath,
-              chunk: {
-                id: requestId,
-                relativePath: audio.relativePath,
-                start: audio.plan.extractionInterval.start,
-                end: audio.plan.extractionInterval.end,
-                duration: audio.durationSeconds,
-                sha256: audio.sha256,
-              },
-              language: "ja",
-              timestampStrategy: "segment",
-              tokenTimestamps: true,
-            });
-            await cache.store({
-              requestId,
-              requestType: "overlap-evidence",
-              identity: activeIdentity,
-              result,
-            });
-          } catch (error) {
-            if (
-              timestampRuntimePolicy === "require-mapped" ||
-              rawVadPolicy === "required"
-            ) {
-              await workerPool.close();
-              throw error;
-            }
-            failure = error instanceof Error ? error.message : String(error);
-            result = { text: "", segments: [], raw: null };
-          }
-        }
-        const mappedAttempt = mapAttempt({
-          result: result ?? { text: "", segments: [], raw: null },
-          plan: audio.plan,
+          targetUnionInterval: audio.plan.unionInterval,
           profile: profileId,
-          runtime,
-          requestId,
-          cacheHit: lookup.hit,
-          prompt,
-          durationSeconds: audio.durationSeconds,
-          failure,
-          sourceCues: options.cues.filter((cue) =>
-            audio.plan.cueIds.includes(cue.id),
-          ),
-          tokenTimestampPolicy:
-            lookup.tokenTimingTrust === "legacy-untrusted"
-              ? "off"
-              : tokenTimestampPolicy,
-          rawVadPolicy,
+          useVad: profile.useVad,
+          vadProfile: profile.vadProfile,
+          language: "ja",
+          tokenTimestamps: true,
+          suppressNonSpeechTokens: true,
+          timestampEvidenceIntegrity,
+          tokenTimestampPolicy,
+          legacyOverlapCachePolicy,
+          rawVadBoundaryNormalizationToleranceSeconds:
+            configuration.rawVadBoundaryNormalizationToleranceSeconds,
+          workerStateIsolation,
+          requestOrder,
+        },
+      });
+      const legacyIdentity = buildPortableAsrCacheIdentityV2({
+        audioContentSha256: audio.sha256,
+        interval: audio.plan.extractionInterval,
+        sampleRate: 16_000,
+        channels: 1,
+        codec: "pcm_s16le",
+        adapterId: "whisper-cpp",
+        model: path.basename(runtime.capability.modelPath),
+        modelHash: runtime.capability.modelHash,
+        modelFamily: runtime.capability.modelFamily,
+        coreML: runtime.capability.runtime === "coreml",
+        whisperCppVersion: runtime.whisperCppVersion,
+        language: "ja",
+        vadMode: profile.useVad ? profile.vadProfile : "no-vad",
+        timestampStrategy: "segment+token",
+        tokenTimestamps: true,
+        decodeConfiguration: {
+          requestType: "overlap-evidence",
+          targetUnionInterval: audio.plan.unionInterval,
+          profile: profileId,
+          useVad: profile.useVad,
+          vadProfile: profile.vadProfile,
+          language: "ja",
+          tokenTimestamps: true,
+          suppressNonSpeechTokens: true,
+        },
+      });
+      const activeIdentity =
+        timestampEvidenceIntegrity === "off" ? legacyIdentity : identity;
+      const lookup = await cache.lookup({
+        requestId,
+        requestType: "overlap-evidence",
+        identity: activeIdentity,
+        ...(timestampEvidenceIntegrity === "off"
+          ? {}
+          : {
+              legacyV2Identity: legacyIdentity,
+              legacyV2Policy: legacyOverlapCachePolicy,
+            }),
+      });
+      let result = lookup.result;
+      let failure: string | null = null;
+      if (lookup.hit) {
+        workerPool.recordCacheHit({
+          requestKey: `${requestId}:${profileId}`,
+          useVad: profile.useVad,
+          profile: profileId,
         });
-        const attemptViews = timestampAttemptViewsForMode({
-          mode: timestampEvidenceIntegrity,
-          auditedAttempt: mappedAttempt.attempt,
-          legacyAttempt: mappedAttempt.legacyAttempt,
-        });
-        attempts.push(attemptViews.artifactAttempt);
-        classificationAttempts.push(attemptViews.classificationAttempt);
-        integrityAttempts.push(mappedAttempt.integrity);
+      } else {
+        let adapter = adapters.get(profileId);
+        if (adapter === undefined) {
+          adapter = await createWhisperCppAdapterForCapability({
+            capability: runtime.capability,
+            executablePath: runtime.executablePath,
+            runner: options.runner,
+            whisperCppVersion: runtime.whisperCppVersion,
+            ...(runtime.vadModelPath === null
+              ? {}
+              : { vadModelPath: runtime.vadModelPath }),
+            useVad: profile.useVad,
+            vadProfile: profile.vadProfile,
+            logicalCores: runtime.logicalCores,
+            tokenTimestampsAvailable: runtime.tokenTimestampsAvailable,
+            fullJsonAvailable: runtime.fullJsonAvailable,
+            workerPool,
+            serverPath: runtime.serverPath,
+            timestampRuntimePolicy,
+            rawVadPolicy,
+            mvlResponseSchemaVersion,
+            ...(runtime.expectedMvlRuntime === null
+              ? {}
+              : { expectedMvlRuntime: runtime.expectedMvlRuntime }),
+          });
+          adapters.set(profileId, adapter);
+        }
+        try {
+          result = await adapter.transcribe({
+            audioPath: audio.absolutePath,
+            chunk: {
+              id: requestId,
+              relativePath: audio.relativePath,
+              start: audio.plan.extractionInterval.start,
+              end: audio.plan.extractionInterval.end,
+              duration: audio.durationSeconds,
+              sha256: audio.sha256,
+            },
+            language: "ja",
+            timestampStrategy: "segment",
+            tokenTimestamps: true,
+          });
+          await cache.store({
+            requestId,
+            requestType: "overlap-evidence",
+            identity: activeIdentity,
+            result,
+          });
+        } catch (error) {
+          if (
+            timestampRuntimePolicy === "require-mapped" ||
+            rawVadPolicy === "required"
+          ) {
+            await workerPool.close();
+            throw error;
+          }
+          failure = error instanceof Error ? error.message : String(error);
+          result = { text: "", segments: [], raw: null };
+        }
       }
+      const mappedAttempt = mapAttempt({
+        result: result ?? { text: "", segments: [], raw: null },
+        plan: audio.plan,
+        profile: profileId,
+        runtime,
+        requestId,
+        cacheHit: lookup.hit,
+        prompt,
+        durationSeconds: audio.durationSeconds,
+        durationMeasurementMethod: audio.durationMeasurementMethod,
+        rawVadBoundaryNormalizationToleranceSeconds:
+          configuration.rawVadBoundaryNormalizationToleranceSeconds,
+        failure,
+        sourceCues: options.cues.filter((cue) =>
+          audio.plan.cueIds.includes(cue.id),
+        ),
+        tokenTimestampPolicy:
+          lookup.tokenTimingTrust === "legacy-untrusted"
+            ? "off"
+            : tokenTimestampPolicy,
+        rawVadPolicy,
+      });
+      const attemptViews = timestampAttemptViewsForMode({
+        mode: timestampEvidenceIntegrity,
+        auditedAttempt: mappedAttempt.attempt,
+        legacyAttempt: mappedAttempt.legacyAttempt,
+      });
+      attempts.push(attemptViews.artifactAttempt);
+      classificationAttempts.push(attemptViews.classificationAttempt);
+      integrityAttempts.push(mappedAttempt.integrity);
     }
   }
   await workerPool.close();
@@ -1361,6 +1596,15 @@ export async function runTargetedOverlapAcousticResolution(
       audioPath: audio.relativePath,
       audioSha256: audio.sha256,
       audioDurationSeconds: audio.durationSeconds,
+      nominalExtractionInterval: audio.plan.extractionInterval,
+      nominalDurationSeconds: audio.nominalDurationSeconds,
+      actualAudioDurationSeconds: audio.durationSeconds,
+      actualAudioLocalEndSeconds: audio.actualAudioLocalEndSeconds,
+      actualMediaGlobalEndSeconds: audio.actualMediaGlobalEndSeconds,
+      durationDifferenceSeconds: audio.durationDifferenceSeconds,
+      durationMeasurementMethod: audio.durationMeasurementMethod,
+      ffprobeDurationSeconds: audio.ffprobeDurationSeconds,
+      durationCrossCheckDeltaSeconds: audio.durationCrossCheckDeltaSeconds,
       audioFullyCoversComponent: audio.fullyCoversComponent,
     });
     if (timestampEvidenceIntegrity === "off") return component;
@@ -1471,8 +1715,11 @@ export async function runTargetedOverlapAcousticResolution(
           attempts: finalizedIntegrityAttempts,
           trustedTokenUsedForTimingIds: trustedTokenIdsUsed,
           untrustedTokenUsedForTimingIds: untrustedTokenIdsUsed,
-          rawVadIntervalCount: finalizedAttempts.reduce(
-            (sum, attempt) => sum + (attempt.rawVadIntervals?.length ?? 0),
+          rawVadIntervalCount: finalizedIntegrityAttempts.reduce(
+            (sum, attempt) =>
+              sum +
+              (attempt.attemptMetrics.rawVadTrustedIntervalCount ?? 0) +
+              (attempt.attemptMetrics.rawVadInvalidIntervalCount ?? 0),
             0,
           ),
           integrityGateFailures,

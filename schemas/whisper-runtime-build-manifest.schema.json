@@ -37,18 +37,46 @@
       "properties": {
         "patchId": {
           "type": "string",
-          "const": "mvl-mapped-token-raw-vad-json-v1"
+          "enum": [
+            "mvl-mapped-token-raw-vad-json-v1",
+            "mvl-mapped-token-raw-vad-json-v1+request-state-isolation-v1"
+          ]
         },
         "patchSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "patchFiles": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "enum": [
+                  "0001-mvl-mapped-token-raw-vad-json.patch",
+                  "0002-mvl-request-state-reset.patch"
+                ]
+              },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": ["path", "sha256"],
+            "additionalProperties": false
+          }
+        },
         "responseSchema": {
           "type": "string",
           "const": "mvl-whisper-server-response/1.0.0"
         },
         "expectedFiles": {
           "minItems": 1,
-          "maxItems": 1,
           "type": "array",
-          "items": { "type": "string", "const": "examples/server/server.cpp" }
+          "items": {
+            "type": "string",
+            "enum": [
+              "examples/server/server.cpp",
+              "include/whisper.h",
+              "src/whisper.cpp"
+            ]
+          }
         }
       },
       "required": ["patchId", "patchSha256", "responseSchema", "expectedFiles"],

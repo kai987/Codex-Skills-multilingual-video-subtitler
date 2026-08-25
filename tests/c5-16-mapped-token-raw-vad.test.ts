@@ -6,6 +6,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   c516StockPatchedRuntimeAbArtifactSchema,
+  mvlRequestStateIsolation,
+  mvlWhisperPatchId,
   mvlWhisperServerCapabilitiesSchema,
   mvlWhisperServerResponseSchema,
   whisperUpstreamPatchManifestSchema,
@@ -25,6 +27,8 @@ import { orderOverlapAcousticProfiles } from "@mvl/video-subtitler";
 const COMMIT = "371b5a7561823ab2bb32142d2751e35e7534727b";
 const PATCH_SHA =
   "bba39640e7005a1fdeb62c549d04ba76b6fc0d8aedae43daf9c9de1ab10a735d";
+const PATCH_SERIES_SHA =
+  "78922c97975e76e19613d6fe2e61d7e96ae1b992df4a07ae8d77a31181f81df7";
 const HASH_A = "a".repeat(64);
 const HASH_B = "b".repeat(64);
 
@@ -433,6 +437,37 @@ describe("C5.16 capability handshake", () => {
     ).toStrictEqual(evaluation.capability);
   });
 
+  it("requires explicit fresh request state for the C5.16.1 patch series", () => {
+    const expectedIsolatedRuntime = {
+      ...expectedRuntime,
+      patchId: mvlWhisperPatchId,
+      patchSha256: PATCH_SERIES_SHA,
+    };
+    const unproved = evaluateMvlCapabilityHandshake({
+      rawCapabilities: {
+        ...capability(),
+        patch_id: mvlWhisperPatchId,
+        patch_sha256: PATCH_SERIES_SHA,
+      },
+      expectedRuntime: expectedIsolatedRuntime,
+      actualBinarySha256: HASH_A,
+    });
+    expect(unproved.verified).toBe(false);
+    expect(unproved.failures).toContain("REQUEST_STATE_ISOLATION_UNVERIFIED");
+
+    const proved = evaluateMvlCapabilityHandshake({
+      rawCapabilities: {
+        ...capability(),
+        patch_id: mvlWhisperPatchId,
+        patch_sha256: PATCH_SERIES_SHA,
+        request_state_isolation: mvlRequestStateIsolation,
+      },
+      expectedRuntime: expectedIsolatedRuntime,
+      actualBinarySha256: HASH_A,
+    });
+    expect(proved).toMatchObject({ verified: true, failures: [] });
+  });
+
   it.each([
     [
       "missing endpoint",
@@ -701,24 +736,36 @@ describe("C5.16 mapped token and raw VAD health", () => {
 });
 
 describe("C5.16 patch, cache, and A/B artifact identity", () => {
-  it("strictly verifies the committed patch manifest and single-file patch hash", async () => {
+  it("strictly verifies the committed ordered patch series and file hashes", async () => {
     const manifestPath = path.resolve(
       "patches/whisper.cpp/v1.9.3/upstream-manifest.json",
-    );
-    const patchPath = path.resolve(
-      "patches/whisper.cpp/v1.9.3/0001-mvl-mapped-token-raw-vad-json.patch",
     );
     const manifest = whisperUpstreamPatchManifestSchema.parse(
       JSON.parse(await readFile(manifestPath, "utf8")) as unknown,
     );
-    const patch = await readFile(patchPath);
-    expect(createHash("sha256").update(patch).digest("hex")).toBe(
-      manifest.patchSha256,
+    const patches = await Promise.all(
+      manifest.patchFiles.map(async ({ path: patchName, sha256 }) => {
+        const patch = await readFile(
+          path.resolve("patches/whisper.cpp/v1.9.3", patchName),
+        );
+        expect(createHash("sha256").update(patch).digest("hex")).toBe(sha256);
+        return patch;
+      }),
     );
-    expect(manifest.expectedFiles).toEqual(["examples/server/server.cpp"]);
-    expect(patch.toString("utf8")).not.toMatch(
-      /^\+\+\+ b\/(?:src|include)\//mu,
+    expect(manifest.patchFiles.map(({ path: patchName }) => patchName)).toEqual(
+      [
+        "0001-mvl-mapped-token-raw-vad-json.patch",
+        "0002-mvl-request-state-reset.patch",
+      ],
     );
+    expect(
+      createHash("sha256").update(Buffer.concat(patches)).digest("hex"),
+    ).toBe(manifest.patchSha256);
+    expect(manifest.expectedFiles).toEqual([
+      "examples/server/server.cpp",
+      "include/whisper.h",
+      "src/whisper.cpp",
+    ]);
   });
 
   it("isolates stock, patched binaries, patch revisions, schemas, and capabilities", () => {

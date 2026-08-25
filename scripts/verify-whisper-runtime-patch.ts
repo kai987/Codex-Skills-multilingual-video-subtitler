@@ -3,12 +3,14 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
+import { InputError } from "@mvl/shared";
+
 import {
   readWhisperPatchManifest,
   runCommand,
   validatePinnedWhisperSource,
   verifyWhisperPatchFiles,
-  whisperPatchPath,
+  whisperPatchPathsForManifest,
 } from "./whisper-runtime-common.js";
 
 const { values } = parseArgs({
@@ -20,6 +22,7 @@ const { values } = parseArgs({
 
 const manifest = await readWhisperPatchManifest();
 await verifyWhisperPatchFiles(manifest);
+const patchPaths = whisperPatchPathsForManifest(manifest);
 const sourceDirectory = path.resolve(
   values["source-dir"] ??
     path.join(
@@ -32,7 +35,11 @@ await validatePinnedWhisperSource({
   manifest,
   requireClean: true,
 });
-await runCommand("git", ["apply", "--check", whisperPatchPath], {
+const [serializerPatchPath] = patchPaths;
+if (serializerPatchPath === undefined) {
+  throw new InputError("Whisper patch manifest has no serializer patch.");
+}
+await runCommand("git", ["apply", "--check", serializerPatchPath], {
   cwd: sourceDirectory,
 });
 
@@ -50,21 +57,31 @@ try {
       cwd: sourceDirectory,
     },
   );
-  await runCommand("git", ["apply", whisperPatchPath], { cwd: worktree });
-  const repeated = await runCommand(
-    "git",
-    ["apply", "--check", whisperPatchPath],
-    {
+  for (const patchPath of patchPaths) {
+    await runCommand("git", ["apply", "--check", patchPath], {
+      cwd: worktree,
+    });
+    await runCommand("git", ["apply", patchPath], { cwd: worktree });
+  }
+  for (const patchPath of patchPaths) {
+    const repeated = await runCommand("git", ["apply", "--check", patchPath], {
       cwd: worktree,
       allowNonZero: true,
-    },
-  );
-  if (repeated.exitCode === 0) {
-    throw new Error("Repeated patch application was not detected.");
+    });
+    if (repeated.exitCode === 0) {
+      throw new Error(
+        `Repeated patch application was not detected: ${patchPath}`,
+      );
+    }
   }
-  await runCommand("git", ["apply", "--reverse", "--check", whisperPatchPath], {
-    cwd: worktree,
-  });
+  for (const patchPath of patchPaths.toReversed()) {
+    await runCommand("git", ["apply", "--reverse", "--check", patchPath], {
+      cwd: worktree,
+    });
+    await runCommand("git", ["apply", "--reverse", patchPath], {
+      cwd: worktree,
+    });
+  }
   await runCommand(
     "git",
     ["worktree", "add", "--detach", wrongCommitWorktree, `${manifest.commit}^`],
@@ -112,7 +129,10 @@ process.stdout.write(
       correctCommitApplyCheck: "passed",
       wrongCommitPolicy: "actively-rejected-by-pinned-commit-guard",
       repeatedApplication: "already-applied-detected",
-      coreInferenceFilesModified: false,
+      requestStatePlumbingFilesModified: manifest.expectedFiles.filter(
+        (file) => file !== "examples/server/server.cpp",
+      ),
+      decodingOrVadAlgorithmModified: false,
     },
     null,
     2,

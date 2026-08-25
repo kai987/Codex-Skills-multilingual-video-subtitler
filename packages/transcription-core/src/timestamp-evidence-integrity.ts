@@ -23,6 +23,9 @@ export const TIMESTAMP_MAPPING_VERSION =
 export const TOKEN_HEALTH_POLICY_VERSION = "c5.16-token-health-v1" as const;
 export const RAW_VAD_POLICY_VERSION =
   "c5.16-whisper-internal-vad-getter-v1" as const;
+export const RAW_VAD_BOUNDARY_POLICY_VERSION =
+  "c5.16.1-vad-boundary-normalization-v1" as const;
+export const RAW_VAD_BOUNDARY_NORMALIZATION_HARD_MAXIMUM_SECONDS = 0.1;
 
 export const DEFAULT_TIMESTAMP_HEALTH_CONFIGURATION: Readonly<TimestampHealthConfiguration> =
   {
@@ -35,6 +38,7 @@ export const DEFAULT_TIMESTAMP_HEALTH_CONFIGURATION: Readonly<TimestampHealthCon
     minimumDecisionMargin: 0.1,
     timestampMappingVersion: TIMESTAMP_MAPPING_VERSION,
     tokenHealthPolicyVersion: TOKEN_HEALTH_POLICY_VERSION,
+    rawVadBoundaryNormalizationToleranceSeconds: 0.05,
   };
 
 export interface RawTimestampToken {
@@ -275,6 +279,8 @@ export function auditTimestampEvidenceAttempt(input: {
   tokenTimestampsRequested: boolean;
   tokenTimestampPolicy: TokenTimestampPolicy;
   mappedTokenGetterActuallyUsed: boolean;
+  actualAudioDurationSeconds?: number;
+  durationMeasurementMethod?: string;
   configuration?: Partial<TimestampHealthConfiguration>;
 }): TimestampAuditResult {
   const configuration = {
@@ -283,10 +289,38 @@ export function auditTimestampEvidenceAttempt(input: {
   };
   const duration =
     input.extractionInterval.end - input.extractionInterval.start;
+  const actualAudioDurationSeconds =
+    input.actualAudioDurationSeconds ?? duration;
+  const runtimeStabilizationActive =
+    input.actualAudioDurationSeconds !== undefined ||
+    input.configuration?.rawVadBoundaryNormalizationToleranceSeconds !==
+      undefined;
+  if (
+    !Number.isFinite(actualAudioDurationSeconds) ||
+    actualAudioDurationSeconds <= 0
+  ) {
+    throw new Error(
+      "Actual extracted-audio duration must be finite and positive.",
+    );
+  }
+  if (
+    configuration.rawVadBoundaryNormalizationToleranceSeconds >
+    RAW_VAD_BOUNDARY_NORMALIZATION_HARD_MAXIMUM_SECONDS
+  ) {
+    throw new Error(
+      `Raw VAD boundary normalization tolerance cannot exceed ${String(RAW_VAD_BOUNDARY_NORMALIZATION_HARD_MAXIMUM_SECONDS)} seconds.`,
+    );
+  }
   const outputTokens: OverlapAcousticAttempt["tokens"] = [];
   const segmentHealth: TimestampAttemptIntegrity["segmentHealth"] = [];
   const outputSegments: OverlapAcousticAttempt["segments"] = [];
 
+  const rawVadBoundaryDuration =
+    Math.abs(actualAudioDurationSeconds - duration) <= 0.005 &&
+    Number(actualAudioDurationSeconds.toFixed(2)) ===
+      Number(duration.toFixed(2))
+      ? duration
+      : actualAudioDurationSeconds;
   const rawVadEvaluations = (input.rawVadIntervals ?? []).map(
     (interval, index, intervals) => {
       const coordinateSystem =
@@ -299,44 +333,118 @@ export function auditTimestampEvidenceAttempt(input: {
         !Number.isFinite(previous.start) ||
         interval.start >= previous.start;
       const structurallyValid =
-        finite &&
-        interval.start >= 0 &&
-        interval.end > interval.start &&
-        ordered;
-      const mappedStart =
+        finite && interval.end > interval.start && ordered;
+      const localRawStart =
         coordinateSystem === "original-audio-local"
-          ? input.extractionInterval.start + interval.start
-          : interval.start;
-      const mappedEnd =
+          ? interval.start
+          : interval.start - input.extractionInterval.start;
+      const localRawEnd =
         coordinateSystem === "original-audio-local"
-          ? input.extractionInterval.start + interval.end
-          : interval.end;
-      const withinExtraction =
+          ? interval.end
+          : interval.end - input.extractionInterval.start;
+      const startOverrun = Math.max(0, -localRawStart);
+      const endOverrun = Math.max(0, localRawEnd - rawVadBoundaryDuration);
+      const maximumBoundaryOverrun = Math.max(startOverrun, endOverrun);
+      const completelyOutside =
+        finite && (localRawEnd <= 0 || localRawStart >= rawVadBoundaryDuration);
+      const normalizationEligible =
         structurallyValid &&
-        mappedStart >= input.extractionInterval.start - 1e-6 &&
-        mappedEnd <= input.extractionInterval.end + 1e-6;
+        !completelyOutside &&
+        maximumBoundaryOverrun > 1e-9 &&
+        maximumBoundaryOverrun <=
+          configuration.rawVadBoundaryNormalizationToleranceSeconds + 1e-9;
+      const normalizedLocalStart = normalizationEligible
+        ? Math.max(0, localRawStart)
+        : localRawStart;
+      const normalizedLocalEnd = normalizationEligible
+        ? Math.min(rawVadBoundaryDuration, localRawEnd)
+        : localRawEnd;
+      const normalizationProducesDuration =
+        normalizedLocalEnd > normalizedLocalStart;
+      const normalizationApplied =
+        normalizationEligible && normalizationProducesDuration;
+      const normalizedStart =
+        coordinateSystem === "original-audio-local"
+          ? normalizedLocalStart
+          : input.extractionInterval.start + normalizedLocalStart;
+      const normalizedEnd =
+        coordinateSystem === "original-audio-local"
+          ? normalizedLocalEnd
+          : input.extractionInterval.start + normalizedLocalEnd;
+      const mappedStart = input.extractionInterval.start + normalizedLocalStart;
+      const mappedEnd = input.extractionInterval.start + normalizedLocalEnd;
+      const withinAudio =
+        structurallyValid && startOverrun <= 1e-9 && endOverrun <= 1e-9;
       const overlapsPrevious =
         structurallyValid &&
         previous !== undefined &&
         Number.isFinite(previous.end) &&
         interval.start < previous.end;
-      const healthStatus = !structurallyValid
-        ? ("invalid" as const)
-        : !withinExtraction
-          ? ("out-of-range" as const)
-          : overlapsPrevious
-            ? ("overlapping-with-padding" as const)
-            : ("trusted" as const);
+      const healthStatus =
+        !structurallyValid ||
+        (normalizationEligible && !normalizationProducesDuration)
+          ? ("invalid" as const)
+          : completelyOutside || (!withinAudio && !normalizationApplied)
+            ? ("out-of-range" as const)
+            : normalizationApplied
+              ? ("trusted-with-boundary-normalization" as const)
+              : overlapsPrevious
+                ? ("overlapping-with-padding" as const)
+                : ("trusted" as const);
+      const timingUsable =
+        healthStatus === "trusted" ||
+        healthStatus === "trusted-with-boundary-normalization" ||
+        healthStatus === "overlapping-with-padding";
+      const maximumNormalizationDelta = normalizationApplied
+        ? Math.max(
+            Math.abs(normalizedLocalStart - localRawStart),
+            Math.abs(normalizedLocalEnd - localRawEnd),
+          )
+        : 0;
+      const timingTrustScore =
+        healthStatus === "trusted"
+          ? 1
+          : healthStatus === "overlapping-with-padding"
+            ? 0.95
+            : healthStatus === "trusted-with-boundary-normalization"
+              ? round(
+                  Math.max(
+                    0.8,
+                    1 -
+                      (maximumNormalizationDelta /
+                        Math.max(
+                          configuration.rawVadBoundaryNormalizationToleranceSeconds,
+                          0.001,
+                        )) *
+                        0.15,
+                  ),
+                )
+              : 0;
       return {
         interval,
         index,
         coordinateSystem,
         mappedStart,
         mappedEnd,
+        normalizedStart,
+        normalizedEnd,
+        normalizationApplied,
+        normalizationDeltaStart: normalizationApplied
+          ? round(Math.abs(normalizedLocalStart - localRawStart))
+          : 0,
+        normalizationDeltaEnd: normalizationApplied
+          ? round(Math.abs(normalizedLocalEnd - localRawEnd))
+          : 0,
+        normalizationReason: normalizationApplied
+          ? startOverrun > 0 && endOverrun > 0
+            ? "RAW_VAD_BOTH_AUDIO_BOUNDARIES_EXCEEDED_WITHIN_TOLERANCE"
+            : startOverrun > 0
+              ? "RAW_VAD_START_PRECEDES_AUDIO_BOUNDARY_WITHIN_TOLERANCE"
+              : "RAW_VAD_END_EXCEEDS_AUDIO_BOUNDARY_WITHIN_TOLERANCE"
+          : null,
         healthStatus,
-        timingUsable:
-          healthStatus === "trusted" ||
-          healthStatus === "overlapping-with-padding",
+        timingTrustScore,
+        timingUsable,
       };
     },
   );
@@ -759,9 +867,23 @@ export function auditTimestampEvidenceAttempt(input: {
       rawVadTrustedIntervalCount: rawVadEvaluations.filter(
         (evaluation) => evaluation.timingUsable,
       ).length,
+      rawVadBoundaryNormalizedIntervalCount: rawVadEvaluations.filter(
+        (evaluation) => evaluation.normalizationApplied,
+      ).length,
       rawVadInvalidIntervalCount: rawVadEvaluations.filter(
         (evaluation) => !evaluation.timingUsable,
       ).length,
+      rawVadMaximumNormalizationDeltaSeconds: round(
+        Math.max(
+          0,
+          ...rawVadEvaluations.map((evaluation) =>
+            Math.max(
+              evaluation.normalizationDeltaStart,
+              evaluation.normalizationDeltaEnd,
+            ),
+          ),
+        ),
+      ),
     },
     trustedTokenIds: trustedTokens.map((token) => token.tokenId).toSorted(),
     quarantinedTokenIds: outputTokens
@@ -771,6 +893,42 @@ export function auditTimestampEvidenceAttempt(input: {
     quarantineReasons: [
       ...new Set(segmentHealth.flatMap((health) => health.quarantineReasons)),
     ].toSorted(),
+    nominalExtractionInterval: input.extractionInterval,
+    nominalDurationSeconds: round(duration),
+    actualAudioDurationSeconds: round(actualAudioDurationSeconds),
+    actualAudioLocalEndSeconds: round(actualAudioDurationSeconds),
+    actualMediaGlobalEndSeconds: round(
+      input.extractionInterval.start + actualAudioDurationSeconds,
+    ),
+    durationDifferenceSeconds: round(actualAudioDurationSeconds - duration),
+    durationMeasurementMethod:
+      input.durationMeasurementMethod ?? "nominal-extraction-interval-fallback",
+    rawVadEvaluations: rawVadEvaluations.map((evaluation) => ({
+      intervalId: evaluation.interval.intervalId,
+      rawStart: Number.isFinite(evaluation.interval.start)
+        ? evaluation.interval.start
+        : null,
+      rawEnd: Number.isFinite(evaluation.interval.end)
+        ? evaluation.interval.end
+        : null,
+      rawCoordinateSystem: evaluation.coordinateSystem,
+      normalizedStart:
+        evaluation.timingUsable && Number.isFinite(evaluation.normalizedStart)
+          ? evaluation.normalizedStart
+          : null,
+      normalizedEnd:
+        evaluation.timingUsable && Number.isFinite(evaluation.normalizedEnd)
+          ? evaluation.normalizedEnd
+          : null,
+      normalizationApplied: evaluation.normalizationApplied,
+      normalizationDeltaStart: evaluation.normalizationDeltaStart,
+      normalizationDeltaEnd: evaluation.normalizationDeltaEnd,
+      normalizationReason: evaluation.normalizationReason,
+      healthStatus: evaluation.healthStatus,
+      timingTrustScore: evaluation.timingTrustScore,
+      timingUsable: evaluation.timingUsable,
+      evidenceLineageId: `whisper-internal-vad:${input.attemptId}:${evaluation.interval.intervalId}:${String(evaluation.index)}`,
+    })),
   });
   return {
     segments: outputSegments,
@@ -816,9 +974,25 @@ export function auditTimestampEvidenceAttempt(input: {
           timingUsable: true,
           rawStart: interval.start,
           rawEnd: interval.end,
+          ...(runtimeStabilizationActive
+            ? {
+                normalizedStart: evaluation.normalizedStart,
+                normalizedEnd: evaluation.normalizedEnd,
+                normalizationApplied: evaluation.normalizationApplied,
+                normalizationDeltaStart: evaluation.normalizationDeltaStart,
+                normalizationDeltaEnd: evaluation.normalizationDeltaEnd,
+                normalizationReason: evaluation.normalizationReason,
+              }
+            : {}),
           rawCoordinateSystem: coordinateSystem,
           mappingMethod: "verified-original-audio-local-offset" as const,
           rawVadIntervalHealthStatus: evaluation.healthStatus,
+          ...(runtimeStabilizationActive
+            ? {
+                healthStatus: evaluation.healthStatus,
+                timingTrustScore: evaluation.timingTrustScore,
+              }
+            : {}),
           evidenceLineageId: `whisper-internal-vad:${input.attemptId}:${interval.intervalId}:${String(index)}`,
         },
       ];
@@ -862,7 +1036,7 @@ export function buildTimestampEvidenceIntegrityArtifact(input: {
   return subtitleTimestampEvidenceIntegritySchema.parse({
     schemaVersion: "1.0.0",
     artifactType: "subtitle-timestamp-evidence-integrity",
-    integrityVersion: "C5.16",
+    integrityVersion: "C5.16.1",
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     sourceOverlapArtifactHash: input.sourceOverlapArtifactHash,
     runtimeCapability: input.runtimeCapability,
@@ -940,7 +1114,15 @@ export function buildTimestampEvidenceIntegrityArtifact(input: {
         (sum, item) => sum + item.segmentCount,
         0,
       ),
-      rawVadIntervalCount: input.rawVadIntervalCount ?? 0,
+      rawVadIntervalCount:
+        input.rawVadIntervalCount ??
+        metrics.reduce(
+          (sum, item) =>
+            sum +
+            (item.rawVadTrustedIntervalCount ?? 0) +
+            (item.rawVadInvalidIntervalCount ?? 0),
+          0,
+        ),
       mappedNoVadTokenCount: input.attempts
         .filter((attempt) => !attempt.useVad)
         .reduce(
@@ -973,9 +1155,31 @@ export function buildTimestampEvidenceIntegrityArtifact(input: {
         (sum, item) => sum + (item.rawVadTrustedIntervalCount ?? 0),
         0,
       ),
+      rawVadFullyTrustedCount: metrics.reduce(
+        (sum, item) =>
+          sum +
+          Math.max(
+            0,
+            (item.rawVadTrustedIntervalCount ?? 0) -
+              (item.rawVadBoundaryNormalizedIntervalCount ?? 0),
+          ),
+        0,
+      ),
+      rawVadBoundaryNormalizedCount: metrics.reduce(
+        (sum, item) => sum + (item.rawVadBoundaryNormalizedIntervalCount ?? 0),
+        0,
+      ),
       rawVadInvalidIntervalCount: metrics.reduce(
         (sum, item) => sum + (item.rawVadInvalidIntervalCount ?? 0),
         0,
+      ),
+      rawVadMaximumNormalizationDeltaSeconds: round(
+        Math.max(
+          0,
+          ...metrics.map(
+            (item) => item.rawVadMaximumNormalizationDeltaSeconds ?? 0,
+          ),
+        ),
       ),
       runtimeCapabilityVerified:
         input.runtimeCapability.timestampCapabilityStatus ===

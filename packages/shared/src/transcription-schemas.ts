@@ -1064,6 +1064,8 @@ export const portableAsrCacheIdentityV2Schema = z
       .optional(),
     runtimeResponseSchemaVersion: z.string().min(1).optional(),
     rawVadPolicyVersion: z.string().min(1).optional(),
+    rawVadBoundaryPolicyVersion: z.string().min(1).optional(),
+    workerStateIsolationPolicyVersion: z.string().min(1).optional(),
     promptSha256: z.string().regex(/^[a-f0-9]{64}$/u),
     decodeConfigurationSha256: z.string().regex(/^[a-f0-9]{64}$/u),
   })
@@ -1710,6 +1712,28 @@ export const whisperExecutionModeSchema = z.enum([
 
 export type WhisperExecutionMode = z.infer<typeof whisperExecutionModeSchema>;
 
+export const workerStateIsolationModeSchema = z.enum([
+  "auto",
+  "require-safe",
+  "restart-on-transition",
+  "segregated",
+]);
+
+export const workerStateIsolationStrategySchema = z.enum([
+  "verified-per-request-reset",
+  "restart-on-vad-to-no-vad",
+  "mode-segregated-workers",
+  "profile-major-order-only",
+  "unknown",
+]);
+
+export type WorkerStateIsolationMode = z.infer<
+  typeof workerStateIsolationModeSchema
+>;
+export type WorkerStateIsolationStrategy = z.infer<
+  typeof workerStateIsolationStrategySchema
+>;
+
 export const whisperExecutionMetricsSchema = z
   .object({
     schemaVersion: transcriptionSchemaVersionSchema,
@@ -1726,6 +1750,49 @@ export const whisperExecutionMetricsSchema = z
     transcriptionSeconds: z.number().nonnegative(),
     totalWorkerSeconds: z.number().nonnegative(),
     fallbackProcessCount: z.number().int().nonnegative(),
+    requestStateIsolationStrategy:
+      workerStateIsolationStrategySchema.optional(),
+    requestOrderPlan: z
+      .array(
+        z
+          .object({
+            sequence: z.number().int().nonnegative(),
+            requestKey: z.string().min(1),
+            vadMode: z.enum(["vad", "no-vad"]),
+            profile: z.string().min(1),
+            cacheHit: z.boolean(),
+            workerId: z.string().min(1).nullable(),
+            contextGeneration: z.number().int().positive().nullable(),
+            isolationAction: z.enum([
+              "none",
+              "reset",
+              "restart",
+              "segregated-route",
+              "process",
+              "cache-hit",
+            ]),
+          })
+          .strict(),
+      )
+      .optional(),
+    requestOrderHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/u)
+      .nullable()
+      .optional(),
+    unsafeTransitionCount: z.number().int().nonnegative().optional(),
+    unsafeWorkerTransitionCount: z.number().int().nonnegative().optional(),
+    preventedUnsafeTransitionCount: z.number().int().nonnegative().optional(),
+    preventedUnsafeWorkerTransitionCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .optional(),
+    workerRestartCount: z.number().int().nonnegative().optional(),
+    workerStateResetCount: z.number().int().nonnegative().optional(),
+    modeSegregatedWorkerCount: z.number().int().nonnegative().optional(),
+    requestOrderIndependencePassed: z.boolean().nullable().optional(),
+    cleanProcessParityPassed: z.boolean().nullable().optional(),
     requests: z.array(
       z
         .object({
@@ -1738,6 +1805,13 @@ export const whisperExecutionMetricsSchema = z
           fallbackMode: z.literal("process").nullable(),
           durationSeconds: z.number().nonnegative(),
           error: z.string().min(1).nullable(),
+          vadMode: z.enum(["vad", "no-vad"]).optional(),
+          profile: z.string().min(1).optional(),
+          workerId: z.string().min(1).nullable().optional(),
+          contextGeneration: z.number().int().positive().nullable().optional(),
+          stateIsolationAction: z
+            .enum(["none", "reset", "restart", "segregated-route", "process"])
+            .optional(),
         })
         .strict(),
     ),
@@ -1754,6 +1828,21 @@ export const whisperExecutionMetricsSchema = z
           coreMLWarmupSeconds: z.number().nonnegative(),
           transcriptionSeconds: z.number().nonnegative(),
           exitReason: z.string().min(1).nullable(),
+          workerId: z.string().min(1).optional(),
+          contextGeneration: z.number().int().positive().optional(),
+          runtimeIdentityHash: z
+            .string()
+            .regex(/^[a-f0-9]{64}$/u)
+            .optional(),
+          currentStateClass: z.string().min(1).optional(),
+          hasProcessedVadRequest: z.boolean().optional(),
+          hasProcessedNoVadRequest: z.boolean().optional(),
+          lastRequestVadMode: z.enum(["vad", "no-vad"]).nullable().optional(),
+          lastProfile: z.string().min(1).nullable().optional(),
+          stateIsolationStrategy: workerStateIsolationStrategySchema.optional(),
+          stateResetCount: z.number().int().nonnegative().optional(),
+          unsafeTransitionCount: z.number().int().nonnegative().optional(),
+          restartCount: z.number().int().nonnegative().optional(),
         })
         .strict(),
     ),

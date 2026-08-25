@@ -1,4 +1,4 @@
-import { cp, readFile, rm, stat } from "node:fs/promises";
+import { cp, readFile, readdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
@@ -10,6 +10,7 @@ import {
 } from "@mvl/shared";
 import {
   finalizeSubtitleTask,
+  generateC5161ShareableArtifacts,
   locateSubtitlePackage,
   sha256LocalFile,
 } from "@mvl/video-subtitler";
@@ -48,6 +49,13 @@ const { values } = parseArgs({
     "asr-cache-import": { type: "string", multiple: true },
     "asr-cache-mode": { type: "string", default: "read-write" },
     "no-review-audio": { type: "boolean", default: false },
+    "runtime-stabilization": { type: "boolean", default: false },
+    "raw-vad-boundary-tolerance": { type: "string", default: "0.05" },
+    "worker-state-isolation": { type: "string", default: "require-safe" },
+    "request-order": { type: "string", default: "standard" },
+    "emit-shareable-artifacts": { type: "boolean", default: false },
+    "shareable-output": { type: "string" },
+    "stock-patched-ab": { type: "string" },
   },
   strict: true,
 });
@@ -139,6 +147,26 @@ const asrCacheMode = choice(
   ["off", "read", "read-write"] as const,
   "--asr-cache-mode",
 );
+const workerStateIsolation = choice(
+  values["worker-state-isolation"],
+  ["auto", "require-safe", "restart-on-transition", "segregated"] as const,
+  "--worker-state-isolation",
+);
+const requestOrder = choice(
+  values["request-order"],
+  ["standard", "adversarial"] as const,
+  "--request-order",
+);
+const rawVadBoundaryTolerance = numberValue(
+  values["raw-vad-boundary-tolerance"],
+  "--raw-vad-boundary-tolerance",
+  0,
+);
+if (rawVadBoundaryTolerance > 0.1) {
+  throw new InputError(
+    "--raw-vad-boundary-tolerance cannot exceed 0.10 seconds.",
+  );
+}
 const audioTrack =
   values["audio-track"] === undefined
     ? undefined
@@ -177,14 +205,15 @@ async function collisionSafeTarget(): Promise<string> {
     return explicit;
   }
   const sourceName = path.basename(sourceTask);
-  const stage =
-    timestampRuntimePolicy === "require-mapped"
+  const stage = values["runtime-stabilization"]
+    ? "c5-16-1-runtime-stabilization"
+    : timestampRuntimePolicy === "require-mapped"
       ? "c5-16-verified-mapped-token-raw-vad"
       : timestampEvidenceIntegrity === "enforce"
         ? "c5-15-1-timestamp-integrity"
         : "c5-15-targeted-acoustic-overlap-resolution";
-  const preferredName = /c5-1[45][^/]*/u.test(sourceName)
-    ? sourceName.replace(/c5-1[45][^/]*/u, stage)
+  const preferredName = /c5-1[456](?:\.1)?[^/]*/u.test(sourceName)
+    ? sourceName.replace(/c5-1[456](?:\.1)?[^/]*/u, stage)
     : `${sourceName}-${stage}`;
   const parent = path.dirname(sourceTask);
   for (let suffix = 0; suffix < 1000; suffix += 1) {
@@ -210,8 +239,37 @@ async function fingerprint(filePath: string) {
   };
 }
 
+async function resolveStockPatchedAbPath(): Promise<string | null> {
+  if (values["stock-patched-ab"] !== undefined) {
+    const explicit = path.resolve(values["stock-patched-ab"]);
+    return (await exists(explicit)) ? explicit : null;
+  }
+  const parent = path.dirname(sourceTask);
+  const candidates = (await readdir(parent, { withFileTypes: true }))
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        entry.name.includes("c5-16-stock-patched-runtime-ab"),
+    )
+    .map((entry) =>
+      path.join(parent, entry.name, "c5-16-stock-patched-runtime-ab.json"),
+    )
+    .toSorted()
+    .reverse();
+  for (const candidate of candidates) {
+    if (await exists(candidate)) return candidate;
+  }
+  return null;
+}
+
 const beforeVideo = await fingerprint(sourceVideo);
 const beforeHuman = await fingerprint(humanReviewedSubtitle);
+const stockPatchedAbPath = await resolveStockPatchedAbPath();
+if (values["emit-shareable-artifacts"] && stockPatchedAbPath === null) {
+  throw new InputError(
+    "Shareable generation requires --stock-patched-ab or a sibling C5.16 A/B artifact.",
+  );
+}
 const outputTask = await collisionSafeTarget();
 await cp(sourceTask, outputTask, {
   recursive: true,
@@ -263,6 +321,9 @@ const result = await finalizeSubtitleTask({
   timestampEvidenceIntegrity,
   tokenTimestampPolicy,
   legacyOverlapCachePolicy,
+  rawVadBoundaryNormalizationToleranceSeconds: rawVadBoundaryTolerance,
+  workerStateIsolation,
+  overlapRequestOrder: requestOrder,
   ...(audioTrack === undefined ? {} : { audioTrack }),
   overlapAcousticConfiguration: {
     contextSeconds: numberValue(
@@ -340,18 +401,23 @@ const readonlyEqual = (
   before.mtimeMs === after.mtimeMs;
 const summaryPath = path.join(
   outputTask,
-  timestampRuntimePolicy === "require-mapped"
-    ? "c5-16-mapped-vad-replay-summary.json"
-    : timestampEvidenceIntegrity === "enforce"
-      ? "c5-15-1-timestamp-integrity-replay-summary.json"
-      : "c5-15-overlap-replay-summary.json",
+  values["runtime-stabilization"]
+    ? "c5-16-1-runtime-stabilization-replay-summary.json"
+    : timestampRuntimePolicy === "require-mapped"
+      ? "c5-16-mapped-vad-replay-summary.json"
+      : timestampEvidenceIntegrity === "enforce"
+        ? "c5-15-1-timestamp-integrity-replay-summary.json"
+        : "c5-15-overlap-replay-summary.json",
 );
 await atomicWriteJson(
   summaryPath,
   {
     schemaVersion: "1.0.0",
-    runType:
-      timestampRuntimePolicy === "require-mapped"
+    pathPolicy: "local-only",
+    shareable: false,
+    runType: values["runtime-stabilization"]
+      ? "C5.16.1 runtime boundary, worker isolation, and shareable stabilization replay"
+      : timestampRuntimePolicy === "require-mapped"
         ? "C5.16 verified mapped token and raw VAD replay"
         : timestampEvidenceIntegrity === "enforce"
           ? "C5.15.1 timestamp evidence integrity replay"
@@ -374,6 +440,11 @@ await atomicWriteJson(
       whisperExecutionMode,
       asrCacheMode,
       maximumAsrRequests,
+      rawVadBoundaryTolerance,
+      workerStateIsolation,
+      requestOrder,
+      rawVadBoundaryPolicyVersion: "c5.16.1-vad-boundary-normalization-v1",
+      workerStateIsolationPolicyVersion: "c5.16.1-worker-state-isolation-v1",
     },
     execution: {
       targetComponentCount: acoustic.summary.componentCount,
@@ -439,12 +510,66 @@ await atomicWriteJson(
   { overwrite: false },
 );
 
+const shareable =
+  values["emit-shareable-artifacts"] && stockPatchedAbPath !== null
+    ? await generateC5161ShareableArtifacts({
+        taskRoot: outputTask,
+        subtitleDirectory: result.subtitleDirectory,
+        localExecutionSummaryPath: summaryPath,
+        stockPatchedRuntimeAbPath: stockPatchedAbPath,
+        ...(values["shareable-output"] === undefined
+          ? {}
+          : { outputDirectory: values["shareable-output"] }),
+        externalFiles: [
+          { role: "source-video", filePath: sourceVideo },
+          {
+            role: "human-reviewed-subtitle",
+            filePath: humanReviewedSubtitle,
+          },
+          ...(values["local-transcription-model"] === undefined
+            ? []
+            : [
+                {
+                  role: "whisper-model",
+                  filePath: path.resolve(values["local-transcription-model"]),
+                },
+              ]),
+          ...(values["whisper-vad-model"] === undefined
+            ? []
+            : [
+                {
+                  role: "vad-model",
+                  filePath: path.resolve(values["whisper-vad-model"]),
+                },
+              ]),
+          ...(values["whisper-server-path"] === undefined
+            ? []
+            : [
+                {
+                  role: "whisper-server",
+                  filePath: path.resolve(values["whisper-server-path"]),
+                },
+              ]),
+          ...(values["runtime-capability-manifest"] === undefined
+            ? []
+            : [
+                {
+                  role: "runtime-capability-manifest",
+                  filePath: path.resolve(values["runtime-capability-manifest"]),
+                },
+              ]),
+        ],
+      })
+    : null;
+
 process.stdout.write(
   `${JSON.stringify(
     {
       ok: true,
       outputTask,
       summaryPath,
+      shareableDirectory: shareable?.outputDirectory ?? null,
+      shareableManifestPath: shareable?.manifestPath ?? null,
       status: result.report.status,
       finalizationMethod: result.report.finalizationMethod,
       metrics: result.report.metrics,

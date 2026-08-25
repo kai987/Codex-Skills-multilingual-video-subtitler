@@ -22,7 +22,13 @@
     },
     "patchId": {
       "anyOf": [
-        { "type": "string", "const": "mvl-mapped-token-raw-vad-json-v1" },
+        {
+          "type": "string",
+          "enum": [
+            "mvl-mapped-token-raw-vad-json-v1",
+            "mvl-mapped-token-raw-vad-json-v1+request-state-isolation-v1"
+          ]
+        },
         { "type": "null" }
       ]
     },
@@ -56,11 +62,18 @@
             },
             "patch_id": {
               "type": "string",
-              "const": "mvl-mapped-token-raw-vad-json-v1"
+              "enum": [
+                "mvl-mapped-token-raw-vad-json-v1",
+                "mvl-mapped-token-raw-vad-json-v1+request-state-isolation-v1"
+              ]
             },
             "patch_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
             "mapped_token_getter_available": { "type": "boolean" },
             "raw_vad_getter_available": { "type": "boolean" },
+            "request_state_isolation": {
+              "type": "string",
+              "const": "fresh-whisper-state-per-mvl-request"
+            },
             "supported_response_formats": {
               "minItems": 1,
               "type": "array",

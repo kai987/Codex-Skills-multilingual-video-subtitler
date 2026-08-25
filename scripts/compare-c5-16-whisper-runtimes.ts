@@ -86,9 +86,9 @@ const overlap = subtitleOverlapAcousticResolutionSchema.parse(
   JSON.parse(await readFile(overlapPath, "utf8")) as unknown,
 );
 const profiles = [
-  // v1.9.3 retains the previous VAD map inside a reused context. Production
-  // and A/B therefore schedule every fresh no-VAD request before any VAD
-  // request while retaining a single compatible worker/model load.
+  // Keep deterministic output ordering. Runtime correctness no longer relies
+  // on this profile-major order: production uses a fresh whisper_state per
+  // request, while A/B starts a clean process for every stock/patched request.
   "no-vad",
   "current-sensitive-vad",
   "extra-sensitive-vad",
@@ -235,9 +235,10 @@ interface RuntimeResponse {
   durationSeconds: number;
 }
 
-async function runRuntime(input: {
+async function runRuntimeProcess(input: {
   binary: string;
   patched: boolean;
+  request: (typeof requests)[number];
 }): Promise<{
   responses: Map<string, RuntimeResponse>;
   wallClockSeconds: number;
@@ -294,7 +295,7 @@ async function runRuntime(input: {
       );
     }
     const responses = new Map<string, RuntimeResponse>();
-    for (const request of requests) {
+    for (const request of [input.request]) {
       const vad = vadConfig(request.profile);
       const requestStarted = performance.now();
       const form = new FormData();
@@ -361,6 +362,43 @@ async function runRuntime(input: {
       child.kill("SIGKILL");
     }
   }
+}
+
+async function runRuntime(input: {
+  binary: string;
+  patched: boolean;
+}): Promise<{
+  responses: Map<string, RuntimeResponse>;
+  wallClockSeconds: number;
+  peakResidentBytes: number | null;
+  capability: unknown;
+  workerStartCount: number;
+  modelLoadCount: number;
+}> {
+  const responses = new Map<string, RuntimeResponse>();
+  let wallClockSeconds = 0;
+  let peakResidentBytes: number | null = null;
+  let capability: unknown = null;
+  for (const request of requests) {
+    const run = await runRuntimeProcess({ ...input, request });
+    for (const [key, response] of run.responses) responses.set(key, response);
+    wallClockSeconds += run.wallClockSeconds;
+    if (run.peakResidentBytes !== null) {
+      peakResidentBytes = Math.max(
+        peakResidentBytes ?? 0,
+        run.peakResidentBytes,
+      );
+    }
+    capability ??= run.capability;
+  }
+  return {
+    responses,
+    wallClockSeconds,
+    peakResidentBytes,
+    capability,
+    workerStartCount: requests.length,
+    modelLoadCount: requests.length,
+  };
 }
 
 function stockView(value: unknown) {
@@ -480,8 +518,9 @@ const pairs = requests.map((request) => {
   const textEqual = stockText === patchedText;
   const segmentsEqual =
     stableJson(stockSegments) === stableJson(patchedSegments);
-  const rawTokensComparable =
+  const rawGroupedWordsEqual =
     stableJson(stockWords) === stableJson(patchedWords);
+  const rawGroupedWordsComparable = true;
   const languageEqual = stockParsed.language === patchedParsed.language;
   const requestConfiguration = {
     profile: request.profile,
@@ -515,7 +554,16 @@ const pairs = requests.map((request) => {
     segmentsEqual,
     stockRawTokenHash: hash(stockWords),
     patchedRawTokenHash: hash(patchedWords),
-    rawTokensComparable,
+    // Deprecated C5.16 field: it historically meant equality, not merely
+    // observability/comparability.
+    rawTokensComparable: rawGroupedWordsEqual,
+    stockRawGroupedWordHash: hash(stockWords),
+    patchedRawGroupedWordHash: hash(patchedWords),
+    rawGroupedWordsComparable,
+    rawGroupedWordsEqual,
+    individualRawTokenParityStatus: "not-observable-on-stock-server" as const,
+    individualRawTokensComparable: false,
+    individualRawTokensEqual: null,
     languageEqual,
     requestConfigurationEqual,
     promptEqual,
@@ -528,7 +576,7 @@ const pairs = requests.map((request) => {
     failures: [
       ...(!textEqual ? ["TRANSCRIPTION_TEXT_MISMATCH"] : []),
       ...(!segmentsEqual ? ["DECODED_SEGMENT_MISMATCH"] : []),
-      ...(!rawTokensComparable ? ["RAW_GROUPED_TOKEN_MISMATCH"] : []),
+      ...(!rawGroupedWordsEqual ? ["RAW_GROUPED_WORD_MISMATCH"] : []),
       ...(!languageEqual ? ["LANGUAGE_MISMATCH"] : []),
       ...(!requestConfigurationEqual ? ["REQUEST_CONFIGURATION_MISMATCH"] : []),
       ...(!promptEqual ? ["PROMPT_CONFIGURATION_MISMATCH"] : []),
@@ -543,8 +591,12 @@ const perProfile = profiles.map((profile) => {
     pairCount: selected.length,
     textParityCount: selected.filter((pair) => pair.textEqual).length,
     segmentParityCount: selected.filter((pair) => pair.segmentsEqual).length,
-    rawTokenParityCount: selected.filter((pair) => pair.rawTokensComparable)
+    rawTokenParityCount: selected.filter((pair) => pair.rawGroupedWordsEqual)
       .length,
+    rawGroupedWordParityCount: selected.filter(
+      (pair) => pair.rawGroupedWordsEqual,
+    ).length,
+    individualRawTokenComparablePairCount: 0,
     languageParityCount: selected.filter((pair) => pair.languageEqual).length,
     patchedMappedTokenCount: selected.reduce(
       (sum, pair) => sum + pair.patchedMappedTokenCount,
@@ -604,7 +656,16 @@ const artifact = c516StockPatchedRuntimeAbArtifactSchema.parse({
     freshRequestCount: pairs.length * 2,
     textParityPassed: pairs.every((pair) => pair.textEqual),
     segmentParityPassed: pairs.every((pair) => pair.segmentsEqual),
-    rawTokenParityPassed: pairs.every((pair) => pair.rawTokensComparable),
+    rawTokenParityPassed: pairs.every((pair) => pair.rawGroupedWordsEqual),
+    rawGroupedWordParityPassed: pairs.every(
+      (pair) => pair.rawGroupedWordsEqual,
+    ),
+    rawGroupedWordComparablePairCount: pairs.filter(
+      (pair) => pair.rawGroupedWordsComparable,
+    ).length,
+    individualRawTokenParityStatus: "not-observable-on-stock-server",
+    individualRawTokenComparablePairCount: 0,
+    individualRawTokenParityPassed: null,
     languageParityPassed: pairs.every((pair) => pair.languageEqual),
     requestConfigurationParityPassed: pairs.every(
       (pair) => pair.requestConfigurationEqual,
@@ -616,10 +677,11 @@ const artifact = c516StockPatchedRuntimeAbArtifactSchema.parse({
     patchedRawVadIntervalCount,
     stockWallClockSeconds: stockRun.wallClockSeconds,
     patchedWallClockSeconds: patchedRun.wallClockSeconds,
-    stockWorkerStartCount: 1,
-    patchedWorkerStartCount: 1,
-    stockModelLoadCount: 1,
-    patchedModelLoadCount: 1,
+    requestContextIsolation: "fresh-process-per-request",
+    stockWorkerStartCount: stockRun.workerStartCount,
+    patchedWorkerStartCount: patchedRun.workerStartCount,
+    stockModelLoadCount: stockRun.modelLoadCount,
+    patchedModelLoadCount: patchedRun.modelLoadCount,
     stockPeakResidentBytes: stockRun.peakResidentBytes,
     patchedPeakResidentBytes: patchedRun.peakResidentBytes,
     stockResponseBytes: pairs.reduce(
@@ -637,6 +699,16 @@ const artifact = c516StockPatchedRuntimeAbArtifactSchema.parse({
 const outputPath = await collisionSafeOutput();
 await atomicWriteJson(outputPath, artifact, { overwrite: false });
 process.stdout.write(
-  `${JSON.stringify({ ok: artifact.summary.accepted, outputPath, summary: artifact.summary }, null, 2)}\n`,
+  `${JSON.stringify(
+    {
+      ok: artifact.summary.accepted,
+      outputPath,
+      groupedRawWordParity: artifact.summary.rawGroupedWordParityPassed,
+      individualRawTokenParity: artifact.summary.individualRawTokenParityStatus,
+      summary: artifact.summary,
+    },
+    null,
+    2,
+  )}\n`,
 );
 if (!artifact.summary.accepted) process.exitCode = 1;

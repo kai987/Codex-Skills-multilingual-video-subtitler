@@ -15,7 +15,10 @@
         "upstream_commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
         "patch_id": {
           "type": "string",
-          "const": "mvl-mapped-token-raw-vad-json-v1"
+          "enum": [
+            "mvl-mapped-token-raw-vad-json-v1",
+            "mvl-mapped-token-raw-vad-json-v1+request-state-isolation-v1"
+          ]
         },
         "patch_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "binary_sha256": { "type": "null" },
@@ -35,6 +38,10 @@
             "raw_vad_getter_used": { "type": "boolean" },
             "raw_and_mapped_token_times_emitted": { "type": "boolean" },
             "raw_vad_segments_emitted": { "type": "boolean" },
+            "request_state_isolation": {
+              "type": "string",
+              "const": "fresh-whisper-state-per-mvl-request"
+            },
             "time_unit": { "type": "string", "const": "centiseconds" }
           },
           "required": [

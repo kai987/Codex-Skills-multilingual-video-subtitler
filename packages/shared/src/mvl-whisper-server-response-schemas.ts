@@ -17,7 +17,16 @@ export const mvlWhisperResponseSchemaVersion =
   "mvl-whisper-server-response/1.0.0" as const;
 export const mvlWhisperCapabilitySchemaVersion =
   "mvl-whisper-server-capabilities/1.0.0" as const;
-export const mvlWhisperPatchId = "mvl-mapped-token-raw-vad-json-v1" as const;
+export const legacyMvlWhisperPatchId =
+  "mvl-mapped-token-raw-vad-json-v1" as const;
+export const mvlWhisperPatchId =
+  "mvl-mapped-token-raw-vad-json-v1+request-state-isolation-v1" as const;
+export const mvlWhisperPatchIdSchema = z.enum([
+  legacyMvlWhisperPatchId,
+  mvlWhisperPatchId,
+]);
+export const mvlRequestStateIsolation =
+  "fresh-whisper-state-per-mvl-request" as const;
 
 export const timestampRuntimePolicySchema = z.enum([
   "auto",
@@ -41,10 +50,11 @@ export const mvlWhisperServerCapabilitiesSchema = z
     schema_version: z.literal(mvlWhisperCapabilitySchemaVersion),
     whisper_cpp_version: z.literal("1.9.3"),
     upstream_commit: commitSchema,
-    patch_id: z.literal(mvlWhisperPatchId),
+    patch_id: mvlWhisperPatchIdSchema,
     patch_sha256: hashSchema,
     mapped_token_getter_available: z.boolean(),
     raw_vad_getter_available: z.boolean(),
+    request_state_isolation: z.literal(mvlRequestStateIsolation).optional(),
     supported_response_formats: z
       .array(
         z.enum([
@@ -334,6 +344,7 @@ const inferenceCapabilitiesSchema = z
     raw_vad_getter_used: z.boolean(),
     raw_and_mapped_token_times_emitted: z.boolean(),
     raw_vad_segments_emitted: z.boolean(),
+    request_state_isolation: z.literal(mvlRequestStateIsolation).optional(),
     time_unit: z.literal("centiseconds"),
   })
   .strict();
@@ -345,7 +356,7 @@ export const mvlWhisperServerResponseSchema = z
       .object({
         whisper_cpp_version: z.literal("1.9.3"),
         upstream_commit: commitSchema,
-        patch_id: z.literal(mvlWhisperPatchId),
+        patch_id: mvlWhisperPatchIdSchema,
         patch_sha256: hashSchema,
         binary_sha256: z.null(),
         response_schema: z.literal(mvlWhisperResponseSchemaVersion),
@@ -493,7 +504,7 @@ export const whisperRuntimeCapabilityArtifactSchema = z
     upstreamRepository: z.literal("ggml-org/whisper.cpp"),
     upstreamTag: z.string().min(1).nullable(),
     upstreamCommit: commitSchema.nullable(),
-    patchId: z.literal(mvlWhisperPatchId).nullable(),
+    patchId: mvlWhisperPatchIdSchema.nullable(),
     patchSha256: hashSchema.nullable(),
     binaryBasename: z.string().min(1),
     binarySha256: hashSchema,
@@ -526,10 +537,32 @@ export const whisperUpstreamPatchManifestSchema = z
     tagObject: commitSchema,
     commit: commitSchema,
     sourceTree: commitSchema,
-    patchId: z.literal(mvlWhisperPatchId),
+    patchId: mvlWhisperPatchIdSchema,
     patchSha256: hashSchema,
+    patchFiles: z
+      .array(
+        z
+          .object({
+            path: z.enum([
+              "0001-mvl-mapped-token-raw-vad-json.patch",
+              "0002-mvl-request-state-reset.patch",
+            ]),
+            sha256: hashSchema,
+          })
+          .strict(),
+      )
+      .min(1)
+      .optional(),
     responseSchema: z.literal(mvlWhisperResponseSchemaVersion),
-    expectedFiles: z.array(z.literal("examples/server/server.cpp")).length(1),
+    expectedFiles: z
+      .array(
+        z.enum([
+          "examples/server/server.cpp",
+          "include/whisper.h",
+          "src/whisper.cpp",
+        ]),
+      )
+      .min(1),
   })
   .strict();
 
@@ -548,6 +581,7 @@ export const whisperRuntimeBuildManifestSchema = z
     patch: whisperUpstreamPatchManifestSchema.pick({
       patchId: true,
       patchSha256: true,
+      patchFiles: true,
       responseSchema: true,
       expectedFiles: true,
     }),
@@ -604,6 +638,20 @@ const runtimeAbRequestPairSchema = z
     stockRawTokenHash: hashSchema,
     patchedRawTokenHash: hashSchema,
     rawTokensComparable: z.boolean(),
+    stockRawGroupedWordHash: hashSchema.optional(),
+    patchedRawGroupedWordHash: hashSchema.optional(),
+    rawGroupedWordsComparable: z.boolean().optional(),
+    rawGroupedWordsEqual: z.boolean().optional(),
+    individualRawTokenParityStatus: z
+      .enum([
+        "not-observable-on-stock-server",
+        "comparable",
+        "passed",
+        "failed",
+      ])
+      .optional(),
+    individualRawTokensComparable: z.boolean().optional(),
+    individualRawTokensEqual: z.boolean().nullable().optional(),
     patchedMappedTokenCount: z.number().int().nonnegative(),
     patchedRawVadIntervalCount: z.number().int().nonnegative(),
     languageEqual: z.boolean(),
@@ -656,6 +704,12 @@ export const c516StockPatchedRuntimeAbArtifactSchema = z
           textParityCount: z.number().int().nonnegative(),
           segmentParityCount: z.number().int().nonnegative(),
           rawTokenParityCount: z.number().int().nonnegative(),
+          rawGroupedWordParityCount: z.number().int().nonnegative().optional(),
+          individualRawTokenComparablePairCount: z
+            .number()
+            .int()
+            .nonnegative()
+            .optional(),
           languageParityCount: z.number().int().nonnegative(),
           patchedMappedTokenCount: z.number().int().nonnegative(),
           patchedRawVadIntervalCount: z.number().int().nonnegative(),
@@ -669,6 +723,26 @@ export const c516StockPatchedRuntimeAbArtifactSchema = z
         textParityPassed: z.boolean(),
         segmentParityPassed: z.boolean(),
         rawTokenParityPassed: z.boolean(),
+        rawGroupedWordParityPassed: z.boolean().optional(),
+        rawGroupedWordComparablePairCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .optional(),
+        individualRawTokenParityStatus: z
+          .enum([
+            "not-observable-on-stock-server",
+            "comparable",
+            "passed",
+            "failed",
+          ])
+          .optional(),
+        individualRawTokenComparablePairCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .optional(),
+        individualRawTokenParityPassed: z.boolean().nullable().optional(),
         languageParityPassed: z.boolean(),
         requestConfigurationParityPassed: z.boolean(),
         promptParityPassed: z.boolean(),
@@ -678,10 +752,13 @@ export const c516StockPatchedRuntimeAbArtifactSchema = z
         patchedRawVadIntervalCount: z.number().int().nonnegative(),
         stockWallClockSeconds: nonnegativeFiniteSchema,
         patchedWallClockSeconds: nonnegativeFiniteSchema,
-        stockWorkerStartCount: z.literal(1),
-        patchedWorkerStartCount: z.literal(1),
-        stockModelLoadCount: z.literal(1),
-        patchedModelLoadCount: z.literal(1),
+        requestContextIsolation: z
+          .enum(["shared-process", "fresh-process-per-request"])
+          .optional(),
+        stockWorkerStartCount: z.number().int().positive(),
+        patchedWorkerStartCount: z.number().int().positive(),
+        stockModelLoadCount: z.number().int().positive(),
+        patchedModelLoadCount: z.number().int().positive(),
         stockPeakResidentBytes: z.number().int().nonnegative().nullable(),
         patchedPeakResidentBytes: z.number().int().nonnegative().nullable(),
         stockResponseBytes: z.number().int().nonnegative(),
@@ -701,7 +778,10 @@ export const c516StockPatchedRuntimeAbArtifactSchema = z
         (pair) => pair.segmentsEqual,
       ),
       rawTokenParityPassed: value.requestPairs.every(
-        (pair) => pair.rawTokensComparable,
+        (pair) =>
+          pair.rawGroupedWordsEqual ??
+          pair.rawGroupedWordsComparable ??
+          pair.rawTokensComparable,
       ),
       languageParityPassed: value.requestPairs.every(
         (pair) => pair.languageEqual,
@@ -715,6 +795,134 @@ export const c516StockPatchedRuntimeAbArtifactSchema = z
           message: `A/B summary ${field} does not match request pairs.`,
         });
       }
+    }
+    if (
+      value.summary.rawGroupedWordParityPassed !== undefined &&
+      value.summary.rawGroupedWordParityPassed !== expected.rawTokenParityPassed
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["summary", "rawGroupedWordParityPassed"],
+        message:
+          "Grouped raw-word parity must agree with the request-pair comparisons.",
+      });
+    }
+    if (
+      value.summary.rawGroupedWordComparablePairCount !== undefined &&
+      value.summary.rawGroupedWordComparablePairCount !==
+        value.requestPairs.filter(
+          (pair) =>
+            pair.rawGroupedWordsComparable ??
+            pair.stockRawGroupedWordHash !== undefined,
+        ).length
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["summary", "rawGroupedWordComparablePairCount"],
+        message:
+          "Grouped raw-word comparable count must agree with request pairs.",
+      });
+    }
+    if (
+      value.summary.rawGroupedWordParityPassed !== undefined &&
+      value.summary.rawTokenParityPassed !==
+        value.summary.rawGroupedWordParityPassed
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["summary", "rawTokenParityPassed"],
+        message:
+          "Deprecated rawTokenParityPassed must alias rawGroupedWordParityPassed.",
+      });
+    }
+    value.requestPairs.forEach((pair, index) => {
+      if (
+        pair.rawGroupedWordsEqual !== undefined &&
+        pair.rawGroupedWordsComparable === false
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["requestPairs", index, "rawGroupedWordsEqual"],
+          message:
+            "Grouped words cannot have an equality result when they are not comparable.",
+        });
+      }
+      const expectedIndividual =
+        pair.individualRawTokenParityStatus === undefined
+          ? null
+          : pair.individualRawTokenParityStatus ===
+              "not-observable-on-stock-server"
+            ? { comparable: false, equal: null }
+            : pair.individualRawTokenParityStatus === "comparable"
+              ? { comparable: true, equal: null }
+              : pair.individualRawTokenParityStatus === "passed"
+                ? { comparable: true, equal: true }
+                : { comparable: true, equal: false };
+      if (
+        expectedIndividual !== null &&
+        (pair.individualRawTokensComparable !== expectedIndividual.comparable ||
+          pair.individualRawTokensEqual !== expectedIndividual.equal)
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["requestPairs", index, "individualRawTokenParityStatus"],
+          message:
+            "Individual-token observability, comparability, and equality fields disagree.",
+        });
+      }
+    });
+    const individualComparablePairs = value.requestPairs.filter(
+      (pair) => pair.individualRawTokensComparable === true,
+    );
+    const individualStatus =
+      individualComparablePairs.length === 0
+        ? ("not-observable-on-stock-server" as const)
+        : individualComparablePairs.some(
+              (pair) => pair.individualRawTokensEqual === false,
+            )
+          ? ("failed" as const)
+          : individualComparablePairs.every(
+                (pair) => pair.individualRawTokensEqual === true,
+              )
+            ? ("passed" as const)
+            : ("comparable" as const);
+    const individualParity =
+      individualStatus === "passed"
+        ? true
+        : individualStatus === "failed"
+          ? false
+          : null;
+    if (
+      value.summary.individualRawTokenComparablePairCount !== undefined &&
+      value.summary.individualRawTokenComparablePairCount !==
+        individualComparablePairs.length
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["summary", "individualRawTokenComparablePairCount"],
+        message:
+          "Individual-token comparable count does not match request pairs.",
+      });
+    }
+    if (
+      value.summary.individualRawTokenParityStatus !== undefined &&
+      value.summary.individualRawTokenParityStatus !== individualStatus
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["summary", "individualRawTokenParityStatus"],
+        message: "Individual-token parity status does not match request pairs.",
+      });
+    }
+    if (
+      value.summary.individualRawTokenParityPassed !== undefined &&
+      value.summary.individualRawTokenParityPassed !== individualParity
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["summary", "individualRawTokenParityPassed"],
+        message: "Individual-token parity result does not match request pairs.",
+      });
     }
     const accepted =
       value.build.sameSource &&

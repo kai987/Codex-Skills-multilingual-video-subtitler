@@ -8,6 +8,8 @@ import { performance } from "node:perf_hooks";
 
 import {
   AppError,
+  mvlRequestStateIsolation,
+  mvlWhisperPatchId,
   mvlWhisperServerCapabilitiesSchema,
   mvlWhisperServerResponseSchema,
   mvlWhisperResponseSchemaVersion,
@@ -18,6 +20,8 @@ import {
   type TimestampRuntimePolicy,
   type WhisperExecutionMetrics,
   type WhisperExecutionMode,
+  type WorkerStateIsolationMode,
+  type WorkerStateIsolationStrategy,
 } from "@mvl/shared";
 
 import type {
@@ -155,6 +159,12 @@ export function evaluateMvlCapabilityHandshake(input: {
       failures.push("RAW_VAD_GETTER_UNAVAILABLE");
     }
     if (
+      input.expectedRuntime.patchId === mvlWhisperPatchId &&
+      parsed.data.request_state_isolation !== mvlRequestStateIsolation
+    ) {
+      failures.push("REQUEST_STATE_ISOLATION_UNVERIFIED");
+    }
+    if (
       !parsed.data.supported_response_formats.includes("mvl_verbose_json_v1") ||
       expectedSchema !== mvlWhisperResponseSchemaVersion
     ) {
@@ -181,6 +191,8 @@ export interface WhisperWorker {
   readonly backend: "coreml" | "cpu";
   initialize(): Promise<void>;
   transcribe(request: WhisperWorkerRequest): Promise<TranscriptionChunkResult>;
+  /** Returns true only after request-local VAD/token state is proven cleared. */
+  resetState?(): Promise<boolean>;
   healthCheck(): Promise<boolean>;
   close(): Promise<void>;
   metrics(): {
@@ -195,6 +207,7 @@ export interface WhisperWorker {
 }
 
 export interface WhisperWorkerFactory {
+  readonly supportsVerifiedStateReset?: boolean;
   serverPathFor(
     executablePath: string,
     explicitServerPath?: string,
@@ -410,16 +423,54 @@ function parseMvlVerboseJson(
     );
   }
   if (
+    expected.patchId === mvlWhisperPatchId &&
+    (capabilityHandshake.request_state_isolation !== mvlRequestStateIsolation ||
+      response.runtime.capabilities.request_state_isolation !==
+        mvlRequestStateIsolation)
+  ) {
+    throw new AppError(
+      "The patched whisper-server response did not prove fresh per-request state isolation.",
+      {
+        code: "TRANSCRIPTION_FAILED",
+        exitCode: 4,
+        details: { requestId: request.requestId },
+      },
+    );
+  }
+  const lexicalTokenCount = response.transcription.reduce(
+    (count, segment) =>
+      count + segment.tokens.filter((token) => !token.special).length,
+    0,
+  );
+  const mappedTokenCount = response.transcription.reduce(
+    (count, segment) =>
+      count +
+      segment.tokens.filter((token) => !token.special && token.mapped !== null)
+        .length,
+    0,
+  );
+  if (
     request.capability.timestampRuntimePolicy === "require-mapped" &&
     request.request.tokenTimestamps === true &&
-    response.transcription.some((segment) =>
-      segment.tokens.some((token) => !token.special),
-    ) &&
+    lexicalTokenCount > 0 &&
     !response.runtime.capabilities.mapped_token_getter_used
   ) {
     throw new AppError(
       "The patched runtime declared mapped-token support but did not prove getter use for this inference.",
-      { code: "TRANSCRIPTION_FAILED", exitCode: 4 },
+      {
+        code: "TRANSCRIPTION_FAILED",
+        exitCode: 4,
+        details: {
+          requestId: request.requestId,
+          lexicalTokenCount,
+          mappedTokenCount,
+          mappedTokenGetterUsed:
+            response.runtime.capabilities.mapped_token_getter_used,
+          requestTokenTimestamps: request.request.tokenTimestamps,
+          runtimeTokenTimestamps: response.request.token_timestamps,
+          capabilityTokenTimestamps: request.capability.tokenTimestamps,
+        },
+      },
     );
   }
   if (
@@ -860,6 +911,14 @@ class WhisperCppServerWorker implements WhisperWorker {
     return parseVerboseJson(response, request);
   }
 
+  async resetState(): Promise<boolean> {
+    await this.initialize();
+    return (
+      this.#mvlCapabilities?.request_state_isolation ===
+      mvlRequestStateIsolation
+    );
+  }
+
   async healthCheck(): Promise<boolean> {
     if (this.#baseUrl === null) return false;
     try {
@@ -899,6 +958,7 @@ class WhisperCppServerWorker implements WhisperWorker {
 }
 
 export const defaultWhisperWorkerFactory: WhisperWorkerFactory = {
+  supportsVerifiedStateReset: true,
   async serverPathFor(executablePath, explicitServerPath) {
     if (explicitServerPath !== undefined) {
       const explicit = path.resolve(explicitServerPath);
@@ -961,31 +1021,167 @@ interface RequestMetric {
   fallbackMode: "process" | null;
   durationSeconds: number;
   error: string | null;
+  vadMode: "vad" | "no-vad";
+  profile: string;
+  workerId: string | null;
+  contextGeneration: number | null;
+  stateIsolationAction:
+    "none" | "reset" | "restart" | "segregated-route" | "process";
+}
+
+interface ManagedWorkerState {
+  workerId: string;
+  contextGeneration: number;
+  runtimeIdentityHash: string;
+  currentStateClass: "pristine" | "no-vad" | "vad" | "vad-after-no-vad";
+  hasProcessedVadRequest: boolean;
+  hasProcessedNoVadRequest: boolean;
+  lastRequestVadMode: "vad" | "no-vad" | null;
+  lastProfile: string | null;
+  requestCount: number;
+  stateIsolationStrategy: WorkerStateIsolationStrategy;
+  stateResetCount: number;
+  unsafeTransitionCount: number;
+  restartCount: number;
+}
+
+interface RequestOrderMetric {
+  sequence: number;
+  requestKey: string;
+  vadMode: "vad" | "no-vad";
+  profile: string;
+  cacheHit: boolean;
+  workerId: string | null;
+  contextGeneration: number | null;
+  isolationAction:
+    "none" | "reset" | "restart" | "segregated-route" | "process" | "cache-hit";
+}
+
+function requestVadMode(capability: WhisperWorkerCapability): "vad" | "no-vad" {
+  return capability.useVad ? "vad" : "no-vad";
+}
+
+function requestProfile(capability: WhisperWorkerCapability): string {
+  if (!capability.useVad) return "no-vad";
+  return capability.vadProfile === "extra-sensitive-v1"
+    ? "extra-sensitive-vad"
+    : "current-sensitive-vad";
 }
 
 export class WhisperCppWorkerPool {
   readonly requestedMode: WhisperExecutionMode;
+  readonly requestedStateIsolation: WorkerStateIsolationMode;
+  readonly stateIsolationStrategy: WorkerStateIsolationStrategy;
   readonly #factory: WhisperWorkerFactory;
   readonly #workers = new Map<string, WhisperWorker>();
   readonly #allWorkers: WhisperWorker[] = [];
+  readonly #workerStates = new Map<WhisperWorker, ManagedWorkerState>();
+  readonly #generationByRuntime = new Map<string, number>();
   readonly #requests: RequestMetric[] = [];
+  readonly #requestOrderPlan: RequestOrderMetric[] = [];
   readonly #backends = new Set<"coreml" | "cpu">();
   #fallbackProcessCount = 0;
   #fallbackReason: string | null = null;
   #cacheHitCount = 0;
+  #unsafeTransitionCount = 0;
+  #preventedUnsafeTransitionCount = 0;
+  #workerRestartCount = 0;
+  #workerStateResetCount = 0;
 
   constructor(
     options: {
       mode?: WhisperExecutionMode | undefined;
       factory?: WhisperWorkerFactory | undefined;
+      stateIsolation?: WorkerStateIsolationMode | undefined;
     } = {},
   ) {
-    this.requestedMode = options.mode ?? "auto";
     this.#factory = options.factory ?? defaultWhisperWorkerFactory;
+    this.requestedMode = options.mode ?? "auto";
+    this.requestedStateIsolation = options.stateIsolation ?? "require-safe";
+    this.stateIsolationStrategy =
+      this.requestedStateIsolation === "segregated"
+        ? "mode-segregated-workers"
+        : this.requestedStateIsolation !== "restart-on-transition" &&
+            this.#factory.supportsVerifiedStateReset === true
+          ? "verified-per-request-reset"
+          : "restart-on-vad-to-no-vad";
   }
 
   recordCacheHits(count: number): void {
     this.#cacheHitCount += Math.max(0, Math.floor(count));
+  }
+
+  recordCacheHit(input: {
+    requestKey: string;
+    useVad: boolean;
+    profile: string;
+  }): void {
+    this.#cacheHitCount += 1;
+    this.#requestOrderPlan.push({
+      sequence: this.#requestOrderPlan.length,
+      requestKey: input.requestKey,
+      vadMode: input.useVad ? "vad" : "no-vad",
+      profile: input.profile,
+      cacheHit: true,
+      workerId: null,
+      contextGeneration: null,
+      isolationAction: "cache-hit",
+    });
+  }
+
+  #createWorker(input: {
+    routeKey: string;
+    runtimeIdentityHash: string;
+    mode: "persistent" | "batch";
+    capability: WhisperWorkerCapability;
+    serverPath: string;
+  }): WhisperWorker {
+    const generation =
+      (this.#generationByRuntime.get(input.runtimeIdentityHash) ?? 0) + 1;
+    this.#generationByRuntime.set(input.runtimeIdentityHash, generation);
+    const worker = this.#factory.create({
+      batchKey: input.routeKey,
+      mode: input.mode,
+      capability: input.capability,
+      serverPath: input.serverPath,
+    });
+    this.#workers.set(input.routeKey, worker);
+    this.#allWorkers.push(worker);
+    this.#workerStates.set(worker, {
+      workerId: `whisper-worker-${randomUUID()}`,
+      contextGeneration: generation,
+      runtimeIdentityHash: input.runtimeIdentityHash,
+      currentStateClass: "pristine",
+      hasProcessedVadRequest: false,
+      hasProcessedNoVadRequest: false,
+      lastRequestVadMode: null,
+      lastProfile: null,
+      requestCount: 0,
+      stateIsolationStrategy: this.stateIsolationStrategy,
+      stateResetCount: 0,
+      unsafeTransitionCount: 0,
+      restartCount: 0,
+    });
+    return worker;
+  }
+
+  #recordSuccessfulState(
+    state: ManagedWorkerState,
+    vadMode: "vad" | "no-vad",
+    profile: string,
+  ): void {
+    state.requestCount += 1;
+    state.lastRequestVadMode = vadMode;
+    state.lastProfile = profile;
+    if (vadMode === "vad") {
+      state.hasProcessedVadRequest = true;
+      state.currentStateClass = state.hasProcessedNoVadRequest
+        ? "vad-after-no-vad"
+        : "vad";
+    } else {
+      state.hasProcessedNoVadRequest = true;
+      state.currentStateClass = "no-vad";
+    }
   }
 
   async transcribe(input: {
@@ -996,11 +1192,17 @@ export class WhisperCppWorkerPool {
   }): Promise<TranscriptionChunkResult> {
     const requestId = `${input.request.chunk.id}-${randomUUID()}`;
     const batchKey = buildWorkerBatchKey(input.capability);
+    const vadMode = requestVadMode(input.capability);
+    const profile = requestProfile(input.capability);
+    const requestKey = `${input.request.chunk.id}:${profile}`;
     this.#backends.add(input.capability.coreML ? "coreml" : "cpu");
     if (this.requestedMode === "process") {
       return await this.#runProcess({
         requestId,
         batchKey,
+        requestKey,
+        vadMode,
+        profile,
         processFallback: input.processFallback,
         fallback: false,
       });
@@ -1026,6 +1228,9 @@ export class WhisperCppWorkerPool {
       return await this.#runProcess({
         requestId,
         batchKey,
+        requestKey,
+        vadMode,
+        profile,
         processFallback: input.processFallback,
         fallback: true,
       });
@@ -1034,17 +1239,106 @@ export class WhisperCppWorkerPool {
       this.requestedMode === "batch"
         ? ("batch" as const)
         : ("persistent" as const);
-    let worker = this.#workers.get(batchKey);
-    if (worker === undefined) {
-      worker = this.#factory.create({
-        batchKey,
+    const routeKey =
+      this.stateIsolationStrategy === "mode-segregated-workers"
+        ? `${batchKey}:${vadMode}`
+        : batchKey;
+    let isolationAction: RequestMetric["stateIsolationAction"] =
+      this.stateIsolationStrategy === "mode-segregated-workers"
+        ? "segregated-route"
+        : "none";
+    let worker = this.#workers.get(routeKey);
+    worker ??= this.#createWorker({
+      routeKey,
+      runtimeIdentityHash: batchKey,
+      mode,
+      capability: input.capability,
+      serverPath,
+    });
+    let state = this.#workerStates.get(worker);
+    if (state === undefined) {
+      throw new Error("Managed whisper worker state is unavailable.");
+    }
+    if (this.stateIsolationStrategy === "verified-per-request-reset") {
+      const preventsUnsafeTransition =
+        vadMode === "no-vad" && state.hasProcessedVadRequest;
+      if (preventsUnsafeTransition) {
+        this.#unsafeTransitionCount += 1;
+        this.#preventedUnsafeTransitionCount += 1;
+        state.unsafeTransitionCount += 1;
+      }
+      let resetSucceeded = false;
+      let resetFailure: string | null = null;
+      try {
+        resetSucceeded =
+          worker.resetState === undefined ? false : await worker.resetState();
+      } catch (error) {
+        resetFailure = error instanceof Error ? error.message : String(error);
+      }
+      if (!resetSucceeded) {
+        await worker.close();
+        this.#workers.delete(routeKey);
+        throw new AppError(
+          "The whisper worker did not prove fresh request-local state; the request was not executed.",
+          {
+            code: "TRANSCRIPTION_FAILED",
+            exitCode: 4,
+            details: {
+              workerId: state.workerId,
+              contextGeneration: state.contextGeneration,
+              transition: preventsUnsafeTransition
+                ? "vad-to-no-vad"
+                : "per-request-isolation",
+              resetFailure,
+            },
+          },
+        );
+      }
+      this.#workerStateResetCount += 1;
+      state.stateResetCount += 1;
+      state.currentStateClass = "pristine";
+      state.hasProcessedVadRequest = false;
+      state.hasProcessedNoVadRequest = false;
+      state.lastRequestVadMode = null;
+      state.lastProfile = null;
+      isolationAction = "reset";
+    }
+    if (
+      this.stateIsolationStrategy === "restart-on-vad-to-no-vad" &&
+      vadMode === "no-vad" &&
+      state.hasProcessedVadRequest
+    ) {
+      this.#unsafeTransitionCount += 1;
+      this.#preventedUnsafeTransitionCount += 1;
+      this.#workerRestartCount += 1;
+      state.unsafeTransitionCount += 1;
+      state.restartCount += 1;
+      await worker.close();
+      this.#workers.delete(routeKey);
+      worker = this.#createWorker({
+        routeKey,
+        runtimeIdentityHash: batchKey,
         mode,
         capability: input.capability,
         serverPath,
       });
-      this.#workers.set(batchKey, worker);
-      this.#allWorkers.push(worker);
+      state = this.#workerStates.get(worker);
+      if (state === undefined) {
+        throw new Error("Restarted whisper worker state is unavailable.");
+      }
+      isolationAction = "restart";
     }
+    const orderMetric: RequestOrderMetric = {
+      sequence: this.#requestOrderPlan.length,
+      requestKey,
+      vadMode,
+      profile,
+      cacheHit: false,
+      workerId: state.workerId,
+      contextGeneration: state.contextGeneration,
+      isolationAction,
+    };
+    this.#requestOrderPlan.push(orderMetric);
     const started = performance.now();
     try {
       const result = await worker.transcribe({
@@ -1053,6 +1347,7 @@ export class WhisperCppWorkerPool {
         capability: input.capability,
         initialPrompt: input.initialPrompt,
       });
+      this.#recordSuccessfulState(state, vadMode, profile);
       this.#requests.push({
         requestId,
         batchKey,
@@ -1063,19 +1358,34 @@ export class WhisperCppWorkerPool {
         fallbackMode: null,
         durationSeconds: (performance.now() - started) / 1000,
         error: null,
+        vadMode,
+        profile,
+        workerId: state.workerId,
+        contextGeneration: state.contextGeneration,
+        stateIsolationAction: isolationAction,
       });
       return result;
     } catch (firstError) {
+      state.restartCount += 1;
+      this.#workerRestartCount += 1;
       await worker.close();
-      this.#workers.delete(batchKey);
-      const retryWorker = this.#factory.create({
-        batchKey,
+      this.#workers.delete(routeKey);
+      const retryWorker = this.#createWorker({
+        routeKey,
+        runtimeIdentityHash: batchKey,
         mode,
         capability: input.capability,
         serverPath,
       });
-      this.#workers.set(batchKey, retryWorker);
-      this.#allWorkers.push(retryWorker);
+      const retryState = this.#workerStates.get(retryWorker);
+      if (retryState === undefined) {
+        throw new Error("Retry whisper worker state is unavailable.", {
+          cause: firstError,
+        });
+      }
+      orderMetric.workerId = retryState.workerId;
+      orderMetric.contextGeneration = retryState.contextGeneration;
+      orderMetric.isolationAction = "restart";
       try {
         const result = await retryWorker.transcribe({
           requestId,
@@ -1083,6 +1393,7 @@ export class WhisperCppWorkerPool {
           capability: input.capability,
           initialPrompt: input.initialPrompt,
         });
+        this.#recordSuccessfulState(retryState, vadMode, profile);
         this.#requests.push({
           requestId,
           batchKey,
@@ -1093,11 +1404,16 @@ export class WhisperCppWorkerPool {
           fallbackMode: null,
           durationSeconds: (performance.now() - started) / 1000,
           error: null,
+          vadMode,
+          profile,
+          workerId: retryState.workerId,
+          contextGeneration: retryState.contextGeneration,
+          stateIsolationAction: "restart",
         });
         return result;
       } catch (retryError) {
         await retryWorker.close();
-        this.#workers.delete(batchKey);
+        this.#workers.delete(routeKey);
         const message = [
           firstError instanceof Error ? firstError.message : String(firstError),
           retryError instanceof Error ? retryError.message : String(retryError),
@@ -1113,13 +1429,37 @@ export class WhisperCppWorkerPool {
             fallbackMode: null,
             durationSeconds: (performance.now() - started) / 1000,
             error: message,
+            vadMode,
+            profile,
+            workerId: retryState.workerId,
+            contextGeneration: retryState.contextGeneration,
+            stateIsolationAction: "restart",
           });
           throw new AppError(
             "The explicitly requested persistent whisper.cpp worker failed.",
             {
               code: "TRANSCRIPTION_FAILED",
               exitCode: 4,
-              details: { requestId, batchKey, reason: message },
+              details: {
+                requestId,
+                batchKey,
+                reason: message,
+                firstFailure:
+                  firstError instanceof AppError
+                    ? {
+                        code: firstError.code,
+                        details: firstError.details,
+                      }
+                    : null,
+                retryFailure:
+                  retryError instanceof AppError
+                    ? {
+                        code: retryError.code,
+                        details: retryError.details,
+                      }
+                    : null,
+              },
+              cause: retryError,
             },
           );
         }
@@ -1127,6 +1467,9 @@ export class WhisperCppWorkerPool {
         return await this.#runProcess({
           requestId,
           batchKey,
+          requestKey,
+          vadMode,
+          profile,
           processFallback: input.processFallback,
           fallback: true,
           retryCount: 1,
@@ -1139,6 +1482,9 @@ export class WhisperCppWorkerPool {
   async #runProcess(input: {
     requestId: string;
     batchKey: string;
+    requestKey: string;
+    vadMode: "vad" | "no-vad";
+    profile: string;
     processFallback: () => Promise<TranscriptionChunkResult>;
     fallback: boolean;
     retryCount?: number | undefined;
@@ -1146,6 +1492,22 @@ export class WhisperCppWorkerPool {
   }): Promise<TranscriptionChunkResult> {
     const started = performance.now();
     if (input.fallback) this.#fallbackProcessCount += 1;
+    if (
+      !this.#requestOrderPlan.some(
+        (request) => request.requestKey === input.requestKey,
+      )
+    ) {
+      this.#requestOrderPlan.push({
+        sequence: this.#requestOrderPlan.length,
+        requestKey: input.requestKey,
+        vadMode: input.vadMode,
+        profile: input.profile,
+        cacheHit: false,
+        workerId: null,
+        contextGeneration: null,
+        isolationAction: "process",
+      });
+    }
     try {
       const result = await input.processFallback();
       this.#requests.push({
@@ -1158,6 +1520,11 @@ export class WhisperCppWorkerPool {
         fallbackMode: input.fallback ? "process" : null,
         durationSeconds: (performance.now() - started) / 1000,
         error: input.priorError ?? null,
+        vadMode: input.vadMode,
+        profile: input.profile,
+        workerId: null,
+        contextGeneration: null,
+        stateIsolationAction: "process",
       });
       return result;
     } catch (error) {
@@ -1171,6 +1538,11 @@ export class WhisperCppWorkerPool {
         fallbackMode: input.fallback ? "process" : null,
         durationSeconds: (performance.now() - started) / 1000,
         error: error instanceof Error ? error.message : String(error),
+        vadMode: input.vadMode,
+        profile: input.profile,
+        workerId: null,
+        contextGeneration: null,
+        stateIsolationAction: "process",
       });
       throw error;
     }
@@ -1178,12 +1550,30 @@ export class WhisperCppWorkerPool {
 
   metrics(): WhisperExecutionMetrics {
     const workers = this.#allWorkers;
-    const workerMetrics = workers.map((worker) => ({
-      batchKey: worker.batchKey,
-      mode: worker.mode,
-      backend: worker.backend,
-      ...worker.metrics(),
-    }));
+    const workerMetrics = workers.map((worker) => {
+      const state = this.#workerStates.get(worker);
+      if (state === undefined) {
+        throw new Error("Managed whisper worker metrics state is unavailable.");
+      }
+      return {
+        batchKey: worker.batchKey,
+        mode: worker.mode,
+        backend: worker.backend,
+        ...worker.metrics(),
+        workerId: state.workerId,
+        contextGeneration: state.contextGeneration,
+        runtimeIdentityHash: state.runtimeIdentityHash,
+        currentStateClass: state.currentStateClass,
+        hasProcessedVadRequest: state.hasProcessedVadRequest,
+        hasProcessedNoVadRequest: state.hasProcessedNoVadRequest,
+        lastRequestVadMode: state.lastRequestVadMode,
+        lastProfile: state.lastProfile,
+        stateIsolationStrategy: state.stateIsolationStrategy,
+        stateResetCount: state.stateResetCount,
+        unsafeTransitionCount: state.unsafeTransitionCount,
+        restartCount: state.restartCount,
+      };
+    });
     const executionMode = this.#requests.some(
       (request) => request.mode === "persistent",
     )
@@ -1233,6 +1623,32 @@ export class WhisperCppWorkerPool {
         0,
       ),
       fallbackProcessCount: this.#fallbackProcessCount,
+      requestStateIsolationStrategy: this.stateIsolationStrategy,
+      requestOrderPlan: this.#requestOrderPlan,
+      requestOrderHash: createHash("sha256")
+        .update(
+          JSON.stringify(
+            this.#requestOrderPlan.map((request) => ({
+              requestKey: request.requestKey,
+              vadMode: request.vadMode,
+              profile: request.profile,
+            })),
+          ),
+        )
+        .digest("hex"),
+      unsafeTransitionCount: this.#unsafeTransitionCount,
+      unsafeWorkerTransitionCount: 0,
+      preventedUnsafeTransitionCount: this.#preventedUnsafeTransitionCount,
+      preventedUnsafeWorkerTransitionCount:
+        this.#preventedUnsafeTransitionCount,
+      workerRestartCount: this.#workerRestartCount,
+      workerStateResetCount: this.#workerStateResetCount,
+      modeSegregatedWorkerCount:
+        this.stateIsolationStrategy === "mode-segregated-workers"
+          ? workerMetrics.length
+          : 0,
+      requestOrderIndependencePassed: null,
+      cleanProcessParityPassed: null,
       requests: this.#requests,
       workers: workerMetrics,
       fallbackReason: this.#fallbackReason,

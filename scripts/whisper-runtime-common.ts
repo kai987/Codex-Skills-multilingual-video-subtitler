@@ -14,10 +14,28 @@ export const whisperPatchPath = path.join(
   whisperPatchDirectory,
   "0001-mvl-mapped-token-raw-vad-json.patch",
 );
+export const whisperRequestStatePatchPath = path.join(
+  whisperPatchDirectory,
+  "0002-mvl-request-state-reset.patch",
+);
+export const whisperPatchPaths = [
+  whisperPatchPath,
+  whisperRequestStatePatchPath,
+] as const;
 export const whisperPatchManifestPath = path.join(
   whisperPatchDirectory,
   "upstream-manifest.json",
 );
+
+export function whisperPatchPathsForManifest(
+  manifest: WhisperUpstreamPatchManifest,
+): string[] {
+  return (
+    manifest.patchFiles ?? [
+      { path: path.basename(whisperPatchPath), sha256: manifest.patchSha256 },
+    ]
+  ).map((entry) => path.join(whisperPatchDirectory, entry.path));
+}
 
 export interface CommandResult {
   stdout: string;
@@ -138,16 +156,40 @@ export async function validatePinnedWhisperSource(input: {
 export async function verifyWhisperPatchFiles(
   manifest: WhisperUpstreamPatchManifest,
 ): Promise<void> {
-  const patchSha256 = await sha256File(whisperPatchPath);
-  if (patchSha256 !== manifest.patchSha256) {
+  const declared = manifest.patchFiles ?? [
+    {
+      path: path.basename(whisperPatchPath),
+      sha256: manifest.patchSha256,
+    },
+  ];
+  const expectedPatchPaths = whisperPatchPathsForManifest(manifest);
+  const patchBuffers = await Promise.all(
+    expectedPatchPaths.map(async (patchPath) => await readFile(patchPath)),
+  );
+  const actualPatchHashes = patchBuffers.map((buffer) => sha256Bytes(buffer));
+  for (const [index, entry] of declared.entries()) {
+    if (actualPatchHashes[index] !== entry.sha256) {
+      throw new InputError(
+        `Whisper patch SHA-256 mismatch for ${entry.path}: expected ${entry.sha256}, received ${String(actualPatchHashes[index])}.`,
+      );
+    }
+  }
+  const seriesSha256 = sha256Bytes(Buffer.concat(patchBuffers));
+  if (seriesSha256 !== manifest.patchSha256) {
     throw new InputError(
-      `Whisper patch SHA-256 mismatch: expected ${manifest.patchSha256}, received ${patchSha256}.`,
+      `Whisper patch-series SHA-256 mismatch: expected ${manifest.patchSha256}, received ${seriesSha256}.`,
     );
   }
-  const patch = await readFile(whisperPatchPath, "utf8");
-  const paths = [...patch.matchAll(/^\+\+\+ b\/(.+)$/gmu)]
-    .map((match) => match[1])
-    .filter((value): value is string => value !== undefined);
+  const patchTexts = patchBuffers.map((buffer) => buffer.toString("utf8"));
+  const [serializerPatchText] = patchTexts;
+  if (serializerPatchText === undefined) {
+    throw new InputError("Whisper patch manifest has no serializer patch.");
+  }
+  const paths = patchTexts.flatMap((patch) =>
+    [...patch.matchAll(/^\+\+\+ b\/(.+)$/gmu)]
+      .map((match) => match[1])
+      .filter((value): value is string => value !== undefined),
+  );
   const uniquePaths = [...new Set(paths)].toSorted();
   if (
     stableJson(uniquePaths) !==
@@ -157,17 +199,28 @@ export async function verifyWhisperPatchFiles(
       `Whisper patch file list does not match manifest: ${uniquePaths.join(", ")}.`,
     );
   }
-  const forbidden = [
-    /^src\//u,
-    /^include\//u,
-    /(?:^|\/)whisper\.cpp$/u,
-    /CMakeLists\.txt$/u,
-  ];
+  const serializerPaths = [
+    ...serializerPatchText.matchAll(/^\+\+\+ b\/(.+)$/gmu),
+  ]
+    .map((match) => match[1])
+    .filter((value): value is string => value !== undefined);
   if (
-    uniquePaths.some((file) => forbidden.some((pattern) => pattern.test(file)))
+    stableJson([...new Set(serializerPaths)].toSorted()) !==
+    stableJson(["examples/server/server.cpp"])
   ) {
     throw new InputError(
       "Whisper evidence serializer patch must not modify core inference or build files.",
+    );
+  }
+  if (
+    patchTexts.some((patch) =>
+      /^\+.*(?:temperature_inc|entropy_thold|logprob_thold|vad_threshold|vad_min_|vad_max_|vad_speech_pad|vad_samples_overlap)\s*=/mu.test(
+        patch,
+      ),
+    )
+  ) {
+    throw new InputError(
+      "Whisper patch series must not modify decoding thresholds or VAD parameters.",
     );
   }
 }

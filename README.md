@@ -97,6 +97,17 @@ npm run replay:c5-15-1-timestamp-integrity -- \
 
 Audit a legacy C5.15 artifact with `npm run audit:c5-15-token-timestamps -- --artifact <artifact.json>`. The command reports containment, zero-duration, boundary-clamp, and maximum-drift evidence without modifying the artifact.
 
+C5.16/C5.16.1 can use the pinned repo-local whisper.cpp v1.9.3 runtime patch to expose official mapped-token timestamps and raw VAD boundaries. C5.16.1 measures each extracted WAV from frame count, preserves every raw interval, and normalizes only an explainable boundary overrun within the configurable 50 ms default tolerance (100 ms hard maximum). Larger or structurally invalid intervals remain quarantined. The patched server creates a fresh `whisper_state` for every MVL inference request while retaining one server process and one loaded model, so correctness no longer depends on arranging no-VAD before VAD requests. Cache identity includes the raw-VAD boundary and worker-state-isolation policy versions.
+
+Local task artifacts retain full diagnostic paths. For sharing, generate strict relative-path copies and audit them for absolute paths and secret-like values:
+
+```bash
+npm run emit:c5-16-1-shareable-artifacts -- --task "/path/to/task-output"
+npm run audit:shareable-artifacts -- --input "/path/to/task-output/shareable"
+```
+
+Use `npm run replay:c5-16-1-offline-evidence --` to migrate existing C5.16 evidence without ASR. Use `npm run replay:c5-16-1-runtime-stabilization --` for standard, adversarial, or cache-replay execution and `npm run verify:c5-16-1-worker-state-isolation --` plus `npm run validate:c5-16-1-runs --` for parity and cross-run acceptance. Stock whisper.cpp exposes grouped words rather than individual timed tokens, so A/B output calls this `rawGroupedWordParityPassed` and records individual-token parity as `not-observable-on-stock-server` instead of claiming equivalence.
+
 Replay an existing human-reviewed task into a collision-safe sibling directory without ASR, subtitle lookup, network access, or model/API calls:
 
 ```bash

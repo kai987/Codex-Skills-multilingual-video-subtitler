@@ -543,6 +543,43 @@ describe("C5.15 acoustic planning and cache", () => {
       presentationResolutionHash(overlapAcousticEvidenceForHash(uncached)),
     ).toBe(presentationResolutionHash(overlapAcousticEvidenceForHash(cached)));
   });
+
+  it("keeps semantic evidence hashes stable across request order", () => {
+    const first = attempt("no-vad", [{ text: "かな", start: 1, end: 2 }]);
+    const second = attempt("current-sensitive-vad", [
+      { text: "かな", start: 1, end: 2 },
+    ]);
+    const common = {
+      generatedAt: "2026-08-26T00:00:00.000Z",
+      sourceFingerprint: {
+        fileName: "fixture.mkv",
+        size: 1024,
+        durationSeconds: 10,
+        sha256: HASH,
+      },
+      baseCueHash: HASH,
+      basePresentationResolutionHash: HASH,
+      mode: "enforce" as const,
+      audioStreamIndex: 1,
+      components: [],
+    };
+    const standard = buildSubtitleOverlapAcousticResolution({
+      ...common,
+      configuration: { requestOrder: "standard" },
+      attempts: [first, second],
+    });
+    const adversarial = buildSubtitleOverlapAcousticResolution({
+      ...common,
+      configuration: { requestOrder: "adversarial" },
+      attempts: [second, first],
+    });
+
+    expect(
+      presentationResolutionHash(overlapAcousticEvidenceForHash(standard)),
+    ).toBe(
+      presentationResolutionHash(overlapAcousticEvidenceForHash(adversarial)),
+    );
+  });
 });
 
 describe("C5.15 posterior cue alignment", () => {

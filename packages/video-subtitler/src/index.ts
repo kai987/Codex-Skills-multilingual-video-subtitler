@@ -11,6 +11,7 @@ export * from "./package.js";
 export * from "./probe.js";
 export * from "./reference-workflow.js";
 export * from "./review.js";
+export * from "./shareable-artifacts.js";
 export * from "./transport.js";
 export * from "./types.js";
 export * from "./workflow.js";

@@ -11,7 +11,7 @@
     },
     "resolutionVersion": {
       "type": "string",
-      "enum": ["C5.15", "C5.15.1", "C5.16"]
+      "enum": ["C5.15", "C5.15.1", "C5.16", "C5.16.1"]
     },
     "generatedAt": {
       "type": "string",
@@ -93,6 +93,19 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "rawVadBoundaryNormalizationToleranceSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.1
+        },
+        "workerStateIsolationPolicyVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestOrder": {
+          "type": "string",
+          "enum": ["standard", "adversarial"]
         },
         "scoringWeights": {
           "type": "object",
@@ -405,310 +418,10 @@
           "timestampIntegrityRef": {
             "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
           },
-          "decodedSegmentIntervals": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "intervalId": { "type": "string", "minLength": 1 },
-                "source": {
-                  "type": "string",
-                  "enum": [
-                    "decoded-segment",
-                    "trusted-mapped-token",
-                    "trusted-no-vad-token",
-                    "raw-vad",
-                    "source-cue"
-                  ]
-                },
-                "coordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "start": { "type": "number", "minimum": 0 },
-                "end": { "type": "number", "exclusiveMinimum": 0 },
-                "timingUsable": { "type": "boolean" },
-                "rawStart": { "type": "number", "minimum": 0 },
-                "rawEnd": { "type": "number", "exclusiveMinimum": 0 },
-                "rawCoordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "mappingMethod": {
-                  "type": "string",
-                  "enum": [
-                    "identity-original-local",
-                    "official-mapped-token-getter",
-                    "verified-segment-relative-offset",
-                    "verified-vad-timeline-map",
-                    "verified-original-audio-local-offset",
-                    "unmapped",
-                    "quarantined"
-                  ]
-                },
-                "rawVadIntervalHealthStatus": {
-                  "type": "string",
-                  "enum": [
-                    "trusted",
-                    "overlapping-with-padding",
-                    "invalid",
-                    "out-of-range",
-                    "unavailable"
-                  ]
-                },
-                "evidenceLineageId": { "type": "string", "minLength": 1 }
-              },
-              "required": [
-                "intervalId",
-                "source",
-                "coordinateSystem",
-                "start",
-                "end",
-                "timingUsable"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "mappedTrustedTokenIntervals": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "intervalId": { "type": "string", "minLength": 1 },
-                "source": {
-                  "type": "string",
-                  "enum": [
-                    "decoded-segment",
-                    "trusted-mapped-token",
-                    "trusted-no-vad-token",
-                    "raw-vad",
-                    "source-cue"
-                  ]
-                },
-                "coordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "start": { "type": "number", "minimum": 0 },
-                "end": { "type": "number", "exclusiveMinimum": 0 },
-                "timingUsable": { "type": "boolean" },
-                "rawStart": { "type": "number", "minimum": 0 },
-                "rawEnd": { "type": "number", "exclusiveMinimum": 0 },
-                "rawCoordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "mappingMethod": {
-                  "type": "string",
-                  "enum": [
-                    "identity-original-local",
-                    "official-mapped-token-getter",
-                    "verified-segment-relative-offset",
-                    "verified-vad-timeline-map",
-                    "verified-original-audio-local-offset",
-                    "unmapped",
-                    "quarantined"
-                  ]
-                },
-                "rawVadIntervalHealthStatus": {
-                  "type": "string",
-                  "enum": [
-                    "trusted",
-                    "overlapping-with-padding",
-                    "invalid",
-                    "out-of-range",
-                    "unavailable"
-                  ]
-                },
-                "evidenceLineageId": { "type": "string", "minLength": 1 }
-              },
-              "required": [
-                "intervalId",
-                "source",
-                "coordinateSystem",
-                "start",
-                "end",
-                "timingUsable"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "rawVadIntervals": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "intervalId": { "type": "string", "minLength": 1 },
-                "source": {
-                  "type": "string",
-                  "enum": [
-                    "decoded-segment",
-                    "trusted-mapped-token",
-                    "trusted-no-vad-token",
-                    "raw-vad",
-                    "source-cue"
-                  ]
-                },
-                "coordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "start": { "type": "number", "minimum": 0 },
-                "end": { "type": "number", "exclusiveMinimum": 0 },
-                "timingUsable": { "type": "boolean" },
-                "rawStart": { "type": "number", "minimum": 0 },
-                "rawEnd": { "type": "number", "exclusiveMinimum": 0 },
-                "rawCoordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "mappingMethod": {
-                  "type": "string",
-                  "enum": [
-                    "identity-original-local",
-                    "official-mapped-token-getter",
-                    "verified-segment-relative-offset",
-                    "verified-vad-timeline-map",
-                    "verified-original-audio-local-offset",
-                    "unmapped",
-                    "quarantined"
-                  ]
-                },
-                "rawVadIntervalHealthStatus": {
-                  "type": "string",
-                  "enum": [
-                    "trusted",
-                    "overlapping-with-padding",
-                    "invalid",
-                    "out-of-range",
-                    "unavailable"
-                  ]
-                },
-                "evidenceLineageId": { "type": "string", "minLength": 1 }
-              },
-              "required": [
-                "intervalId",
-                "source",
-                "coordinateSystem",
-                "start",
-                "end",
-                "timingUsable"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "sourceCueIntervals": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "intervalId": { "type": "string", "minLength": 1 },
-                "source": {
-                  "type": "string",
-                  "enum": [
-                    "decoded-segment",
-                    "trusted-mapped-token",
-                    "trusted-no-vad-token",
-                    "raw-vad",
-                    "source-cue"
-                  ]
-                },
-                "coordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "start": { "type": "number", "minimum": 0 },
-                "end": { "type": "number", "exclusiveMinimum": 0 },
-                "timingUsable": { "type": "boolean" },
-                "rawStart": { "type": "number", "minimum": 0 },
-                "rawEnd": { "type": "number", "exclusiveMinimum": 0 },
-                "rawCoordinateSystem": {
-                  "type": "string",
-                  "enum": [
-                    "original-audio-local",
-                    "original-media-global",
-                    "vad-processed-local",
-                    "segment-relative",
-                    "unknown"
-                  ]
-                },
-                "mappingMethod": {
-                  "type": "string",
-                  "enum": [
-                    "identity-original-local",
-                    "official-mapped-token-getter",
-                    "verified-segment-relative-offset",
-                    "verified-vad-timeline-map",
-                    "verified-original-audio-local-offset",
-                    "unmapped",
-                    "quarantined"
-                  ]
-                },
-                "rawVadIntervalHealthStatus": {
-                  "type": "string",
-                  "enum": [
-                    "trusted",
-                    "overlapping-with-padding",
-                    "invalid",
-                    "out-of-range",
-                    "unavailable"
-                  ]
-                },
-                "evidenceLineageId": { "type": "string", "minLength": 1 }
-              },
-              "required": [
-                "intervalId",
-                "source",
-                "coordinateSystem",
-                "start",
-                "end",
-                "timingUsable"
-              ],
-              "additionalProperties": false
-            }
-          },
+          "decodedSegmentIntervals": { "type": "array", "items": {} },
+          "mappedTrustedTokenIntervals": { "type": "array", "items": {} },
+          "rawVadIntervals": { "type": "array", "items": {} },
+          "sourceCueIntervals": { "type": "array", "items": {} },
           "metrics": {
             "type": "object",
             "properties": {
@@ -816,6 +529,16 @@
             "required": ["start", "end"],
             "additionalProperties": false
           },
+          "nominalExtractionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "nominalDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
           "audioPath": {
             "anyOf": [
               {
@@ -833,6 +556,29 @@
             ]
           },
           "audioDurationSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "actualAudioDurationSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "actualAudioLocalEndSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "actualMediaGlobalEndSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "durationDifferenceSeconds": { "type": "number" },
+          "durationMeasurementMethod": { "type": "string", "minLength": 1 },
+          "ffprobeDurationSeconds": {
+            "anyOf": [
+              { "type": "number", "exclusiveMinimum": 0 },
+              { "type": "null" }
+            ]
+          },
+          "durationCrossCheckDeltaSeconds": {
             "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
           },
           "audioFullyCoversComponent": { "type": "boolean" },

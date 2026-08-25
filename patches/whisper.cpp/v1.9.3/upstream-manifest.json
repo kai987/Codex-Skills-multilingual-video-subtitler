@@ -6,8 +6,22 @@
   "tagObject": "7246b7311e089fe092c4abe7cfad5d0921f8be00",
   "commit": "371b5a7561823ab2bb32142d2751e35e7534727b",
   "sourceTree": "3d7ce4f956997cfa325c7556533aba5604278463",
-  "patchId": "mvl-mapped-token-raw-vad-json-v1",
-  "patchSha256": "bba39640e7005a1fdeb62c549d04ba76b6fc0d8aedae43daf9c9de1ab10a735d",
+  "patchId": "mvl-mapped-token-raw-vad-json-v1+request-state-isolation-v1",
+  "patchSha256": "78922c97975e76e19613d6fe2e61d7e96ae1b992df4a07ae8d77a31181f81df7",
+  "patchFiles": [
+    {
+      "path": "0001-mvl-mapped-token-raw-vad-json.patch",
+      "sha256": "bba39640e7005a1fdeb62c549d04ba76b6fc0d8aedae43daf9c9de1ab10a735d"
+    },
+    {
+      "path": "0002-mvl-request-state-reset.patch",
+      "sha256": "0d0df33cae2d273c856db5cfbd63e3e8732be44f1d5ffda481817ea4662eb2ae"
+    }
+  ],
   "responseSchema": "mvl-whisper-server-response/1.0.0",
-  "expectedFiles": ["examples/server/server.cpp"]
+  "expectedFiles": [
+    "examples/server/server.cpp",
+    "include/whisper.h",
+    "src/whisper.cpp"
+  ]
 }

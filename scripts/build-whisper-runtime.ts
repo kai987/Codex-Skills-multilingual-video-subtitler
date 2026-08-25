@@ -25,7 +25,7 @@ import {
   stableJson,
   validatePinnedWhisperSource,
   verifyWhisperPatchFiles,
-  whisperPatchPath,
+  whisperPatchPathsForManifest,
 } from "./whisper-runtime-common.js";
 
 const { values } = parseArgs({
@@ -65,6 +65,7 @@ async function isDirectory(target: string): Promise<boolean> {
 
 const manifest = await readWhisperPatchManifest();
 await verifyWhisperPatchFiles(manifest);
+const patchPaths = whisperPatchPathsForManifest(manifest);
 
 async function resolveSourceDirectory(): Promise<string> {
   if (values["source-dir"] !== undefined) {
@@ -127,7 +128,11 @@ await validatePinnedWhisperSource({
   manifest,
   requireClean: true,
 });
-await runCommand("git", ["apply", "--check", whisperPatchPath], {
+const [serializerPatchPath] = patchPaths;
+if (serializerPatchPath === undefined) {
+  throw new InputError("Whisper patch manifest has no serializer patch.");
+}
+await runCommand("git", ["apply", "--check", serializerPatchPath], {
   cwd: sourceDirectory,
 });
 
@@ -290,7 +295,12 @@ try {
       cwd: sourceDirectory,
     },
   );
-  await runCommand("git", ["apply", whisperPatchPath], { cwd: patchedSource });
+  for (const patchPath of patchPaths) {
+    await runCommand("git", ["apply", "--check", patchPath], {
+      cwd: patchedSource,
+    });
+    await runCommand("git", ["apply", patchPath], { cwd: patchedSource });
+  }
 
   const jobs =
     values.jobs ??
@@ -367,6 +377,9 @@ try {
     patch: {
       patchId: manifest.patchId,
       patchSha256: manifest.patchSha256,
+      ...(manifest.patchFiles === undefined
+        ? {}
+        : { patchFiles: manifest.patchFiles }),
       responseSchema: manifest.responseSchema,
       expectedFiles: manifest.expectedFiles,
     },

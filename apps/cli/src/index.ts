@@ -205,6 +205,10 @@ interface FinalizeCliOptions extends GlobalOptions {
   asrCacheDir?: string;
   asrCacheImport?: string[];
   asrCacheMode: "off" | "read" | "read-write";
+  rawVadBoundaryTolerance: number;
+  workerStateIsolation:
+    "auto" | "require-safe" | "restart-on-transition" | "segregated";
+  overlapRequestOrder: "standard" | "adversarial";
 }
 
 interface ReviewCliOptions extends GlobalOptions {
@@ -1244,6 +1248,28 @@ program
       .default("auto"),
   )
   .option(
+    "--raw-vad-boundary-tolerance <seconds>",
+    "maximum near-boundary Raw VAD normalization (hard maximum 0.10)",
+    nonNegativeNumber,
+    0.05,
+  )
+  .addOption(
+    new Option(
+      "--worker-state-isolation <mode>",
+      "persistent-worker VAD/no-VAD state isolation",
+    )
+      .choices(["auto", "require-safe", "restart-on-transition", "segregated"])
+      .default("require-safe"),
+  )
+  .addOption(
+    new Option(
+      "--overlap-request-order <order>",
+      "targeted overlap request scheduling plan",
+    )
+      .choices(["standard", "adversarial"])
+      .default("standard"),
+  )
+  .option(
     "--runtime-capability-manifest <path>",
     "matching repo-local whisper runtime build manifest",
   )
@@ -1281,6 +1307,11 @@ program
   .option("--no-review-audio", "skip review audio extraction")
   .option("--dry-run", "validate and compute without writing outputs")
   .action(async (options: FinalizeCliOptions, command: Command) => {
+    if (options.rawVadBoundaryTolerance > 0.1) {
+      throw new InputError(
+        "--raw-vad-boundary-tolerance cannot exceed 0.10 seconds.",
+      );
+    }
     const globals = command.optsWithGlobals<GlobalOptions>();
     const logger = new ConsoleLogger(
       globals.jsonLogs ?? false,
@@ -1321,6 +1352,10 @@ program
         : { whisperServerPath: options.whisperServerPath }),
       timestampRuntimePolicy: options.timestampRuntimePolicy,
       rawVadPolicy: options.rawVadPolicy,
+      rawVadBoundaryNormalizationToleranceSeconds:
+        options.rawVadBoundaryTolerance,
+      workerStateIsolation: options.workerStateIsolation,
+      overlapRequestOrder: options.overlapRequestOrder,
       ...(options.runtimeCapabilityManifest === undefined
         ? {}
         : {
