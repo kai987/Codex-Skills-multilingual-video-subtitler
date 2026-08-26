@@ -18,6 +18,7 @@ export * from "./c5-17-1-schemas.js";
 export * from "./c5-17-2-schemas.js";
 export * from "./c5-18-schemas.js";
 export * from "./c5-18-1-schemas.js";
+export * from "./c5-19-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

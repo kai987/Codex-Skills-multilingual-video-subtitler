@@ -7,6 +7,12 @@ import {
   type TerminologyEvidenceArtifact,
 } from "@mvl/shared";
 
+import {
+  rankCandidatesWithSeriesMemory,
+  type MemoryRankingPoolInput,
+} from "./memory-ranking.js";
+import type { SeriesLanguageMemory } from "@mvl/shared";
+
 function hash(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
@@ -56,4 +62,19 @@ export function buildTerminologyEvidence(input: {
     fallback:
       entries.length === 0 ? "no-terminology-dictionary-provided" : null,
   });
+}
+
+/**
+ * C5.19 integration point. Existing terminology evidence remains cue-local and
+ * replacement-disabled; Series Memory is delegated to the same ranking path so
+ * it cannot become an independent finalization authority.
+ */
+export function buildSeriesAwareTerminologyRanking(input: {
+  pools: readonly MemoryRankingPoolInput[];
+  memory: SeriesLanguageMemory;
+  tieBreakMargin?: number;
+  generatedAt?: string;
+  evaluationMode?: "bootstrap" | "causal" | "frozen";
+}) {
+  return rankCandidatesWithSeriesMemory(input);
 }

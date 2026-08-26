@@ -1,0 +1,502 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/series-language-memory-delta.schema.json",
+  "title": "series-language-memory-delta",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "series-language-memory-delta"
+    },
+    "deltaVersion": { "type": "string", "const": "C5.19" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "seriesKey": { "type": "string", "minLength": 1 },
+    "parentMemoryHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "proposedEntry": {
+            "type": "object",
+            "properties": {
+              "entryId": { "type": "string", "minLength": 1 },
+              "seriesKey": { "type": "string", "minLength": 1 },
+              "entryType": {
+                "type": "string",
+                "enum": [
+                  "proper-noun",
+                  "person-name",
+                  "place-name",
+                  "organization-name",
+                  "title-name",
+                  "terminology",
+                  "regional-term",
+                  "domain-term",
+                  "dialect-form",
+                  "fixed-expression",
+                  "pronunciation-only",
+                  "orthographic-variant",
+                  "correction-pair"
+                ]
+              },
+              "canonicalSurface": { "type": "string", "minLength": 1 },
+              "canonicalSurfaceNfc": { "type": "string", "minLength": 1 },
+              "lookupKeyNfkc": { "type": "string", "minLength": 1 },
+              "readingHiragana": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "readingKatakana": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "pronunciationPhones": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "dictionaryForm": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "normalizedForm": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "partOfSpeech": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "variants": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "orthographicVariants": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "acousticAliases": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "acousticAliasProvenance": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "alias": { "type": "string", "minLength": 1 },
+                    "aliasType": {
+                      "type": "string",
+                      "enum": [
+                        "reading",
+                        "orthographic-reading",
+                        "human-correction-reading"
+                      ]
+                    },
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "sudachi-reading",
+                        "mfa-dictionary-reading",
+                        "g2p-reading",
+                        "manual-reading",
+                        "human-correction-reading"
+                      ]
+                    },
+                    "sourceArtifactHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "sourceEntryId": { "type": "string", "minLength": 1 },
+                    "sourceEvidenceIds": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "trustLevel": {
+                      "type": "string",
+                      "enum": [
+                        "human-corrected",
+                        "human-reviewed",
+                        "validated-series",
+                        "repeated-verified",
+                        "single-observation",
+                        "candidate-only"
+                      ]
+                    },
+                    "verified": { "type": "boolean" }
+                  },
+                  "required": [
+                    "alias",
+                    "aliasType",
+                    "source",
+                    "sourceArtifactHash",
+                    "sourceEntryId",
+                    "sourceEvidenceIds",
+                    "trustLevel",
+                    "verified"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "observedWrongForms": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "dialectMetadata": {
+                "type": "object",
+                "properties": {
+                  "isDialectCandidate": { "type": "boolean" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["not-dialect", "candidate", "verified"]
+                  },
+                  "region": { "type": "string", "minLength": 1 },
+                  "surfaceForm": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "dialectPattern": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "standardEquivalent": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "equivalenceSource": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "markerType": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "preserveSurface": { "type": "boolean" },
+                  "preservationRequired": { "type": "boolean" }
+                },
+                "required": [
+                  "isDialectCandidate",
+                  "status",
+                  "region",
+                  "surfaceForm",
+                  "dialectPattern",
+                  "standardEquivalent",
+                  "equivalenceSource",
+                  "markerType",
+                  "preserveSurface",
+                  "preservationRequired"
+                ],
+                "additionalProperties": false
+              },
+              "preservationPolicy": {
+                "type": "string",
+                "enum": [
+                  "preserve-canonical-surface",
+                  "preserve-dialect-surface",
+                  "ranking-only",
+                  "pronunciation-projection-only"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": ["active", "quarantined", "deprecated"]
+              },
+              "trustLevel": {
+                "type": "string",
+                "enum": [
+                  "human-corrected",
+                  "human-reviewed",
+                  "validated-series",
+                  "repeated-verified",
+                  "single-observation",
+                  "candidate-only"
+                ]
+              },
+              "applicationEligibility": {
+                "type": "string",
+                "enum": [
+                  "ranking-and-pronunciation",
+                  "ranking-only",
+                  "pronunciation-only",
+                  "suggestion-only",
+                  "none"
+                ]
+              },
+              "sourceEpisodes": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "firstSeen": { "type": "number", "minimum": 0 },
+              "lastSeen": { "type": "number", "minimum": 0 },
+              "occurrenceIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "evidence": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "evidenceId": { "type": "string", "minLength": 1 },
+                    "evidenceLineageId": { "type": "string", "minLength": 1 },
+                    "episodeId": { "type": "string", "minLength": 1 },
+                    "cueId": { "type": "string", "minLength": 1 },
+                    "sourceType": {
+                      "type": "string",
+                      "enum": [
+                        "human-reviewed-canonical",
+                        "human-correction",
+                        "validated-final-canonical",
+                        "reference-consensus",
+                        "sudachi-dictionary",
+                        "mfa-dictionary",
+                        "g2p",
+                        "ctc-projection",
+                        "asr-candidate",
+                        "manual-memory-entry"
+                      ]
+                    },
+                    "sourceArtifactHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "occurrenceId": { "type": "string", "minLength": 1 },
+                    "observedAtSeconds": { "type": "number", "minimum": 0 },
+                    "surface": { "type": "string", "minLength": 1 },
+                    "reading": {
+                      "anyOf": [
+                        { "type": "string", "minLength": 1 },
+                        { "type": "null" }
+                      ]
+                    },
+                    "semanticHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "evidenceId",
+                    "evidenceLineageId",
+                    "episodeId",
+                    "cueId",
+                    "sourceType",
+                    "sourceArtifactHash",
+                    "occurrenceId",
+                    "observedAtSeconds",
+                    "surface",
+                    "reading",
+                    "semanticHash"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "conflicts": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "entryId",
+              "seriesKey",
+              "entryType",
+              "canonicalSurface",
+              "canonicalSurfaceNfc",
+              "lookupKeyNfkc",
+              "readingHiragana",
+              "readingKatakana",
+              "pronunciationPhones",
+              "dictionaryForm",
+              "normalizedForm",
+              "partOfSpeech",
+              "variants",
+              "orthographicVariants",
+              "acousticAliases",
+              "acousticAliasProvenance",
+              "observedWrongForms",
+              "dialectMetadata",
+              "preservationPolicy",
+              "status",
+              "trustLevel",
+              "applicationEligibility",
+              "sourceEpisodes",
+              "firstSeen",
+              "lastSeen",
+              "occurrenceIds",
+              "evidence",
+              "conflicts",
+              "semanticHash"
+            ],
+            "additionalProperties": false
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "episodeId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "human-reviewed-canonical",
+                    "human-correction",
+                    "validated-final-canonical",
+                    "reference-consensus",
+                    "sudachi-dictionary",
+                    "mfa-dictionary",
+                    "g2p",
+                    "ctc-projection",
+                    "asr-candidate",
+                    "manual-memory-entry"
+                  ]
+                },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "occurrenceId": { "type": "string", "minLength": 1 },
+                "observedAtSeconds": { "type": "number", "minimum": 0 },
+                "surface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "episodeId",
+                "cueId",
+                "sourceType",
+                "sourceArtifactHash",
+                "occurrenceId",
+                "observedAtSeconds",
+                "surface",
+                "reading",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "promotionDecision": {
+            "type": "string",
+            "enum": ["promote", "merge", "quarantine", "reject"]
+          },
+          "promotionReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "candidateId",
+          "proposedEntry",
+          "evidence",
+          "promotionDecision",
+          "promotionReasons",
+          "blockers"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "properties": {
+        "memoryCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryPromotedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryMergedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryQuarantinedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryRejectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "memoryCandidateCount",
+        "memoryPromotedCount",
+        "memoryMergedCount",
+        "memoryQuarantinedCount",
+        "memoryRejectedCount"
+      ],
+      "additionalProperties": false
+    },
+    "deltaHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "deltaVersion",
+    "generatedAt",
+    "seriesKey",
+    "parentMemoryHash",
+    "candidates",
+    "statistics",
+    "deltaHash",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

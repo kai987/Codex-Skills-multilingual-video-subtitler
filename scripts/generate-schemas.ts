@@ -109,6 +109,18 @@ import {
   subtitleLocalSeparatedStreamEvidenceSchema,
   c5181CtcBoundaryReplaySummarySchema,
   c5181FreshCacheObserveValidationSchema,
+  seriesLanguageMemorySchema,
+  episodeLanguageObservationsSchema,
+  seriesLanguageMemoryDeltaSchema,
+  subtitleSeriesMemoryEvidenceSchema,
+  subtitleMemoryAssistedRankingSchema,
+  subtitleMemoryPronunciationProjectionSchema,
+  memoryAssistedCtcTargetAuditSchema,
+  memoryAssistedCtcObservationSchema,
+  c519MemoryReplaySummarySchema,
+  c519CausalValidationSchema,
+  seriesMemoryQualityAuditSchema,
+  c519RunValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -653,6 +665,66 @@ const schemas = [
     fileName: "c4-persistent-worker-verification.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c4-persistent-worker-verification.schema.json",
     schema: c4PersistentWorkerVerificationArtifactSchema,
+  },
+  {
+    fileName: "series-language-memory.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/series-language-memory.schema.json",
+    schema: seriesLanguageMemorySchema,
+  },
+  {
+    fileName: "episode-language-observations.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/episode-language-observations.schema.json",
+    schema: episodeLanguageObservationsSchema,
+  },
+  {
+    fileName: "series-language-memory-delta.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/series-language-memory-delta.schema.json",
+    schema: seriesLanguageMemoryDeltaSchema,
+  },
+  {
+    fileName: "subtitle-series-memory-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-series-memory-evidence.schema.json",
+    schema: subtitleSeriesMemoryEvidenceSchema,
+  },
+  {
+    fileName: "subtitle-memory-assisted-ranking.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-memory-assisted-ranking.schema.json",
+    schema: subtitleMemoryAssistedRankingSchema,
+  },
+  {
+    fileName: "subtitle-memory-pronunciation-projection.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-memory-pronunciation-projection.schema.json",
+    schema: subtitleMemoryPronunciationProjectionSchema,
+  },
+  {
+    fileName: "memory-assisted-ctc-target-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/memory-assisted-ctc-target-audit.schema.json",
+    schema: memoryAssistedCtcTargetAuditSchema,
+  },
+  {
+    fileName: "memory-assisted-ctc-observation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/memory-assisted-ctc-observation.schema.json",
+    schema: memoryAssistedCtcObservationSchema,
+  },
+  {
+    fileName: "c5-19-memory-replay-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-19-memory-replay-summary.schema.json",
+    schema: c519MemoryReplaySummarySchema,
+  },
+  {
+    fileName: "c5-19-causal-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-19-causal-validation.schema.json",
+    schema: c519CausalValidationSchema,
+  },
+  {
+    fileName: "series-memory-quality-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/series-memory-quality-audit.schema.json",
+    schema: seriesMemoryQualityAuditSchema,
+  },
+  {
+    fileName: "c5-19-run-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-19-run-validation.schema.json",
+    schema: c519RunValidationSchema,
   },
 ] as const;
 

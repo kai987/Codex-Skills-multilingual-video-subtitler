@@ -1,0 +1,1202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/episode-language-observations.schema.json",
+  "title": "episode-language-observations",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "episode-language-observations"
+    },
+    "observationVersion": { "type": "string", "const": "C5.19" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "seriesIdentity": {
+      "type": "object",
+      "properties": {
+        "seriesKey": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "normalizedTitle": { "type": "string", "minLength": 1 },
+        "year": {
+          "anyOf": [
+            { "type": "integer", "minimum": 1800, "maximum": 2200 },
+            { "type": "null" }
+          ]
+        },
+        "season": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            { "type": "null" }
+          ]
+        },
+        "mediaType": {
+          "type": "string",
+          "enum": ["series", "movie", "special", "unknown"]
+        },
+        "identitySource": {
+          "type": "string",
+          "enum": [
+            "subtitle-package-media-identity",
+            "explicit-series-task",
+            "curated-memory"
+          ]
+        },
+        "identityStatus": {
+          "type": "string",
+          "enum": ["verified", "provisional", "insufficient"]
+        },
+        "identityEvidence": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "memoryScope": {
+          "type": "string",
+          "enum": ["episode", "season", "series"]
+        }
+      },
+      "required": [
+        "seriesKey",
+        "title",
+        "normalizedTitle",
+        "year",
+        "season",
+        "mediaType",
+        "identitySource",
+        "identityStatus",
+        "identityEvidence",
+        "memoryScope"
+      ],
+      "additionalProperties": false
+    },
+    "episodeIdentity": {
+      "type": "object",
+      "properties": {
+        "episodeId": { "type": "string", "minLength": 1 },
+        "seriesKey": { "type": "string", "minLength": 1 },
+        "episodeNumber": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            { "type": "null" }
+          ]
+        },
+        "sourceFingerprintHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "episodeId",
+        "seriesKey",
+        "episodeNumber",
+        "sourceFingerprintHash"
+      ],
+      "additionalProperties": false
+    },
+    "cueObservations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "start": { "type": "number", "minimum": 0 },
+          "end": { "type": "number", "exclusiveMinimum": 0 },
+          "canonicalTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "cueId",
+          "start",
+          "end",
+          "canonicalTextHash",
+          "candidateIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "termCandidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "entryType": {
+            "type": "string",
+            "enum": [
+              "proper-noun",
+              "person-name",
+              "place-name",
+              "organization-name",
+              "title-name",
+              "terminology",
+              "regional-term",
+              "domain-term",
+              "dialect-form",
+              "fixed-expression",
+              "pronunciation-only",
+              "orthographic-variant",
+              "correction-pair"
+            ]
+          },
+          "canonicalSurface": { "type": "string", "minLength": 1 },
+          "reading": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "pronunciationPhones": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dictionaryForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "normalizedForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "partOfSpeech": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "observedWrongForms": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dialectMetadata": {
+            "type": "object",
+            "properties": {
+              "isDialectCandidate": { "type": "boolean" },
+              "status": {
+                "type": "string",
+                "enum": ["not-dialect", "candidate", "verified"]
+              },
+              "region": { "type": "string", "minLength": 1 },
+              "surfaceForm": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "dialectPattern": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "standardEquivalent": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "equivalenceSource": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "markerType": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "preserveSurface": { "type": "boolean" },
+              "preservationRequired": { "type": "boolean" }
+            },
+            "required": [
+              "isDialectCandidate",
+              "status",
+              "region",
+              "surfaceForm",
+              "dialectPattern",
+              "standardEquivalent",
+              "equivalenceSource",
+              "markerType",
+              "preserveSurface",
+              "preservationRequired"
+            ],
+            "additionalProperties": false
+          },
+          "occurrenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "episodeId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "human-reviewed-canonical",
+                    "human-correction",
+                    "validated-final-canonical",
+                    "reference-consensus",
+                    "sudachi-dictionary",
+                    "mfa-dictionary",
+                    "g2p",
+                    "ctc-projection",
+                    "asr-candidate",
+                    "manual-memory-entry"
+                  ]
+                },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "occurrenceId": { "type": "string", "minLength": 1 },
+                "observedAtSeconds": { "type": "number", "minimum": 0 },
+                "surface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "episodeId",
+                "cueId",
+                "sourceType",
+                "sourceArtifactHash",
+                "occurrenceId",
+                "observedAtSeconds",
+                "surface",
+                "reading",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "occurrenceCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "humanReviewed": { "type": "boolean" },
+          "commonWord": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "candidateId",
+          "entryType",
+          "canonicalSurface",
+          "reading",
+          "pronunciationPhones",
+          "dictionaryForm",
+          "normalizedForm",
+          "partOfSpeech",
+          "observedWrongForms",
+          "dialectMetadata",
+          "occurrenceIds",
+          "evidence",
+          "occurrenceCount",
+          "humanReviewed",
+          "commonWord",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "properNounCandidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "entryType": {
+            "type": "string",
+            "enum": [
+              "proper-noun",
+              "person-name",
+              "place-name",
+              "organization-name",
+              "title-name",
+              "terminology",
+              "regional-term",
+              "domain-term",
+              "dialect-form",
+              "fixed-expression",
+              "pronunciation-only",
+              "orthographic-variant",
+              "correction-pair"
+            ]
+          },
+          "canonicalSurface": { "type": "string", "minLength": 1 },
+          "reading": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "pronunciationPhones": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dictionaryForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "normalizedForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "partOfSpeech": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "observedWrongForms": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dialectMetadata": {
+            "type": "object",
+            "properties": {
+              "isDialectCandidate": { "type": "boolean" },
+              "status": {
+                "type": "string",
+                "enum": ["not-dialect", "candidate", "verified"]
+              },
+              "region": { "type": "string", "minLength": 1 },
+              "surfaceForm": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "dialectPattern": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "standardEquivalent": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "equivalenceSource": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "markerType": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "preserveSurface": { "type": "boolean" },
+              "preservationRequired": { "type": "boolean" }
+            },
+            "required": [
+              "isDialectCandidate",
+              "status",
+              "region",
+              "surfaceForm",
+              "dialectPattern",
+              "standardEquivalent",
+              "equivalenceSource",
+              "markerType",
+              "preserveSurface",
+              "preservationRequired"
+            ],
+            "additionalProperties": false
+          },
+          "occurrenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "episodeId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "human-reviewed-canonical",
+                    "human-correction",
+                    "validated-final-canonical",
+                    "reference-consensus",
+                    "sudachi-dictionary",
+                    "mfa-dictionary",
+                    "g2p",
+                    "ctc-projection",
+                    "asr-candidate",
+                    "manual-memory-entry"
+                  ]
+                },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "occurrenceId": { "type": "string", "minLength": 1 },
+                "observedAtSeconds": { "type": "number", "minimum": 0 },
+                "surface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "episodeId",
+                "cueId",
+                "sourceType",
+                "sourceArtifactHash",
+                "occurrenceId",
+                "observedAtSeconds",
+                "surface",
+                "reading",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "occurrenceCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "humanReviewed": { "type": "boolean" },
+          "commonWord": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "candidateId",
+          "entryType",
+          "canonicalSurface",
+          "reading",
+          "pronunciationPhones",
+          "dictionaryForm",
+          "normalizedForm",
+          "partOfSpeech",
+          "observedWrongForms",
+          "dialectMetadata",
+          "occurrenceIds",
+          "evidence",
+          "occurrenceCount",
+          "humanReviewed",
+          "commonWord",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "dialectCandidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "entryType": {
+            "type": "string",
+            "enum": [
+              "proper-noun",
+              "person-name",
+              "place-name",
+              "organization-name",
+              "title-name",
+              "terminology",
+              "regional-term",
+              "domain-term",
+              "dialect-form",
+              "fixed-expression",
+              "pronunciation-only",
+              "orthographic-variant",
+              "correction-pair"
+            ]
+          },
+          "canonicalSurface": { "type": "string", "minLength": 1 },
+          "reading": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "pronunciationPhones": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dictionaryForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "normalizedForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "partOfSpeech": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "observedWrongForms": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dialectMetadata": {
+            "type": "object",
+            "properties": {
+              "isDialectCandidate": { "type": "boolean" },
+              "status": {
+                "type": "string",
+                "enum": ["not-dialect", "candidate", "verified"]
+              },
+              "region": { "type": "string", "minLength": 1 },
+              "surfaceForm": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "dialectPattern": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "standardEquivalent": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "equivalenceSource": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "markerType": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "preserveSurface": { "type": "boolean" },
+              "preservationRequired": { "type": "boolean" }
+            },
+            "required": [
+              "isDialectCandidate",
+              "status",
+              "region",
+              "surfaceForm",
+              "dialectPattern",
+              "standardEquivalent",
+              "equivalenceSource",
+              "markerType",
+              "preserveSurface",
+              "preservationRequired"
+            ],
+            "additionalProperties": false
+          },
+          "occurrenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "episodeId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "human-reviewed-canonical",
+                    "human-correction",
+                    "validated-final-canonical",
+                    "reference-consensus",
+                    "sudachi-dictionary",
+                    "mfa-dictionary",
+                    "g2p",
+                    "ctc-projection",
+                    "asr-candidate",
+                    "manual-memory-entry"
+                  ]
+                },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "occurrenceId": { "type": "string", "minLength": 1 },
+                "observedAtSeconds": { "type": "number", "minimum": 0 },
+                "surface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "episodeId",
+                "cueId",
+                "sourceType",
+                "sourceArtifactHash",
+                "occurrenceId",
+                "observedAtSeconds",
+                "surface",
+                "reading",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "occurrenceCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "humanReviewed": { "type": "boolean" },
+          "commonWord": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "candidateId",
+          "entryType",
+          "canonicalSurface",
+          "reading",
+          "pronunciationPhones",
+          "dictionaryForm",
+          "normalizedForm",
+          "partOfSpeech",
+          "observedWrongForms",
+          "dialectMetadata",
+          "occurrenceIds",
+          "evidence",
+          "occurrenceCount",
+          "humanReviewed",
+          "commonWord",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "correctionObservations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "entryType": {
+            "type": "string",
+            "enum": [
+              "proper-noun",
+              "person-name",
+              "place-name",
+              "organization-name",
+              "title-name",
+              "terminology",
+              "regional-term",
+              "domain-term",
+              "dialect-form",
+              "fixed-expression",
+              "pronunciation-only",
+              "orthographic-variant",
+              "correction-pair"
+            ]
+          },
+          "canonicalSurface": { "type": "string", "minLength": 1 },
+          "reading": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "pronunciationPhones": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dictionaryForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "normalizedForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "partOfSpeech": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "observedWrongForms": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dialectMetadata": {
+            "type": "object",
+            "properties": {
+              "isDialectCandidate": { "type": "boolean" },
+              "status": {
+                "type": "string",
+                "enum": ["not-dialect", "candidate", "verified"]
+              },
+              "region": { "type": "string", "minLength": 1 },
+              "surfaceForm": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "dialectPattern": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "standardEquivalent": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "equivalenceSource": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "markerType": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "preserveSurface": { "type": "boolean" },
+              "preservationRequired": { "type": "boolean" }
+            },
+            "required": [
+              "isDialectCandidate",
+              "status",
+              "region",
+              "surfaceForm",
+              "dialectPattern",
+              "standardEquivalent",
+              "equivalenceSource",
+              "markerType",
+              "preserveSurface",
+              "preservationRequired"
+            ],
+            "additionalProperties": false
+          },
+          "occurrenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "episodeId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "human-reviewed-canonical",
+                    "human-correction",
+                    "validated-final-canonical",
+                    "reference-consensus",
+                    "sudachi-dictionary",
+                    "mfa-dictionary",
+                    "g2p",
+                    "ctc-projection",
+                    "asr-candidate",
+                    "manual-memory-entry"
+                  ]
+                },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "occurrenceId": { "type": "string", "minLength": 1 },
+                "observedAtSeconds": { "type": "number", "minimum": 0 },
+                "surface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "episodeId",
+                "cueId",
+                "sourceType",
+                "sourceArtifactHash",
+                "occurrenceId",
+                "observedAtSeconds",
+                "surface",
+                "reading",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "occurrenceCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "humanReviewed": { "type": "boolean" },
+          "commonWord": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "candidateId",
+          "entryType",
+          "canonicalSurface",
+          "reading",
+          "pronunciationPhones",
+          "dictionaryForm",
+          "normalizedForm",
+          "partOfSpeech",
+          "observedWrongForms",
+          "dialectMetadata",
+          "occurrenceIds",
+          "evidence",
+          "occurrenceCount",
+          "humanReviewed",
+          "commonWord",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "pronunciationObservations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "entryType": {
+            "type": "string",
+            "enum": [
+              "proper-noun",
+              "person-name",
+              "place-name",
+              "organization-name",
+              "title-name",
+              "terminology",
+              "regional-term",
+              "domain-term",
+              "dialect-form",
+              "fixed-expression",
+              "pronunciation-only",
+              "orthographic-variant",
+              "correction-pair"
+            ]
+          },
+          "canonicalSurface": { "type": "string", "minLength": 1 },
+          "reading": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "pronunciationPhones": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dictionaryForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "normalizedForm": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "partOfSpeech": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "observedWrongForms": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "dialectMetadata": {
+            "type": "object",
+            "properties": {
+              "isDialectCandidate": { "type": "boolean" },
+              "status": {
+                "type": "string",
+                "enum": ["not-dialect", "candidate", "verified"]
+              },
+              "region": { "type": "string", "minLength": 1 },
+              "surfaceForm": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "dialectPattern": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "standardEquivalent": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "equivalenceSource": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "markerType": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "preserveSurface": { "type": "boolean" },
+              "preservationRequired": { "type": "boolean" }
+            },
+            "required": [
+              "isDialectCandidate",
+              "status",
+              "region",
+              "surfaceForm",
+              "dialectPattern",
+              "standardEquivalent",
+              "equivalenceSource",
+              "markerType",
+              "preserveSurface",
+              "preservationRequired"
+            ],
+            "additionalProperties": false
+          },
+          "occurrenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "episodeId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "human-reviewed-canonical",
+                    "human-correction",
+                    "validated-final-canonical",
+                    "reference-consensus",
+                    "sudachi-dictionary",
+                    "mfa-dictionary",
+                    "g2p",
+                    "ctc-projection",
+                    "asr-candidate",
+                    "manual-memory-entry"
+                  ]
+                },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "occurrenceId": { "type": "string", "minLength": 1 },
+                "observedAtSeconds": { "type": "number", "minimum": 0 },
+                "surface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "episodeId",
+                "cueId",
+                "sourceType",
+                "sourceArtifactHash",
+                "occurrenceId",
+                "observedAtSeconds",
+                "surface",
+                "reading",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "occurrenceCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "humanReviewed": { "type": "boolean" },
+          "commonWord": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "candidateId",
+          "entryType",
+          "canonicalSurface",
+          "reading",
+          "pronunciationPhones",
+          "dictionaryForm",
+          "normalizedForm",
+          "partOfSpeech",
+          "observedWrongForms",
+          "dialectMetadata",
+          "occurrenceIds",
+          "evidence",
+          "occurrenceCount",
+          "humanReviewed",
+          "commonWord",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "properties": {
+        "sourceCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryRejectedCommonWordCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryRejectedLowEvidenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateMemoryEvidenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "sourceCueCount",
+        "memoryCandidateCount",
+        "memoryRejectedCommonWordCount",
+        "memoryRejectedLowEvidenceCount",
+        "duplicateMemoryEvidenceCount"
+      ],
+      "additionalProperties": false
+    },
+    "sourceArtifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "observationVersion",
+    "generatedAt",
+    "seriesIdentity",
+    "episodeIdentity",
+    "cueObservations",
+    "termCandidates",
+    "properNounCandidates",
+    "dialectCandidates",
+    "correctionObservations",
+    "pronunciationObservations",
+    "statistics",
+    "sourceArtifactHashes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
