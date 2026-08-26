@@ -100,6 +100,15 @@ import {
   speakerEvidenceCacheManifestSchema,
   c518SpeakerEvidenceReplaySummarySchema,
   c518FreshCacheObserveValidationSchema,
+  ctcRuntimeCapabilitySchema,
+  ctcModelManifestSchema,
+  ctcAlignmentCacheEntrySchema,
+  ctcAlignmentCacheManifestSchema,
+  subtitleCtcAlignmentInputSchema,
+  subtitleLocalCtcBoundaryEvidenceSchema,
+  subtitleLocalSeparatedStreamEvidenceSchema,
+  c5181CtcBoundaryReplaySummarySchema,
+  c5181FreshCacheObserveValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -184,6 +193,51 @@ const schemas = [
     fileName: "c5-18-fresh-cache-observe-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c5-18-fresh-cache-observe-validation.schema.json",
     schema: c518FreshCacheObserveValidationSchema,
+  },
+  {
+    fileName: "ctc-runtime-capability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/ctc-runtime-capability.schema.json",
+    schema: ctcRuntimeCapabilitySchema,
+  },
+  {
+    fileName: "ctc-model-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/ctc-model-manifest.schema.json",
+    schema: ctcModelManifestSchema,
+  },
+  {
+    fileName: "ctc-alignment-cache-entry.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/ctc-alignment-cache-entry.schema.json",
+    schema: ctcAlignmentCacheEntrySchema,
+  },
+  {
+    fileName: "ctc-alignment-cache-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/ctc-alignment-cache-manifest.schema.json",
+    schema: ctcAlignmentCacheManifestSchema,
+  },
+  {
+    fileName: "subtitle-ctc-alignment-input.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-ctc-alignment-input.schema.json",
+    schema: subtitleCtcAlignmentInputSchema,
+  },
+  {
+    fileName: "subtitle-local-ctc-boundary-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-local-ctc-boundary-evidence.schema.json",
+    schema: subtitleLocalCtcBoundaryEvidenceSchema,
+  },
+  {
+    fileName: "subtitle-local-separated-stream-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-local-separated-stream-evidence.schema.json",
+    schema: subtitleLocalSeparatedStreamEvidenceSchema,
+  },
+  {
+    fileName: "c5-18-1-ctc-boundary-replay-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-18-1-ctc-boundary-replay-summary.schema.json",
+    schema: c5181CtcBoundaryReplaySummarySchema,
+  },
+  {
+    fileName: "c5-18-1-fresh-cache-observe-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-18-1-fresh-cache-observe-validation.schema.json",
+    schema: c5181FreshCacheObserveValidationSchema,
   },
   {
     fileName: "subtitle-canonical-alignment-input.schema.json",

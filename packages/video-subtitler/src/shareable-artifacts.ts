@@ -29,6 +29,13 @@ import {
   subtitleLocalSpeakerEvidenceSchema,
   c518SpeakerEvidenceReplaySummarySchema,
   c518FreshCacheObserveValidationSchema,
+  ctcRuntimeCapabilitySchema,
+  subtitleCtcAlignmentInputSchema,
+  subtitleLocalCtcBoundaryEvidenceSchema,
+  ctcAlignmentCacheManifestSchema,
+  subtitleLocalSeparatedStreamEvidenceSchema,
+  c5181CtcBoundaryReplaySummarySchema,
+  c5181FreshCacheObserveValidationSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -45,6 +52,8 @@ const C5172_SHAREABLE_POLICY_VERSION =
   "c5.17.2-shareable-artifact-policy-v1" as const;
 const C518_SHAREABLE_POLICY_VERSION =
   "c5.18-shareable-artifact-policy-v1" as const;
+const C5181_SHAREABLE_POLICY_VERSION =
+  "c5.18.1-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -85,6 +94,17 @@ const artifactSchemas = {
     c518SpeakerEvidenceReplaySummarySchema,
   "c5-18-fresh-cache-observe-validation.json":
     c518FreshCacheObserveValidationSchema,
+  "ctc-runtime-capability.json": ctcRuntimeCapabilitySchema,
+  "subtitle-ctc-alignment-input.json": subtitleCtcAlignmentInputSchema,
+  "subtitle-local-ctc-boundary-evidence.json":
+    subtitleLocalCtcBoundaryEvidenceSchema,
+  "ctc-alignment-cache-manifest.json": ctcAlignmentCacheManifestSchema,
+  "subtitle-local-separated-stream-evidence.json":
+    subtitleLocalSeparatedStreamEvidenceSchema,
+  "c5-18-1-ctc-boundary-replay-summary.json":
+    c5181CtcBoundaryReplaySummarySchema,
+  "c5-18-1-fresh-cache-observe-validation.json":
+    c5181FreshCacheObserveValidationSchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -439,6 +459,15 @@ export async function generateC5161ShareableArtifacts(input: {
     replaySummaryPath: string;
     freshCacheObserveValidationPath?: string;
   };
+  c5181Artifacts?: {
+    runtimeCapabilityPath: string;
+    alignmentInputPath: string;
+    boundaryEvidencePath: string;
+    cacheManifestPath: string;
+    separatedStreamEvidencePath: string;
+    replaySummaryPath: string;
+    freshCacheObserveValidationPath?: string;
+  };
 }): Promise<{
   outputDirectory: string;
   manifestPath: string;
@@ -584,6 +613,44 @@ export async function generateC5161ShareableArtifacts(input: {
       });
     }
   }
+  if (input.c5181Artifacts !== undefined) {
+    sources.push(
+      {
+        name: "ctc-runtime-capability.json",
+        sourcePath: path.resolve(input.c5181Artifacts.runtimeCapabilityPath),
+      },
+      {
+        name: "subtitle-ctc-alignment-input.json",
+        sourcePath: path.resolve(input.c5181Artifacts.alignmentInputPath),
+      },
+      {
+        name: "subtitle-local-ctc-boundary-evidence.json",
+        sourcePath: path.resolve(input.c5181Artifacts.boundaryEvidencePath),
+      },
+      {
+        name: "ctc-alignment-cache-manifest.json",
+        sourcePath: path.resolve(input.c5181Artifacts.cacheManifestPath),
+      },
+      {
+        name: "subtitle-local-separated-stream-evidence.json",
+        sourcePath: path.resolve(
+          input.c5181Artifacts.separatedStreamEvidencePath,
+        ),
+      },
+      {
+        name: "c5-18-1-ctc-boundary-replay-summary.json",
+        sourcePath: path.resolve(input.c5181Artifacts.replaySummaryPath),
+      },
+    );
+    if (input.c5181Artifacts.freshCacheObserveValidationPath !== undefined) {
+      sources.push({
+        name: "c5-18-1-fresh-cache-observe-validation.json",
+        sourcePath: path.resolve(
+          input.c5181Artifacts.freshCacheObserveValidationPath,
+        ),
+      });
+    }
+  }
   const sourceHashes = await Promise.all(
     sources.map(async (source) => sha256(await readFile(source.sourcePath))),
   );
@@ -703,16 +770,18 @@ export async function generateC5161ShareableArtifacts(input: {
     schemaVersion: "1.0.0",
     artifactType: "shareable-artifact-manifest",
     policyVersion:
-      input.c518Artifacts !== undefined ||
-      input.c5172Artifacts?.reviewActionValidationReportPath !== undefined
-        ? C518_SHAREABLE_POLICY_VERSION
-        : input.c5172Artifacts !== undefined
-          ? C5172_SHAREABLE_POLICY_VERSION
-          : input.c517Artifacts === undefined
-            ? SHAREABLE_POLICY_VERSION
-            : input.c517Artifacts.pronunciationPath === undefined
-              ? C517_SHAREABLE_POLICY_VERSION
-              : C5171_SHAREABLE_POLICY_VERSION,
+      input.c5181Artifacts !== undefined
+        ? C5181_SHAREABLE_POLICY_VERSION
+        : input.c518Artifacts !== undefined ||
+            input.c5172Artifacts?.reviewActionValidationReportPath !== undefined
+          ? C518_SHAREABLE_POLICY_VERSION
+          : input.c5172Artifacts !== undefined
+            ? C5172_SHAREABLE_POLICY_VERSION
+            : input.c517Artifacts === undefined
+              ? SHAREABLE_POLICY_VERSION
+              : input.c517Artifacts.pronunciationPath === undefined
+                ? C517_SHAREABLE_POLICY_VERSION
+                : C5171_SHAREABLE_POLICY_VERSION,
     generatedAt: new Date().toISOString(),
     taskIdentityHash,
     pathPolicy: "shareable-relative-only",
@@ -842,6 +911,141 @@ export async function appendC518ValidationToShareable(input: {
       shareablePath: path.posix.join(path.basename(directory), validationName),
       shareableHash: await sha256File(validationTarget),
       schemaName: "c5-18-fresh-cache-observe-validation.schema.json",
+      pathReplacementCount: sanitized.pathReplacementCount,
+      secretRedactionCount: sanitized.secretRedactionCount,
+      absolutePathLeakCount: validationScan.absolutePathLeakCount,
+      prohibitedSecretCount: validationScan.prohibitedSecretCount,
+      validationPassed:
+        validationScan.absolutePathLeakCount === 0 &&
+        validationScan.prohibitedSecretCount === 0,
+    },
+    {
+      ...executionItem,
+      shareableHash: await sha256File(executionTarget),
+      absolutePathLeakCount: executionScan.absolutePathLeakCount,
+      prohibitedSecretCount: executionScan.prohibitedSecretCount,
+      validationPassed:
+        executionScan.absolutePathLeakCount === 0 &&
+        executionScan.prohibitedSecretCount === 0,
+    },
+  ];
+  const manifest = shareableArtifactManifestSchema.parse({
+    ...existingManifest,
+    generatedAt: new Date().toISOString(),
+    taskIdentityHash,
+    items,
+    summary: {
+      artifactCount: items.length,
+      validationPassedCount: items.filter((item) => item.validationPassed)
+        .length,
+      absolutePathLeakCount: items.reduce(
+        (sum, item) => sum + item.absolutePathLeakCount,
+        0,
+      ),
+      prohibitedSecretCount: items.reduce(
+        (sum, item) => sum + item.prohibitedSecretCount,
+        0,
+      ),
+      pathReplacementCount: items.reduce(
+        (sum, item) => sum + item.pathReplacementCount,
+        0,
+      ),
+      secretRedactionCount: items.reduce(
+        (sum, item) => sum + item.secretRedactionCount,
+        0,
+      ),
+    },
+  });
+  await atomicWriteJson(manifestPath, manifest, { overwrite: true });
+  return auditC5161ShareableArtifacts(directory);
+}
+
+export async function appendC5181ValidationToShareable(input: {
+  taskRoot: string;
+  validationPath: string;
+}): Promise<{
+  manifest: ShareableArtifactManifest;
+  validationPassed: boolean;
+  absolutePathLeakCount: number;
+  prohibitedSecretCount: number;
+  brokenRelativeReferenceCount: number;
+}> {
+  const taskRoot = path.resolve(input.taskRoot);
+  const validationPath = path.resolve(input.validationPath);
+  if (!validationPath.startsWith(`${taskRoot}${path.sep}`)) {
+    throw new Error(
+      "C5.18.1 validation must be materialized inside the task root before sharing.",
+    );
+  }
+  const directory = path.join(taskRoot, "shareable");
+  const manifestPath = path.join(directory, "shareable-artifact-manifest.json");
+  const existingManifest = shareableArtifactManifestSchema.parse(
+    JSON.parse(await readFile(manifestPath, "utf8")) as unknown,
+  );
+  if (existingManifest.policyVersion !== C5181_SHAREABLE_POLICY_VERSION) {
+    throw new Error(
+      "C5.18.1 validation requires a C5.18.1 shareable manifest.",
+    );
+  }
+  const validationName = "c5-18-1-fresh-cache-observe-validation.json" as const;
+  const validationSource = await readFile(validationPath);
+  const sanitized = sanitizeShareableValue({
+    value: JSON.parse(validationSource.toString("utf8")) as unknown,
+    taskRoot,
+  });
+  const validation = c5181FreshCacheObserveValidationSchema.parse(
+    sanitized.value,
+  );
+  const validationScan = scanShareableValue(validation);
+  const validationTarget = path.join(directory, validationName);
+  await atomicWriteJson(validationTarget, validation, { overwrite: true });
+
+  const retainedItems = existingManifest.items.filter((item) => {
+    const name = path.basename(item.shareablePath);
+    return name !== validationName && name !== "execution-summary.json";
+  });
+  const identitySources = [
+    ...retainedItems.map((item) => ({
+      name: path.basename(item.shareablePath),
+      hash: item.sourceArtifactHash,
+    })),
+    { name: validationName, hash: sha256(validationSource) },
+  ];
+  const taskIdentityHash = sha256(stable(identitySources));
+  const executionTarget = path.join(directory, "execution-summary.json");
+  const executionItem = existingManifest.items.find(
+    (item) => path.basename(item.shareablePath) === "execution-summary.json",
+  );
+  if (executionItem === undefined) {
+    throw new Error("Shareable manifest is missing execution-summary.json.");
+  }
+  const execution = c5161ShareableExecutionSummarySchema.parse(
+    JSON.parse(await readFile(executionTarget, "utf8")) as unknown,
+  );
+  const validationRelativePath = path
+    .relative(taskRoot, validationPath)
+    .split(path.sep)
+    .join("/");
+  const updatedExecution = c5161ShareableExecutionSummarySchema.parse({
+    ...execution,
+    taskIdentityHash,
+    internalArtifacts: [
+      ...execution.internalArtifacts.filter(
+        (item) => item !== validationRelativePath,
+      ),
+      validationRelativePath,
+    ],
+  });
+  await atomicWriteJson(executionTarget, updatedExecution, { overwrite: true });
+  const executionScan = scanShareableValue(updatedExecution);
+  const items: ShareableArtifactManifest["items"] = [
+    ...retainedItems,
+    {
+      sourceArtifactName: path.basename(validationPath),
+      sourceArtifactHash: sha256(validationSource),
+      shareablePath: path.posix.join(path.basename(directory), validationName),
+      shareableHash: await sha256File(validationTarget),
+      schemaName: "c5-18-1-fresh-cache-observe-validation.schema.json",
       pathReplacementCount: sanitized.pathReplacementCount,
       secretRedactionCount: sanitized.secretRedactionCount,
       absolutePathLeakCount: validationScan.absolutePathLeakCount,

@@ -107,6 +107,70 @@
         { "type": "null" }
       ]
     },
+    "ctcBoundaryEvidenceArtifactPath": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+        },
+        { "type": "null" }
+      ]
+    },
+    "ctcBoundaryEvidenceArtifactHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcRuntimeIdentityHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcModelSnapshotHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcAlignmentInputHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcEvidenceHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "ctcJointAssignmentHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "sourceSeparationEvidenceHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
     "items": {
       "type": "array",
       "items": {
@@ -467,6 +531,10 @@
             "items": { "type": "string", "minLength": 1 }
           },
           "speakerEvidenceComponentId": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "ctcBoundaryEvidenceComponentId": {
             "default": null,
             "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
           },
@@ -2269,6 +2337,7 @@
           "candidateActionBindings",
           "findingIds",
           "speakerEvidenceComponentId",
+          "ctcBoundaryEvidenceComponentId",
           "blockers",
           "allowedHumanActions",
           "audioClipPath",
@@ -2459,6 +2528,15 @@
     "speakerEvidencePolicyVersion",
     "speakerAssignmentHash",
     "speakerRelationshipHash",
+    "ctcBoundaryEvidenceArtifactPath",
+    "ctcBoundaryEvidenceArtifactHash",
+    "ctcRuntimeIdentityHash",
+    "ctcModelSnapshotHash",
+    "ctcAlignmentInputHash",
+    "ctcEvidenceHash",
+    "ctcPolicyVersion",
+    "ctcJointAssignmentHash",
+    "sourceSeparationEvidenceHash",
     "items",
     "summary"
   ],

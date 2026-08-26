@@ -298,6 +298,58 @@ export const finalizationMetricsSchema = z
     rawEmbeddingInShareableCount: z.literal(0).default(0),
     forbiddenSpeakerIdentityEvidenceUseCount: z.literal(0).default(0),
     forbiddenSpeakerTimingHeuristicUseCount: z.literal(0).default(0),
+    ctcTargetCueCount: z.number().int().nonnegative().default(0),
+    ctcTargetEncodableCueCount: z.number().int().nonnegative().default(0),
+    ctcDirectAttemptCount: z.number().int().nonnegative().default(0),
+    ctcDirectInferenceCount: z.number().int().nonnegative().default(0),
+    ctcDirectCacheHitCount: z.number().int().nonnegative().default(0),
+    ctcModelLoadCount: z.number().int().nonnegative().default(0),
+    ctcPathSuccessCount: z.number().int().nonnegative().default(0),
+    ctcWindowStableCueCount: z.number().int().nonnegative().default(0),
+    ctcEdgePinnedCueCount: z.number().int().nonnegative().default(0),
+    ctcDuplicateOccurrenceConflictCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    ctcJointAssignmentResolvedComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    ctcTimingActionableCueCount: z.number().int().nonnegative().default(0),
+    ctcTimingActionableComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    ctcTimingMutationCueCount: z.number().int().nonnegative().default(0),
+    ctcTimingMutationComponentCount: z.number().int().nonnegative().default(0),
+    ctcResolvedSubtitleOverlapComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    ctcGreedyTextMutationCount: z.literal(0).default(0),
+    ctcTokenRatioRepairCount: z.literal(0).default(0),
+    separationTriggeredComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    separationInferenceCount: z.number().int().nonnegative().default(0),
+    separationCacheHitCount: z.number().int().nonnegative().default(0),
+    separatedStreamCtcAttemptCount: z.number().int().nonnegative().default(0),
+    speakerRelationshipResolvedComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    subtitleOverlapResolvedComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
   })
   .strict();
 
@@ -383,6 +435,13 @@ export const subtitleFinalizationReportSchema = z
         speakerRuntimeCapability: relativePathSchema.nullable().default(null),
         localSpeakerEvidence: relativePathSchema.nullable().default(null),
         speakerEvidenceCacheManifest: relativePathSchema
+          .nullable()
+          .default(null),
+        ctcRuntimeCapability: relativePathSchema.nullable().default(null),
+        ctcAlignmentInput: relativePathSchema.nullable().default(null),
+        localCtcBoundaryEvidence: relativePathSchema.nullable().default(null),
+        ctcAlignmentCacheManifest: relativePathSchema.nullable().default(null),
+        localSeparatedStreamEvidence: relativePathSchema
           .nullable()
           .default(null),
         reviewActionValidationReport: relativePathSchema
@@ -494,6 +553,7 @@ export const subtitleReviewItemSchema = z
       .default([]),
     findingIds: z.array(z.string().min(1)),
     speakerEvidenceComponentId: z.string().min(1).nullable().default(null),
+    ctcBoundaryEvidenceComponentId: z.string().min(1).nullable().default(null),
     blockers: z.array(z.string().min(1)),
     allowedHumanActions: z.array(
       z.enum([
@@ -634,6 +694,17 @@ export const subtitleReviewPackageSchema = z
     speakerEvidencePolicyVersion: z.string().min(1).nullable().default(null),
     speakerAssignmentHash: hashSchema.nullable().default(null),
     speakerRelationshipHash: hashSchema.nullable().default(null),
+    ctcBoundaryEvidenceArtifactPath: relativePathSchema
+      .nullable()
+      .default(null),
+    ctcBoundaryEvidenceArtifactHash: hashSchema.nullable().default(null),
+    ctcRuntimeIdentityHash: hashSchema.nullable().default(null),
+    ctcModelSnapshotHash: hashSchema.nullable().default(null),
+    ctcAlignmentInputHash: hashSchema.nullable().default(null),
+    ctcEvidenceHash: hashSchema.nullable().default(null),
+    ctcPolicyVersion: z.string().min(1).nullable().default(null),
+    ctcJointAssignmentHash: hashSchema.nullable().default(null),
+    sourceSeparationEvidenceHash: hashSchema.nullable().default(null),
     items: z.array(subtitleReviewItemSchema),
     summary: z
       .object({

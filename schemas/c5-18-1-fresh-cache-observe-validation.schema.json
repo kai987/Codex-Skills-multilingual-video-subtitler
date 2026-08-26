@@ -1,0 +1,868 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c5-18-1-fresh-cache-observe-validation.schema.json",
+  "title": "c5-18-1-fresh-cache-observe-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c5-18-1-fresh-cache-observe-validation"
+    },
+    "validationVersion": { "type": "string", "const": "C5.18.1" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "freshTaskName": { "type": "string", "minLength": 1 },
+    "observeTaskName": { "type": "string", "minLength": 1 },
+    "cacheReplayTaskName": { "type": "string", "minLength": 1 },
+    "fresh": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "artifactType": {
+          "type": "string",
+          "const": "c5-18-1-ctc-boundary-replay-summary"
+        },
+        "replayVersion": { "type": "string", "const": "C5.18.1" },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "runId": { "type": "string", "minLength": 1 },
+        "sourceTaskName": { "type": "string", "minLength": 1 },
+        "outputTaskName": { "type": "string", "minLength": 1 },
+        "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+        "cacheMode": {
+          "type": "string",
+          "enum": ["off", "read", "read-write"]
+        },
+        "sourceSeparationMode": {
+          "type": "string",
+          "enum": ["off", "observe"]
+        },
+        "runtimeIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "deviceRequested": { "type": "string", "enum": ["auto", "mps", "cpu"] },
+        "deviceUsed": { "type": "string", "enum": ["mps", "cpu"] },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "targetComponentCount": { "type": "number", "const": 7 },
+            "targetCueCount": { "type": "number", "const": 16 },
+            "directCtcRequestCount": { "type": "number", "const": 32 },
+            "directCtcInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "directCtcCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "ctcModelLoadCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wholeMediaCtcInferenceCount": { "type": "number", "const": 0 },
+            "speakerInferenceCount": { "type": "number", "const": 0 },
+            "mfaProcessCount": { "type": "number", "const": 0 },
+            "whisperRequestCount": { "type": "number", "const": 0 },
+            "wholeMediaAsrRequestCount": { "type": "number", "const": 0 },
+            "openAiRequestCount": { "type": "number", "const": 0 },
+            "onlineSubtitleSearchCount": { "type": "number", "const": 0 },
+            "separationInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "separationCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "separationModelLoadCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "separatedStreamCtcAttemptCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "separatedStreamCtcInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "separatedStreamCtcCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "canonicalTextMutationCount": { "type": "number", "const": 0 },
+            "canonicalTimingMutationCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 16
+            },
+            "greedyTextMutationCount": { "type": "number", "const": 0 },
+            "tokenRatioRepairCount": { "type": "number", "const": 0 },
+            "forbiddenTimingHeuristicUseCount": {
+              "type": "number",
+              "const": 0
+            },
+            "speakerRelationshipResolvedComponentCount": {
+              "type": "number",
+              "const": 1
+            },
+            "subtitleOverlapResolvedComponentCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "remainingReviewComponentCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7
+            }
+          },
+          "required": [
+            "targetComponentCount",
+            "targetCueCount",
+            "directCtcRequestCount",
+            "directCtcInferenceCount",
+            "directCtcCacheHitCount",
+            "ctcModelLoadCount",
+            "wholeMediaCtcInferenceCount",
+            "speakerInferenceCount",
+            "mfaProcessCount",
+            "whisperRequestCount",
+            "wholeMediaAsrRequestCount",
+            "openAiRequestCount",
+            "onlineSubtitleSearchCount",
+            "separationInferenceCount",
+            "separationCacheHitCount",
+            "separationModelLoadCount",
+            "separatedStreamCtcAttemptCount",
+            "separatedStreamCtcInferenceCount",
+            "separatedStreamCtcCacheHitCount",
+            "canonicalTextMutationCount",
+            "canonicalTimingMutationCount",
+            "greedyTextMutationCount",
+            "tokenRatioRepairCount",
+            "forbiddenTimingHeuristicUseCount",
+            "speakerRelationshipResolvedComponentCount",
+            "subtitleOverlapResolvedComponentCount",
+            "remainingReviewComponentCount"
+          ],
+          "additionalProperties": false
+        },
+        "hashes": {
+          "type": "object",
+          "properties": {
+            "ctcAlignmentInputSemanticHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "ctcEvidenceSemanticHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "jointAssignmentHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "sourceSeparationEvidenceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "componentDecisionHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "mutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "presentationHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "ctcAlignmentInputSemanticHash",
+            "ctcEvidenceSemanticHash",
+            "jointAssignmentHash",
+            "sourceSeparationEvidenceHash",
+            "componentDecisionHash",
+            "mutationHash",
+            "outputCueHash",
+            "timingHash",
+            "presentationHash"
+          ],
+          "additionalProperties": false
+        },
+        "runtimeCapabilityPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "alignmentInputPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "boundaryEvidencePath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "cacheManifestPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "separatedStreamEvidencePath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "reviewDeliveryIntegrityPassed": { "type": "boolean" },
+        "shareableAuditPassed": { "type": "boolean" },
+        "networkUsedDuringInference": { "type": "boolean", "const": false },
+        "sourceReadOnlyVerified": { "type": "boolean" },
+        "humanSubtitleReadOnlyVerified": { "type": "boolean" },
+        "finalStatus": {
+          "type": "string",
+          "enum": ["finalized", "needs-review"]
+        },
+        "finalizationMethod": {
+          "type": "string",
+          "enum": ["automatic", "none"]
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "schemaVersion",
+        "artifactType",
+        "replayVersion",
+        "generatedAt",
+        "runId",
+        "sourceTaskName",
+        "outputTaskName",
+        "mode",
+        "cacheMode",
+        "sourceSeparationMode",
+        "runtimeIdentityHash",
+        "modelSnapshotHash",
+        "deviceRequested",
+        "deviceUsed",
+        "counts",
+        "hashes",
+        "runtimeCapabilityPath",
+        "alignmentInputPath",
+        "boundaryEvidencePath",
+        "cacheManifestPath",
+        "separatedStreamEvidencePath",
+        "reviewDeliveryIntegrityPassed",
+        "shareableAuditPassed",
+        "networkUsedDuringInference",
+        "sourceReadOnlyVerified",
+        "humanSubtitleReadOnlyVerified",
+        "finalStatus",
+        "finalizationMethod",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "observe": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "artifactType": {
+          "type": "string",
+          "const": "c5-18-1-ctc-boundary-replay-summary"
+        },
+        "replayVersion": { "type": "string", "const": "C5.18.1" },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "runId": { "type": "string", "minLength": 1 },
+        "sourceTaskName": { "type": "string", "minLength": 1 },
+        "outputTaskName": { "type": "string", "minLength": 1 },
+        "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+        "cacheMode": {
+          "type": "string",
+          "enum": ["off", "read", "read-write"]
+        },
+        "sourceSeparationMode": {
+          "type": "string",
+          "enum": ["off", "observe"]
+        },
+        "runtimeIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "deviceRequested": { "type": "string", "enum": ["auto", "mps", "cpu"] },
+        "deviceUsed": { "type": "string", "enum": ["mps", "cpu"] },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "targetComponentCount": { "type": "number", "const": 7 },
+            "targetCueCount": { "type": "number", "const": 16 },
+            "directCtcRequestCount": { "type": "number", "const": 32 },
+            "directCtcInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "directCtcCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "ctcModelLoadCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wholeMediaCtcInferenceCount": { "type": "number", "const": 0 },
+            "speakerInferenceCount": { "type": "number", "const": 0 },
+            "mfaProcessCount": { "type": "number", "const": 0 },
+            "whisperRequestCount": { "type": "number", "const": 0 },
+            "wholeMediaAsrRequestCount": { "type": "number", "const": 0 },
+            "openAiRequestCount": { "type": "number", "const": 0 },
+            "onlineSubtitleSearchCount": { "type": "number", "const": 0 },
+            "separationInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "separationCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "separationModelLoadCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "separatedStreamCtcAttemptCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "separatedStreamCtcInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "separatedStreamCtcCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "canonicalTextMutationCount": { "type": "number", "const": 0 },
+            "canonicalTimingMutationCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 16
+            },
+            "greedyTextMutationCount": { "type": "number", "const": 0 },
+            "tokenRatioRepairCount": { "type": "number", "const": 0 },
+            "forbiddenTimingHeuristicUseCount": {
+              "type": "number",
+              "const": 0
+            },
+            "speakerRelationshipResolvedComponentCount": {
+              "type": "number",
+              "const": 1
+            },
+            "subtitleOverlapResolvedComponentCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "remainingReviewComponentCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7
+            }
+          },
+          "required": [
+            "targetComponentCount",
+            "targetCueCount",
+            "directCtcRequestCount",
+            "directCtcInferenceCount",
+            "directCtcCacheHitCount",
+            "ctcModelLoadCount",
+            "wholeMediaCtcInferenceCount",
+            "speakerInferenceCount",
+            "mfaProcessCount",
+            "whisperRequestCount",
+            "wholeMediaAsrRequestCount",
+            "openAiRequestCount",
+            "onlineSubtitleSearchCount",
+            "separationInferenceCount",
+            "separationCacheHitCount",
+            "separationModelLoadCount",
+            "separatedStreamCtcAttemptCount",
+            "separatedStreamCtcInferenceCount",
+            "separatedStreamCtcCacheHitCount",
+            "canonicalTextMutationCount",
+            "canonicalTimingMutationCount",
+            "greedyTextMutationCount",
+            "tokenRatioRepairCount",
+            "forbiddenTimingHeuristicUseCount",
+            "speakerRelationshipResolvedComponentCount",
+            "subtitleOverlapResolvedComponentCount",
+            "remainingReviewComponentCount"
+          ],
+          "additionalProperties": false
+        },
+        "hashes": {
+          "type": "object",
+          "properties": {
+            "ctcAlignmentInputSemanticHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "ctcEvidenceSemanticHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "jointAssignmentHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "sourceSeparationEvidenceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "componentDecisionHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "mutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "presentationHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "ctcAlignmentInputSemanticHash",
+            "ctcEvidenceSemanticHash",
+            "jointAssignmentHash",
+            "sourceSeparationEvidenceHash",
+            "componentDecisionHash",
+            "mutationHash",
+            "outputCueHash",
+            "timingHash",
+            "presentationHash"
+          ],
+          "additionalProperties": false
+        },
+        "runtimeCapabilityPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "alignmentInputPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "boundaryEvidencePath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "cacheManifestPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "separatedStreamEvidencePath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "reviewDeliveryIntegrityPassed": { "type": "boolean" },
+        "shareableAuditPassed": { "type": "boolean" },
+        "networkUsedDuringInference": { "type": "boolean", "const": false },
+        "sourceReadOnlyVerified": { "type": "boolean" },
+        "humanSubtitleReadOnlyVerified": { "type": "boolean" },
+        "finalStatus": {
+          "type": "string",
+          "enum": ["finalized", "needs-review"]
+        },
+        "finalizationMethod": {
+          "type": "string",
+          "enum": ["automatic", "none"]
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "schemaVersion",
+        "artifactType",
+        "replayVersion",
+        "generatedAt",
+        "runId",
+        "sourceTaskName",
+        "outputTaskName",
+        "mode",
+        "cacheMode",
+        "sourceSeparationMode",
+        "runtimeIdentityHash",
+        "modelSnapshotHash",
+        "deviceRequested",
+        "deviceUsed",
+        "counts",
+        "hashes",
+        "runtimeCapabilityPath",
+        "alignmentInputPath",
+        "boundaryEvidencePath",
+        "cacheManifestPath",
+        "separatedStreamEvidencePath",
+        "reviewDeliveryIntegrityPassed",
+        "shareableAuditPassed",
+        "networkUsedDuringInference",
+        "sourceReadOnlyVerified",
+        "humanSubtitleReadOnlyVerified",
+        "finalStatus",
+        "finalizationMethod",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "cacheReplay": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "artifactType": {
+          "type": "string",
+          "const": "c5-18-1-ctc-boundary-replay-summary"
+        },
+        "replayVersion": { "type": "string", "const": "C5.18.1" },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "runId": { "type": "string", "minLength": 1 },
+        "sourceTaskName": { "type": "string", "minLength": 1 },
+        "outputTaskName": { "type": "string", "minLength": 1 },
+        "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+        "cacheMode": {
+          "type": "string",
+          "enum": ["off", "read", "read-write"]
+        },
+        "sourceSeparationMode": {
+          "type": "string",
+          "enum": ["off", "observe"]
+        },
+        "runtimeIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "deviceRequested": { "type": "string", "enum": ["auto", "mps", "cpu"] },
+        "deviceUsed": { "type": "string", "enum": ["mps", "cpu"] },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "targetComponentCount": { "type": "number", "const": 7 },
+            "targetCueCount": { "type": "number", "const": 16 },
+            "directCtcRequestCount": { "type": "number", "const": 32 },
+            "directCtcInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "directCtcCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "ctcModelLoadCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "wholeMediaCtcInferenceCount": { "type": "number", "const": 0 },
+            "speakerInferenceCount": { "type": "number", "const": 0 },
+            "mfaProcessCount": { "type": "number", "const": 0 },
+            "whisperRequestCount": { "type": "number", "const": 0 },
+            "wholeMediaAsrRequestCount": { "type": "number", "const": 0 },
+            "openAiRequestCount": { "type": "number", "const": 0 },
+            "onlineSubtitleSearchCount": { "type": "number", "const": 0 },
+            "separationInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "separationCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4
+            },
+            "separationModelLoadCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "separatedStreamCtcAttemptCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "separatedStreamCtcInferenceCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "separatedStreamCtcCacheHitCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "canonicalTextMutationCount": { "type": "number", "const": 0 },
+            "canonicalTimingMutationCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 16
+            },
+            "greedyTextMutationCount": { "type": "number", "const": 0 },
+            "tokenRatioRepairCount": { "type": "number", "const": 0 },
+            "forbiddenTimingHeuristicUseCount": {
+              "type": "number",
+              "const": 0
+            },
+            "speakerRelationshipResolvedComponentCount": {
+              "type": "number",
+              "const": 1
+            },
+            "subtitleOverlapResolvedComponentCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "remainingReviewComponentCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7
+            }
+          },
+          "required": [
+            "targetComponentCount",
+            "targetCueCount",
+            "directCtcRequestCount",
+            "directCtcInferenceCount",
+            "directCtcCacheHitCount",
+            "ctcModelLoadCount",
+            "wholeMediaCtcInferenceCount",
+            "speakerInferenceCount",
+            "mfaProcessCount",
+            "whisperRequestCount",
+            "wholeMediaAsrRequestCount",
+            "openAiRequestCount",
+            "onlineSubtitleSearchCount",
+            "separationInferenceCount",
+            "separationCacheHitCount",
+            "separationModelLoadCount",
+            "separatedStreamCtcAttemptCount",
+            "separatedStreamCtcInferenceCount",
+            "separatedStreamCtcCacheHitCount",
+            "canonicalTextMutationCount",
+            "canonicalTimingMutationCount",
+            "greedyTextMutationCount",
+            "tokenRatioRepairCount",
+            "forbiddenTimingHeuristicUseCount",
+            "speakerRelationshipResolvedComponentCount",
+            "subtitleOverlapResolvedComponentCount",
+            "remainingReviewComponentCount"
+          ],
+          "additionalProperties": false
+        },
+        "hashes": {
+          "type": "object",
+          "properties": {
+            "ctcAlignmentInputSemanticHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "ctcEvidenceSemanticHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "jointAssignmentHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "sourceSeparationEvidenceHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "componentDecisionHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "mutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "presentationHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "ctcAlignmentInputSemanticHash",
+            "ctcEvidenceSemanticHash",
+            "jointAssignmentHash",
+            "sourceSeparationEvidenceHash",
+            "componentDecisionHash",
+            "mutationHash",
+            "outputCueHash",
+            "timingHash",
+            "presentationHash"
+          ],
+          "additionalProperties": false
+        },
+        "runtimeCapabilityPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "alignmentInputPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "boundaryEvidencePath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "cacheManifestPath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "separatedStreamEvidencePath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+        },
+        "reviewDeliveryIntegrityPassed": { "type": "boolean" },
+        "shareableAuditPassed": { "type": "boolean" },
+        "networkUsedDuringInference": { "type": "boolean", "const": false },
+        "sourceReadOnlyVerified": { "type": "boolean" },
+        "humanSubtitleReadOnlyVerified": { "type": "boolean" },
+        "finalStatus": {
+          "type": "string",
+          "enum": ["finalized", "needs-review"]
+        },
+        "finalizationMethod": {
+          "type": "string",
+          "enum": ["automatic", "none"]
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "schemaVersion",
+        "artifactType",
+        "replayVersion",
+        "generatedAt",
+        "runId",
+        "sourceTaskName",
+        "outputTaskName",
+        "mode",
+        "cacheMode",
+        "sourceSeparationMode",
+        "runtimeIdentityHash",
+        "modelSnapshotHash",
+        "deviceRequested",
+        "deviceUsed",
+        "counts",
+        "hashes",
+        "runtimeCapabilityPath",
+        "alignmentInputPath",
+        "boundaryEvidencePath",
+        "cacheManifestPath",
+        "separatedStreamEvidencePath",
+        "reviewDeliveryIntegrityPassed",
+        "shareableAuditPassed",
+        "networkUsedDuringInference",
+        "sourceReadOnlyVerified",
+        "humanSubtitleReadOnlyVerified",
+        "finalStatus",
+        "finalizationMethod",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "parity": {
+      "type": "object",
+      "properties": {
+        "ctcAlignmentInputSemanticHash": { "type": "boolean" },
+        "ctcEvidenceSemanticHash": { "type": "boolean" },
+        "jointAssignmentHash": { "type": "boolean" },
+        "sourceSeparationEvidenceHash": { "type": "boolean" },
+        "componentDecisionHash": { "type": "boolean" },
+        "mutationHash": { "type": "boolean" },
+        "outputCueHash": { "type": "boolean" },
+        "allPassed": { "type": "boolean" }
+      },
+      "required": [
+        "ctcAlignmentInputSemanticHash",
+        "ctcEvidenceSemanticHash",
+        "jointAssignmentHash",
+        "sourceSeparationEvidenceHash",
+        "componentDecisionHash",
+        "mutationHash",
+        "outputCueHash",
+        "allPassed"
+      ],
+      "additionalProperties": false
+    },
+    "observeMutationCount": { "type": "number", "const": 0 },
+    "cacheReplayInferenceCount": { "type": "number", "const": 0 },
+    "cacheReplayModelLoadCount": { "type": "number", "const": 0 },
+    "validationPassed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "validationVersion",
+    "generatedAt",
+    "freshTaskName",
+    "observeTaskName",
+    "cacheReplayTaskName",
+    "fresh",
+    "observe",
+    "cacheReplay",
+    "parity",
+    "observeMutationCount",
+    "cacheReplayInferenceCount",
+    "cacheReplayModelLoadCount",
+    "validationPassed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

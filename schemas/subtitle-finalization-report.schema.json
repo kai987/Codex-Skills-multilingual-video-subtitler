@@ -753,6 +753,148 @@
           "default": 0,
           "type": "number",
           "const": 0
+        },
+        "ctcTargetCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcTargetEncodableCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcDirectAttemptCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcDirectInferenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcDirectCacheHitCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcModelLoadCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcPathSuccessCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcWindowStableCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcEdgePinnedCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcDuplicateOccurrenceConflictCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcJointAssignmentResolvedComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcTimingActionableCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcTimingActionableComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcTimingMutationCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcTimingMutationComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcResolvedSubtitleOverlapComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcGreedyTextMutationCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
+        },
+        "ctcTokenRatioRepairCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
+        },
+        "separationTriggeredComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "separationInferenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "separationCacheHitCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "separatedStreamCtcAttemptCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerRelationshipResolvedComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "subtitleOverlapResolvedComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
         }
       },
       "required": [
@@ -846,7 +988,31 @@
         "realPersonIdentificationCount",
         "rawEmbeddingInShareableCount",
         "forbiddenSpeakerIdentityEvidenceUseCount",
-        "forbiddenSpeakerTimingHeuristicUseCount"
+        "forbiddenSpeakerTimingHeuristicUseCount",
+        "ctcTargetCueCount",
+        "ctcTargetEncodableCueCount",
+        "ctcDirectAttemptCount",
+        "ctcDirectInferenceCount",
+        "ctcDirectCacheHitCount",
+        "ctcModelLoadCount",
+        "ctcPathSuccessCount",
+        "ctcWindowStableCueCount",
+        "ctcEdgePinnedCueCount",
+        "ctcDuplicateOccurrenceConflictCount",
+        "ctcJointAssignmentResolvedComponentCount",
+        "ctcTimingActionableCueCount",
+        "ctcTimingActionableComponentCount",
+        "ctcTimingMutationCueCount",
+        "ctcTimingMutationComponentCount",
+        "ctcResolvedSubtitleOverlapComponentCount",
+        "ctcGreedyTextMutationCount",
+        "ctcTokenRatioRepairCount",
+        "separationTriggeredComponentCount",
+        "separationInferenceCount",
+        "separationCacheHitCount",
+        "separatedStreamCtcAttemptCount",
+        "speakerRelationshipResolvedComponentCount",
+        "subtitleOverlapResolvedComponentCount"
       ],
       "additionalProperties": false
     },
@@ -1096,6 +1262,61 @@
             { "type": "null" }
           ]
         },
+        "ctcRuntimeCapability": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "ctcAlignmentInput": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "localCtcBoundaryEvidence": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "ctcAlignmentCacheManifest": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "localSeparatedStreamEvidence": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
         "reviewActionValidationReport": {
           "default": null,
           "anyOf": [
@@ -1139,6 +1360,11 @@
         "speakerRuntimeCapability",
         "localSpeakerEvidence",
         "speakerEvidenceCacheManifest",
+        "ctcRuntimeCapability",
+        "ctcAlignmentInput",
+        "localCtcBoundaryEvidence",
+        "ctcAlignmentCacheManifest",
+        "localSeparatedStreamEvidence",
         "reviewActionValidationReport",
         "subtitledVideo"
       ],
