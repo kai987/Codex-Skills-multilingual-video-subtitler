@@ -47,11 +47,21 @@ import {
   c519MemoryReplaySummarySchema,
   c519CausalValidationSchema,
   seriesMemoryQualityAuditSchema,
+  c60ProtectedRiskPolicySchema,
+  humanBaselineAuthoritySchema,
+  subtitleFinalizationEvidenceFreshnessSchema,
+  subtitleBaselinePreservationAssessmentSchema,
+  subtitleFinalizationRiskAssessmentSchema,
+  subtitleReviewEffectiveDispositionSchema,
+  c60ProtectedFinalizationReplaySummarySchema,
+  c60ProtectedFinalizationValidationSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
 } from "@mvl/shared";
 import type { z } from "zod";
+
+import { c60SemanticHash } from "./finalization-risk-policy.js";
 
 const SHAREABLE_POLICY_VERSION =
   "c5.16.1-shareable-artifact-policy-v1" as const;
@@ -67,6 +77,8 @@ const C5181_SHAREABLE_POLICY_VERSION =
   "c5.18.1-shareable-artifact-policy-v1" as const;
 const C519_SHAREABLE_POLICY_VERSION =
   "c5.19-shareable-artifact-policy-v1" as const;
+const C60_PROTECTED_SHAREABLE_POLICY_VERSION =
+  "c6.0-protected-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -130,6 +142,20 @@ const artifactSchemas = {
   "c5-19-memory-replay-summary.json": c519MemoryReplaySummarySchema,
   "c5-19-causal-validation.json": c519CausalValidationSchema,
   "series-memory-quality-audit.json": seriesMemoryQualityAuditSchema,
+  "c6-0-protected-risk-policy.json": c60ProtectedRiskPolicySchema,
+  "human-baseline-authority.json": humanBaselineAuthoritySchema,
+  "subtitle-finalization-evidence-freshness.json":
+    subtitleFinalizationEvidenceFreshnessSchema,
+  "subtitle-baseline-preservation-assessment.json":
+    subtitleBaselinePreservationAssessmentSchema,
+  "subtitle-finalization-risk-assessment.json":
+    subtitleFinalizationRiskAssessmentSchema,
+  "subtitle-review-effective-disposition.json":
+    subtitleReviewEffectiveDispositionSchema,
+  "c6-0-protected-finalization-replay-summary.json":
+    c60ProtectedFinalizationReplaySummarySchema,
+  "c6-0-protected-finalization-validation.json":
+    c60ProtectedFinalizationValidationSchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -1245,5 +1271,196 @@ export async function auditC5161ShareableArtifacts(
     absolutePathLeakCount,
     prohibitedSecretCount,
     brokenRelativeReferenceCount,
+  };
+}
+
+const c60ProtectedShareableNames = [
+  "c6-0-protected-risk-policy.json",
+  "human-baseline-authority.json",
+  "subtitle-finalization-evidence-freshness.json",
+  "subtitle-baseline-preservation-assessment.json",
+  "subtitle-finalization-risk-assessment.json",
+  "subtitle-review-effective-disposition.json",
+  "c6-0-protected-finalization-replay-summary.json",
+  "subtitle-finalization-report.json",
+  "subtitle-presentation-resolution.json",
+  "subtitle-local-ctc-boundary-evidence.json",
+  "memory-assisted-ctc-target-audit.json",
+  "subtitle-review-delivery-integrity.json",
+  "subtitle-canonical-forced-alignment.json",
+] as const;
+
+export async function generateC60ProtectedShareableArtifacts(input: {
+  taskRoot: string;
+  subtitleDirectory: string;
+  validationPath?: string;
+  outputDirectory?: string;
+}): Promise<{
+  outputDirectory: string;
+  manifestPath: string;
+  manifest: ShareableArtifactManifest;
+}> {
+  const taskRoot = path.resolve(input.taskRoot);
+  const subtitleDirectory = path.resolve(input.subtitleDirectory);
+  const outputDirectory = path.resolve(
+    input.outputDirectory ??
+      path.join(taskRoot, "shareable-c6-0-protected-finalization"),
+  );
+  await mkdir(outputDirectory, { recursive: true });
+  const sourcePathFor = (name: string): string =>
+    name === "c6-0-protected-finalization-replay-summary.json"
+      ? path.join(taskRoot, name)
+      : path.join(subtitleDirectory, name);
+  const sources: {
+    name: keyof typeof artifactSchemas;
+    sourcePath: string;
+  }[] = c60ProtectedShareableNames.map((name) => ({
+    name,
+    sourcePath: sourcePathFor(name),
+  }));
+  if (input.validationPath !== undefined) {
+    sources.push({
+      name: "c6-0-protected-finalization-validation.json",
+      sourcePath: path.resolve(input.validationPath),
+    });
+  }
+  const availableNames = sources.map((source) => source.name).toSorted();
+  const items: ShareableArtifactManifest["items"] = [];
+  for (const source of sources) {
+    const sourceBuffer = await readFile(source.sourcePath);
+    let raw = JSON.parse(sourceBuffer.toString("utf8")) as unknown;
+    if (source.name === "subtitle-review-delivery-integrity.json") {
+      const local = subtitleReviewDeliveryIntegritySchema.parse(raw);
+      const shareable = {
+        ...local,
+        items: local.items.map((item) => ({
+          ...item,
+          audioClipPath: null,
+          audioIncludedInShareable: false,
+        })),
+      };
+      raw = {
+        ...shareable,
+        semanticHash: sha256(
+          stable({
+            ...shareable,
+            generatedAt: null,
+            semanticHash: null,
+          }),
+        ),
+      };
+    }
+    if (source.name === "c6-0-protected-finalization-replay-summary.json") {
+      const local = c60ProtectedFinalizationReplaySummarySchema.parse(raw);
+      const shareable = {
+        ...local,
+        outputFiles: availableNames,
+      };
+      raw = {
+        ...shareable,
+        semanticHash: c60SemanticHash(shareable),
+      };
+    }
+    const sanitized = sanitizeShareableValue({ value: raw, taskRoot });
+    const parsed = schemaFor(source.name).parse(
+      sanitized.value,
+    ) as z.output<ShareableSchema>;
+    const scan = scanShareableValue(parsed);
+    const targetPath = path.join(outputDirectory, source.name);
+    await atomicWriteJson(targetPath, parsed, { overwrite: true });
+    const shareableHash = sha256(await readFile(targetPath));
+    items.push({
+      sourceArtifactName: path.basename(source.sourcePath),
+      sourceArtifactHash: sha256(sourceBuffer),
+      shareablePath: path.posix.join(
+        path.basename(outputDirectory),
+        source.name,
+      ),
+      shareableHash,
+      schemaName: source.name.replace(/\.json$/u, ".schema.json"),
+      pathReplacementCount: sanitized.pathReplacementCount,
+      secretRedactionCount: sanitized.secretRedactionCount,
+      absolutePathLeakCount: scan.absolutePathLeakCount,
+      prohibitedSecretCount: scan.prohibitedSecretCount,
+      validationPassed:
+        scan.absolutePathLeakCount === 0 && scan.prohibitedSecretCount === 0,
+    });
+  }
+  const manifest = shareableArtifactManifestSchema.parse({
+    schemaVersion: "1.0.0",
+    artifactType: "shareable-artifact-manifest",
+    policyVersion: C60_PROTECTED_SHAREABLE_POLICY_VERSION,
+    generatedAt: new Date().toISOString(),
+    taskIdentityHash: sha256(
+      stable(
+        items.map((item) => ({
+          name: item.sourceArtifactName,
+          hash: item.sourceArtifactHash,
+        })),
+      ),
+    ),
+    pathPolicy: "shareable-relative-only",
+    shareable: true,
+    items,
+    summary: {
+      artifactCount: items.length,
+      validationPassedCount: items.filter((item) => item.validationPassed)
+        .length,
+      absolutePathLeakCount: items.reduce(
+        (sum, item) => sum + item.absolutePathLeakCount,
+        0,
+      ),
+      prohibitedSecretCount: items.reduce(
+        (sum, item) => sum + item.prohibitedSecretCount,
+        0,
+      ),
+      pathReplacementCount: items.reduce(
+        (sum, item) => sum + item.pathReplacementCount,
+        0,
+      ),
+      secretRedactionCount: items.reduce(
+        (sum, item) => sum + item.secretRedactionCount,
+        0,
+      ),
+    },
+  });
+  const manifestPath = path.join(
+    outputDirectory,
+    "shareable-artifact-manifest.json",
+  );
+  await atomicWriteJson(manifestPath, manifest, { overwrite: true });
+  return { outputDirectory, manifestPath, manifest };
+}
+
+export async function auditC60ProtectedShareableArtifacts(
+  inputDirectory: string,
+): Promise<Awaited<ReturnType<typeof auditC5161ShareableArtifacts>>> {
+  const result = await auditC5161ShareableArtifacts(inputDirectory);
+  const directory = path.resolve(inputDirectory);
+  let brokenRelativeReferenceCount = result.brokenRelativeReferenceCount;
+  const replayPath = path.join(
+    directory,
+    "c6-0-protected-finalization-replay-summary.json",
+  );
+  const replay = c60ProtectedFinalizationReplaySummarySchema.parse(
+    JSON.parse(await readFile(replayPath, "utf8")) as unknown,
+  );
+  for (const reference of replay.outputFiles) {
+    const target = path.resolve(directory, reference);
+    if (
+      !target.startsWith(`${directory}${path.sep}`) ||
+      !(await stat(target).then(
+        (value) => value.isFile(),
+        () => false,
+      ))
+    ) {
+      brokenRelativeReferenceCount += 1;
+    }
+  }
+  return {
+    ...result,
+    brokenRelativeReferenceCount,
+    validationPassed:
+      result.validationPassed && brokenRelativeReferenceCount === 0,
   };
 }

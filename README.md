@@ -62,6 +62,25 @@ npm run subtitle-finalize -- \
 
 Finalization keeps the strict v1 package cues canonical and writes display-only line breaks, repetition classifications, overlap-component decisions, and any trusted timing-only repair to `subtitle-presentation-resolution.json`. `--presentation-resolution observe` records recommendations without applying them; `off` preserves the legacy quality gate. `--overlap-resolution balanced` additionally permits only tightly bounded authoritative rapid-turn overlap and still never uses an unsupported midpoint trim.
 
+C6.0 adds an opt-in protected finalization policy without changing the default legacy path. `protected-observe` classifies every known legacy finding with the exact-match risk policy and writes strict authority, freshness, preservation, risk, review-disposition, replay, and shareable-audit artifacts, but it cannot change finalization status or create final files. `protected-enforce` may release only a cryptographically verified, user-confirmed human-reviewed baseline whose source lineage, canonical text/timing, presentation serialization, and read-only checks all pass. Machine-only release remains forbidden and fails closed with `MACHINE_ONLY_BLIND_ACCEPTANCE_REQUIRED`.
+
+```bash
+npm run subtitle-finalize -- \
+  --task "/path/to/c5-19-task" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
+  --source-video "/path/to/source-video.mkv" \
+  --c6-finalization-policy protected-observe
+
+npm run replay:c6-0-protected-finalization -- \
+  --task "/path/to/c5-19-task" \
+  --output "/path/to/new-c6-task" \
+  --human-reviewed-subtitle "/path/to/human-reviewed.ass" \
+  --source-video "/path/to/source-video.mkv" \
+  --c6-finalization-policy protected-enforce
+```
+
+Protected finalization separates current-output safety from mutation safety. A preservation-supported component can explain why the accepted human baseline is safe without claiming that the underlying subtitle overlap was automatically resolved. The original legacy blocker and Review Item counts remain auditable in every protected result. Unknown finding codes and stale or incompatible upstream artifacts fail closed; no prefix or substring policy matching is used. The policy flag accepts only `legacy`, `protected-observe`, or `protected-enforce`, defaults to `legacy`, and has no unsafe bypass.
+
 To collect bounded local acoustic evidence only for still-blocking overlap components, opt in to C5.15. It extracts each complete component union plus bounded context, runs three prompt-free local `large-v3` profiles through the shared whisper.cpp worker/cache, and aligns the already-reviewed text only after ASR. `observe` writes evidence without closing findings; `enforce` may apply an atomic timing-only repair or a serializer-only legal-overlap layout when the localized evidence passes every threshold. It never runs whole-media ASR or changes reviewed text:
 
 ```bash

@@ -39,7 +39,9 @@ describe("C6.0 protected finalization gates", () => {
 
   it("fails closed when the source-controlled policy is tampered", () => {
     const policy = structuredClone(C60_PROTECTED_RISK_POLICY);
-    policy.entries[0]!.rationale = "tampered";
+    const firstEntry = policy.entries.at(0);
+    if (firstEntry === undefined) throw new Error("Expected policy entry.");
+    firstEntry.rationale = "tampered";
     const result = evaluateProtectedFinalizationRisk({
       ...protectedRiskInput(),
       policy,

@@ -31,7 +31,12 @@ describe("C6.0 evidence freshness", () => {
     ["canonical-changed", { canonicalTextChanged: true }],
     ["timing-changed", { canonicalTimingChanged: true }],
     ["lineage-mismatch", { lineageCompatible: false }],
-  ] as const)("returns %s when the evidence contract fails", (expected, patch) => {
-    expect(determineC60FreshnessStatus({ ...valid, ...patch })).toBe(expected);
-  });
+  ] as const)(
+    "returns %s when the evidence contract fails",
+    (expected, patch) => {
+      expect(determineC60FreshnessStatus({ ...valid, ...patch })).toBe(
+        expected,
+      );
+    },
+  );
 });

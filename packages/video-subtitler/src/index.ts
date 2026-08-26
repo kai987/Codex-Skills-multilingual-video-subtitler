@@ -9,6 +9,7 @@ export * from "./finalization-risk-assessment.js";
 export * from "./human-baseline-authority.js";
 export * from "./baseline-preservation.js";
 export * from "./review-effective-disposition.js";
+export * from "./protected-finalization.js";
 export * from "./mfa-output.js";
 export * from "./mfa-word-unit-mapping.js";
 export * from "./mfa-runtime.js";

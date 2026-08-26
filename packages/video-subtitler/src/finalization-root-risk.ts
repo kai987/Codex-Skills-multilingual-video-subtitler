@@ -50,9 +50,7 @@ export function buildFinalizationRootRisks(input: {
       return {
         rootRiskId: `root-risk:${family}`,
         rootRiskFamily: family,
-        memberSignalIds: signals
-          .map((signal) => signal.signalId)
-          .toSorted(),
+        memberSignalIds: signals.map((signal) => signal.signalId).toSorted(),
         derivedFindingIds: matching
           .filter(
             (finding) =>

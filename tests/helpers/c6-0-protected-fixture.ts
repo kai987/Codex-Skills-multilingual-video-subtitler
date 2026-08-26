@@ -24,9 +24,7 @@ export const C60_TEST_COMPONENTS = Array.from(
   (_, index) => `component-${index + 1}`,
 );
 
-export function protectedAuthority(
-  verified = true,
-): HumanBaselineAuthority {
+export function protectedAuthority(verified = true): HumanBaselineAuthority {
   const base = {
     schemaVersion: "1.0.0" as const,
     artifactType: "human-baseline-authority" as const,
@@ -83,7 +81,9 @@ export function protectedFreshness(
     lineageCompatible: true,
     canonicalTextChanged: false,
     canonicalTimingChanged: false,
-    freshnessStatus: passed ? ("superseded" as const) : ("hash-mismatch" as const),
+    freshnessStatus: passed
+      ? ("superseded" as const)
+      : ("hash-mismatch" as const),
     supersededByEvidenceIds: ["memory-1"],
     reasonCodes: passed
       ? ["LATER_C5_19_TARGET_ENCODABILITY_VERIFIED"]

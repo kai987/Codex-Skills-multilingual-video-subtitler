@@ -177,6 +177,7 @@ interface SubtitleCliOptions extends GlobalOptions {
 interface FinalizeCliOptions extends GlobalOptions {
   task: string;
   finalization: "auto" | "review-fallback" | "human";
+  c6FinalizationPolicy: "legacy" | "protected-observe" | "protected-enforce";
   resolutions?: string;
   humanReviewedSubtitle?: string;
   sourceVideo?: string;
@@ -1167,6 +1168,14 @@ program
       .choices(["auto", "review-fallback", "human"])
       .default("auto"),
   )
+  .addOption(
+    new Option(
+      "--c6-finalization-policy <mode>",
+      "C6.0 risk policy; protected-enforce currently requires a verified human-reviewed baseline. Machine-only zero-touch is not authorized in C6.0",
+    )
+      .choices(["legacy", "protected-observe", "protected-enforce"])
+      .default("legacy"),
+  )
   .option("--resolutions <path>", "human-review-resolutions.json")
   .option(
     "--human-reviewed-subtitle <path>",
@@ -1431,9 +1440,17 @@ program
       globals.jsonLogs ?? false,
       globals.debug === true ? "debug" : "info",
     );
+    if (options.c6FinalizationPolicy !== "legacy") {
+      logger.log(
+        "warning",
+        "C6.0 protected finalization preserves verified human-reviewed output only; it does not authorize machine-only zero-touch release, remove Review artifacts, or claim subtitle-overlap resolution.",
+        { c6FinalizationPolicy: options.c6FinalizationPolicy },
+      );
+    }
     const result = await finalizeSubtitleTask({
       taskDirectory: options.task,
       mode: options.finalization,
+      c6FinalizationPolicy: options.c6FinalizationPolicy,
       ...(options.resolutions === undefined
         ? {}
         : { resolutionsPath: options.resolutions }),

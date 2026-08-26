@@ -44,8 +44,7 @@ describe("C6.0 protected risk assessment", () => {
       protectedRiskInput({ positiveRiskComponent: 0 }),
     );
     expect(
-      positive.riskAssessment.summary
-        .positiveCurrentOutputDefectEvidenceCount,
+      positive.riskAssessment.summary.positiveCurrentOutputDefectEvidenceCount,
     ).toBe(1);
     expect(positive.riskAssessment.protectedOutcome).toBe(
       "HUMAN_REVIEW_REQUIRED",

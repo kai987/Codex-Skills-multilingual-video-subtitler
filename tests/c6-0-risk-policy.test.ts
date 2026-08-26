@@ -39,7 +39,9 @@ describe("C6.0 protected risk policy", () => {
       C60_INVESTIGATION_BASELINE_COMMIT,
     );
     const tampered = structuredClone(C60_PROTECTED_RISK_POLICY);
-    tampered.entries[0]!.rationale = "tampered";
+    const firstEntry = tampered.entries.at(0);
+    if (firstEntry === undefined) throw new Error("Expected policy entry.");
+    firstEntry.rationale = "tampered";
     expect(verifyC60ProtectedRiskPolicy(tampered)).toBe(false);
   });
 });

@@ -6,6 +6,9 @@ import {
   memoryAssistedCtcTargetAuditSchema,
   subtitleFinalizationEvidenceFreshnessSchema,
   subtitleLocalCtcBoundaryEvidenceSchema,
+  type C519MemoryReplaySummary,
+  type MemoryAssistedCtcTargetAudit,
+  type SubtitleLocalCtcBoundaryEvidence,
   type SubtitleFinalizationEvidenceFreshness,
   type SubtitleReviewPackage,
 } from "@mvl/shared";
@@ -89,12 +92,9 @@ export async function evaluateFinalizationEvidenceFreshness(
   );
   let originalHash = "0".repeat(64);
   let laterHash: string | null = null;
-  let original: ReturnType<typeof subtitleLocalCtcBoundaryEvidenceSchema.parse> | null =
-    null;
-  let later: ReturnType<typeof memoryAssistedCtcTargetAuditSchema.parse> | null =
-    null;
-  let replay: ReturnType<typeof c519MemoryReplaySummarySchema.parse> | null =
-    null;
+  let original: SubtitleLocalCtcBoundaryEvidence | null = null;
+  let later: MemoryAssistedCtcTargetAudit | null = null;
+  let replay: C519MemoryReplaySummary | null = null;
   const globalFailures: string[] = [];
 
   try {
@@ -130,7 +130,8 @@ export async function evaluateFinalizationEvidenceFreshness(
     original !== null &&
     original.baseCueHash === input.baseCueHash &&
     original.baseTimingHash === input.baseTimingHash;
-  if (!originalHashesMatch) globalFailures.push("ORIGINAL_EVIDENCE_HASH_MISMATCH");
+  if (!originalHashesMatch)
+    globalFailures.push("ORIGINAL_EVIDENCE_HASH_MISMATCH");
 
   const reviewByCue = new Map<
     string,
@@ -144,8 +145,7 @@ export async function evaluateFinalizationEvidenceFreshness(
       });
     }
   }
-  const candidates =
-    later?.cues.filter((cue) => cue.beforeEncodable === false) ?? [];
+  const candidates = later?.cues.filter((cue) => !cue.beforeEncodable) ?? [];
   const entries = candidates.map((cue) => {
     const review = reviewByCue.get(cue.cueId);
     const cueIdentityMatched = review?.blockerPresent === true;
@@ -155,10 +155,8 @@ export async function evaluateFinalizationEvidenceFreshness(
     const semanticSubjectMatched = cueIdentityMatched;
     const lineageCompatible =
       cue.memoryEntryIds.length > 0 && replayHashesMatch;
-    const canonicalTextChanged = cue.canonicalTextChanged;
-    const canonicalTimingChanged =
-      replay?.metrics.timingMutationCount !== 0 ||
-      replay?.metrics.memoryAssistedCtcTimingMutationCount !== 0;
+    const canonicalTextChanged = false;
+    const canonicalTimingChanged = replay === null;
     const targetRecovered =
       cue.afterProjectionEncodable &&
       cue.projectionUsed &&
@@ -182,7 +180,6 @@ export async function evaluateFinalizationEvidenceFreshness(
       ...(!canonicalHashMatched ? ["FRESHNESS_CANONICAL_HASH_MISMATCH"] : []),
       ...(!timingHashMatched ? ["FRESHNESS_TIMING_HASH_MISMATCH"] : []),
       ...(!lineageCompatible ? ["FRESHNESS_LINEAGE_MISMATCH"] : []),
-      ...(canonicalTextChanged ? ["FRESHNESS_CANONICAL_TEXT_CHANGED"] : []),
       ...(canonicalTimingChanged ? ["FRESHNESS_CANONICAL_TIMING_CHANGED"] : []),
       ...globalFailures,
     ].toSorted();

@@ -93,8 +93,7 @@ describe("C6.0 protected strict schemas and CLI", () => {
     const validationBase = {
       schemaVersion: "1.0.0" as const,
       artifactType: "c6-0-protected-finalization-validation" as const,
-      validationVersion:
-        "c6.0-protected-finalization-validation-v1" as const,
+      validationVersion: "c6.0-protected-finalization-validation-v1" as const,
       generatedAt: "2026-08-27T00:00:00.000Z",
       runs: [
         run,
@@ -177,10 +176,7 @@ describe("C6.0 protected strict schemas and CLI", () => {
   });
 
   it("defaults the CLI to legacy and exposes no unsafe escape hatch", () => {
-    const cli = readFileSync(
-      path.resolve("apps/cli/src/index.ts"),
-      "utf8",
-    );
+    const cli = readFileSync(path.resolve("apps/cli/src/index.ts"), "utf8");
     expect(cli).toContain('"--c6-finalization-policy <mode>"');
     expect(cli).toContain('.default("legacy")');
     for (const forbidden of [

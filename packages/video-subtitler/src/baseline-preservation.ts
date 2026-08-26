@@ -57,7 +57,10 @@ export function assessBaselinePreservation(
   };
   const failed = Object.entries(checks)
     .filter(([, passed]) => !passed)
-    .map(([name]) => `BASELINE_PRESERVATION_${name.replaceAll(/([A-Z])/gu, "_$1").toUpperCase()}_FAILED`)
+    .map(
+      ([name]) =>
+        `BASELINE_PRESERVATION_${name.replaceAll(/([A-Z])/gu, "_$1").toUpperCase()}_FAILED`,
+    )
     .toSorted();
   const eligible = failed.length === 0;
   const base = {

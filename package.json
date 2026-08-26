@@ -70,6 +70,8 @@
     "validate:c5-19-runs": "tsx scripts/validate-c5-19-runs.ts",
     "investigate:c6-0-finalization-risk": "tsx scripts/investigate-c6-0-finalization-risk.ts",
     "validate:c6-0-investigation": "tsx scripts/validate-c6-0-investigation.ts",
+    "replay:c6-0-protected-finalization": "tsx scripts/replay-c6-0-protected-finalization.ts",
+    "validate:c6-0-protected-finalization": "tsx scripts/validate-c6-0-protected-finalization.ts",
     "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
     "verify:c4-persistent-worker": "tsx scripts/verify-c4-persistent-worker.ts",
     "validate:c4-real-runs": "tsx scripts/validate-c4-real-runs.ts",

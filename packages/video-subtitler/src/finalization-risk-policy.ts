@@ -81,9 +81,7 @@ const routingDiagnosticCodes = [
   "FINAL_INTEGRITY_FINDING_REQUIRES_REVIEW",
 ] as const;
 
-const provenanceDiagnosticCodes = [
-  "HUMAN_REVIEWED_BASELINE_IMPORTED",
-] as const;
+const provenanceDiagnosticCodes = ["HUMAN_REVIEWED_BASELINE_IMPORTED"] as const;
 
 const mutationAbsenceCodes = [
   "ALIGNMENT_PINNED_TO_WINDOW_EDGE",
@@ -387,15 +385,14 @@ export function createC60ProtectedRiskPolicy(): C60ProtectedRiskPolicy {
 }
 
 export const C60_PROTECTED_RISK_POLICY = createC60ProtectedRiskPolicy();
-export const C60_PROTECTED_POLICY_HASH =
-  C60_PROTECTED_RISK_POLICY.policyHash;
+export const C60_PROTECTED_POLICY_HASH = C60_PROTECTED_RISK_POLICY.policyHash;
 
 export function verifyC60ProtectedRiskPolicy(
   policy: C60ProtectedRiskPolicy,
 ): boolean {
-  const { policyHash: _policyHash, ...content } = policy;
+  const { policyHash, ...content } = policy;
   return (
-    policy.policyHash === C60_PROTECTED_POLICY_HASH &&
+    policyHash === C60_PROTECTED_POLICY_HASH &&
     c60StableHash(content) === C60_PROTECTED_POLICY_HASH
   );
 }
@@ -422,5 +419,7 @@ export const C60_OBSERVED_INVESTIGATION_CODES = [
 ].toSorted();
 
 if (new Set(C60_OBSERVED_INVESTIGATION_CODES).size !== 70) {
-  throw new Error("C6.0 protected policy must cover exactly 70 observed codes.");
+  throw new Error(
+    "C6.0 protected policy must cover exactly 70 observed codes.",
+  );
 }

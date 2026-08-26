@@ -50,8 +50,10 @@ export function verifyHumanBaselineAuthority(
     failures.push("SOURCE_VIDEO_READ_ONLY_VERIFICATION_FAILED");
   }
   if (
-    input.sourceFingerprint.sha256 !== input.reviewPackage.sourceFingerprint.sha256 ||
-    input.sourceFingerprint.size !== input.reviewPackage.sourceFingerprint.size ||
+    input.sourceFingerprint.sha256 !==
+      input.reviewPackage.sourceFingerprint.sha256 ||
+    input.sourceFingerprint.size !==
+      input.reviewPackage.sourceFingerprint.size ||
     input.sourceFingerprint.fileName !==
       input.reviewPackage.sourceFingerprint.fileName
   ) {

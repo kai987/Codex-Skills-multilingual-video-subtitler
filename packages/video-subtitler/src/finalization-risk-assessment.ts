@@ -6,7 +6,6 @@ import {
   type C60FinalizationPolicyMode,
   type C60ProtectedDisposition,
   type C60ProtectedRiskPolicy,
-  type FinalizationFinding,
   type HumanBaselineAuthority,
   type SubtitleFinalizationEvidenceFreshness,
   type SubtitleFinalizationReport,
@@ -190,7 +189,8 @@ function buildComponentRisks(input: {
   }
   return input.reviewPackage.items
     .map((item) => {
-      const componentId = item.speakerEvidenceComponentId ?? "unknown-component";
+      const componentId =
+        item.speakerEvidenceComponentId ?? "unknown-component";
       const speaker = speakerComponents.get(componentId);
       const ctc = ctcComponents.get(componentId);
       const speakerRelationshipResolved =
@@ -204,11 +204,14 @@ function buildComponentRisks(input: {
         speakerRelationshipResolved &&
         (item.blockers.includes("CTC_LEGAL_OVERLAP_DELETED") ||
           ctcBlockers.includes("CTC_LEGAL_OVERLAP_DELETED"));
+      const ctcSubtitleOverlapResolved = ctc?.subtitleOverlapResolved;
+      const ctcTimingMutationApplied = ctc?.timingMutationApplied;
+      const ctcMutations = ctc?.mutations;
       const subtitleOverlapResolved =
-        ctc?.subtitleOverlapResolved === true &&
-        ctc?.timingMutationApplied === true &&
-        Array.isArray(ctc.mutations) &&
-        ctc.mutations.length > 0;
+        ctcSubtitleOverlapResolved === true &&
+        ctcTimingMutationApplied === true &&
+        Array.isArray(ctcMutations) &&
+        ctcMutations.length > 0;
       const positiveCodes = item.blockers.filter((code) => {
         const policy = c60PolicyEntry(code);
         return (
@@ -443,9 +446,9 @@ export function evaluateProtectedFinalizationRisk(
             : ("FINAL_SAFE" as const);
   const summary = {
     observedSignalCount: input.observedSignalCounts.size,
-    policyCoveredObservedSignalCount: [...input.observedSignalCounts.keys()].filter(
-      (code) => c60PolicyEntry(code, policy) !== undefined,
-    ).length,
+    policyCoveredObservedSignalCount: [
+      ...input.observedSignalCounts.keys(),
+    ].filter((code) => c60PolicyEntry(code, policy) !== undefined).length,
     unknownObservedSignalCount,
     unknownSignalFailClosedCount: unknownCodes.length,
     legacyBlockingFindingCount: input.legacyReport.findings.filter(

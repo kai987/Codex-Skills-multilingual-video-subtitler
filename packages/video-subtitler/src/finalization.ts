@@ -38,6 +38,7 @@ import {
   type TimestampRuntimePolicy,
   type WhisperExecutionMode,
   type WorkerStateIsolationMode,
+  type C60FinalizationPolicyMode,
 } from "@mvl/shared";
 import {
   DEFAULT_FINALIZATION_THRESHOLDS,
@@ -87,9 +88,11 @@ import {
   type CanonicalForcedAlignmentResult,
 } from "./canonical-forced-alignment.js";
 import type { ForcedAlignmentCacheMode } from "./forced-alignment-cache.js";
+import { finalizeProtectedExistingTask } from "./protected-finalization.js";
 
 export interface SubtitleFinalizationOptions {
   taskDirectory: string;
+  c6FinalizationPolicy?: C60FinalizationPolicyMode;
   mode?: FinalizationMode;
   resolutionsPath?: string;
   humanReviewedSubtitlePath?: string;
@@ -654,6 +657,22 @@ export async function finalizeSubtitleTask(
   options: SubtitleFinalizationOptions,
 ): Promise<SubtitleFinalizationResult> {
   const generatedAt = new Date().toISOString();
+  const c6FinalizationPolicy = options.c6FinalizationPolicy ?? "legacy";
+  if (c6FinalizationPolicy !== "legacy") {
+    return await finalizeProtectedExistingTask({
+      taskDirectory: options.taskDirectory,
+      mode: c6FinalizationPolicy,
+      generatedAt,
+      ...(options.humanReviewedSubtitlePath === undefined
+        ? {}
+        : { humanReviewedSubtitlePath: options.humanReviewedSubtitlePath }),
+      ...(options.sourceVideoPath === undefined
+        ? {}
+        : { sourceVideoPath: options.sourceVideoPath }),
+      dryRun: options.dryRun ?? false,
+      ...(options.logger === undefined ? {} : { logger: options.logger }),
+    });
+  }
   const mode = options.mode ?? "review-fallback";
   const presentationResolutionMode =
     options.presentationResolution ?? "enforce";

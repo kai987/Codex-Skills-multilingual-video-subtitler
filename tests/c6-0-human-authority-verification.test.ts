@@ -118,9 +118,9 @@ describe("C6.0 human authority verification", () => {
         humanBaseline: { ...human, cues: cues.slice(0, 1) },
       }).authorityVerified,
     ).toBe(false);
-    expect(verify({ expectedTimingHash: "d".repeat(64) }).authorityVerified).toBe(
-      false,
-    );
+    expect(
+      verify({ expectedTimingHash: "d".repeat(64) }).authorityVerified,
+    ).toBe(false);
     expect(verify({ humanReadOnly: false }).authorityVerified).toBe(false);
   });
 });

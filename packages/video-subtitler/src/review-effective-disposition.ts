@@ -33,7 +33,9 @@ export function buildReviewEffectiveDisposition(input: {
       return {
         reviewId: item.reviewId,
         componentId:
-          item.speakerEvidenceComponentId ?? component?.componentId ?? "unknown",
+          item.speakerEvidenceComponentId ??
+          component?.componentId ??
+          "unknown",
         legacyRequiresHumanReview: item.requiresHumanReview,
         protectedDisposition: mandatory
           ? ("mandatory" as const)
@@ -85,7 +87,8 @@ export function buildReviewEffectiveDisposition(input: {
       effectiveMandatoryReviewCount: items.filter(
         (item) => item.protectedMandatory,
       ).length,
-      effectiveAdvisoryReviewCount: items.filter((item) => item.advisory).length,
+      effectiveAdvisoryReviewCount: items.filter((item) => item.advisory)
+        .length,
       preservationSupportedReviewCount: items.filter(
         (item) => item.preservationSupported,
       ).length,
