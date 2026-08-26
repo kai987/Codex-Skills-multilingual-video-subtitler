@@ -171,6 +171,36 @@
         { "type": "null" }
       ]
     },
+    "seriesMemoryHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "memoryPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "memoryRankingPolicyHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "pronunciationProjectionHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "seriesMemoryDecisionDependency": {
+      "default": "none",
+      "type": "string",
+      "enum": ["none", "ranking"]
+    },
     "items": {
       "type": "array",
       "items": {
@@ -2537,6 +2567,11 @@
     "ctcPolicyVersion",
     "ctcJointAssignmentHash",
     "sourceSeparationEvidenceHash",
+    "seriesMemoryHash",
+    "memoryPolicyVersion",
+    "memoryRankingPolicyHash",
+    "pronunciationProjectionHash",
+    "seriesMemoryDecisionDependency",
     "items",
     "summary"
   ],

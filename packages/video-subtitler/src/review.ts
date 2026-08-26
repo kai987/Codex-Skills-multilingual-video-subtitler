@@ -23,6 +23,10 @@ import {
   type SubtitleLocalCtcBoundaryEvidence,
   type SubtitleLocalSeparatedStreamEvidence,
   type SubtitleReviewPackage,
+  type SeriesLanguageMemory,
+  type SubtitleSeriesMemoryEvidence,
+  type SubtitleMemoryAssistedRanking,
+  type SubtitleMemoryPronunciationProjection,
 } from "@mvl/shared";
 
 import {
@@ -94,13 +98,15 @@ function hardenedReviewJavascript(
   timelineEnabled: boolean,
   speakerEvidenceEnabled: boolean,
   ctcEvidenceEnabled: boolean,
+  seriesMemoryEnabled: boolean,
 ): string {
   return String.raw`const timelineEnabled=${String(timelineEnabled)};
 const speakerEvidenceEnabled=${String(speakerEvidenceEnabled)};
 const ctcEvidenceEnabled=${String(ctcEvidenceEnabled)};
+const seriesMemoryEnabled=${String(seriesMemoryEnabled)};
 const REVIEW_ACTION_REGISTRY=${JSON.stringify(REVIEW_ACTION_REGISTRY)};
 const validateReviewActionPayload=${portableValidateReviewAction.toString()};
-const state={data:null,speakerEvidence:null,ctcEvidence:null,separationEvidence:null,index:0,resolutions:new Map(),quarantinedLocalResolutions:[],validationEvents:[],downloadBlockedCount:0,loop:false,loopStart:null,stopAt:null};
+const state={data:null,speakerEvidence:null,ctcEvidence:null,separationEvidence:null,seriesMemory:null,memoryEvidence:null,memoryRanking:null,memoryProjection:null,index:0,resolutions:new Map(),quarantinedLocalResolutions:[],validationEvents:[],downloadBlockedCount:0,loop:false,loopStart:null,stopAt:null};
 const q=(s,r=document)=>r.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function baseResolution(item,action){return{resolutionId:'resolution-'+item.reviewId,reviewId:item.reviewId,action,selectedCandidateId:null,selectedCandidateEvidenceHash:null,correctedText:null,start:null,end:null,splitParts:[],mergeCueIds:[],reviewerNotes:null,errorTypes:[],confirmedReading:null,terminologyHints:[],dialectHints:[]}}
@@ -125,13 +131,16 @@ function trackHtml(item,e,component){const names={'source-cue-prior':'Human Orig
 function speakerBar(item,label,start,end,kind,lineage){const window=item.audioExtractedInterval??item.audioRequestedInterval??item.interval;const span=Math.max(.001,window.end-window.start);const left=Math.max(0,Math.min(100,100*(start-window.start)/span));const width=Math.max(.2,Math.min(100-left,100*(end-start)/span));return '<div class="track"><button class="track-label" data-speaker-start="'+start+'" data-speaker-end="'+end+'">'+esc(label)+'</button><div><div class="rail"><span class="bar speaker '+esc(kind)+'" style="left:'+left+'%;width:'+width+'%"></span></div><div class="evidence-detail">'+esc(start.toFixed(3)+' → '+end.toFixed(3)+' | '+lineage)+'</div></div></div>'}
 function speakerEvidenceHtml(item){const component=(state.speakerEvidence?.components??[]).find(value=>value.componentId===item.speakerEvidenceComponentId);if(!component)return speakerEvidenceEnabled?'<section class="timeline"><div class="scope">Local speaker evidence</div><p class="warning">Speaker evidence is unavailable for this component.</p></section>':'';const standard=component.speakerTracks.flatMap(track=>track.standardTurns.map(turn=>speakerBar(item,'Standard · '+track.speakerId,turn.startMediaGlobal,turn.endMediaGlobal,'standard',turn.evidenceLineageId))).join('');const exclusive=component.speakerTracks.flatMap(track=>track.exclusiveTurns.map(turn=>speakerBar(item,'Exclusive · '+track.speakerId,turn.startMediaGlobal,turn.endMediaGlobal,'exclusive',turn.evidenceLineageId))).join('');const overlaps=component.overlapSpeechIntervals.map(value=>speakerBar(item,'Overlap · '+value.activeSpeakerIds.join(' + '),value.interval.start,value.interval.end,'overlap',value.evidenceLineageIds.join(', '))).join('');const changes=component.speakerChangePoints.map(value=>speakerBar(item,'Change · '+value.beforeSpeakerId+' → '+value.afterSpeakerId,value.timeMediaGlobal-.015,value.timeMediaGlobal+.015,'change',value.evidenceLineageIds.join(', '))).join('');return '<section class="timeline speaker-evidence"><div class="scope">Anonymous local speaker evidence</div><div class="disclaimer">Speaker labels are anonymous and local to this review component.<br>Diarization evidence does not identify a real person.<br>Acoustic prominence is a heuristic and does not prove foreground/background identity.</div>'+standard+exclusive+overlaps+changes+'<details><summary>Cue assignment, prominence, and relationship hypotheses</summary><pre>'+esc(JSON.stringify({cueSpeakerHypotheses:component.cueSpeakerHypotheses,prominenceEvidence:component.prominenceEvidence,relationshipHypotheses:component.relationshipHypotheses,selectedRelationship:component.selectedRelationship,windowStability:component.windowStability},null,2))+'</pre></details></section>'}
 function ctcEvidenceHtml(item){if(!ctcEvidenceEnabled)return'';const component=(state.ctcEvidence?.components??[]).find(value=>value.componentId===item.ctcBoundaryEvidenceComponentId);if(!component)return'<section class="timeline"><div class="scope">Local CTC boundary evidence</div><p class="warning">CTC evidence is unavailable for this component.</p></section>';const attempts=component.cueDecisions.flatMap(cue=>[state.ctcEvidence.attempts.find(value=>value.attemptId===cue.narrowAttemptId),state.ctcEvidence.attempts.find(value=>value.attemptId===cue.expandedAttemptId)].filter(Boolean));const tracks=attempts.filter(value=>value.selectedBoundary).map(value=>trackHtml(item,{sourceType:value.windowType==='narrow'?'CTC Narrow':'CTC Expanded',scope:'cue',interval:value.selectedBoundary,timingUsable:value.pathStatus==='success',trustScore:value.meanTokenPosterior,evidenceId:value.attemptId,blockers:value.blockers},false)).join('');const selected=component.cueDecisions.filter(cue=>cue.selectedBoundary).map(cue=>trackHtml(item,{sourceType:'Selected CTC Boundary',scope:'cue',interval:cue.selectedBoundary,timingUsable:cue.timingActionable,trustScore:null,evidenceId:cue.semanticHash,blockers:cue.blockers},false)).join('');const separation=(state.separationEvidence?.components??[]).find(value=>value.componentId===component.componentId);return '<section class="timeline ctc-evidence"><div class="scope">Local CTC boundary refinement</div><div class="disclaimer">CTC Alignment uses the existing transcript as a target.<br>It does not independently prove that the subtitle text is correct.<br>Scores are uncalibrated and each boundary side requires independent lexical support.</div>'+tracks+selected+'<details><summary>CTC token frames, MFA, Mapped Token, Evidence-DP, Raw VAD, Speaker Track, and Source Cue Prior</summary><pre>'+esc(JSON.stringify({cues:component.cueDecisions,jointAssignment:component.jointAssignment,separation:separation??null},null,2))+'</pre></details></section>'}
+function seriesMemoryHtml(item){if(!seriesMemoryEnabled)return'';const cueEvidence=(state.memoryEvidence?.cues??[]).filter(value=>item.targetCueIds.includes(value.cueId));const entryIds=[...new Set(cueEvidence.flatMap(value=>value.matchedEntryIds))];const entries=(state.seriesMemory?.entries??[]).filter(value=>entryIds.includes(value.entryId)).map(value=>({canonicalSurface:value.canonicalSurface,reading:value.readingHiragana,acousticAliases:value.acousticAliases,entryType:value.entryType,trustLevel:value.trustLevel,firstSeen:value.firstSeen,occurrenceCount:value.occurrenceIds.length,sourceEpisodes:value.sourceEpisodes,variants:value.variants,wrongForms:value.observedWrongForms,dialectPreservation:value.dialectMetadata.preservationRequired}));const projections=(state.memoryProjection?.cues??[]).filter(value=>item.targetCueIds.includes(value.cueId)&&value.spans.length);const rankings=(state.memoryRanking?.decisions??[]).filter(value=>item.targetCueIds.includes(value.cueId));return '<section class="timeline series-memory"><div class="scope">Series Memory Evidence</div><div class="disclaimer">Memory is prior evidence only.<br>It does not independently prove the subtitle text.</div><details open><summary>Memory matches, pronunciation projection, and ranking effect</summary><pre>'+esc(JSON.stringify({entries,projections,rankings},null,2))+'</pre></details></section>'}
+const speakerEvidenceWithoutMemoryHtml=speakerEvidenceHtml;
+speakerEvidenceHtml=item=>speakerEvidenceWithoutMemoryHtml(item)+seriesMemoryHtml(item);
 function shortcutHints(item){return REVIEW_ACTION_REGISTRY.filter(entry=>entry.shortcut&&item.allowedHumanActions.includes(entry.action)).map(entry=>entry.shortcut.toUpperCase()+' '+entry.label).join(', ')}
 function render(){const item=state.data.items[state.index];q('#position').textContent=(state.index+1)+' / '+state.data.items.length;if(!item){q('#items').innerHTML='<p>No review items.</p>';return}q('#shortcut-hints').textContent=shortcutHints(item);q('#quarantine-status').textContent=state.quarantinedLocalResolutions.length?'Quarantined saved actions: '+state.quarantinedLocalResolutions.length:'';const suggestions=esc(JSON.stringify(item.candidateSuggestions.map(candidate=>({id:candidate.candidateId,coverage:candidate.coverageMetrics,evidence:candidate.sourceEvidenceIds})),null,2));const union=item.componentUnionInterval??item.interval;const cueEvidence=item.boundaryEvidence??[];const componentEvidence=[...(item.componentRawVadIntervals??[]),...(item.componentDecodedSegments??[]),...(item.componentMappedTokenEvidence??[]),...(item.componentPauseEvidence??[])].filter(evidence=>evidence.scope!=='cue');const packageTracks=[{sourceType:'component-union',scope:'component',interval:union,timingUsable:true,trustScore:1,evidenceId:'review-package:component-union',blockers:[]},...(item.audioExtractedInterval?[{sourceType:'audio-extraction-window',scope:'component',interval:item.audioExtractedInterval,timingUsable:item.audioValidationStatus==='validated',trustScore:null,evidenceId:'review-package:audio-extraction-window',blockers:item.audioError?[item.audioError]:[]}]:[])];const unresolved=item.unresolvedEvidenceReferences??[];const timeline=timelineEnabled?'<section class="timeline"><div class="scope">Cue-specific evidence tracks</div>'+cueEvidence.map(evidence=>trackHtml(item,evidence,false)).join('')+'<div class="scope">Component acoustic tracks</div>'+packageTracks.concat(componentEvidence).map(evidence=>trackHtml(item,evidence,true)).join('')+(unresolved.length?'<p class="error">EVIDENCE_REFERENCE_UNRESOLVED: '+esc(unresolved.join(', '))+'</p>':'')+'</section>':'';const forced=item.forcedAlignmentEvidence?'<section class="forced"><div class="label">Forced-alignment decision context</div><pre>'+esc(JSON.stringify(item.forcedAlignmentEvidence,null,2))+'</pre></section>':'';const audio=item.audioClipPath?'<audio id="review-audio" controls preload="metadata" src="'+esc(item.audioClipPath)+'"></audio>':'';const cueLoops=(item.forcedAlignmentEvidence?.cues??[]).map(cue=>'<button data-loop-start="'+cue.originalTiming.start+'" data-loop-end="'+cue.originalTiming.end+'">Loop cue '+esc(cue.cueId)+'</button>').join('');const audioActions='<div class="play-actions"><button data-loop-start="'+union.start+'" data-loop-end="'+union.end+'">Loop component</button>'+cueLoops+'</div>';const buttons=item.allowedHumanActions.map(action=>'<button data-action="'+action+'">'+esc(REVIEW_ACTION_REGISTRY.find(entry=>entry.action===action)?.label??action)+'</button>').join('');const meta='<div class="meta"><div><span class="label">Audio source</span><br>'+esc(item.audioSource)+'</div><div><span class="label">Validation</span><br>'+esc(item.audioValidationStatus)+'</div><div><span class="label">SHA-256</span><br>'+esc(item.audioSha256??'none')+'</div><div><span class="label">Coverage</span><br>'+esc(String(item.audioFullyCoversComponent))+'</div><div><span class="label">Mapped token</span><br>'+cueEvidence.filter(evidence=>evidence.sourceType==='trusted-mapped-token'||evidence.sourceType==='trusted-no-vad-token').length+'</div><div><span class="label">Raw VAD islands</span><br>'+(item.componentRawVadIntervals??[]).length+'</div><div><span class="label">Decoded segments</span><br>'+(item.componentDecodedSegments??[]).length+'</div><div><span class="label">Evidence status</span><br>'+esc(item.evidenceSourceResolutionStatus)+'</div></div>';q('#items').innerHTML='<article class="item"><div class="grid"><section><div class="label">Current subtitle / human timing</div><div class="text">'+esc(item.currentText)+'</div><p>'+union.start.toFixed(3)+' → '+union.end.toFixed(3)+'</p></section><section><div class="label">Machine recommendation</div><div class="text">'+esc(item.machineDecision.proposedText??'KEEP')+'</div><p>'+esc(item.candidateSuggestions[0]?.associationType??'none')+'</p></section><section><div class="label">Previous</div><div>'+esc(item.previousCue?.text??'—')+'</div><div class="label">Next</div><div>'+esc(item.nextCue?.text??'—')+'</div></section><section><div class="label">Candidate evidence</div><pre>'+suggestions+'</pre></section></div><div class="disclaimer">MFA boundaries are machine evidence, not confirmed ground truth.<br>Mapped Token and Raw VAD are timing evidence only and do not identify the speaker.<br>Component-level Raw VAD intervals do not prove which cue or speaker produced the speech.</div>'+meta+'<div id="audio-error" class="statusline">'+esc(item.audioError??'Audio metadata and coverage validated.')+'</div>'+audio+audioActions+timeline+ctcEvidenceHtml(item)+speakerEvidenceHtml(item)+forced+'<div class="label blocker">Review blockers</div><div class="blocker">'+esc(item.blockers.join(', ')||'none')+'</div><div class="actions">'+buttons+'<button id="preview-resolution">Preview resolution</button></div><p>Selected: '+esc(state.resolutions.get(item.reviewId)?.action??'none')+'</p><pre id="resolution-preview"></pre></article>';document.querySelectorAll('[data-action]').forEach(button=>button.onclick=()=>executeAction(item,button.dataset.action,'button'));q('#preview-resolution').onclick=()=>previewResolution(item);document.querySelectorAll('[data-loop-start]').forEach(button=>button.onclick=()=>playRange(item,Number(button.dataset.loopStart),Number(button.dataset.loopEnd)));document.querySelectorAll('[data-evidence-start]').forEach(button=>button.onclick=()=>playRange(item,Number(button.dataset.evidenceStart),Number(button.dataset.evidenceEnd)));document.querySelectorAll('[data-speaker-start]').forEach(button=>button.onclick=()=>playRange(item,Number(button.dataset.speakerStart),Number(button.dataset.speakerEnd)));const audioElement=q('#review-audio');if(audioElement){audioElement.addEventListener('error',()=>showAudioError('file missing, unreadable, or unsupported'));audioElement.addEventListener('timeupdate',()=>{if(state.stopAt!==null&&audioElement.currentTime>=state.stopAt){if(state.loop){audioElement.currentTime=state.loopStart??0;audioElement.play().catch(error=>showAudioError(error.message))}else{audioElement.pause();state.loopStart=null;state.stopAt=null}}})}}
 function move(delta){if(!state.data.items.length)return;state.index=(state.index+delta+state.data.items.length)%state.data.items.length;state.loopStart=null;state.stopAt=null;render()}
 function download(){const check=preflight();if(!check.valid){state.downloadBlockedCount+=1;showValidation(check.errors,'download-preflight');const first=check.errors[0];const index=state.data.items.findIndex(item=>item.reviewId===first?.reviewId);if(index>=0){state.index=index;render();q('#items').scrollIntoView({behavior:'smooth',block:'start'})}return}const data=state.data;const body={schemaVersion:'1.0.0',resolutionType:'human-review-resolutions',reviewVersion:data.reviewVersion,sourceFingerprint:data.sourceFingerprint,baseSubtitlePackageHash:data.baseSubtitlePackageHash,baseCueHash:data.baseCueHash,inputEvidenceHash:data.inputEvidenceHash,resolutions:[...state.resolutions.values()].sort((left,right)=>left.reviewId.localeCompare(right.reviewId))};const anchor=document.createElement('a');anchor.href=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)+'\n'],{type:'application/json'}));anchor.download='human-review-resolutions.json';anchor.click();URL.revokeObjectURL(anchor.href)}
 q('#previous').onclick=()=>move(-1);q('#next').onclick=()=>move(1);q('#download').onclick=download;q('#bulk-keep').onclick=()=>bulkApply('KEEP');q('#import-resolutions').onchange=event=>{const file=event.target.files?.[0];if(!file)return;file.text().then(text=>{try{importResolutions(JSON.parse(text))}catch(error){showValidation([{code:'IMPORTED_REVIEW_JSON_INVALID',reviewId:null,action:null,field:'file',message:error.message}],'import')}})};
 document.addEventListener('keydown',event=>{if(event.target.matches('input,textarea'))return;if(event.key==='ArrowLeft')move(-1);if(event.key==='ArrowRight')move(1);const item=state.data.items[state.index];if(!item)return;const entry=REVIEW_ACTION_REGISTRY.find(value=>value.shortcut===event.key.toLowerCase());if(entry)executeAction(item,entry.action,'keyboard');if(event.key===' '){event.preventDefault();const audio=q('#review-audio');if(audio){if(audio.paused)audio.play();else audio.pause()}}if(event.key.toLowerCase()==='l'){state.loop=!state.loop;q('#loop-status').textContent=state.loop?'loop on':'loop off'}});
-Promise.all([fetch('./data/subtitle-review-package.json').then(response=>response.json()),speakerEvidenceEnabled?fetch('./data/subtitle-local-speaker-evidence.json').then(response=>response.json()):Promise.resolve(null),ctcEvidenceEnabled?fetch('./data/subtitle-local-ctc-boundary-evidence.json').then(response=>response.json()):Promise.resolve(null),ctcEvidenceEnabled?fetch('./data/subtitle-local-separated-stream-evidence.json').then(response=>response.json()):Promise.resolve(null)]).then(([data,speakerEvidence,ctcEvidence,separationEvidence])=>{state.data=data;state.speakerEvidence=speakerEvidence;state.ctcEvidence=ctcEvidence;state.separationEvidence=separationEvidence;restoreSavedState();render()}).catch(error=>q('#items').textContent=error.message);`;
+Promise.all([fetch('./data/subtitle-review-package.json').then(response=>response.json()),speakerEvidenceEnabled?fetch('./data/subtitle-local-speaker-evidence.json').then(response=>response.json()):Promise.resolve(null),ctcEvidenceEnabled?fetch('./data/subtitle-local-ctc-boundary-evidence.json').then(response=>response.json()):Promise.resolve(null),ctcEvidenceEnabled?fetch('./data/subtitle-local-separated-stream-evidence.json').then(response=>response.json()):Promise.resolve(null),seriesMemoryEnabled?fetch('./data/series-language-memory.json').then(response=>response.json()):Promise.resolve(null),seriesMemoryEnabled?fetch('./data/subtitle-series-memory-evidence.json').then(response=>response.json()):Promise.resolve(null),seriesMemoryEnabled?fetch('./data/subtitle-memory-assisted-ranking.json').then(response=>response.json()):Promise.resolve(null),seriesMemoryEnabled?fetch('./data/subtitle-memory-pronunciation-projection.json').then(response=>response.json()):Promise.resolve(null)]).then(([data,speakerEvidence,ctcEvidence,separationEvidence,seriesMemory,memoryEvidence,memoryRanking,memoryProjection])=>{state.data=data;state.speakerEvidence=speakerEvidence;state.ctcEvidence=ctcEvidence;state.separationEvidence=separationEvidence;state.seriesMemory=seriesMemory;state.memoryEvidence=memoryEvidence;state.memoryRanking=memoryRanking;state.memoryProjection=memoryProjection;restoreSavedState();render()}).catch(error=>q('#items').textContent=error.message);`;
 }
 
 function reviewHtml(): string {
@@ -144,6 +153,10 @@ export async function writeSubtitleReviewPage(input: {
   speakerEvidence?: SubtitleLocalSpeakerEvidence;
   ctcEvidence?: SubtitleLocalCtcBoundaryEvidence;
   separatedStreamEvidence?: SubtitleLocalSeparatedStreamEvidence;
+  seriesMemory?: SeriesLanguageMemory;
+  seriesMemoryEvidence?: SubtitleSeriesMemoryEvidence;
+  memoryRanking?: SubtitleMemoryAssistedRanking;
+  memoryProjection?: SubtitleMemoryPronunciationProjection;
   timelineEnabled?: boolean;
 }): Promise<string> {
   const reviewDirectory = path.join(input.subtitleDirectory, "review");
@@ -168,6 +181,7 @@ export async function writeSubtitleReviewPage(input: {
         input.timelineEnabled ?? true,
         input.speakerEvidence !== undefined,
         input.ctcEvidence !== undefined,
+        input.seriesMemory !== undefined,
       ),
       {
         overwrite: true,
@@ -209,6 +223,47 @@ export async function writeSubtitleReviewPage(input: {
           "subtitle-local-separated-stream-evidence.json",
         ),
         input.separatedStreamEvidence,
+        { overwrite: true },
+      ),
+    );
+  }
+  if (
+    input.seriesMemory !== undefined &&
+    input.seriesMemoryEvidence !== undefined &&
+    input.memoryRanking !== undefined &&
+    input.memoryProjection !== undefined
+  ) {
+    writes.push(
+      atomicWriteJson(
+        path.join(reviewDirectory, "data", "series-language-memory.json"),
+        input.seriesMemory,
+        { overwrite: true },
+      ),
+      atomicWriteJson(
+        path.join(
+          reviewDirectory,
+          "data",
+          "subtitle-series-memory-evidence.json",
+        ),
+        input.seriesMemoryEvidence,
+        { overwrite: true },
+      ),
+      atomicWriteJson(
+        path.join(
+          reviewDirectory,
+          "data",
+          "subtitle-memory-assisted-ranking.json",
+        ),
+        input.memoryRanking,
+        { overwrite: true },
+      ),
+      atomicWriteJson(
+        path.join(
+          reviewDirectory,
+          "data",
+          "subtitle-memory-pronunciation-projection.json",
+        ),
+        input.memoryProjection,
         { overwrite: true },
       ),
     );

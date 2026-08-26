@@ -36,6 +36,17 @@ import {
   subtitleLocalSeparatedStreamEvidenceSchema,
   c5181CtcBoundaryReplaySummarySchema,
   c5181FreshCacheObserveValidationSchema,
+  seriesLanguageMemorySchema,
+  episodeLanguageObservationsSchema,
+  seriesLanguageMemoryDeltaSchema,
+  subtitleSeriesMemoryEvidenceSchema,
+  subtitleMemoryAssistedRankingSchema,
+  subtitleMemoryPronunciationProjectionSchema,
+  memoryAssistedCtcTargetAuditSchema,
+  memoryAssistedCtcObservationSchema,
+  c519MemoryReplaySummarySchema,
+  c519CausalValidationSchema,
+  seriesMemoryQualityAuditSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -54,6 +65,8 @@ const C518_SHAREABLE_POLICY_VERSION =
   "c5.18-shareable-artifact-policy-v1" as const;
 const C5181_SHAREABLE_POLICY_VERSION =
   "c5.18.1-shareable-artifact-policy-v1" as const;
+const C519_SHAREABLE_POLICY_VERSION =
+  "c5.19-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -105,6 +118,18 @@ const artifactSchemas = {
     c5181CtcBoundaryReplaySummarySchema,
   "c5-18-1-fresh-cache-observe-validation.json":
     c5181FreshCacheObserveValidationSchema,
+  "series-language-memory.json": seriesLanguageMemorySchema,
+  "episode-language-observations.json": episodeLanguageObservationsSchema,
+  "series-language-memory-delta.json": seriesLanguageMemoryDeltaSchema,
+  "subtitle-series-memory-evidence.json": subtitleSeriesMemoryEvidenceSchema,
+  "subtitle-memory-assisted-ranking.json": subtitleMemoryAssistedRankingSchema,
+  "subtitle-memory-pronunciation-projection.json":
+    subtitleMemoryPronunciationProjectionSchema,
+  "memory-assisted-ctc-target-audit.json": memoryAssistedCtcTargetAuditSchema,
+  "memory-assisted-ctc-observation.json": memoryAssistedCtcObservationSchema,
+  "c5-19-memory-replay-summary.json": c519MemoryReplaySummarySchema,
+  "c5-19-causal-validation.json": c519CausalValidationSchema,
+  "series-memory-quality-audit.json": seriesMemoryQualityAuditSchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -468,6 +493,19 @@ export async function generateC5161ShareableArtifacts(input: {
     replaySummaryPath: string;
     freshCacheObserveValidationPath?: string;
   };
+  c519Artifacts?: {
+    memoryPath: string;
+    observationsPath: string;
+    deltaPath: string;
+    evidencePath: string;
+    rankingPath: string;
+    pronunciationProjectionPath: string;
+    ctcTargetAuditPath: string;
+    ctcObservationPath: string;
+    replaySummaryPath: string;
+    causalValidationPath: string;
+    qualityAuditPath: string;
+  };
 }): Promise<{
   outputDirectory: string;
   manifestPath: string;
@@ -651,6 +689,56 @@ export async function generateC5161ShareableArtifacts(input: {
       });
     }
   }
+  if (input.c519Artifacts !== undefined) {
+    sources.push(
+      {
+        name: "series-language-memory.json",
+        sourcePath: path.resolve(input.c519Artifacts.memoryPath),
+      },
+      {
+        name: "episode-language-observations.json",
+        sourcePath: path.resolve(input.c519Artifacts.observationsPath),
+      },
+      {
+        name: "series-language-memory-delta.json",
+        sourcePath: path.resolve(input.c519Artifacts.deltaPath),
+      },
+      {
+        name: "subtitle-series-memory-evidence.json",
+        sourcePath: path.resolve(input.c519Artifacts.evidencePath),
+      },
+      {
+        name: "subtitle-memory-assisted-ranking.json",
+        sourcePath: path.resolve(input.c519Artifacts.rankingPath),
+      },
+      {
+        name: "subtitle-memory-pronunciation-projection.json",
+        sourcePath: path.resolve(
+          input.c519Artifacts.pronunciationProjectionPath,
+        ),
+      },
+      {
+        name: "memory-assisted-ctc-target-audit.json",
+        sourcePath: path.resolve(input.c519Artifacts.ctcTargetAuditPath),
+      },
+      {
+        name: "memory-assisted-ctc-observation.json",
+        sourcePath: path.resolve(input.c519Artifacts.ctcObservationPath),
+      },
+      {
+        name: "c5-19-memory-replay-summary.json",
+        sourcePath: path.resolve(input.c519Artifacts.replaySummaryPath),
+      },
+      {
+        name: "c5-19-causal-validation.json",
+        sourcePath: path.resolve(input.c519Artifacts.causalValidationPath),
+      },
+      {
+        name: "series-memory-quality-audit.json",
+        sourcePath: path.resolve(input.c519Artifacts.qualityAuditPath),
+      },
+    );
+  }
   const sourceHashes = await Promise.all(
     sources.map(async (source) => sha256(await readFile(source.sourcePath))),
   );
@@ -770,18 +858,21 @@ export async function generateC5161ShareableArtifacts(input: {
     schemaVersion: "1.0.0",
     artifactType: "shareable-artifact-manifest",
     policyVersion:
-      input.c5181Artifacts !== undefined
-        ? C5181_SHAREABLE_POLICY_VERSION
-        : input.c518Artifacts !== undefined ||
-            input.c5172Artifacts?.reviewActionValidationReportPath !== undefined
-          ? C518_SHAREABLE_POLICY_VERSION
-          : input.c5172Artifacts !== undefined
-            ? C5172_SHAREABLE_POLICY_VERSION
-            : input.c517Artifacts === undefined
-              ? SHAREABLE_POLICY_VERSION
-              : input.c517Artifacts.pronunciationPath === undefined
-                ? C517_SHAREABLE_POLICY_VERSION
-                : C5171_SHAREABLE_POLICY_VERSION,
+      input.c519Artifacts !== undefined
+        ? C519_SHAREABLE_POLICY_VERSION
+        : input.c5181Artifacts !== undefined
+          ? C5181_SHAREABLE_POLICY_VERSION
+          : input.c518Artifacts !== undefined ||
+              input.c5172Artifacts?.reviewActionValidationReportPath !==
+                undefined
+            ? C518_SHAREABLE_POLICY_VERSION
+            : input.c5172Artifacts !== undefined
+              ? C5172_SHAREABLE_POLICY_VERSION
+              : input.c517Artifacts === undefined
+                ? SHAREABLE_POLICY_VERSION
+                : input.c517Artifacts.pronunciationPath === undefined
+                  ? C517_SHAREABLE_POLICY_VERSION
+                  : C5171_SHAREABLE_POLICY_VERSION,
     generatedAt: new Date().toISOString(),
     taskIdentityHash,
     pathPolicy: "shareable-relative-only",

@@ -350,6 +350,76 @@ export const finalizationMetricsSchema = z
       .int()
       .nonnegative()
       .default(0),
+    seriesMemorySourceCueCount: z.number().int().nonnegative().default(0),
+    memoryCandidateCount: z.number().int().nonnegative().default(0),
+    memoryPromotedCount: z.number().int().nonnegative().default(0),
+    memoryEntryCount: z.number().int().nonnegative().default(0),
+    properNounEntryCount: z.number().int().nonnegative().default(0),
+    terminologyEntryCount: z.number().int().nonnegative().default(0),
+    dialectEntryCount: z.number().int().nonnegative().default(0),
+    correctionEntryCount: z.number().int().nonnegative().default(0),
+    pronunciationEntryCount: z.number().int().nonnegative().default(0),
+    acousticAliasCount: z.number().int().nonnegative().default(0),
+    ambiguousMemoryAliasCount: z.number().int().nonnegative().default(0),
+    conflictedReadingCount: z.number().int().nonnegative().default(0),
+    duplicateMemoryEvidenceCount: z.number().int().nonnegative().default(0),
+    memoryEvidenceDoubleCountPreventedCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    causalMemoryMatchCount: z.number().int().nonnegative().default(0),
+    frozenMemoryMatchCount: z.number().int().nonnegative().default(0),
+    memoryRankingEvaluatedCueCount: z.number().int().nonnegative().default(0),
+    memoryRankingChangedCount: z.number().int().nonnegative().default(0),
+    memoryRankingCorrectedCount: z.number().int().nonnegative().default(0),
+    memoryRankingRegressionCount: z.number().int().nonnegative().default(0),
+    dialectPreservationCount: z.number().int().nonnegative().default(0),
+    dialectStandardizationAttemptCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    pronunciationProjectionCount: z.number().int().nonnegative().default(0),
+    previousUnencodableCueCount: z.number().int().nonnegative().default(0),
+    previousUnencodableCueRescuedCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    memoryCanonicalTextMutationCount: z.number().int().nonnegative().default(0),
+    memoryTimingMutationCount: z.number().int().nonnegative().default(0),
+    memoryFabricatedAutoCandidateCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    memoryAcousticOverrideViolationCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    crossSeriesMemoryLeakCount: z.number().int().nonnegative().default(0),
+    futureCueMemoryLeakCount: z.number().int().nonnegative().default(0),
+    sameCueMemoryLeakCount: z.number().int().nonnegative().default(0),
+    memoryGlobalReplacementCount: z.number().int().nonnegative().default(0),
+    pronunciationProjectionCanonicalMutationCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    targetedMemoryCtcObserveCount: z.number().int().nonnegative().default(0),
+    memoryAssistedCtcTimingMutationCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    seriesMemoryIdempotentMergePassed: z
+      .number()
+      .int()
+      .min(0)
+      .max(1)
+      .default(0),
   })
   .strict();
 
@@ -447,6 +517,28 @@ export const subtitleFinalizationReportSchema = z
         reviewActionValidationReport: relativePathSchema
           .nullable()
           .default(null),
+        seriesLanguageMemory: relativePathSchema.nullable().default(null),
+        episodeLanguageObservations: relativePathSchema
+          .nullable()
+          .default(null),
+        seriesLanguageMemoryDelta: relativePathSchema.nullable().default(null),
+        subtitleSeriesMemoryEvidence: relativePathSchema
+          .nullable()
+          .default(null),
+        subtitleMemoryAssistedRanking: relativePathSchema
+          .nullable()
+          .default(null),
+        subtitleMemoryPronunciationProjection: relativePathSchema
+          .nullable()
+          .default(null),
+        memoryAssistedCtcTargetAudit: relativePathSchema
+          .nullable()
+          .default(null),
+        memoryAssistedCtcObservation: relativePathSchema
+          .nullable()
+          .default(null),
+        c519CausalValidation: relativePathSchema.nullable().default(null),
+        seriesMemoryQualityAudit: relativePathSchema.nullable().default(null),
         subtitledVideo: relativePathSchema.nullable(),
       })
       .strict(),
@@ -705,6 +797,11 @@ export const subtitleReviewPackageSchema = z
     ctcPolicyVersion: z.string().min(1).nullable().default(null),
     ctcJointAssignmentHash: hashSchema.nullable().default(null),
     sourceSeparationEvidenceHash: hashSchema.nullable().default(null),
+    seriesMemoryHash: hashSchema.nullable().default(null),
+    memoryPolicyVersion: z.string().min(1).nullable().default(null),
+    memoryRankingPolicyHash: hashSchema.nullable().default(null),
+    pronunciationProjectionHash: hashSchema.nullable().default(null),
+    seriesMemoryDecisionDependency: z.enum(["none", "ranking"]).default("none"),
     items: z.array(subtitleReviewItemSchema),
     summary: z
       .object({

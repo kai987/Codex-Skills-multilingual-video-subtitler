@@ -895,6 +895,228 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
+        },
+        "seriesMemorySourceCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryCandidateCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryPromotedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryEntryCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "properNounEntryCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "terminologyEntryCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dialectEntryCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "correctionEntryCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pronunciationEntryCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acousticAliasCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousMemoryAliasCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "conflictedReadingCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateMemoryEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryEvidenceDoubleCountPreventedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "causalMemoryMatchCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "frozenMemoryMatchCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryRankingEvaluatedCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryRankingChangedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryRankingCorrectedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryRankingRegressionCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dialectPreservationCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dialectStandardizationAttemptCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pronunciationProjectionCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "previousUnencodableCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "previousUnencodableCueRescuedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryCanonicalTextMutationCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryTimingMutationCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryFabricatedAutoCandidateCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryAcousticOverrideViolationCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossSeriesMemoryLeakCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "futureCueMemoryLeakCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sameCueMemoryLeakCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryGlobalReplacementCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pronunciationProjectionCanonicalMutationCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetedMemoryCtcObserveCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "memoryAssistedCtcTimingMutationCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "seriesMemoryIdempotentMergePassed": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
         }
       },
       "required": [
@@ -1012,7 +1234,44 @@
         "separationCacheHitCount",
         "separatedStreamCtcAttemptCount",
         "speakerRelationshipResolvedComponentCount",
-        "subtitleOverlapResolvedComponentCount"
+        "subtitleOverlapResolvedComponentCount",
+        "seriesMemorySourceCueCount",
+        "memoryCandidateCount",
+        "memoryPromotedCount",
+        "memoryEntryCount",
+        "properNounEntryCount",
+        "terminologyEntryCount",
+        "dialectEntryCount",
+        "correctionEntryCount",
+        "pronunciationEntryCount",
+        "acousticAliasCount",
+        "ambiguousMemoryAliasCount",
+        "conflictedReadingCount",
+        "duplicateMemoryEvidenceCount",
+        "memoryEvidenceDoubleCountPreventedCount",
+        "causalMemoryMatchCount",
+        "frozenMemoryMatchCount",
+        "memoryRankingEvaluatedCueCount",
+        "memoryRankingChangedCount",
+        "memoryRankingCorrectedCount",
+        "memoryRankingRegressionCount",
+        "dialectPreservationCount",
+        "dialectStandardizationAttemptCount",
+        "pronunciationProjectionCount",
+        "previousUnencodableCueCount",
+        "previousUnencodableCueRescuedCount",
+        "memoryCanonicalTextMutationCount",
+        "memoryTimingMutationCount",
+        "memoryFabricatedAutoCandidateCount",
+        "memoryAcousticOverrideViolationCount",
+        "crossSeriesMemoryLeakCount",
+        "futureCueMemoryLeakCount",
+        "sameCueMemoryLeakCount",
+        "memoryGlobalReplacementCount",
+        "pronunciationProjectionCanonicalMutationCount",
+        "targetedMemoryCtcObserveCount",
+        "memoryAssistedCtcTimingMutationCount",
+        "seriesMemoryIdempotentMergePassed"
       ],
       "additionalProperties": false
     },
@@ -1328,6 +1587,116 @@
             { "type": "null" }
           ]
         },
+        "seriesLanguageMemory": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "episodeLanguageObservations": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "seriesLanguageMemoryDelta": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "subtitleSeriesMemoryEvidence": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "subtitleMemoryAssistedRanking": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "subtitleMemoryPronunciationProjection": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "memoryAssistedCtcTargetAudit": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "memoryAssistedCtcObservation": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "c519CausalValidation": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "seriesMemoryQualityAudit": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
         "subtitledVideo": {
           "anyOf": [
             {
@@ -1366,6 +1735,16 @@
         "ctcAlignmentCacheManifest",
         "localSeparatedStreamEvidence",
         "reviewActionValidationReport",
+        "seriesLanguageMemory",
+        "episodeLanguageObservations",
+        "seriesLanguageMemoryDelta",
+        "subtitleSeriesMemoryEvidence",
+        "subtitleMemoryAssistedRanking",
+        "subtitleMemoryPronunciationProjection",
+        "memoryAssistedCtcTargetAudit",
+        "memoryAssistedCtcObservation",
+        "c519CausalValidation",
+        "seriesMemoryQualityAudit",
         "subtitledVideo"
       ],
       "additionalProperties": false
