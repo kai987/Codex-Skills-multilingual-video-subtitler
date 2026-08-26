@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-protected-finalization-replay-summary.schema.json",
+  "title": "c6-0-protected-finalization-replay-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-protected-finalization-replay-summary"
+    },
+    "runId": { "type": "string", "minLength": 1 },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["legacy", "protected-observe", "protected-enforce"]
+    },
+    "sourceTask": { "type": "string", "minLength": 1 },
+    "authorityType": {
+      "type": "string",
+      "enum": ["user-confirmed-human-reviewed", "none"]
+    },
+    "authorityVerified": { "type": "boolean" },
+    "riskPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "freshnessHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rootRiskHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "riskAssessmentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewDispositionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "legacyStatus": { "type": "string", "minLength": 1 },
+    "protectedOutcome": {
+      "type": "string",
+      "enum": [
+        "FINAL_SAFE",
+        "FINAL_SAFE_WITH_ADVISORIES",
+        "HUMAN_REVIEW_REQUIRED",
+        "REJECTED",
+        "MACHINE_ONLY_NOT_AUTHORIZED"
+      ]
+    },
+    "effectiveStatus": { "type": "string", "minLength": 1 },
+    "effectiveFinalizationMethod": { "type": "string", "minLength": 1 },
+    "legacyBlockingFindingCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "effectiveFinalBlockerCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "advisoryCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "canonicalCueHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalCueHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHashBefore": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalTimingHashAfter": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputFiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+      }
+    },
+    "strictFinalPackageExists": { "type": "boolean" },
+    "reviewDeliveryIntegrityPassed": { "type": "boolean" },
+    "reviewAudioPlayableCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reviewAudioItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "modelExecutionCounts": {
+      "type": "object",
+      "properties": {
+        "whisper": { "type": "number", "const": 0 },
+        "mfa": { "type": "number", "const": 0 },
+        "speaker": { "type": "number", "const": 0 },
+        "ctc": { "type": "number", "const": 0 },
+        "separation": { "type": "number", "const": 0 },
+        "openai": { "type": "number", "const": 0 },
+        "onlineSubtitleSearch": { "type": "number", "const": 0 },
+        "wholeMediaAsr": { "type": "number", "const": 0 },
+        "modelInferenceCount": { "type": "number", "const": 0 },
+        "modelLoadCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "whisper",
+        "mfa",
+        "speaker",
+        "ctc",
+        "separation",
+        "openai",
+        "onlineSubtitleSearch",
+        "wholeMediaAsr",
+        "modelInferenceCount",
+        "modelLoadCount"
+      ],
+      "additionalProperties": false
+    },
+    "networkUsed": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runId",
+    "generatedAt",
+    "mode",
+    "sourceTask",
+    "authorityType",
+    "authorityVerified",
+    "riskPolicyHash",
+    "freshnessHash",
+    "rootRiskHash",
+    "riskAssessmentHash",
+    "reviewDispositionHash",
+    "legacyStatus",
+    "protectedOutcome",
+    "effectiveStatus",
+    "effectiveFinalizationMethod",
+    "legacyBlockingFindingCount",
+    "effectiveFinalBlockerCount",
+    "advisoryCount",
+    "canonicalCueHashBefore",
+    "canonicalCueHashAfter",
+    "canonicalTimingHashBefore",
+    "canonicalTimingHashAfter",
+    "presentationHash",
+    "outputFiles",
+    "strictFinalPackageExists",
+    "reviewDeliveryIntegrityPassed",
+    "reviewAudioPlayableCount",
+    "reviewAudioItemCount",
+    "modelExecutionCounts",
+    "networkUsed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

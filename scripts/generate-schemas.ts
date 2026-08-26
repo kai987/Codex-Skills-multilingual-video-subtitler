@@ -130,11 +130,59 @@ import {
   c60HumanAuthorityDependencyAuditSchema,
   c60ZeroTouchReadinessSchema,
   c60InvestigationSummarySchema,
+  c60ProtectedRiskPolicySchema,
+  humanBaselineAuthoritySchema,
+  subtitleFinalizationEvidenceFreshnessSchema,
+  subtitleBaselinePreservationAssessmentSchema,
+  subtitleFinalizationRiskAssessmentSchema,
+  subtitleReviewEffectiveDispositionSchema,
+  c60ProtectedFinalizationReplaySummarySchema,
+  c60ProtectedFinalizationValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "c6-0-protected-risk-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-protected-risk-policy.schema.json",
+    schema: c60ProtectedRiskPolicySchema,
+  },
+  {
+    fileName: "human-baseline-authority.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/human-baseline-authority.schema.json",
+    schema: humanBaselineAuthoritySchema,
+  },
+  {
+    fileName: "subtitle-finalization-evidence-freshness.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-finalization-evidence-freshness.schema.json",
+    schema: subtitleFinalizationEvidenceFreshnessSchema,
+  },
+  {
+    fileName: "subtitle-baseline-preservation-assessment.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-baseline-preservation-assessment.schema.json",
+    schema: subtitleBaselinePreservationAssessmentSchema,
+  },
+  {
+    fileName: "subtitle-finalization-risk-assessment.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-finalization-risk-assessment.schema.json",
+    schema: subtitleFinalizationRiskAssessmentSchema,
+  },
+  {
+    fileName: "subtitle-review-effective-disposition.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-review-effective-disposition.schema.json",
+    schema: subtitleReviewEffectiveDispositionSchema,
+  },
+  {
+    fileName: "c6-0-protected-finalization-replay-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-protected-finalization-replay-summary.schema.json",
+    schema: c60ProtectedFinalizationReplaySummarySchema,
+  },
+  {
+    fileName: "c6-0-protected-finalization-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-protected-finalization-validation.schema.json",
+    schema: c60ProtectedFinalizationValidationSchema,
+  },
   {
     fileName: "c6-0-blocker-inventory.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-blocker-inventory.schema.json",

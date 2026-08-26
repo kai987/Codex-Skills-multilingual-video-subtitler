@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-baseline-preservation-assessment.schema.json",
+  "title": "subtitle-baseline-preservation-assessment",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-baseline-preservation-assessment"
+    },
+    "preservationVersion": {
+      "type": "string",
+      "const": "c6.0-human-baseline-preservation-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "decisionPath": { "type": "string", "const": "BASELINE_PRESERVATION" },
+    "canonicalCueHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalCueHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHashBefore": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalTimingHashAfter": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalTextMutationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "canonicalTimingMutationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "checks": {
+      "type": "object",
+      "properties": {
+        "humanAuthorityVerified": { "type": "boolean" },
+        "sourceReadOnlyVerified": { "type": "boolean" },
+        "humanSubtitleReadOnlyVerified": { "type": "boolean" },
+        "canonicalCueHashUnchanged": { "type": "boolean" },
+        "canonicalTimingHashUnchanged": { "type": "boolean" },
+        "noCanonicalTextMutation": { "type": "boolean" },
+        "noCanonicalTimingMutation": { "type": "boolean" },
+        "noPositiveCurrentOutputDefectEvidence": { "type": "boolean" },
+        "noIntegrityFinalBlockers": { "type": "boolean" },
+        "noUnknownObservedSignals": { "type": "boolean" },
+        "freshnessIntegrityPassed": { "type": "boolean" },
+        "policyIntegrityPassed": { "type": "boolean" },
+        "serializationRoundTripPassed": { "type": "boolean" },
+        "formatSemanticParityPassed": { "type": "boolean" },
+        "presentationIntegrityPassed": { "type": "boolean" },
+        "reviewDeliveryIntegrityPassed": { "type": "boolean" }
+      },
+      "required": [
+        "humanAuthorityVerified",
+        "sourceReadOnlyVerified",
+        "humanSubtitleReadOnlyVerified",
+        "canonicalCueHashUnchanged",
+        "canonicalTimingHashUnchanged",
+        "noCanonicalTextMutation",
+        "noCanonicalTimingMutation",
+        "noPositiveCurrentOutputDefectEvidence",
+        "noIntegrityFinalBlockers",
+        "noUnknownObservedSignals",
+        "freshnessIntegrityPassed",
+        "policyIntegrityPassed",
+        "serializationRoundTripPassed",
+        "formatSemanticParityPassed",
+        "presentationIntegrityPassed",
+        "reviewDeliveryIntegrityPassed"
+      ],
+      "additionalProperties": false
+    },
+    "eligible": { "type": "boolean" },
+    "applied": { "type": "boolean" },
+    "reasonCodes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "preservationVersion",
+    "generatedAt",
+    "decisionPath",
+    "canonicalCueHashBefore",
+    "canonicalCueHashAfter",
+    "canonicalTimingHashBefore",
+    "canonicalTimingHashAfter",
+    "canonicalTextMutationCount",
+    "canonicalTimingMutationCount",
+    "checks",
+    "eligible",
+    "applied",
+    "reasonCodes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

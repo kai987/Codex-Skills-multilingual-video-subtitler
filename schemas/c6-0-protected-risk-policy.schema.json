@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-protected-risk-policy.schema.json",
+  "title": "c6-0-protected-risk-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-0-protected-risk-policy" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0-protected-finalization-risk-v1"
+    },
+    "investigationBaselineCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "investigationParentCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "createdFromInvestigationVersion": { "type": "string", "const": "C6.0" },
+    "runASemanticHashes": {
+      "type": "object",
+      "properties": {
+        "blockerInventory": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "blockerOntology": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "blockerRootCauseGraph": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "blockerSupersessionAudit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "componentEvidenceMatrix": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "componentRiskAudit": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "finalizationCounterfactual": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "humanAuthorityDependencyAudit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "investigationSummary": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "zeroTouchReadiness": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "blockerInventory",
+        "blockerOntology",
+        "blockerRootCauseGraph",
+        "blockerSupersessionAudit",
+        "componentEvidenceMatrix",
+        "componentRiskAudit",
+        "finalizationCounterfactual",
+        "humanAuthorityDependencyAudit",
+        "investigationSummary",
+        "zeroTouchReadiness"
+      ],
+      "additionalProperties": false
+    },
+    "runBSemanticHashes": {
+      "type": "object",
+      "properties": {
+        "blockerInventory": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "blockerOntology": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "blockerRootCauseGraph": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "blockerSupersessionAudit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "componentEvidenceMatrix": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "componentRiskAudit": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "finalizationCounterfactual": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "humanAuthorityDependencyAudit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "investigationSummary": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "zeroTouchReadiness": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "blockerInventory",
+        "blockerOntology",
+        "blockerRootCauseGraph",
+        "blockerSupersessionAudit",
+        "componentEvidenceMatrix",
+        "componentRiskAudit",
+        "finalizationCounterfactual",
+        "humanAuthorityDependencyAudit",
+        "investigationSummary",
+        "zeroTouchReadiness"
+      ],
+      "additionalProperties": false
+    },
+    "ontologyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rootCauseGraphHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "exactMatchOnly": { "type": "boolean", "const": true },
+    "unknownSignalsFailClosed": { "type": "boolean", "const": true },
+    "entries": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "rootRiskFamily": { "type": "string", "minLength": 1 },
+          "blockingScope": {
+            "type": "string",
+            "enum": [
+              "current-output-safety",
+              "automatic-mutation-safety",
+              "evidence-availability",
+              "evidence-consistency",
+              "delivery-integrity",
+              "format-compatibility",
+              "review-routing",
+              "diagnostic-only"
+            ]
+          },
+          "evidencePolarity": {
+            "type": "string",
+            "enum": [
+              "positive-risk-evidence",
+              "absence-of-support",
+              "contradictory-evidence",
+              "execution-diagnostic",
+              "format-advisory",
+              "preservation-support"
+            ]
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "FINAL_BLOCKER",
+              "MUTATION_GUARD",
+              "REVIEW_ADVISORY",
+              "DIAGNOSTIC_ONLY",
+              "CONTEXT_DEPENDENT",
+              "SUPERSEDED",
+              "UNKNOWN"
+            ]
+          },
+          "currentOutputRisk": {
+            "type": "string",
+            "enum": [
+              "PROVEN_UNSAFE",
+              "HIGH_RISK",
+              "UNKNOWN",
+              "LOW_RISK",
+              "NO_POSITIVE_DEFECT_EVIDENCE"
+            ]
+          },
+          "proposedMutationRisk": {
+            "type": "string",
+            "enum": ["HIGH", "MEDIUM", "LOW", "NOT_APPLICABLE"]
+          },
+          "providerSpecific": { "type": "boolean" },
+          "contextRule": { "type": "string", "minLength": 1 },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "code",
+          "rootRiskFamily",
+          "blockingScope",
+          "evidencePolarity",
+          "disposition",
+          "currentOutputRisk",
+          "proposedMutationRisk",
+          "providerSpecific",
+          "contextRule",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "investigationBaselineCommit",
+    "investigationParentCommit",
+    "createdFromInvestigationVersion",
+    "runASemanticHashes",
+    "runBSemanticHashes",
+    "ontologyHash",
+    "rootCauseGraphHash",
+    "machineOnlyReleaseAuthorized",
+    "exactMatchOnly",
+    "unknownSignalsFailClosed",
+    "entries",
+    "policyHash"
+  ],
+  "additionalProperties": false
+}

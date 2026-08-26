@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/human-baseline-authority.schema.json",
+  "title": "human-baseline-authority",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "human-baseline-authority" },
+    "authorityVersion": {
+      "type": "string",
+      "const": "c6.0-human-baseline-authority-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "authorityType": {
+      "type": "string",
+      "enum": ["user-confirmed-human-reviewed", "none"]
+    },
+    "sourceFileName": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "sourceFileSha256": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "sourceFileSize": {
+      "anyOf": [
+        { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        { "type": "null" }
+      ]
+    },
+    "sourceCueHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "sourceTimingHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "sourceVideoFileName": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "sourceVideoSha256": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "sourceVideoSize": {
+      "anyOf": [
+        { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        { "type": "null" }
+      ]
+    },
+    "cueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "textAuthority": { "type": "boolean" },
+    "timingAuthority": { "type": "boolean" },
+    "readOnlyVerified": { "type": "boolean" },
+    "sourceVideoReadOnlyVerified": { "type": "boolean" },
+    "coverageVerified": { "type": "boolean" },
+    "lineageVerified": { "type": "boolean" },
+    "authorityVerified": { "type": "boolean" },
+    "verificationFailures": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "authorityVersion",
+    "generatedAt",
+    "authorityType",
+    "sourceFileName",
+    "sourceFileSha256",
+    "sourceFileSize",
+    "sourceCueHash",
+    "sourceTimingHash",
+    "sourceVideoFileName",
+    "sourceVideoSha256",
+    "sourceVideoSize",
+    "cueCount",
+    "textAuthority",
+    "timingAuthority",
+    "readOnlyVerified",
+    "sourceVideoReadOnlyVerified",
+    "coverageVerified",
+    "lineageVerified",
+    "authorityVerified",
+    "verificationFailures",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
