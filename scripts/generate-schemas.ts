@@ -91,6 +91,7 @@ import {
   c5171FreshCacheObserveValidationSchema,
   c5172ReviewDeliveryReplaySummarySchema,
   subtitleReviewDeliveryIntegritySchema,
+  reviewActionValidationReportSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -130,6 +131,11 @@ const schemas = [
     fileName: "c5-17-2-review-delivery-replay-summary.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c5-17-2-review-delivery-replay-summary.schema.json",
     schema: c5172ReviewDeliveryReplaySummarySchema,
+  },
+  {
+    fileName: "review-action-validation-report.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/review-action-validation-report.schema.json",
+    schema: reviewActionValidationReportSchema,
   },
   {
     fileName: "subtitle-canonical-alignment-input.schema.json",

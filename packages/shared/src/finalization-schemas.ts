@@ -441,6 +441,19 @@ export const subtitleReviewItemSchema = z
     nextCue: reviewCueContextSchema.nullable(),
     machineDecision: cueDecisionSchema,
     candidateSuggestions: z.array(finalizationCandidateSchema),
+    candidateActionBindings: z
+      .array(
+        z
+          .object({
+            candidateId: z.string().min(1),
+            reviewId: z.string().min(1),
+            candidateEvidenceHash: hashSchema,
+            reviewVersion: z.string().min(1),
+            status: z.enum(["active", "stale", "revoked", "deleted"]),
+          })
+          .strict(),
+      )
+      .default([]),
     findingIds: z.array(z.string().min(1)),
     blockers: z.array(z.string().min(1)),
     allowedHumanActions: z.array(
@@ -574,6 +587,7 @@ export const subtitleReviewPackageSchema = z
       .enum(["legacy", "observed", "enforced"])
       .default("legacy"),
     deliveryIntegrityPolicyVersion: z.string().min(1).nullable().default(null),
+    reviewActionPolicyVersion: z.string().min(1).nullable().default(null),
     items: z.array(subtitleReviewItemSchema),
     summary: z
       .object({
@@ -608,7 +622,7 @@ export const subtitleReviewPackageSchema = z
   })
   .strict();
 
-const humanActionSchema = z.enum([
+export const humanActionSchema = z.enum([
   "KEEP",
   "ACCEPT_SUGGESTION",
   "EDIT_TEXT",
@@ -637,6 +651,7 @@ export const humanReviewResolutionSchema = z
     reviewId: z.string().min(1),
     action: humanActionSchema,
     selectedCandidateId: z.string().min(1).nullable(),
+    selectedCandidateEvidenceHash: hashSchema.nullable().optional(),
     correctedText: z.string().min(1).nullable(),
     start: z.number().nonnegative().nullable(),
     end: z.number().positive().nullable(),

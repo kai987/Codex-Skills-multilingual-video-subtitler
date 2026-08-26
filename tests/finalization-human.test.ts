@@ -10,7 +10,10 @@ import {
   type SubtitleCue,
 } from "@mvl/shared";
 import { calculateCandidateCoverage } from "@mvl/transcription-core";
-import { applyHumanReviewResolutions } from "@mvl/video-subtitler";
+import {
+  applyHumanReviewResolutions,
+  reviewCandidateEvidenceHash,
+} from "@mvl/video-subtitler";
 
 const fingerprint: SourceFingerprint = {
   fileName: "sample.mkv",
@@ -114,16 +117,24 @@ const decision = {
   decisionReasons: ["SUGGESTION_ONLY"],
 };
 
+const reviewVersion = "review-v3-test";
+const candidateEvidenceHash = reviewCandidateEvidenceHash({
+  reviewId: "review-a",
+  inputEvidenceHash: "d".repeat(64),
+  candidate,
+});
+
 const reviewPackage = subtitleReviewPackageSchema.parse({
   schemaVersion: "1.0.0",
   packageType: "multilingual-subtitle-review-package",
-  reviewVersion: "review-v1-test",
+  reviewVersion,
   generatedAt: "1970-01-01T00:00:00.000Z",
   sourceFingerprint: fingerprint,
   baseSubtitlePackagePath: "./subtitle-package.json",
   baseSubtitlePackageHash: "b".repeat(64),
   baseCueHash: "c".repeat(64),
   inputEvidenceHash: "d".repeat(64),
+  reviewActionPolicyVersion: "c5.18-review-action-semantics-v1",
   items: [
     {
       reviewId: "review-a",
@@ -138,6 +149,15 @@ const reviewPackage = subtitleReviewPackageSchema.parse({
       nextCue: { cueId: "cue-b", text: "次の文", start: 2, end: 3 },
       machineDecision: decision,
       candidateSuggestions: [candidate],
+      candidateActionBindings: [
+        {
+          candidateId: candidate.candidateId,
+          reviewId: "review-a",
+          candidateEvidenceHash,
+          reviewVersion,
+          status: "active",
+        },
+      ],
       findingIds: ["finding-a"],
       blockers: ["BROAD_WINDOW_ASSOCIATION"],
       allowedHumanActions: [
@@ -238,7 +258,7 @@ describe("human review import validation", () => {
           selectedCandidateId: "missing",
         }),
       ]),
-    ).toThrow(/unknown candidate/u);
+    ).toThrow(/CANDIDATE_NOT_FOUND_FOR_REVIEW_ITEM/u);
     expect(() =>
       apply([resolution(), resolution({ resolutionId: "other" })]),
     ).toThrow(/Duplicate resolution/u);
@@ -264,6 +284,7 @@ describe("deterministic human actions and correction feedback", () => {
       resolution({
         action: "ACCEPT_SUGGESTION",
         selectedCandidateId: "candidate-a",
+        selectedCandidateEvidenceHash: candidateEvidenceHash,
         errorTypes: ["KANJI_SELECTION_ERROR"],
       }),
     ]);

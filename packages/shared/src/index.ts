@@ -16,6 +16,7 @@ export * from "./text-quality-schemas.js";
 export * from "./c4-schemas.js";
 export * from "./c5-17-1-schemas.js";
 export * from "./c5-17-2-schemas.js";
+export * from "./c5-18-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

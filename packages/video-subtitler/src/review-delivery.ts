@@ -30,6 +30,12 @@ import {
   type ReconciledReviewEvidence,
 } from "./review-evidence.js";
 import { writeSubtitleReviewPage } from "./review.js";
+import {
+  REVIEW_ACTION_POLICY_HASH,
+  REVIEW_ACTION_POLICY_VERSION,
+  bindReviewCandidates,
+  candidateBindingDescriptors,
+} from "./review-action-validation.js";
 
 export const REVIEW_DELIVERY_POLICY_VERSION =
   "c5.17.2-review-delivery-integrity-v1" as const;
@@ -538,12 +544,19 @@ export async function repairReviewPackageDelivery(input: {
       ? (source.reviewPackage.evidenceReconciliationHash ?? sha256Value([]))
       : observedEvidenceReconciliationHash;
   const summary = reviewSummary(items);
-  const reviewVersion = `review-v2-${sha256Value({
+  const bindingDescriptors = candidateBindingDescriptors({
+    items,
+    inputEvidenceHash: source.reviewPackage.inputEvidenceHash,
+  });
+  const reviewVersion = `review-v3-${sha256Value({
     baseSubtitlePackageHash: source.reviewPackage.baseSubtitlePackageHash,
     baseCueHash: source.reviewPackage.baseCueHash,
     inputEvidenceHash: source.reviewPackage.inputEvidenceHash,
     evidenceReconciliationHash,
     deliveryIntegrityPolicyVersion: REVIEW_DELIVERY_POLICY_VERSION,
+    reviewActionPolicyVersion: REVIEW_ACTION_POLICY_VERSION,
+    reviewActionPolicyHash: REVIEW_ACTION_POLICY_HASH,
+    candidateBindingDescriptors: bindingDescriptors,
     items: items.map((item) => ({
       reviewId: item.reviewId,
       audioClipPath: item.audioClipPath,
@@ -555,6 +568,11 @@ export async function repairReviewPackageDelivery(input: {
       evidenceReconciliationHash: item.evidenceReconciliationHash,
     })),
   }).slice(0, 24)}`;
+  const boundItems = bindReviewCandidates({
+    items,
+    inputEvidenceHash: source.reviewPackage.inputEvidenceHash,
+    reviewVersion,
+  });
   const reviewPackage = subtitleReviewPackageSchema.parse({
     ...source.reviewPackage,
     generatedAt: new Date().toISOString(),
@@ -567,7 +585,8 @@ export async function repairReviewPackageDelivery(input: {
           ? "observed"
           : "enforced",
     deliveryIntegrityPolicyVersion: REVIEW_DELIVERY_POLICY_VERSION,
-    items,
+    reviewActionPolicyVersion: REVIEW_ACTION_POLICY_VERSION,
+    items: boundItems,
     summary,
   });
   const reviewPackagePath = path.join(

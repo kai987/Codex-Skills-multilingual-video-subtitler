@@ -12,7 +12,6 @@ import {
   type CueDecision,
   type FinalizationCandidate,
   type FinalizationFinding,
-  type HumanReviewResolution,
   type HumanReviewResolutions,
   type ProcessRunner,
   type SourceFingerprint,
@@ -29,20 +28,19 @@ import {
   stableStringify,
 } from "./finalization-support.js";
 import { resolveReviewAudio } from "./review-audio.js";
+import {
+  REVIEW_ACTION_POLICY_HASH,
+  REVIEW_ACTION_POLICY_VERSION,
+  REVIEW_ACTION_REGISTRY,
+  assertReviewActionPayload,
+  bindReviewCandidates,
+  candidateBindingDescriptors,
+  portableValidateReviewAction,
+} from "./review-action-validation.js";
 
 export { reviewAudioBounds } from "./review-audio.js";
 
-const HUMAN_ACTIONS = [
-  "KEEP",
-  "ACCEPT_SUGGESTION",
-  "EDIT_TEXT",
-  "REJECT_SUGGESTION",
-  "SPLIT_CUE",
-  "MERGE_CUES",
-  "EDIT_TIMING",
-  "DELETE_CUE",
-  "MARK_UNRESOLVED",
-] as const;
+const HUMAN_ACTIONS = REVIEW_ACTION_REGISTRY.map((entry) => entry.action);
 
 function contextCue(cue: SubtitleCue | undefined) {
   return cue === undefined
@@ -89,23 +87,43 @@ function reviewCss(): string {
   return `:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#0b0d10;color:#edf2f7}*{box-sizing:border-box}body{margin:0;background:#0b0d10}header{position:sticky;top:0;background:#11161dcc;padding:.8rem 1rem;z-index:3;border-bottom:1px solid #334155;backdrop-filter:blur(12px);display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}main{max-width:1180px;margin:auto;padding:1rem}.item{border:1px solid #334155;border-radius:14px;padding:1rem;margin:1rem 0;background:#11161d}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.label{font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}.text{white-space:pre-wrap;font-size:1.12rem}.blocker,.error{color:#fca5a5}.ok{color:#86efac}.warning{color:#fde68a}.actions,.play-actions{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.8rem}button{padding:.5rem .72rem;border-radius:8px;border:1px solid #475569;background:#1e293b;color:inherit;cursor:pointer}button:hover{background:#334155}audio{width:100%;margin:.7rem 0}.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem}.meta>div{padding:.55rem;background:#17202b;border-radius:8px;overflow-wrap:anywhere}.timeline{margin-top:1rem;border:1px solid #334155;border-radius:10px;padding:.75rem}.scope{margin:.8rem 0 .3rem;color:#cbd5e1;font-weight:650}.track{display:grid;grid-template-columns:190px 1fr;gap:.65rem;align-items:center;margin:.35rem 0}.track-label{font-size:.74rem;overflow-wrap:anywhere}.rail{height:22px;position:relative;background:#0f172a;border-radius:5px;overflow:hidden}.bar{position:absolute;top:3px;height:16px;min-width:2px;border-radius:4px;background:#38bdf8}.bar.component{background:#a78bfa}.bar.unusable{background:#64748b}.evidence-detail{font:12px ui-monospace,SFMono-Regular,monospace;color:#cbd5e1;white-space:pre-wrap;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}.disclaimer{border-left:3px solid #f59e0b;padding:.65rem;background:#2a2112}.statusline{font-size:.85rem;color:#cbd5e1}@media(max-width:760px){.grid,.meta{grid-template-columns:1fr}.track{grid-template-columns:1fr}main{padding:.5rem}.item{border-radius:0;margin:.5rem 0}}`;
 }
 
-function reviewJavascript(timelineEnabled: boolean): string {
-  return String.raw`const timelineEnabled=${String(timelineEnabled)};const state={data:null,index:0,resolutions:new Map(),loop:false,loopStart:null,stopAt:null};
-const q=(s,r=document)=>r.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function resolution(item,action){const base={resolutionId:'resolution-'+item.reviewId,reviewId:item.reviewId,action,selectedCandidateId:null,correctedText:null,start:null,end:null,splitParts:[],mergeCueIds:[],reviewerNotes:null,errorTypes:[],confirmedReading:null,terminologyHints:[],dialectHints:[]};if(action==='ACCEPT_SUGGESTION')base.selectedCandidateId=item.machineDecision.selectedCandidateId;if(action==='EDIT_TEXT'){const v=prompt('Corrected text',item.currentText);if(!v)return;base.correctedText=v}if(action==='EDIT_TIMING'){base.start=Number(prompt('Start',item.currentStart));base.end=Number(prompt('End',item.currentEnd))}if(action==='DELETE_CUE'){const n=prompt('Deletion reason (required)');if(!n)return;base.reviewerNotes=n}if(action==='SPLIT_CUE'){const raw=prompt('Parts as JSON [{"text":"...","start":0,"end":1}]');if(!raw)return;try{base.splitParts=JSON.parse(raw)}catch{return alert('Invalid JSON')}}if(action==='MERGE_CUES'){const ids=prompt('Adjacent cue IDs, comma separated',item.targetCueIds.join(','));const text=prompt('Merged text',item.currentText);if(!ids||!text)return;base.mergeCueIds=ids.split(',').map(x=>x.trim()).filter(Boolean);base.correctedText=text}state.resolutions.set(item.reviewId,base);render()}
+function hardenedReviewJavascript(timelineEnabled: boolean): string {
+  return String.raw`const timelineEnabled=${String(timelineEnabled)};
+const REVIEW_ACTION_REGISTRY=${JSON.stringify(REVIEW_ACTION_REGISTRY)};
+const validateReviewActionPayload=${portableValidateReviewAction.toString()};
+const state={data:null,index:0,resolutions:new Map(),quarantinedLocalResolutions:[],validationEvents:[],downloadBlockedCount:0,loop:false,loopStart:null,stopAt:null};
+const q=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function baseResolution(item,action){return{resolutionId:'resolution-'+item.reviewId,reviewId:item.reviewId,action,selectedCandidateId:null,selectedCandidateEvidenceHash:null,correctedText:null,start:null,end:null,splitParts:[],mergeCueIds:[],reviewerNotes:null,errorTypes:[],confirmedReading:null,terminologyHints:[],dialectHints:[]}}
+function bindingFor(item,candidateId){return(item.candidateActionBindings??[]).find(binding=>binding.candidateId===candidateId&&binding.reviewId===item.reviewId&&binding.status==='active')??null}
+function showValidation(errors,source){const safe=errors.map(error=>({at:new Date().toISOString(),source,code:error.code,reviewId:error.reviewId,action:error.action,field:error.field,message:error.message}));state.validationEvents.push(...safe);const last=safe[0];const el=q('#validation-status');if(el){el.textContent=last?last.code+' · '+(last.reviewId??'unknown')+' · '+(last.field??'payload'):'Validation passed.';el.className=last?'error':'ok'}}
+function buildResolution(item,action){const base=baseResolution(item,action);if(action==='ACCEPT_SUGGESTION'){base.selectedCandidateId=item.machineDecision.selectedCandidateId;const binding=bindingFor(item,base.selectedCandidateId);base.selectedCandidateEvidenceHash=binding?.candidateEvidenceHash??null}if(action==='REJECT_SUGGESTION'){const chosen=prompt('Candidate ID to reject',item.machineDecision.selectedCandidateId??'');if(chosen===null)return null;base.selectedCandidateId=chosen.trim()||null;const binding=bindingFor(item,base.selectedCandidateId);base.selectedCandidateEvidenceHash=binding?.candidateEvidenceHash??null}if(action==='EDIT_TEXT'){const value=prompt('Corrected text',item.currentText);if(value===null)return null;base.correctedText=value}if(action==='EDIT_TIMING'){const start=prompt('Start',item.currentStart);const end=prompt('End',item.currentEnd);if(start===null||end===null)return null;base.start=Number(start);base.end=Number(end)}if(action==='DELETE_CUE'){const notes=prompt('Deletion reason (required)');if(notes===null)return null;base.reviewerNotes=notes}if(action==='SPLIT_CUE'){const raw=prompt('Parts as JSON [{"text":"...","start":0,"end":1}]');if(raw===null)return null;try{base.splitParts=JSON.parse(raw)}catch{showValidation([{code:'REVIEW_ACTION_SCHEMA_INVALID',reviewId:item.reviewId,action,field:'splitParts',message:'Invalid JSON.'}],'input');return null}}if(action==='MERGE_CUES'){const ids=prompt('Adjacent component cue IDs, comma separated',item.targetCueIds.join(','));const text=prompt('Merged text',item.currentText);if(ids===null||text===null)return null;base.mergeCueIds=ids.split(',').map(value=>value.trim()).filter(Boolean);base.correctedText=text}return base}
+function validateForItem(item,resolution){return validateReviewActionPayload(REVIEW_ACTION_REGISTRY,item,resolution,state.data.reviewVersion)}
+function storageKey(){return'mvl-review-resolutions:'+state.data.reviewVersion}
+function saveValidatedState(){const errors=[];for(const resolution of state.resolutions.values()){const item=state.data.items.find(value=>value.reviewId===resolution.reviewId);if(!item){errors.push({code:'UNKNOWN_REVIEW_ITEM',reviewId:resolution.reviewId,action:resolution.action,field:'reviewId',message:'Unknown review item.'});continue}const validation=validateForItem(item,resolution);if(!validation.valid)errors.push(...validation.errors)}if(errors.length){showValidation(errors,'autosave');return false}localStorage.setItem(storageKey(),JSON.stringify([...state.resolutions.values()]));return true}
+function commitResolution(item,resolution,source){const validation=validateForItem(item,resolution);if(!validation.valid){showValidation(validation.errors,source);return false}state.resolutions.set(item.reviewId,resolution);if(!saveValidatedState()){state.resolutions.delete(item.reviewId);return false}showValidation([],source);render();return true}
+function executeAction(item,action,source){const resolution=buildResolution(item,action);if(resolution===null)return false;return commitResolution(item,resolution,source)}
+function restoreSavedState(){const raw=localStorage.getItem(storageKey());if(raw===null)return;let saved;try{saved=JSON.parse(raw)}catch{saved=[];showValidation([{code:'INVALID_SAVED_REVIEW_ACTION',reviewId:null,action:null,field:'localStorage',message:'Saved review state is not valid JSON.'}],'localStorage')}if(!Array.isArray(saved))saved=[];for(const resolution of saved){const item=state.data.items.find(value=>value.reviewId===resolution?.reviewId);const validation=item?validateForItem(item,resolution):{valid:false,errors:[{code:'UNKNOWN_REVIEW_ITEM',reviewId:resolution?.reviewId??null,action:resolution?.action??null,field:'reviewId',message:'Saved resolution targets an unknown item.'}]};if(validation.valid){state.resolutions.set(item.reviewId,resolution)}else{state.quarantinedLocalResolutions.push(resolution);showValidation(validation.errors.map(error=>({...error,code:'INVALID_SAVED_REVIEW_ACTION'})),'localStorage')}}saveValidatedState()}
+function packageIdentityValid(value){return value&&value.reviewVersion===state.data.reviewVersion&&value.baseSubtitlePackageHash===state.data.baseSubtitlePackageHash&&value.baseCueHash===state.data.baseCueHash&&value.inputEvidenceHash===state.data.inputEvidenceHash}
+function importResolutions(value){if(!packageIdentityValid(value)||!Array.isArray(value.resolutions)){showValidation([{code:'IMPORTED_REVIEW_PACKAGE_STALE',reviewId:null,action:null,field:'reviewVersion',message:'Imported resolutions do not match this review package.'}],'import');return}for(const resolution of value.resolutions){const item=state.data.items.find(entry=>entry.reviewId===resolution?.reviewId);const validation=item?validateForItem(item,resolution):{valid:false,errors:[{code:'UNKNOWN_REVIEW_ITEM',reviewId:resolution?.reviewId??null,action:resolution?.action??null,field:'reviewId',message:'Imported resolution targets an unknown item.'}]};if(validation.valid)state.resolutions.set(item.reviewId,resolution);else{state.quarantinedLocalResolutions.push(resolution);showValidation(validation.errors,'import')}}saveValidatedState();render()}
+function preflight(){const errors=[];for(const resolution of state.resolutions.values()){const item=state.data.items.find(value=>value.reviewId===resolution.reviewId);if(!item){errors.push({code:'UNKNOWN_REVIEW_ITEM',reviewId:resolution.reviewId,action:resolution.action,field:'reviewId',message:'Unknown review item.'});continue}const validation=validateForItem(item,resolution);if(!validation.valid)errors.push(...validation.errors)}return{valid:errors.length===0,errors}}
+function previewResolution(item){const resolution=state.resolutions.get(item.reviewId);if(!resolution){showValidation([{code:'NO_RESOLUTION_TO_PREVIEW',reviewId:item.reviewId,action:null,field:'resolution',message:'Choose an action before previewing.'}],'preview');return}const validation=validateForItem(item,resolution);if(!validation.valid){showValidation(validation.errors,'preview');return}q('#resolution-preview').textContent=JSON.stringify(resolution,null,2)}
+function bulkApply(action){const pending=state.data.items.filter(item=>!state.resolutions.has(item.reviewId));const prepared=pending.map(item=>({item,resolution:baseResolution(item,action)}));const errors=prepared.flatMap(({item,resolution})=>validateForItem(item,resolution).errors);if(errors.length){showValidation(errors,'bulk');return}for(const{item,resolution}of prepared)state.resolutions.set(item.reviewId,resolution);saveValidatedState();render()}
 function localTime(media,item){return Math.max(0,media-(item.audioExtractedInterval?.start??0))}
-function playRange(item,start,end){const a=q('#review-audio');if(!a){showAudioError('audio file is not available');return}state.loopStart=localTime(start,item);state.stopAt=localTime(end,item);a.currentTime=state.loopStart;a.play().catch(e=>showAudioError(e.message))}
-function showAudioError(message){const el=q('#audio-error');if(el){el.textContent='AUDIO_PLAYBACK_ERROR: '+message;el.className='error'}}
+function playRange(item,start,end){const audio=q('#review-audio');if(!audio){showAudioError('audio file is not available');return}state.loopStart=localTime(start,item);state.stopAt=localTime(end,item);audio.currentTime=state.loopStart;audio.play().catch(error=>showAudioError(error.message))}
+function showAudioError(message){const element=q('#audio-error');if(element){element.textContent='AUDIO_PLAYBACK_ERROR: '+message;element.className='error'}}
 function trackHtml(item,e,component){const names={'source-cue-prior':'Human Original Timing','mfa-narrow':'MFA Narrow','mfa-expanded':'MFA Expanded','forced-alignment-selected':'Forced Alignment Selected','evidence-dp':'Evidence-DP','trusted-mapped-token':'Mapped Token','trusted-no-vad-token':'Mapped Token (no-VAD)','decoded-segment':'Decoded Segment','raw-vad':'Raw VAD','pause':'Pause','component-union':'Component Union','audio-extraction-window':'Audio Extraction Window'};const window=item.audioExtractedInterval??item.audioRequestedInterval??item.interval;const span=Math.max(.001,window.end-window.start);const left=Math.max(0,Math.min(100,100*(e.interval.start-window.start)/span));const width=Math.max(.2,Math.min(100-left,100*(e.interval.end-e.interval.start)/span));const cls=(component?' component':'')+(e.timingUsable?'':' unusable');const label=(names[e.sourceType]??e.sourceType)+' · '+e.scope;const detail=e.interval.start.toFixed(3)+' → '+e.interval.end.toFixed(3)+' | trust '+String(e.trustScore??'n/a')+' | '+e.evidenceId+(e.blockers?.length?' | '+e.blockers.join(', '):'');return '<div class="track"><button class="track-label" data-evidence-start="'+e.interval.start+'" data-evidence-end="'+e.interval.end+'">'+esc(label)+'</button><div><div class="rail"><span class="bar'+cls+'" style="left:'+left+'%;width:'+width+'%"></span></div><div class="evidence-detail">'+esc(detail)+'</div></div></div>'}
-function render(){const item=state.data.items[state.index];q('#position').textContent=(state.index+1)+' / '+state.data.items.length;if(!item){q('#items').innerHTML='<p>No review items.</p>';return}const suggestions=esc(JSON.stringify(item.candidateSuggestions.map(c=>({id:c.candidateId,coverage:c.coverageMetrics,evidence:c.sourceEvidenceIds})),null,2));const union=item.componentUnionInterval??item.interval;const cueEvidence=item.boundaryEvidence??[];const componentEvidence=[...(item.componentRawVadIntervals??[]),...(item.componentDecodedSegments??[]),...(item.componentMappedTokenEvidence??[]),...(item.componentPauseEvidence??[])].filter(e=>e.scope!=='cue');const packageTracks=[{sourceType:'component-union',scope:'component',interval:union,timingUsable:true,trustScore:1,evidenceId:'review-package:component-union',blockers:[]},...(item.audioExtractedInterval?[{sourceType:'audio-extraction-window',scope:'component',interval:item.audioExtractedInterval,timingUsable:item.audioValidationStatus==='validated',trustScore:null,evidenceId:'review-package:audio-extraction-window',blockers:item.audioError?[item.audioError]:[]}]:[])];const unresolved=item.unresolvedEvidenceReferences??[];const timeline=timelineEnabled?'<section class="timeline"><div class="scope">Cue-specific evidence tracks</div>'+cueEvidence.map(e=>trackHtml(item,e,false)).join('')+'<div class="scope">Component acoustic tracks</div>'+packageTracks.concat(componentEvidence).map(e=>trackHtml(item,e,true)).join('')+(unresolved.length?'<p class="error">EVIDENCE_REFERENCE_UNRESOLVED: '+esc(unresolved.join(', '))+'</p>':'')+'</section>':'';const forced=item.forcedAlignmentEvidence?'<section class="forced"><div class="label">Forced-alignment decision context</div><pre>'+esc(JSON.stringify(item.forcedAlignmentEvidence,null,2))+'</pre></section>':'';const audio=item.audioClipPath?'<audio id="review-audio" controls preload="metadata" src="'+esc(item.audioClipPath)+'"></audio>':'';const cueLoops=(item.forcedAlignmentEvidence?.cues??[]).map(c=>'<button data-loop-start="'+c.originalTiming.start+'" data-loop-end="'+c.originalTiming.end+'">Loop cue '+esc(c.cueId)+'</button>').join('');const audioActions='<div class="play-actions"><button data-loop-start="'+union.start+'" data-loop-end="'+union.end+'">Loop component</button>'+cueLoops+'</div>';const buttons=item.allowedHumanActions.map(a=>'<button data-action="'+a+'">'+a+'</button>').join('');const meta='<div class="meta"><div><span class="label">Audio source</span><br>'+esc(item.audioSource)+'</div><div><span class="label">Validation</span><br>'+esc(item.audioValidationStatus)+'</div><div><span class="label">SHA-256</span><br>'+esc(item.audioSha256??'none')+'</div><div><span class="label">Coverage</span><br>'+esc(String(item.audioFullyCoversComponent))+'</div><div><span class="label">Mapped token</span><br>'+cueEvidence.filter(e=>e.sourceType==='trusted-mapped-token'||e.sourceType==='trusted-no-vad-token').length+'</div><div><span class="label">Raw VAD islands</span><br>'+(item.componentRawVadIntervals??[]).length+'</div><div><span class="label">Decoded segments</span><br>'+(item.componentDecodedSegments??[]).length+'</div><div><span class="label">Evidence status</span><br>'+esc(item.evidenceSourceResolutionStatus)+'</div></div>';q('#items').innerHTML='<article class="item"><div class="grid"><section><div class="label">Current subtitle / human timing</div><div class="text">'+esc(item.currentText)+'</div><p>'+union.start.toFixed(3)+' → '+union.end.toFixed(3)+'</p></section><section><div class="label">Machine recommendation</div><div class="text">'+esc(item.machineDecision.proposedText??'KEEP')+'</div><p>'+esc(item.candidateSuggestions[0]?.associationType??'none')+'</p></section><section><div class="label">Previous</div><div>'+esc(item.previousCue?.text??'—')+'</div><div class="label">Next</div><div>'+esc(item.nextCue?.text??'—')+'</div></section><section><div class="label">Candidate evidence</div><pre>'+suggestions+'</pre></section></div><div class="disclaimer">MFA boundaries are machine evidence, not confirmed ground truth.<br>Mapped Token and Raw VAD are timing evidence only and do not identify the speaker.<br>Component-level Raw VAD intervals do not prove which cue or speaker produced the speech.</div>'+meta+'<div id="audio-error" class="statusline">'+esc(item.audioError??'Audio metadata and coverage validated.')+'</div>'+audio+audioActions+timeline+forced+'<div class="label blocker">Review blockers</div><div class="blocker">'+esc(item.blockers.join(', ')||'none')+'</div><div class="actions">'+buttons+'</div><p>Selected: '+esc(state.resolutions.get(item.reviewId)?.action??'none')+'</p></article>';document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>resolution(item,b.dataset.action));document.querySelectorAll('[data-loop-start]').forEach(b=>b.onclick=()=>playRange(item,Number(b.dataset.loopStart),Number(b.dataset.loopEnd)));document.querySelectorAll('[data-evidence-start]').forEach(b=>b.onclick=()=>playRange(item,Number(b.dataset.evidenceStart),Number(b.dataset.evidenceEnd)));const a=q('#review-audio');if(a){a.addEventListener('error',()=>showAudioError('file missing, unreadable, or unsupported'));a.addEventListener('timeupdate',()=>{if(state.stopAt!==null&&a.currentTime>=state.stopAt){if(state.loop){a.currentTime=state.loopStart??0;a.play().catch(e=>showAudioError(e.message))}else{a.pause();state.loopStart=null;state.stopAt=null}}})}}
+function shortcutHints(item){return REVIEW_ACTION_REGISTRY.filter(entry=>entry.shortcut&&item.allowedHumanActions.includes(entry.action)).map(entry=>entry.shortcut.toUpperCase()+' '+entry.label).join(', ')}
+function render(){const item=state.data.items[state.index];q('#position').textContent=(state.index+1)+' / '+state.data.items.length;if(!item){q('#items').innerHTML='<p>No review items.</p>';return}q('#shortcut-hints').textContent=shortcutHints(item);q('#quarantine-status').textContent=state.quarantinedLocalResolutions.length?'Quarantined saved actions: '+state.quarantinedLocalResolutions.length:'';const suggestions=esc(JSON.stringify(item.candidateSuggestions.map(candidate=>({id:candidate.candidateId,coverage:candidate.coverageMetrics,evidence:candidate.sourceEvidenceIds})),null,2));const union=item.componentUnionInterval??item.interval;const cueEvidence=item.boundaryEvidence??[];const componentEvidence=[...(item.componentRawVadIntervals??[]),...(item.componentDecodedSegments??[]),...(item.componentMappedTokenEvidence??[]),...(item.componentPauseEvidence??[])].filter(evidence=>evidence.scope!=='cue');const packageTracks=[{sourceType:'component-union',scope:'component',interval:union,timingUsable:true,trustScore:1,evidenceId:'review-package:component-union',blockers:[]},...(item.audioExtractedInterval?[{sourceType:'audio-extraction-window',scope:'component',interval:item.audioExtractedInterval,timingUsable:item.audioValidationStatus==='validated',trustScore:null,evidenceId:'review-package:audio-extraction-window',blockers:item.audioError?[item.audioError]:[]}]:[])];const unresolved=item.unresolvedEvidenceReferences??[];const timeline=timelineEnabled?'<section class="timeline"><div class="scope">Cue-specific evidence tracks</div>'+cueEvidence.map(evidence=>trackHtml(item,evidence,false)).join('')+'<div class="scope">Component acoustic tracks</div>'+packageTracks.concat(componentEvidence).map(evidence=>trackHtml(item,evidence,true)).join('')+(unresolved.length?'<p class="error">EVIDENCE_REFERENCE_UNRESOLVED: '+esc(unresolved.join(', '))+'</p>':'')+'</section>':'';const forced=item.forcedAlignmentEvidence?'<section class="forced"><div class="label">Forced-alignment decision context</div><pre>'+esc(JSON.stringify(item.forcedAlignmentEvidence,null,2))+'</pre></section>':'';const audio=item.audioClipPath?'<audio id="review-audio" controls preload="metadata" src="'+esc(item.audioClipPath)+'"></audio>':'';const cueLoops=(item.forcedAlignmentEvidence?.cues??[]).map(cue=>'<button data-loop-start="'+cue.originalTiming.start+'" data-loop-end="'+cue.originalTiming.end+'">Loop cue '+esc(cue.cueId)+'</button>').join('');const audioActions='<div class="play-actions"><button data-loop-start="'+union.start+'" data-loop-end="'+union.end+'">Loop component</button>'+cueLoops+'</div>';const buttons=item.allowedHumanActions.map(action=>'<button data-action="'+action+'">'+esc(REVIEW_ACTION_REGISTRY.find(entry=>entry.action===action)?.label??action)+'</button>').join('');const meta='<div class="meta"><div><span class="label">Audio source</span><br>'+esc(item.audioSource)+'</div><div><span class="label">Validation</span><br>'+esc(item.audioValidationStatus)+'</div><div><span class="label">SHA-256</span><br>'+esc(item.audioSha256??'none')+'</div><div><span class="label">Coverage</span><br>'+esc(String(item.audioFullyCoversComponent))+'</div><div><span class="label">Mapped token</span><br>'+cueEvidence.filter(evidence=>evidence.sourceType==='trusted-mapped-token'||evidence.sourceType==='trusted-no-vad-token').length+'</div><div><span class="label">Raw VAD islands</span><br>'+(item.componentRawVadIntervals??[]).length+'</div><div><span class="label">Decoded segments</span><br>'+(item.componentDecodedSegments??[]).length+'</div><div><span class="label">Evidence status</span><br>'+esc(item.evidenceSourceResolutionStatus)+'</div></div>';q('#items').innerHTML='<article class="item"><div class="grid"><section><div class="label">Current subtitle / human timing</div><div class="text">'+esc(item.currentText)+'</div><p>'+union.start.toFixed(3)+' → '+union.end.toFixed(3)+'</p></section><section><div class="label">Machine recommendation</div><div class="text">'+esc(item.machineDecision.proposedText??'KEEP')+'</div><p>'+esc(item.candidateSuggestions[0]?.associationType??'none')+'</p></section><section><div class="label">Previous</div><div>'+esc(item.previousCue?.text??'—')+'</div><div class="label">Next</div><div>'+esc(item.nextCue?.text??'—')+'</div></section><section><div class="label">Candidate evidence</div><pre>'+suggestions+'</pre></section></div><div class="disclaimer">MFA boundaries are machine evidence, not confirmed ground truth.<br>Mapped Token and Raw VAD are timing evidence only and do not identify the speaker.<br>Component-level Raw VAD intervals do not prove which cue or speaker produced the speech.</div>'+meta+'<div id="audio-error" class="statusline">'+esc(item.audioError??'Audio metadata and coverage validated.')+'</div>'+audio+audioActions+timeline+forced+'<div class="label blocker">Review blockers</div><div class="blocker">'+esc(item.blockers.join(', ')||'none')+'</div><div class="actions">'+buttons+'<button id="preview-resolution">Preview resolution</button></div><p>Selected: '+esc(state.resolutions.get(item.reviewId)?.action??'none')+'</p><pre id="resolution-preview"></pre></article>';document.querySelectorAll('[data-action]').forEach(button=>button.onclick=()=>executeAction(item,button.dataset.action,'button'));q('#preview-resolution').onclick=()=>previewResolution(item);document.querySelectorAll('[data-loop-start]').forEach(button=>button.onclick=()=>playRange(item,Number(button.dataset.loopStart),Number(button.dataset.loopEnd)));document.querySelectorAll('[data-evidence-start]').forEach(button=>button.onclick=()=>playRange(item,Number(button.dataset.evidenceStart),Number(button.dataset.evidenceEnd)));const audioElement=q('#review-audio');if(audioElement){audioElement.addEventListener('error',()=>showAudioError('file missing, unreadable, or unsupported'));audioElement.addEventListener('timeupdate',()=>{if(state.stopAt!==null&&audioElement.currentTime>=state.stopAt){if(state.loop){audioElement.currentTime=state.loopStart??0;audioElement.play().catch(error=>showAudioError(error.message))}else{audioElement.pause();state.loopStart=null;state.stopAt=null}}})}}
 function move(delta){if(!state.data.items.length)return;state.index=(state.index+delta+state.data.items.length)%state.data.items.length;state.loopStart=null;state.stopAt=null;render()}
-q('#previous').onclick=()=>move(-1);q('#next').onclick=()=>move(1);q('#download').onclick=()=>{const d=state.data;const body={schemaVersion:'1.0.0',resolutionType:'human-review-resolutions',reviewVersion:d.reviewVersion,sourceFingerprint:d.sourceFingerprint,baseSubtitlePackageHash:d.baseSubtitlePackageHash,baseCueHash:d.baseCueHash,inputEvidenceHash:d.inputEvidenceHash,resolutions:[...state.resolutions.values()].sort((a,b)=>a.reviewId.localeCompare(b.reviewId))};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)+'\\n'],{type:'application/json'}));a.download='human-review-resolutions.json';a.click();URL.revokeObjectURL(a.href)};
-document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea'))return;if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);const item=state.data.items[state.index];if(!item)return;if(e.key==='a')resolution(item,'ACCEPT_SUGGESTION');if(e.key==='k')resolution(item,'KEEP');if(e.key==='u')resolution(item,'MARK_UNRESOLVED');if(e.key===' '){e.preventDefault();const a=q('#review-audio');if(a){if(a.paused)a.play();else a.pause()}}if(e.key.toLowerCase()==='l'){state.loop=!state.loop;q('#loop-status').textContent=state.loop?'loop on':'loop off'}});
-fetch('./data/subtitle-review-package.json').then(r=>r.json()).then(d=>{state.data=d;render()}).catch(e=>q('#items').textContent=e.message);`;
+function download(){const check=preflight();if(!check.valid){state.downloadBlockedCount+=1;showValidation(check.errors,'download-preflight');const first=check.errors[0];const index=state.data.items.findIndex(item=>item.reviewId===first?.reviewId);if(index>=0){state.index=index;render();q('#items').scrollIntoView({behavior:'smooth',block:'start'})}return}const data=state.data;const body={schemaVersion:'1.0.0',resolutionType:'human-review-resolutions',reviewVersion:data.reviewVersion,sourceFingerprint:data.sourceFingerprint,baseSubtitlePackageHash:data.baseSubtitlePackageHash,baseCueHash:data.baseCueHash,inputEvidenceHash:data.inputEvidenceHash,resolutions:[...state.resolutions.values()].sort((left,right)=>left.reviewId.localeCompare(right.reviewId))};const anchor=document.createElement('a');anchor.href=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)+'\n'],{type:'application/json'}));anchor.download='human-review-resolutions.json';anchor.click();URL.revokeObjectURL(anchor.href)}
+q('#previous').onclick=()=>move(-1);q('#next').onclick=()=>move(1);q('#download').onclick=download;q('#bulk-keep').onclick=()=>bulkApply('KEEP');q('#import-resolutions').onchange=event=>{const file=event.target.files?.[0];if(!file)return;file.text().then(text=>{try{importResolutions(JSON.parse(text))}catch(error){showValidation([{code:'IMPORTED_REVIEW_JSON_INVALID',reviewId:null,action:null,field:'file',message:error.message}],'import')}})};
+document.addEventListener('keydown',event=>{if(event.target.matches('input,textarea'))return;if(event.key==='ArrowLeft')move(-1);if(event.key==='ArrowRight')move(1);const item=state.data.items[state.index];if(!item)return;const entry=REVIEW_ACTION_REGISTRY.find(value=>value.shortcut===event.key.toLowerCase());if(entry)executeAction(item,entry.action,'keyboard');if(event.key===' '){event.preventDefault();const audio=q('#review-audio');if(audio){if(audio.paused)audio.play();else audio.pause()}}if(event.key.toLowerCase()==='l'){state.loop=!state.loop;q('#loop-status').textContent=state.loop?'loop on':'loop off'}});
+fetch('./data/subtitle-review-package.json').then(response=>response.json()).then(data=>{state.data=data;restoreSavedState();render()}).catch(error=>q('#items').textContent=error.message);`;
 }
 
 function reviewHtml(): string {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Subtitle evidence review</title><link rel="stylesheet" href="./assets/review.css"></head><body><header><strong>Subtitle evidence review</strong><span id="position"></span><button id="previous">Previous</button><button id="next">Next</button><button id="download">Download resolutions</button><small>Keys: space play, L loop, ←/→ navigate, A accept, K keep, U unresolved · <span id="loop-status">loop off</span></small></header><main id="items">Loading…</main><script type="module" src="./assets/review.js"></script></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Subtitle evidence review</title><link rel="stylesheet" href="./assets/review.css"></head><body><header><strong>Subtitle evidence review</strong><span id="position"></span><button id="previous">Previous</button><button id="next">Next</button><button id="bulk-keep">Keep all unreviewed</button><label>Import resolutions <input id="import-resolutions" type="file" accept="application/json"></label><button id="download">Download resolutions</button><small>Keys: space play, L loop, ←/→ navigate · <span id="shortcut-hints"></span> · <span id="loop-status">loop off</span></small><span id="validation-status" class="statusline"></span><span id="quarantine-status" class="warning"></span></header><main id="items">Loading…</main><script type="module" src="./assets/review.js"></script></body></html>`;
 }
 
 export async function writeSubtitleReviewPage(input: {
@@ -131,7 +149,7 @@ export async function writeSubtitleReviewPage(input: {
     ),
     atomicWriteFile(
       path.join(reviewDirectory, "assets", "review.js"),
-      reviewJavascript(input.timelineEnabled ?? true),
+      hardenedReviewJavascript(input.timelineEnabled ?? true),
       {
         overwrite: true,
       },
@@ -353,6 +371,7 @@ export async function prepareSubtitleReviewPackage(input: {
       nextCue: contextCue(input.cues[lastIndex + 1]),
       machineDecision: decision,
       candidateSuggestions,
+      candidateActionBindings: [],
       findingIds: relatedFindings.map((item) => item.findingId),
       blockers: [
         ...new Set([
@@ -406,10 +425,17 @@ export async function prepareSubtitleReviewPackage(input: {
       requiresHumanReview: true,
     });
   }
-  const reviewVersion = `review-v1-${sha256Value({
+  const bindingDescriptors = candidateBindingDescriptors({
+    items,
+    inputEvidenceHash: input.inputEvidenceHash,
+  });
+  const reviewVersion = `review-v3-${sha256Value({
     baseSubtitlePackageHash: input.baseSubtitlePackageHash,
     baseCueHash: input.baseCueHash,
     inputEvidenceHash: input.inputEvidenceHash,
+    reviewActionPolicyVersion: REVIEW_ACTION_POLICY_VERSION,
+    reviewActionPolicyHash: REVIEW_ACTION_POLICY_HASH,
+    candidateBindingDescriptors: bindingDescriptors,
     items: items.map((item) => ({
       reviewId: item.reviewId,
       targetCueIds: item.targetCueIds,
@@ -424,6 +450,11 @@ export async function prepareSubtitleReviewPackage(input: {
       forcedAlignmentEvidence: item.forcedAlignmentEvidence ?? null,
     })),
   }).slice(0, 24)}`;
+  const boundItems = bindReviewCandidates({
+    items,
+    inputEvidenceHash: input.inputEvidenceHash,
+    reviewVersion,
+  });
   const reviewPackage = subtitleReviewPackageSchema.parse({
     schemaVersion: "1.0.0",
     packageType: "multilingual-subtitle-review-package",
@@ -434,7 +465,8 @@ export async function prepareSubtitleReviewPackage(input: {
     baseSubtitlePackageHash: input.baseSubtitlePackageHash,
     baseCueHash: input.baseCueHash,
     inputEvidenceHash: input.inputEvidenceHash,
-    items,
+    reviewActionPolicyVersion: REVIEW_ACTION_POLICY_VERSION,
+    items: boundItems,
     summary: {
       itemCount: items.length,
       mandatoryItemCount: items.filter((item) => item.requiresHumanReview)
@@ -496,92 +528,6 @@ function equalFingerprint(
   return stableStringify(left) === stableStringify(right);
 }
 
-function validateResolutionPayload(
-  resolution: HumanReviewResolution,
-  reviewItem: SubtitleReviewPackage["items"][number],
-): void {
-  switch (resolution.action) {
-    case "ACCEPT_SUGGESTION":
-      if (
-        resolution.selectedCandidateId === null ||
-        !reviewItem.candidateSuggestions.some(
-          (candidate) =>
-            candidate.candidateId === resolution.selectedCandidateId,
-        )
-      ) {
-        throw new InputError(
-          `Resolution ${resolution.resolutionId} references an unknown candidate.`,
-        );
-      }
-      break;
-    case "EDIT_TEXT":
-      if (
-        resolution.correctedText === null ||
-        resolution.correctedText.trim() === ""
-      ) {
-        throw new InputError(
-          `Resolution ${resolution.resolutionId} requires correctedText.`,
-        );
-      }
-      break;
-    case "EDIT_TIMING":
-      if (
-        resolution.start === null ||
-        resolution.end === null ||
-        resolution.end <= resolution.start
-      ) {
-        throw new InputError(
-          `Resolution ${resolution.resolutionId} has invalid timing.`,
-        );
-      }
-      break;
-    case "SPLIT_CUE":
-      if (resolution.splitParts.length < 2) {
-        throw new InputError(
-          `Resolution ${resolution.resolutionId} requires at least two parts.`,
-        );
-      }
-      for (const [index, part] of resolution.splitParts.entries()) {
-        const previous = resolution.splitParts[index - 1];
-        if (
-          part.start < reviewItem.interval.start ||
-          part.end > reviewItem.interval.end ||
-          (previous !== undefined && part.start < previous.end)
-        ) {
-          throw new InputError(
-            `Resolution ${resolution.resolutionId} split parts leave or overlap the review interval.`,
-          );
-        }
-      }
-      break;
-    case "MERGE_CUES":
-      if (
-        resolution.mergeCueIds.length < 2 ||
-        !reviewItem.targetCueIds.every((cueId) =>
-          resolution.mergeCueIds.includes(cueId),
-        ) ||
-        resolution.correctedText === null ||
-        resolution.correctedText.trim() === ""
-      ) {
-        throw new InputError(
-          `Resolution ${resolution.resolutionId} requires adjacent mergeCueIds and correctedText.`,
-        );
-      }
-      break;
-    case "DELETE_CUE":
-      if (resolution.reviewerNotes === null) {
-        throw new InputError(
-          `Resolution ${resolution.resolutionId} requires reviewerNotes.`,
-        );
-      }
-      break;
-    case "KEEP":
-    case "REJECT_SUGGESTION":
-    case "MARK_UNRESOLVED":
-      break;
-  }
-}
-
 function deterministicCueId(input: unknown): string {
   return `cue-human-${sha256Value(input).slice(0, 20)}`;
 }
@@ -640,7 +586,11 @@ export function applyHumanReviewResolutions(input: {
     if (item === undefined) {
       throw new InputError(`Unknown reviewId ${resolution.reviewId}.`);
     }
-    validateResolutionPayload(resolution, item);
+    assertReviewActionPayload({
+      item,
+      resolution,
+      reviewVersion: review.reviewVersion,
+    });
   }
   const cueOrder = new Map(input.cues.map((cue, index) => [cue.id, index]));
   const consumedCueIds = new Set<string>();

@@ -270,7 +270,9 @@ describe("C5.17.2 local review page", () => {
     expect(page.javascript).toContain("Loop component");
     expect(page.javascript).toContain("Loop cue ");
     expect(page.javascript).toContain("state.loopStart");
-    expect(page.javascript).toContain("a.currentTime=state.loopStart??0");
+    expect(page.javascript).toContain(
+      "audioElement.currentTime=state.loopStart??0",
+    );
   });
 
   it("shows every required evidence track and separates scopes", async () => {
@@ -298,14 +300,21 @@ describe("C5.17.2 local review page", () => {
 
   it("keeps keyboard navigation and schema-shaped resolution download", async () => {
     const page = await renderPage();
-    expect(page.javascript).toContain("e.key==='ArrowLeft'");
-    expect(page.javascript).toContain("e.key==='ArrowRight'");
-    expect(page.javascript).toContain("e.key===' '");
-    expect(page.javascript).toContain("e.key.toLowerCase()==='l'");
+    expect(page.javascript).toContain("event.key==='ArrowLeft'");
+    expect(page.javascript).toContain("event.key==='ArrowRight'");
+    expect(page.javascript).toContain("event.key===' '");
+    expect(page.javascript).toContain("event.key.toLowerCase()==='l'");
     expect(page.javascript).toContain(
       "resolutionType:'human-review-resolutions'",
     );
-    expect(page.javascript).toContain("reviewVersion:d.reviewVersion");
+    expect(page.javascript).toContain("reviewVersion:data.reviewVersion");
+    expect(page.javascript).toContain("ACTION_NOT_AVAILABLE_FOR_REVIEW_ITEM");
+    expect(page.javascript).toContain("quarantinedLocalResolutions");
+    expect(page.javascript).toContain("download-preflight");
+    expect(page.javascript).toContain("shortcutHints(item)");
+    expect(page.javascript).not.toContain(
+      "if(e.key==='a')resolution(item,'ACCEPT_SUGGESTION')",
+    );
   });
 
   it("rejects old human resolutions after the audio/evidence review version changes", () => {

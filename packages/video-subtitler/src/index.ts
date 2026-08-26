@@ -23,6 +23,7 @@ export * from "./review.js";
 export * from "./review-audio.js";
 export * from "./review-evidence.js";
 export * from "./review-delivery.js";
+export * from "./review-action-validation.js";
 export * from "./shareable-artifacts.js";
 export * from "./transport.js";
 export * from "./types.js";

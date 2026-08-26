@@ -24,6 +24,7 @@ import {
   c5171FreshCacheObserveValidationSchema,
   c5172ReviewDeliveryReplaySummarySchema,
   subtitleReviewDeliveryIntegritySchema,
+  reviewActionValidationReportSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -38,6 +39,8 @@ const C5171_SHAREABLE_POLICY_VERSION =
   "c5.17.1-shareable-artifact-policy-v1" as const;
 const C5172_SHAREABLE_POLICY_VERSION =
   "c5.17.2-shareable-artifact-policy-v1" as const;
+const C518_SHAREABLE_POLICY_VERSION =
+  "c5.18-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -70,6 +73,7 @@ const artifactSchemas = {
     subtitleReviewDeliveryIntegritySchema,
   "c5-17-2-review-delivery-replay-summary.json":
     c5172ReviewDeliveryReplaySummarySchema,
+  "review-action-validation-report.json": reviewActionValidationReportSchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -416,6 +420,7 @@ export async function generateC5161ShareableArtifacts(input: {
   c5172Artifacts?: {
     deliveryIntegrityPath: string;
     replaySummaryPath: string;
+    reviewActionValidationReportPath?: string;
   };
 }): Promise<{
   outputDirectory: string;
@@ -529,6 +534,14 @@ export async function generateC5161ShareableArtifacts(input: {
         sourcePath: path.resolve(input.c5172Artifacts.replaySummaryPath),
       },
     );
+    if (input.c5172Artifacts.reviewActionValidationReportPath !== undefined) {
+      sources.push({
+        name: "review-action-validation-report.json",
+        sourcePath: path.resolve(
+          input.c5172Artifacts.reviewActionValidationReportPath,
+        ),
+      });
+    }
   }
   const sourceHashes = await Promise.all(
     sources.map(async (source) => sha256(await readFile(source.sourcePath))),
@@ -649,13 +662,15 @@ export async function generateC5161ShareableArtifacts(input: {
     schemaVersion: "1.0.0",
     artifactType: "shareable-artifact-manifest",
     policyVersion:
-      input.c5172Artifacts !== undefined
-        ? C5172_SHAREABLE_POLICY_VERSION
-        : input.c517Artifacts === undefined
-          ? SHAREABLE_POLICY_VERSION
-          : input.c517Artifacts.pronunciationPath === undefined
-            ? C517_SHAREABLE_POLICY_VERSION
-            : C5171_SHAREABLE_POLICY_VERSION,
+      input.c5172Artifacts?.reviewActionValidationReportPath !== undefined
+        ? C518_SHAREABLE_POLICY_VERSION
+        : input.c5172Artifacts !== undefined
+          ? C5172_SHAREABLE_POLICY_VERSION
+          : input.c517Artifacts === undefined
+            ? SHAREABLE_POLICY_VERSION
+            : input.c517Artifacts.pronunciationPath === undefined
+              ? C517_SHAREABLE_POLICY_VERSION
+              : C5171_SHAREABLE_POLICY_VERSION,
     generatedAt: new Date().toISOString(),
     taskIdentityHash,
     pathPolicy: "shareable-relative-only",

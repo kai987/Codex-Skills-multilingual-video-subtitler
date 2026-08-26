@@ -7,12 +7,14 @@ import {
   InputError,
   atomicWriteJson,
   c5172ReviewDeliveryReplaySummarySchema,
+  reviewActionHardeningModeSchema,
   reviewAudioModeSchema,
   reviewDeliveryIntegrityModeSchema,
   reviewEvidenceReconciliationModeSchema,
 } from "@mvl/shared";
 import {
   generateC5161ShareableArtifacts,
+  buildReviewActionValidationReport,
   locateSubtitlePackage,
   repairReviewPackageDelivery,
   sha256Value,
@@ -34,6 +36,7 @@ const { values } = parseArgs({
     "review-audio-context-seconds": { type: "string", default: "1.5" },
     "review-audio-maximum-seconds": { type: "string", default: "30" },
     "review-page-timeline": { type: "string", default: "true" },
+    "review-action-hardening": { type: "string", default: "enforce" },
   },
   strict: true,
 });
@@ -152,6 +155,9 @@ const evidenceMode = reviewEvidenceReconciliationModeSchema.parse(
 const deliveryMode = reviewDeliveryIntegrityModeSchema.parse(
   values["review-delivery-integrity"],
 );
+const actionHardeningMode = reviewActionHardeningModeSchema.parse(
+  values["review-action-hardening"],
+);
 const reviewPageTimeline = values["review-page-timeline"] === "true";
 if (!["true", "false"].includes(values["review-page-timeline"])) {
   throw new InputError("--review-page-timeline must be true or false.");
@@ -172,6 +178,13 @@ const sourceLocated = await locateSubtitlePackage(sourceTask);
 const sourceCriticalBefore = await criticalHashes(
   sourceLocated.subtitleDirectory,
 );
+const sourceReviewJavascript = await readFile(
+  path.join(sourceLocated.subtitleDirectory, "review", "assets", "review.js"),
+  "utf8",
+);
+const legacyShortcutRoutePresent = sourceReviewJavascript.includes(
+  "if(e.key==='a')resolution(item,'ACCEPT_SUGGESTION')",
+);
 
 await cp(sourceTask, outputTask, {
   recursive: true,
@@ -181,6 +194,9 @@ await cp(sourceTask, outputTask, {
 });
 const targetLocated = await locateSubtitlePackage(outputTask);
 await rm(path.join(outputTask, "shareable"), { recursive: true, force: true });
+await rm(path.join(outputTask, "c5-17-2-review-delivery-replay-summary.json"), {
+  force: true,
+});
 // Force a real handoff from the read-only source task instead of treating files
 // inherited by the directory copy as newly generated output.
 await rm(path.join(targetLocated.subtitleDirectory, "audio", "review"), {
@@ -280,6 +296,22 @@ if (
 }
 const outputReviewPackageHash = await sha256File(
   repaired.target.paths.reviewPackage,
+);
+const reviewActionValidationReport = buildReviewActionValidationReport({
+  mode: actionHardeningMode,
+  sourceReviewPackage: repaired.source.reviewPackage,
+  targetReviewPackage: repaired.reviewPackage,
+  targetReviewPackageHash: outputReviewPackageHash,
+  legacyShortcutRoutePresent,
+});
+const reviewActionValidationReportPath = path.join(
+  repaired.targetSubtitleDirectory,
+  "review-action-validation-report.json",
+);
+await atomicWriteJson(
+  reviewActionValidationReportPath,
+  reviewActionValidationReport,
+  { overwrite: true },
 );
 const outputFinalizationReportHash = await sha256File(
   repaired.target.paths.finalizationReport,
@@ -419,6 +451,7 @@ await generateC5161ShareableArtifacts({
   c5172Artifacts: {
     deliveryIntegrityPath: delivery.path,
     replaySummaryPath: summaryPath,
+    reviewActionValidationReportPath,
   },
 });
 
@@ -432,6 +465,7 @@ process.stdout.write(
       finalizationReport: repaired.target.paths.finalizationReport,
       deliveryIntegrity: delivery.path,
       replaySummary: summaryPath,
+      reviewActionValidationReport: reviewActionValidationReportPath,
       metrics: delivery.artifact.summary,
     },
     null,

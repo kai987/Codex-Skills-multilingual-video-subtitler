@@ -53,6 +53,10 @@
       "default": null,
       "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
     },
+    "reviewActionPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
     "items": {
       "type": "array",
       "items": {
@@ -376,6 +380,34 @@
                 "automaticMutationEligible",
                 "requiresHumanReview",
                 "blockers"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "candidateActionBindings": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "reviewId": { "type": "string", "minLength": 1 },
+                "candidateEvidenceHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "reviewVersion": { "type": "string", "minLength": 1 },
+                "status": {
+                  "type": "string",
+                  "enum": ["active", "stale", "revoked", "deleted"]
+                }
+              },
+              "required": [
+                "candidateId",
+                "reviewId",
+                "candidateEvidenceHash",
+                "reviewVersion",
+                "status"
               ],
               "additionalProperties": false
             }
@@ -2180,6 +2212,7 @@
           "nextCue",
           "machineDecision",
           "candidateSuggestions",
+          "candidateActionBindings",
           "findingIds",
           "blockers",
           "allowedHumanActions",
@@ -2363,6 +2396,7 @@
     "evidenceReconciliationHash",
     "evidenceReconciliationStatus",
     "deliveryIntegrityPolicyVersion",
+    "reviewActionPolicyVersion",
     "items",
     "summary"
   ],
