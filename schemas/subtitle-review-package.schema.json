@@ -37,6 +37,22 @@
     },
     "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "inputEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evidenceReconciliationHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "evidenceReconciliationStatus": {
+      "default": "legacy",
+      "type": "string",
+      "enum": ["legacy", "observed", "enforced"]
+    },
+    "deliveryIntegrityPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
     "items": {
       "type": "array",
       "items": {
@@ -402,6 +418,60 @@
           "audioError": {
             "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
           },
+          "audioSource": {
+            "default": "unavailable",
+            "type": "string",
+            "enum": [
+              "generated-from-source-video",
+              "reused-existing-review-audio",
+              "reused-overlap-audio",
+              "inherited-verified-review-audio",
+              "disabled-by-user",
+              "unavailable"
+            ]
+          },
+          "audioValidationStatus": {
+            "default": "unavailable",
+            "type": "string",
+            "enum": [
+              "validated",
+              "hash-mismatch",
+              "coverage-incomplete",
+              "invalid-wav",
+              "source-missing",
+              "disabled",
+              "unavailable"
+            ]
+          },
+          "audioSourceArtifact": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "audioSourceAudioPath": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioSourceComponentId": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "audioSourceEvidenceLineageIds": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "audioHandoffMethod": {
+            "default": "none",
+            "type": "string",
+            "enum": ["existing", "copy", "hardlink", "generated", "none"]
+          },
           "componentUnionInterval": {
             "type": "object",
             "properties": {
@@ -445,6 +515,54 @@
             "default": null,
             "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
           },
+          "audioActualDurationSeconds": {
+            "default": null,
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "audioSampleRate": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioChannelCount": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioBitsPerSample": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioFrameCount": {
+            "default": null,
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "audioInspectionMethod": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
           "audioSha256": {
             "default": null,
             "anyOf": [
@@ -457,7 +575,1404 @@
             "type": "number",
             "minimum": 0
           },
+          "audioContextBeforeSeconds": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0
+          },
+          "audioContextAfterSeconds": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0
+          },
           "audioFullyCoversComponent": { "default": false, "type": "boolean" },
+          "boundaryEvidence": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentRawVadIntervals": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentDecodedSegments": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentMappedTokenEvidence": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentPauseEvidence": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "evidenceReconciliationHash": {
+            "default": null,
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "evidenceSourceResolutionStatus": {
+            "default": "legacy",
+            "type": "string",
+            "enum": ["legacy", "resolved", "partial", "unresolved"]
+          },
+          "unresolvedEvidenceReferences": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
           "forcedAlignmentEvidence": {
             "type": "object",
             "properties": {
@@ -670,12 +2185,35 @@
           "allowedHumanActions",
           "audioClipPath",
           "audioError",
+          "audioSource",
+          "audioValidationStatus",
+          "audioSourceArtifact",
+          "audioSourceAudioPath",
+          "audioSourceComponentId",
+          "audioSourceEvidenceLineageIds",
+          "audioHandoffMethod",
           "audioRequestedInterval",
           "audioExtractedInterval",
           "audioDurationSeconds",
+          "audioActualDurationSeconds",
+          "audioSampleRate",
+          "audioChannelCount",
+          "audioBitsPerSample",
+          "audioFrameCount",
+          "audioInspectionMethod",
           "audioSha256",
           "audioContextSeconds",
+          "audioContextBeforeSeconds",
+          "audioContextAfterSeconds",
           "audioFullyCoversComponent",
+          "boundaryEvidence",
+          "componentRawVadIntervals",
+          "componentDecodedSegments",
+          "componentMappedTokenEvidence",
+          "componentPauseEvidence",
+          "evidenceReconciliationHash",
+          "evidenceSourceResolutionStatus",
+          "unresolvedEvidenceReferences",
           "requiresHumanReview"
         ],
         "additionalProperties": false
@@ -709,6 +2247,84 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
+        },
+        "audioPhysicalFileCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioReferencedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioPlayableCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioReusedExistingCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioReusedOverlapCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioGeneratedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioHashMismatchCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioMetadataFailureCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawVadEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "decodedSegmentEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenBoundaryCopiedFromEvidenceDpCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedEvidenceReferenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
         }
       },
       "required": [
@@ -716,7 +2332,20 @@
         "mandatoryItemCount",
         "audioClipCount",
         "audioFailureCount",
-        "audioCoverageFailureCount"
+        "audioCoverageFailureCount",
+        "audioPhysicalFileCount",
+        "audioReferencedCount",
+        "audioPlayableCount",
+        "audioReusedExistingCount",
+        "audioReusedOverlapCount",
+        "audioGeneratedCount",
+        "audioHashMismatchCount",
+        "audioMetadataFailureCount",
+        "mappedTokenEvidenceCount",
+        "rawVadEvidenceCount",
+        "decodedSegmentEvidenceCount",
+        "mappedTokenBoundaryCopiedFromEvidenceDpCount",
+        "unresolvedEvidenceReferenceCount"
       ],
       "additionalProperties": false
     }
@@ -731,6 +2360,9 @@
     "baseSubtitlePackageHash",
     "baseCueHash",
     "inputEvidenceHash",
+    "evidenceReconciliationHash",
+    "evidenceReconciliationStatus",
+    "deliveryIntegrityPolicyVersion",
     "items",
     "summary"
   ],

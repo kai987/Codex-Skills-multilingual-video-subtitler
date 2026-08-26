@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { mkdir, readFile, stat } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -22,6 +22,8 @@ import {
   mfaSampleProbeSchema,
   c5171RuntimePreparationSummarySchema,
   c5171FreshCacheObserveValidationSchema,
+  c5172ReviewDeliveryReplaySummarySchema,
+  subtitleReviewDeliveryIntegritySchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -34,6 +36,8 @@ const C517_SHAREABLE_POLICY_VERSION =
   "c5.17-shareable-artifact-policy-v1" as const;
 const C5171_SHAREABLE_POLICY_VERSION =
   "c5.17.1-shareable-artifact-policy-v1" as const;
+const C5172_SHAREABLE_POLICY_VERSION =
+  "c5.17.2-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -62,6 +66,10 @@ const artifactSchemas = {
     c5171RuntimePreparationSummarySchema,
   "c5-17-1-fresh-cache-observe-validation.json":
     c5171FreshCacheObserveValidationSchema,
+  "subtitle-review-delivery-integrity.json":
+    subtitleReviewDeliveryIntegritySchema,
+  "c5-17-2-review-delivery-replay-summary.json":
+    c5172ReviewDeliveryReplaySummarySchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -405,6 +413,10 @@ export async function generateC5161ShareableArtifacts(input: {
     runtimePreparationSummaryPath?: string;
     freshCacheObserveValidationPath?: string;
   };
+  c5172Artifacts?: {
+    deliveryIntegrityPath: string;
+    replaySummaryPath: string;
+  };
 }): Promise<{
   outputDirectory: string;
   manifestPath: string;
@@ -506,6 +518,18 @@ export async function generateC5161ShareableArtifacts(input: {
       }
     }
   }
+  if (input.c5172Artifacts !== undefined) {
+    sources.push(
+      {
+        name: "subtitle-review-delivery-integrity.json",
+        sourcePath: path.resolve(input.c5172Artifacts.deliveryIntegrityPath),
+      },
+      {
+        name: "c5-17-2-review-delivery-replay-summary.json",
+        sourcePath: path.resolve(input.c5172Artifacts.replaySummaryPath),
+      },
+    );
+  }
   const sourceHashes = await Promise.all(
     sources.map(async (source) => sha256(await readFile(source.sourcePath))),
   );
@@ -570,7 +594,29 @@ export async function generateC5161ShareableArtifacts(input: {
     const semanticallyMigrated =
       source.name === "c5-16-stock-patched-runtime-ab.json"
         ? migrateC516AbMetricSemantics(raw)
-        : raw;
+        : source.name === "subtitle-review-delivery-integrity.json"
+          ? (() => {
+              const local = subtitleReviewDeliveryIntegritySchema.parse(raw);
+              const shareable = {
+                ...local,
+                items: local.items.map((item) => ({
+                  ...item,
+                  audioClipPath: null,
+                  audioIncludedInShareable: false,
+                })),
+              };
+              return {
+                ...shareable,
+                semanticHash: sha256(
+                  stable({
+                    ...shareable,
+                    generatedAt: null,
+                    semanticHash: null,
+                  }),
+                ),
+              };
+            })()
+          : raw;
     const sanitized = sanitizeShareableValue({
       value: semanticallyMigrated,
       taskRoot,
@@ -603,11 +649,13 @@ export async function generateC5161ShareableArtifacts(input: {
     schemaVersion: "1.0.0",
     artifactType: "shareable-artifact-manifest",
     policyVersion:
-      input.c517Artifacts === undefined
-        ? SHAREABLE_POLICY_VERSION
-        : input.c517Artifacts.pronunciationPath === undefined
-          ? C517_SHAREABLE_POLICY_VERSION
-          : C5171_SHAREABLE_POLICY_VERSION,
+      input.c5172Artifacts !== undefined
+        ? C5172_SHAREABLE_POLICY_VERSION
+        : input.c517Artifacts === undefined
+          ? SHAREABLE_POLICY_VERSION
+          : input.c517Artifacts.pronunciationPath === undefined
+            ? C517_SHAREABLE_POLICY_VERSION
+            : C5171_SHAREABLE_POLICY_VERSION,
     generatedAt: new Date().toISOString(),
     taskIdentityHash,
     pathPolicy: "shareable-relative-only",
@@ -657,6 +705,7 @@ export async function auditC5161ShareableArtifacts(
   validationPassed: boolean;
   absolutePathLeakCount: number;
   prohibitedSecretCount: number;
+  brokenRelativeReferenceCount: number;
 }> {
   const directory = path.resolve(inputDirectory);
   const manifestPath = path.join(directory, "shareable-artifact-manifest.json");
@@ -665,6 +714,7 @@ export async function auditC5161ShareableArtifacts(
   );
   let absolutePathLeakCount = 0;
   let prohibitedSecretCount = 0;
+  let brokenRelativeReferenceCount = 0;
   let validationPassed = true;
   const taskRoot = path.dirname(directory);
   for (const item of manifest.items) {
@@ -673,6 +723,12 @@ export async function auditC5161ShareableArtifacts(
     const value = schemaFor(
       path.basename(target) as keyof typeof artifactSchemas,
     ).parse(JSON.parse(buffer.toString("utf8")) as unknown);
+    if (path.basename(target) === "subtitle-review-delivery-integrity.json") {
+      const delivery = subtitleReviewDeliveryIntegritySchema.parse(value);
+      brokenRelativeReferenceCount += delivery.items.filter(
+        (item) => item.audioIncludedInShareable || item.audioClipPath !== null,
+      ).length;
+    }
     const scan = scanShareableValue(value);
     absolutePathLeakCount += scan.absolutePathLeakCount;
     prohibitedSecretCount += scan.prohibitedSecretCount;
@@ -690,10 +746,16 @@ export async function auditC5161ShareableArtifacts(
     manifest.summary.absolutePathLeakCount === 0 &&
     manifest.summary.prohibitedSecretCount === 0 &&
     manifest.summary.validationPassedCount === manifest.summary.artifactCount;
+  const files = await readdir(directory, { recursive: true });
+  brokenRelativeReferenceCount += files.filter((file) =>
+    file.toLowerCase().endsWith(".wav"),
+  ).length;
+  validationPassed &&= brokenRelativeReferenceCount === 0;
   return {
     manifest,
     validationPassed,
     absolutePathLeakCount,
     prohibitedSecretCount,
+    brokenRelativeReferenceCount,
   };
 }

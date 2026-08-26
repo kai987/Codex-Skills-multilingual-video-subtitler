@@ -158,7 +158,21 @@ describe("C5.15 review component union", () => {
       async run(_executable, args) {
         const output = args.at(-1);
         if (output === undefined) throw new Error("missing output");
-        await writeFile(output, "fixture-audio");
+        const frameCount = 160_000;
+        const wav = Buffer.alloc(44 + frameCount * 2);
+        wav.write("RIFF", 0, "ascii");
+        wav.writeUInt32LE(wav.length - 8, 4);
+        wav.write("WAVEfmt ", 8, "ascii");
+        wav.writeUInt32LE(16, 16);
+        wav.writeUInt16LE(1, 20);
+        wav.writeUInt16LE(1, 22);
+        wav.writeUInt32LE(16_000, 24);
+        wav.writeUInt32LE(32_000, 28);
+        wav.writeUInt16LE(2, 32);
+        wav.writeUInt16LE(16, 34);
+        wav.write("data", 36, "ascii");
+        wav.writeUInt32LE(frameCount * 2, 40);
+        await writeFile(output, wav);
         return { stdout: "", stderr: "", exitCode: 0 };
       },
     };

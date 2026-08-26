@@ -31,6 +31,7 @@ export const shareableArtifactManifestSchema = z
       "c5.16.1-shareable-artifact-policy-v1",
       "c5.17-shareable-artifact-policy-v1",
       "c5.17.1-shareable-artifact-policy-v1",
+      "c5.17.2-shareable-artifact-policy-v1",
     ]),
     generatedAt: z.iso.datetime(),
     taskIdentityHash: hashSchema,

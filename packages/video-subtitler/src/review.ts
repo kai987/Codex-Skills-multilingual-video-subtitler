@@ -1,5 +1,4 @@
-import { createHash } from "node:crypto";
-import { mkdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -19,6 +18,7 @@ import {
   type SourceFingerprint,
   type SubtitleCue,
   type SubtitleCanonicalForcedAlignment,
+  type SubtitleOverlapAcousticResolution,
   type SubtitlePackage,
   type SubtitleReviewPackage,
 } from "@mvl/shared";
@@ -28,6 +28,9 @@ import {
   sha256Value,
   stableStringify,
 } from "./finalization-support.js";
+import { resolveReviewAudio } from "./review-audio.js";
+
+export { reviewAudioBounds } from "./review-audio.js";
 
 const HUMAN_ACTIONS = [
   "KEEP",
@@ -82,155 +85,59 @@ export function reviewComponentUnionInterval(
  * itself longer than the requested review limit, preserving evidence takes
  * precedence over the soft clip limit.
  */
-export function reviewAudioBounds(input: {
-  start: number;
-  end: number;
-  duration: number;
-  contextSeconds: number;
-  maximumSeconds: number;
-}): { start: number; end: number } {
-  const componentDuration = input.end - input.start;
-  const maximumSeconds = Math.max(input.maximumSeconds, componentDuration);
-  const availableContext = Math.max(0, maximumSeconds - componentDuration);
-  const desiredBefore = Math.min(input.contextSeconds, input.start);
-  const desiredAfter = Math.min(
-    input.contextSeconds,
-    Math.max(0, input.duration - input.end),
-  );
-  let before = Math.min(desiredBefore, availableContext / 2);
-  let after = Math.min(desiredAfter, availableContext - before);
-  const remaining = Math.max(0, availableContext - before - after);
-  if (remaining > 0) {
-    const moreBefore = Math.min(remaining, desiredBefore - before);
-    before += moreBefore;
-    after += Math.min(remaining - moreBefore, desiredAfter - after);
-  }
-  return {
-    start: Math.max(0, input.start - before),
-    end: Math.min(input.duration, input.end + after),
-  };
-}
-
-async function createReviewAudio(input: {
-  reviewId: string;
-  interval: { start: number; end: number };
-  durationSeconds: number;
-  subtitleDirectory: string;
-  sourceVideoPath: string | null;
-  runner: ProcessRunner;
-  ffmpegPath: string;
-  audioStreamIndex?: number;
-  contextSeconds: number;
-  maximumSeconds: number;
-}): Promise<{
-  path: string | null;
-  error: string | null;
-  requestedInterval: { start: number; end: number };
-  extractedInterval: { start: number; end: number } | null;
-  durationSeconds: number | null;
-  sha256: string | null;
-  fullyCoversComponent: boolean;
-}> {
-  const bounds = reviewAudioBounds({
-    start: input.interval.start,
-    end: input.interval.end,
-    duration: input.durationSeconds,
-    contextSeconds: input.contextSeconds,
-    maximumSeconds: input.maximumSeconds,
-  });
-  if (input.sourceVideoPath === null) {
-    return {
-      path: null,
-      error: "SOURCE_VIDEO_UNAVAILABLE",
-      requestedInterval: bounds,
-      extractedInterval: null,
-      durationSeconds: null,
-      sha256: null,
-      fullyCoversComponent: false,
-    };
-  }
-  const relative = path.posix.join(
-    "..",
-    "audio",
-    "review",
-    `${input.reviewId}.wav`,
-  );
-  const output = path.join(
-    input.subtitleDirectory,
-    "audio",
-    "review",
-    `${input.reviewId}.wav`,
-  );
-  try {
-    await mkdir(path.dirname(output), { recursive: true });
-    await input.runner.run(input.ffmpegPath, [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-ss",
-      bounds.start.toFixed(3),
-      "-i",
-      input.sourceVideoPath,
-      ...(input.audioStreamIndex === undefined
-        ? []
-        : ["-map", `0:${input.audioStreamIndex}`]),
-      "-t",
-      Math.max(0.001, bounds.end - bounds.start).toFixed(3),
-      "-vn",
-      "-ac",
-      "1",
-      "-ar",
-      "16000",
-      "-c:a",
-      "pcm_s16le",
-      output,
-    ]);
-    const audioSha256 = createHash("sha256")
-      .update(await readFile(output))
-      .digest("hex");
-    const fullyCoversComponent =
-      bounds.start <= input.interval.start + 0.001 &&
-      bounds.end >= input.interval.end - 0.001;
-    return {
-      path: relative,
-      error: null,
-      requestedInterval: bounds,
-      extractedInterval: bounds,
-      durationSeconds: bounds.end - bounds.start,
-      sha256: audioSha256,
-      fullyCoversComponent,
-    };
-  } catch (error) {
-    return {
-      path: null,
-      error: error instanceof Error ? error.message : String(error),
-      requestedInterval: bounds,
-      extractedInterval: null,
-      durationSeconds: null,
-      sha256: null,
-      fullyCoversComponent: false,
-    };
-  }
-}
-
 function reviewCss(): string {
-  return `:root{color-scheme:light dark;font-family:system-ui,sans-serif}body{margin:0;background:#111;color:#eee}header{position:sticky;top:0;background:#181818;padding:1rem;z-index:2;border-bottom:1px solid #444}main{max-width:1100px;margin:auto;padding:1rem}.item{border:1px solid #444;border-radius:12px;padding:1rem;margin:1rem 0;background:#1b1b1b}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.label{font-size:.8rem;color:#aaa;text-transform:uppercase}.text{white-space:pre-wrap;font-size:1.15rem}.blocker{color:#ffb4a9}.actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}button{padding:.55rem .8rem;border-radius:8px;border:1px solid #666;background:#292929;color:inherit;cursor:pointer}button:hover{background:#383838}.selected{outline:2px solid #7dd3fc}audio{width:100%;margin-top:.75rem}@media(max-width:700px){.grid{grid-template-columns:1fr}main{padding:.5rem}.item{border-radius:0;margin:.5rem 0}}`;
+  return `:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#0b0d10;color:#edf2f7}*{box-sizing:border-box}body{margin:0;background:#0b0d10}header{position:sticky;top:0;background:#11161dcc;padding:.8rem 1rem;z-index:3;border-bottom:1px solid #334155;backdrop-filter:blur(12px);display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}main{max-width:1180px;margin:auto;padding:1rem}.item{border:1px solid #334155;border-radius:14px;padding:1rem;margin:1rem 0;background:#11161d}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.label{font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}.text{white-space:pre-wrap;font-size:1.12rem}.blocker,.error{color:#fca5a5}.ok{color:#86efac}.warning{color:#fde68a}.actions,.play-actions{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.8rem}button{padding:.5rem .72rem;border-radius:8px;border:1px solid #475569;background:#1e293b;color:inherit;cursor:pointer}button:hover{background:#334155}audio{width:100%;margin:.7rem 0}.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem}.meta>div{padding:.55rem;background:#17202b;border-radius:8px;overflow-wrap:anywhere}.timeline{margin-top:1rem;border:1px solid #334155;border-radius:10px;padding:.75rem}.scope{margin:.8rem 0 .3rem;color:#cbd5e1;font-weight:650}.track{display:grid;grid-template-columns:190px 1fr;gap:.65rem;align-items:center;margin:.35rem 0}.track-label{font-size:.74rem;overflow-wrap:anywhere}.rail{height:22px;position:relative;background:#0f172a;border-radius:5px;overflow:hidden}.bar{position:absolute;top:3px;height:16px;min-width:2px;border-radius:4px;background:#38bdf8}.bar.component{background:#a78bfa}.bar.unusable{background:#64748b}.evidence-detail{font:12px ui-monospace,SFMono-Regular,monospace;color:#cbd5e1;white-space:pre-wrap;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}.disclaimer{border-left:3px solid #f59e0b;padding:.65rem;background:#2a2112}.statusline{font-size:.85rem;color:#cbd5e1}@media(max-width:760px){.grid,.meta{grid-template-columns:1fr}.track{grid-template-columns:1fr}main{padding:.5rem}.item{border-radius:0;margin:.5rem 0}}`;
 }
 
-function reviewJavascript(): string {
-  return String.raw`const state={data:null,index:0,resolutions:new Map(),loop:false};
+function reviewJavascript(timelineEnabled: boolean): string {
+  return String.raw`const timelineEnabled=${String(timelineEnabled)};const state={data:null,index:0,resolutions:new Map(),loop:false,loopStart:null,stopAt:null};
 const q=(s,r=document)=>r.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function resolution(item,action){const base={resolutionId:'resolution-'+item.reviewId,reviewId:item.reviewId,action,selectedCandidateId:null,correctedText:null,start:null,end:null,splitParts:[],mergeCueIds:[],reviewerNotes:null,errorTypes:[],confirmedReading:null,terminologyHints:[],dialectHints:[]};if(action==='ACCEPT_SUGGESTION')base.selectedCandidateId=item.machineDecision.selectedCandidateId;if(action==='EDIT_TEXT'){const v=prompt('Corrected text',item.currentText);if(!v)return;base.correctedText=v}if(action==='EDIT_TIMING'){base.start=Number(prompt('Start',item.currentStart));base.end=Number(prompt('End',item.currentEnd))}if(action==='DELETE_CUE'){const n=prompt('Deletion reason (required)');if(!n)return;base.reviewerNotes=n}if(action==='SPLIT_CUE'){const raw=prompt('Parts as JSON [{"text":"...","start":0,"end":1}]');if(!raw)return;try{base.splitParts=JSON.parse(raw)}catch{return alert('Invalid JSON')}}if(action==='MERGE_CUES'){const ids=prompt('Adjacent cue IDs, comma separated',item.targetCueIds.join(','));const text=prompt('Merged text',item.currentText);if(!ids||!text)return;base.mergeCueIds=ids.split(',').map(x=>x.trim()).filter(Boolean);base.correctedText=text}state.resolutions.set(item.reviewId,base);render()}
-function render(){const item=state.data.items[state.index];q('#position').textContent=(state.index+1)+' / '+state.data.items.length;if(!item){q('#items').innerHTML='<p>No review items.</p>';return}const suggestions=esc(JSON.stringify(item.candidateSuggestions.map(c=>({id:c.candidateId,coverage:c.coverageMetrics,evidence:c.sourceEvidenceIds})),null,2));const forced=item.forcedAlignmentEvidence?'<section class="forced"><div class="label">C5.17 forced-alignment evidence</div><p>'+esc(item.forcedAlignmentEvidence.disclaimer)+'</p><pre>'+esc(JSON.stringify(item.forcedAlignmentEvidence,null,2))+'</pre></section>':'';const audio=item.audioClipPath?'<audio controls src="'+esc(item.audioClipPath)+'"></audio>':'<p>'+esc(item.audioError??'No audio')+'</p>';const union=item.componentUnionInterval??item.interval;const audioEvidence=item.audioRequestedInterval?'<p>Component union: '+union.start.toFixed(3)+' → '+union.end.toFixed(3)+' · Audio: '+item.audioRequestedInterval.start.toFixed(3)+' → '+item.audioRequestedInterval.end.toFixed(3)+' · Complete: '+String(item.audioFullyCoversComponent)+'</p>':'';const buttons=item.allowedHumanActions.map(a=>'<button data-action="'+a+'">'+a+'</button>').join('');q('#items').innerHTML='<article class="item"><div class="grid"><section><div class="label">Current subtitle / human timing</div><div class="text">'+esc(item.currentText)+'</div><p>'+union.start.toFixed(3)+' → '+union.end.toFixed(3)+'</p></section><section><div class="label">Machine recommendation</div><div class="text">'+esc(item.machineDecision.proposedText??'KEEP')+'</div><p>'+esc(item.candidateSuggestions[0]?.associationType??'none')+'</p></section><section><div class="label">Previous</div><div>'+esc(item.previousCue?.text??'—')+'</div><div class="label">Next</div><div>'+esc(item.nextCue?.text??'—')+'</div></section><section><div class="label">Whisper candidate evidence</div><pre>'+suggestions+'</pre></section></div>'+forced+'<div class="label blocker">Blockers</div><div class="blocker">'+esc(item.blockers.join(', ')||'none')+'</div>'+audioEvidence+audio+'<div class="actions">'+buttons+'</div><p>Selected: '+esc(state.resolutions.get(item.reviewId)?.action??'none')+'</p></article>';document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>resolution(item,b.dataset.action));}
-function move(delta){if(!state.data.items.length)return;state.index=(state.index+delta+state.data.items.length)%state.data.items.length;render()}
+function localTime(media,item){return Math.max(0,media-(item.audioExtractedInterval?.start??0))}
+function playRange(item,start,end){const a=q('#review-audio');if(!a){showAudioError('audio file is not available');return}state.loopStart=localTime(start,item);state.stopAt=localTime(end,item);a.currentTime=state.loopStart;a.play().catch(e=>showAudioError(e.message))}
+function showAudioError(message){const el=q('#audio-error');if(el){el.textContent='AUDIO_PLAYBACK_ERROR: '+message;el.className='error'}}
+function trackHtml(item,e,component){const names={'source-cue-prior':'Human Original Timing','mfa-narrow':'MFA Narrow','mfa-expanded':'MFA Expanded','forced-alignment-selected':'Forced Alignment Selected','evidence-dp':'Evidence-DP','trusted-mapped-token':'Mapped Token','trusted-no-vad-token':'Mapped Token (no-VAD)','decoded-segment':'Decoded Segment','raw-vad':'Raw VAD','pause':'Pause','component-union':'Component Union','audio-extraction-window':'Audio Extraction Window'};const window=item.audioExtractedInterval??item.audioRequestedInterval??item.interval;const span=Math.max(.001,window.end-window.start);const left=Math.max(0,Math.min(100,100*(e.interval.start-window.start)/span));const width=Math.max(.2,Math.min(100-left,100*(e.interval.end-e.interval.start)/span));const cls=(component?' component':'')+(e.timingUsable?'':' unusable');const label=(names[e.sourceType]??e.sourceType)+' · '+e.scope;const detail=e.interval.start.toFixed(3)+' → '+e.interval.end.toFixed(3)+' | trust '+String(e.trustScore??'n/a')+' | '+e.evidenceId+(e.blockers?.length?' | '+e.blockers.join(', '):'');return '<div class="track"><button class="track-label" data-evidence-start="'+e.interval.start+'" data-evidence-end="'+e.interval.end+'">'+esc(label)+'</button><div><div class="rail"><span class="bar'+cls+'" style="left:'+left+'%;width:'+width+'%"></span></div><div class="evidence-detail">'+esc(detail)+'</div></div></div>'}
+function render(){const item=state.data.items[state.index];q('#position').textContent=(state.index+1)+' / '+state.data.items.length;if(!item){q('#items').innerHTML='<p>No review items.</p>';return}const suggestions=esc(JSON.stringify(item.candidateSuggestions.map(c=>({id:c.candidateId,coverage:c.coverageMetrics,evidence:c.sourceEvidenceIds})),null,2));const union=item.componentUnionInterval??item.interval;const cueEvidence=item.boundaryEvidence??[];const componentEvidence=[...(item.componentRawVadIntervals??[]),...(item.componentDecodedSegments??[]),...(item.componentMappedTokenEvidence??[]),...(item.componentPauseEvidence??[])].filter(e=>e.scope!=='cue');const packageTracks=[{sourceType:'component-union',scope:'component',interval:union,timingUsable:true,trustScore:1,evidenceId:'review-package:component-union',blockers:[]},...(item.audioExtractedInterval?[{sourceType:'audio-extraction-window',scope:'component',interval:item.audioExtractedInterval,timingUsable:item.audioValidationStatus==='validated',trustScore:null,evidenceId:'review-package:audio-extraction-window',blockers:item.audioError?[item.audioError]:[]}]:[])];const unresolved=item.unresolvedEvidenceReferences??[];const timeline=timelineEnabled?'<section class="timeline"><div class="scope">Cue-specific evidence tracks</div>'+cueEvidence.map(e=>trackHtml(item,e,false)).join('')+'<div class="scope">Component acoustic tracks</div>'+packageTracks.concat(componentEvidence).map(e=>trackHtml(item,e,true)).join('')+(unresolved.length?'<p class="error">EVIDENCE_REFERENCE_UNRESOLVED: '+esc(unresolved.join(', '))+'</p>':'')+'</section>':'';const forced=item.forcedAlignmentEvidence?'<section class="forced"><div class="label">Forced-alignment decision context</div><pre>'+esc(JSON.stringify(item.forcedAlignmentEvidence,null,2))+'</pre></section>':'';const audio=item.audioClipPath?'<audio id="review-audio" controls preload="metadata" src="'+esc(item.audioClipPath)+'"></audio>':'';const cueLoops=(item.forcedAlignmentEvidence?.cues??[]).map(c=>'<button data-loop-start="'+c.originalTiming.start+'" data-loop-end="'+c.originalTiming.end+'">Loop cue '+esc(c.cueId)+'</button>').join('');const audioActions='<div class="play-actions"><button data-loop-start="'+union.start+'" data-loop-end="'+union.end+'">Loop component</button>'+cueLoops+'</div>';const buttons=item.allowedHumanActions.map(a=>'<button data-action="'+a+'">'+a+'</button>').join('');const meta='<div class="meta"><div><span class="label">Audio source</span><br>'+esc(item.audioSource)+'</div><div><span class="label">Validation</span><br>'+esc(item.audioValidationStatus)+'</div><div><span class="label">SHA-256</span><br>'+esc(item.audioSha256??'none')+'</div><div><span class="label">Coverage</span><br>'+esc(String(item.audioFullyCoversComponent))+'</div><div><span class="label">Mapped token</span><br>'+cueEvidence.filter(e=>e.sourceType==='trusted-mapped-token'||e.sourceType==='trusted-no-vad-token').length+'</div><div><span class="label">Raw VAD islands</span><br>'+(item.componentRawVadIntervals??[]).length+'</div><div><span class="label">Decoded segments</span><br>'+(item.componentDecodedSegments??[]).length+'</div><div><span class="label">Evidence status</span><br>'+esc(item.evidenceSourceResolutionStatus)+'</div></div>';q('#items').innerHTML='<article class="item"><div class="grid"><section><div class="label">Current subtitle / human timing</div><div class="text">'+esc(item.currentText)+'</div><p>'+union.start.toFixed(3)+' → '+union.end.toFixed(3)+'</p></section><section><div class="label">Machine recommendation</div><div class="text">'+esc(item.machineDecision.proposedText??'KEEP')+'</div><p>'+esc(item.candidateSuggestions[0]?.associationType??'none')+'</p></section><section><div class="label">Previous</div><div>'+esc(item.previousCue?.text??'—')+'</div><div class="label">Next</div><div>'+esc(item.nextCue?.text??'—')+'</div></section><section><div class="label">Candidate evidence</div><pre>'+suggestions+'</pre></section></div><div class="disclaimer">MFA boundaries are machine evidence, not confirmed ground truth.<br>Mapped Token and Raw VAD are timing evidence only and do not identify the speaker.<br>Component-level Raw VAD intervals do not prove which cue or speaker produced the speech.</div>'+meta+'<div id="audio-error" class="statusline">'+esc(item.audioError??'Audio metadata and coverage validated.')+'</div>'+audio+audioActions+timeline+forced+'<div class="label blocker">Review blockers</div><div class="blocker">'+esc(item.blockers.join(', ')||'none')+'</div><div class="actions">'+buttons+'</div><p>Selected: '+esc(state.resolutions.get(item.reviewId)?.action??'none')+'</p></article>';document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>resolution(item,b.dataset.action));document.querySelectorAll('[data-loop-start]').forEach(b=>b.onclick=()=>playRange(item,Number(b.dataset.loopStart),Number(b.dataset.loopEnd)));document.querySelectorAll('[data-evidence-start]').forEach(b=>b.onclick=()=>playRange(item,Number(b.dataset.evidenceStart),Number(b.dataset.evidenceEnd)));const a=q('#review-audio');if(a){a.addEventListener('error',()=>showAudioError('file missing, unreadable, or unsupported'));a.addEventListener('timeupdate',()=>{if(state.stopAt!==null&&a.currentTime>=state.stopAt){if(state.loop){a.currentTime=state.loopStart??0;a.play().catch(e=>showAudioError(e.message))}else{a.pause();state.loopStart=null;state.stopAt=null}}})}}
+function move(delta){if(!state.data.items.length)return;state.index=(state.index+delta+state.data.items.length)%state.data.items.length;state.loopStart=null;state.stopAt=null;render()}
 q('#previous').onclick=()=>move(-1);q('#next').onclick=()=>move(1);q('#download').onclick=()=>{const d=state.data;const body={schemaVersion:'1.0.0',resolutionType:'human-review-resolutions',reviewVersion:d.reviewVersion,sourceFingerprint:d.sourceFingerprint,baseSubtitlePackageHash:d.baseSubtitlePackageHash,baseCueHash:d.baseCueHash,inputEvidenceHash:d.inputEvidenceHash,resolutions:[...state.resolutions.values()].sort((a,b)=>a.reviewId.localeCompare(b.reviewId))};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)+'\\n'],{type:'application/json'}));a.download='human-review-resolutions.json';a.click();URL.revokeObjectURL(a.href)};
-document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea'))return;if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);const item=state.data.items[state.index];if(!item)return;if(e.key==='a')resolution(item,'ACCEPT_SUGGESTION');if(e.key==='k')resolution(item,'KEEP');if(e.key==='u')resolution(item,'MARK_UNRESOLVED');if(e.key===' '){e.preventDefault();const a=q('audio');if(a){if(a.paused)a.play();else a.pause()}}if(e.key==='l'){state.loop=!state.loop;const a=q('audio');if(a)a.loop=state.loop}});
+document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea'))return;if(e.key==='ArrowLeft')move(-1);if(e.key==='ArrowRight')move(1);const item=state.data.items[state.index];if(!item)return;if(e.key==='a')resolution(item,'ACCEPT_SUGGESTION');if(e.key==='k')resolution(item,'KEEP');if(e.key==='u')resolution(item,'MARK_UNRESOLVED');if(e.key===' '){e.preventDefault();const a=q('#review-audio');if(a){if(a.paused)a.play();else a.pause()}}if(e.key.toLowerCase()==='l'){state.loop=!state.loop;q('#loop-status').textContent=state.loop?'loop on':'loop off'}});
 fetch('./data/subtitle-review-package.json').then(r=>r.json()).then(d=>{state.data=d;render()}).catch(e=>q('#items').textContent=e.message);`;
 }
 
 function reviewHtml(): string {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Subtitle review</title><link rel="stylesheet" href="./assets/review.css"></head><body><header><strong>Subtitle review</strong> <span id="position"></span> <button id="previous">Previous</button> <button id="next">Next</button> <button id="download">Download resolutions</button><small> Keys: space play, l loop, ←/→ navigate, a accept, k keep, u unresolved</small></header><main id="items">Loading…</main><script type="module" src="./assets/review.js"></script></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Subtitle evidence review</title><link rel="stylesheet" href="./assets/review.css"></head><body><header><strong>Subtitle evidence review</strong><span id="position"></span><button id="previous">Previous</button><button id="next">Next</button><button id="download">Download resolutions</button><small>Keys: space play, L loop, ←/→ navigate, A accept, K keep, U unresolved · <span id="loop-status">loop off</span></small></header><main id="items">Loading…</main><script type="module" src="./assets/review.js"></script></body></html>`;
+}
+
+export async function writeSubtitleReviewPage(input: {
+  subtitleDirectory: string;
+  reviewPackage: SubtitleReviewPackage;
+  timelineEnabled?: boolean;
+}): Promise<string> {
+  const reviewDirectory = path.join(input.subtitleDirectory, "review");
+  const pagePath = path.join(reviewDirectory, "index.html");
+  await Promise.all([
+    atomicWriteJson(
+      path.join(reviewDirectory, "data", "subtitle-review-package.json"),
+      input.reviewPackage,
+      { overwrite: true },
+    ),
+    atomicWriteFile(pagePath, reviewHtml(), { overwrite: true }),
+    atomicWriteFile(
+      path.join(reviewDirectory, "assets", "review.css"),
+      reviewCss(),
+      {
+        overwrite: true,
+      },
+    ),
+    atomicWriteFile(
+      path.join(reviewDirectory, "assets", "review.js"),
+      reviewJavascript(input.timelineEnabled ?? true),
+      {
+        overwrite: true,
+      },
+    ),
+  ]);
+  return pagePath;
 }
 
 export async function prepareSubtitleReviewPackage(input: {
@@ -254,6 +161,9 @@ export async function prepareSubtitleReviewPackage(input: {
   maximumClipSeconds?: number;
   audioStreamIndex?: number;
   forcedAlignment?: SubtitleCanonicalForcedAlignment;
+  overlapAcoustic?: SubtitleOverlapAcousticResolution;
+  sourceSubtitleDirectory?: string;
+  reviewAudioMode?: "auto" | "generate" | "reuse-only" | "off";
 }): Promise<{
   reviewPackage: SubtitleReviewPackage;
   packagePath: string;
@@ -307,36 +217,6 @@ export async function prepareSubtitleReviewPackage(input: {
         decision.targetCueIds.includes(cueId),
       ),
     );
-    const audio = input.generateAudio
-      ? await createReviewAudio({
-          reviewId,
-          interval,
-          durationSeconds: input.subtitlePackage.source.durationSeconds,
-          subtitleDirectory: input.subtitleDirectory,
-          sourceVideoPath: input.sourceVideoPath,
-          runner: input.runner,
-          ffmpegPath: input.ffmpegPath,
-          ...(input.audioStreamIndex === undefined
-            ? {}
-            : { audioStreamIndex: input.audioStreamIndex }),
-          contextSeconds: input.contextSeconds ?? 1.5,
-          maximumSeconds: input.maximumClipSeconds ?? 30,
-        })
-      : {
-          path: null,
-          error: "AUDIO_GENERATION_NOT_REQUESTED",
-          requestedInterval: reviewAudioBounds({
-            start: interval.start,
-            end: interval.end,
-            duration: input.subtitlePackage.source.durationSeconds,
-            contextSeconds: input.contextSeconds ?? 1.5,
-            maximumSeconds: input.maximumClipSeconds ?? 30,
-          }),
-          extractedInterval: null,
-          durationSeconds: null,
-          sha256: null,
-          fullyCoversComponent: false,
-        };
     const relatedFindings = input.findings.filter((item) =>
       item.cueIds.some((cueId) => decision.targetCueIds.includes(cueId)),
     );
@@ -344,6 +224,36 @@ export async function prepareSubtitleReviewPackage(input: {
     const forcedComponent = forcedAlignment?.components.find((component) =>
       component.cueIds.some((cueId) => decision.targetCueIds.includes(cueId)),
     );
+    const overlapComponent = input.overlapAcoustic?.components.find(
+      (component) =>
+        component.cueIds.some((cueId) => decision.targetCueIds.includes(cueId)),
+    );
+    const componentId =
+      forcedComponent?.componentId ??
+      overlapComponent?.componentId ??
+      `review-component-${reviewId}`;
+    const audio = await resolveReviewAudio({
+      mode: input.reviewAudioMode ?? (input.generateAudio ? "auto" : "off"),
+      reviewId,
+      componentId,
+      componentUnionInterval: interval,
+      mediaDurationSeconds: input.subtitlePackage.source.durationSeconds,
+      targetSubtitleDirectory: input.subtitleDirectory,
+      ...(input.sourceSubtitleDirectory === undefined
+        ? {}
+        : { sourceSubtitleDirectory: input.sourceSubtitleDirectory }),
+      sourceVideoPath: input.sourceVideoPath,
+      ...(input.overlapAcoustic === undefined
+        ? {}
+        : { overlapArtifact: input.overlapAcoustic }),
+      runner: input.runner,
+      ffmpegPath: input.ffmpegPath,
+      ...(input.audioStreamIndex === undefined
+        ? {}
+        : { audioStreamIndex: input.audioStreamIndex }),
+      contextSeconds: input.contextSeconds ?? 1.5,
+      maximumSeconds: input.maximumClipSeconds ?? 30,
+    });
     const forcedAlignmentEvidence =
       forcedComponent === undefined || forcedAlignment === undefined
         ? undefined
@@ -410,14 +320,7 @@ export async function prepareSubtitleReviewPackage(input: {
                         start: canonical.evidenceDp.startBoundary,
                         end: canonical.evidenceDp.endBoundary,
                       },
-                mappedTokenBoundary:
-                  canonical.evidenceDp.startBoundary === null ||
-                  canonical.evidenceDp.endBoundary === null
-                    ? null
-                    : {
-                        start: canonical.evidenceDp.startBoundary,
-                        end: canonical.evidenceDp.endBoundary,
-                      },
+                mappedTokenBoundary: null,
                 rawVadBoundary: null,
                 windowStabilityScore:
                   alignment.antiForcingMetrics.windowStabilityScore,
@@ -467,13 +370,36 @@ export async function prepareSubtitleReviewPackage(input: {
           : [...HUMAN_ACTIONS],
       audioClipPath: audio.path,
       audioError: audio.error,
+      audioSource: audio.source,
+      audioValidationStatus: audio.validationStatus,
+      audioSourceArtifact: audio.sourceArtifact,
+      audioSourceAudioPath: audio.sourceAudioPath,
+      audioSourceComponentId: audio.sourceComponentId,
+      audioSourceEvidenceLineageIds: audio.sourceEvidenceLineageIds,
+      audioHandoffMethod: audio.handoffMethod,
       componentUnionInterval: interval,
       audioRequestedInterval: audio.requestedInterval,
       audioExtractedInterval: audio.extractedInterval,
       audioDurationSeconds: audio.durationSeconds,
+      audioActualDurationSeconds: audio.actualDurationSeconds,
+      audioSampleRate: audio.sampleRate,
+      audioChannelCount: audio.channelCount,
+      audioBitsPerSample: audio.bitsPerSample,
+      audioFrameCount: audio.frameCount,
+      audioInspectionMethod: audio.inspectionMethod,
       audioSha256: audio.sha256,
       audioContextSeconds: input.contextSeconds ?? 1.5,
+      audioContextBeforeSeconds: audio.contextBeforeSeconds,
+      audioContextAfterSeconds: audio.contextAfterSeconds,
       audioFullyCoversComponent: audio.fullyCoversComponent,
+      boundaryEvidence: [],
+      componentRawVadIntervals: [],
+      componentDecodedSegments: [],
+      componentMappedTokenEvidence: [],
+      componentPauseEvidence: [],
+      evidenceReconciliationHash: null,
+      evidenceSourceResolutionStatus: "legacy",
+      unresolvedEvidenceReferences: [],
       ...(forcedAlignmentEvidence === undefined
         ? {}
         : { forcedAlignmentEvidence }),
@@ -489,6 +415,12 @@ export async function prepareSubtitleReviewPackage(input: {
       targetCueIds: item.targetCueIds,
       componentUnionInterval: item.componentUnionInterval ?? item.interval,
       audioRequestedInterval: item.audioRequestedInterval,
+      audioClipPath: item.audioClipPath,
+      audioSha256: item.audioSha256,
+      audioSource: item.audioSource,
+      audioExtractedInterval: item.audioExtractedInterval,
+      audioFullyCoversComponent: item.audioFullyCoversComponent,
+      audioValidationStatus: item.audioValidationStatus,
       forcedAlignmentEvidence: item.forcedAlignmentEvidence ?? null,
     })),
   }).slice(0, 24)}`;
@@ -514,35 +446,46 @@ export async function prepareSubtitleReviewPackage(input: {
       audioCoverageFailureCount: items.filter(
         (item) => !item.audioFullyCoversComponent,
       ).length,
+      audioPhysicalFileCount: items.filter(
+        (item) => item.audioValidationStatus === "validated",
+      ).length,
+      audioReferencedCount: items.filter((item) => item.audioClipPath !== null)
+        .length,
+      audioPlayableCount: items.filter(
+        (item) =>
+          item.audioClipPath !== null &&
+          item.audioValidationStatus === "validated" &&
+          item.audioFullyCoversComponent,
+      ).length,
+      audioReusedExistingCount: items.filter((item) =>
+        [
+          "reused-existing-review-audio",
+          "inherited-verified-review-audio",
+        ].includes(item.audioSource),
+      ).length,
+      audioReusedOverlapCount: items.filter(
+        (item) => item.audioSource === "reused-overlap-audio",
+      ).length,
+      audioGeneratedCount: items.filter(
+        (item) => item.audioSource === "generated-from-source-video",
+      ).length,
+      audioHashMismatchCount: items.filter(
+        (item) => item.audioValidationStatus === "hash-mismatch",
+      ).length,
+      audioMetadataFailureCount: items.filter((item) =>
+        ["invalid-wav"].includes(item.audioValidationStatus),
+      ).length,
     },
   });
   const packagePath = path.join(
     input.subtitleDirectory,
     "subtitle-review-package.json",
   );
-  const reviewDirectory = path.join(input.subtitleDirectory, "review");
-  const pagePath = path.join(reviewDirectory, "index.html");
-  await Promise.all([
-    atomicWriteJson(packagePath, reviewPackage, { overwrite: true }),
-    atomicWriteJson(
-      path.join(reviewDirectory, "data", "subtitle-review-package.json"),
-      reviewPackage,
-      { overwrite: true },
-    ),
-    atomicWriteFile(pagePath, reviewHtml(), { overwrite: true }),
-    atomicWriteFile(
-      path.join(reviewDirectory, "assets", "review.css"),
-      reviewCss(),
-      {
-        overwrite: true,
-      },
-    ),
-    atomicWriteFile(
-      path.join(reviewDirectory, "assets", "review.js"),
-      reviewJavascript(),
-      { overwrite: true },
-    ),
-  ]);
+  await atomicWriteJson(packagePath, reviewPackage, { overwrite: true });
+  const pagePath = await writeSubtitleReviewPage({
+    subtitleDirectory: input.subtitleDirectory,
+    reviewPackage,
+  });
   return { reviewPackage, packagePath, pagePath };
 }
 

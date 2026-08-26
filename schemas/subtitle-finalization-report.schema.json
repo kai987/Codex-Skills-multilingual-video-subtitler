@@ -511,6 +511,106 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "reviewAudioPhysicalFileCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioReferencedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioPlayableCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioReusedExistingCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioReusedOverlapCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioGeneratedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioHashMismatchCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioMetadataFailureCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawVadEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "decodedSegmentEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenBoundaryCopiedFromEvidenceDpCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedEvidenceReferenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rootReviewDataMismatchCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "finalizationReviewMetricMismatchCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewPageBrokenAudioReferenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewDeliveryIntegrityPassed": {
+          "default": false,
+          "type": "boolean"
+        },
         "forcedAlignmentAnalyzedCueCount": {
           "default": 0,
           "type": "integer",
@@ -603,6 +703,23 @@
         "automaticCanonicalMutationDecisionCount",
         "automaticTimingMutationDecisionCount",
         "reviewAudioCoverageFailureCount",
+        "reviewAudioPhysicalFileCount",
+        "reviewAudioReferencedCount",
+        "reviewAudioPlayableCount",
+        "reviewAudioReusedExistingCount",
+        "reviewAudioReusedOverlapCount",
+        "reviewAudioGeneratedCount",
+        "reviewAudioHashMismatchCount",
+        "reviewAudioMetadataFailureCount",
+        "mappedTokenEvidenceCount",
+        "rawVadEvidenceCount",
+        "decodedSegmentEvidenceCount",
+        "mappedTokenBoundaryCopiedFromEvidenceDpCount",
+        "unresolvedEvidenceReferenceCount",
+        "rootReviewDataMismatchCount",
+        "finalizationReviewMetricMismatchCount",
+        "reviewPageBrokenAudioReferenceCount",
+        "reviewDeliveryIntegrityPassed",
         "forcedAlignmentAnalyzedCueCount",
         "forcedAlignmentAttemptCount",
         "forcedAlignmentCacheHitCount",
@@ -622,6 +739,10 @@
         "formatSemanticParityPassed": { "type": "boolean" },
         "canonicalParityPassed": { "default": true, "type": "boolean" },
         "presentationParityPassed": { "default": true, "type": "boolean" },
+        "reviewDeliveryIntegrityPassed": {
+          "default": false,
+          "type": "boolean"
+        },
         "rollbackApplied": { "type": "boolean" },
         "sourceReadOnlyVerified": { "type": "boolean" },
         "serializedSrtContainsOverlap": { "default": false, "type": "boolean" },
@@ -647,6 +768,7 @@
         "formatSemanticParityPassed",
         "canonicalParityPassed",
         "presentationParityPassed",
+        "reviewDeliveryIntegrityPassed",
         "rollbackApplied",
         "sourceReadOnlyVerified",
         "serializedSrtContainsOverlap",
@@ -692,6 +814,17 @@
           ]
         },
         "reviewPage": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "reviewDeliveryIntegrity": {
+          "default": null,
           "anyOf": [
             {
               "type": "string",
@@ -828,6 +961,7 @@
         "subtitlePackage",
         "reviewPackage",
         "reviewPage",
+        "reviewDeliveryIntegrity",
         "correctionFeedback",
         "presentationResolution",
         "overlapAcousticResolution",

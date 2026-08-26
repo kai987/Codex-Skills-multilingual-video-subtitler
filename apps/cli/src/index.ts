@@ -182,6 +182,7 @@ interface FinalizeCliOptions extends GlobalOptions {
   sourceVideo?: string;
   prepareReview?: boolean;
   reviewAudio: boolean;
+  reviewAudioMode: "auto" | "generate" | "reuse-only" | "off";
   dryRun?: boolean;
   presentationResolution: "off" | "observe" | "enforce";
   overlapResolution: "conservative" | "balanced";
@@ -233,6 +234,7 @@ interface ReviewCliOptions extends GlobalOptions {
   humanReviewedSubtitle?: string;
   sourceVideo?: string;
   reviewAudio: boolean;
+  reviewAudioMode: "auto" | "generate" | "reuse-only" | "off";
 }
 
 interface GrammarCliOptions extends GlobalOptions {
@@ -1399,6 +1401,14 @@ program
       .default("read-write"),
   )
   .option("--no-review-audio", "skip review audio extraction")
+  .addOption(
+    new Option(
+      "--review-audio-mode <mode>",
+      "review WAV policy (reuse valid clips before optional extraction)",
+    )
+      .choices(["auto", "generate", "reuse-only", "off"])
+      .default("auto"),
+  )
   .option("--dry-run", "validate and compute without writing outputs")
   .action(async (options: FinalizeCliOptions, command: Command) => {
     if (options.rawVadBoundaryTolerance > 0.1) {
@@ -1527,6 +1537,7 @@ program
       asrCacheImportPaths: options.asrCacheImport ?? [],
       asrCacheMode: options.asrCacheMode,
       generateReviewAudio: options.reviewAudio,
+      reviewAudioMode: options.reviewAudio ? options.reviewAudioMode : "off",
       dryRun: options.dryRun ?? false,
       runner: new NodeProcessRunner(),
       logger,
@@ -1560,6 +1571,14 @@ program
     "explicit source video for fingerprint/audio",
   )
   .option("--no-review-audio", "skip review audio extraction")
+  .addOption(
+    new Option(
+      "--review-audio-mode <mode>",
+      "review WAV policy (reuse valid clips before optional extraction)",
+    )
+      .choices(["auto", "generate", "reuse-only", "off"])
+      .default("auto"),
+  )
   .action(async (options: ReviewCliOptions, command: Command) => {
     const globals = command.optsWithGlobals<GlobalOptions>();
     const logger = new ConsoleLogger(
@@ -1575,6 +1594,7 @@ program
         ? {}
         : { sourceVideoPath: options.sourceVideo }),
       generateReviewAudio: options.reviewAudio,
+      reviewAudioMode: options.reviewAudio ? options.reviewAudioMode : "off",
       runner: new NodeProcessRunner(),
       logger,
     });

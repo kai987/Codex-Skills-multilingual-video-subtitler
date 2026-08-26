@@ -96,6 +96,7 @@ export interface SubtitleFinalizationOptions {
   sourceVideoPath?: string;
   prepareReview?: boolean;
   generateReviewAudio?: boolean;
+  reviewAudioMode?: "auto" | "generate" | "reuse-only" | "off";
   dryRun?: boolean;
   ffmpegPath?: string;
   runner?: ProcessRunner;
@@ -1376,6 +1377,10 @@ export async function finalizeSubtitleTask(
   let reviewItemCount = 0;
   let reviewAudioCoverageFailureCount = 0;
   if (shouldPrepareReview && options.dryRun !== true) {
+    const reviewOverlapArtifact =
+      overlapAcousticResult?.artifact ??
+      c517OverlapArtifact ??
+      existingOverlapArtifact?.artifact;
     const review = await prepareSubtitleReviewPackage({
       subtitleDirectory: located.subtitleDirectory,
       baseSubtitlePackagePath: effectiveBasePackagePath,
@@ -1392,6 +1397,9 @@ export async function finalizeSubtitleTask(
       runner,
       ffmpegPath: options.ffmpegPath ?? "ffmpeg",
       generateAudio: options.generateReviewAudio ?? true,
+      ...(options.reviewAudioMode === undefined
+        ? {}
+        : { reviewAudioMode: options.reviewAudioMode }),
       ...(overlapAcousticResult === null
         ? options.audioTrack === undefined
           ? {}
@@ -1409,6 +1417,9 @@ export async function finalizeSubtitleTask(
       ...(canonicalForcedAlignmentResult === null
         ? {}
         : { forcedAlignment: canonicalForcedAlignmentResult.artifact }),
+      ...(reviewOverlapArtifact === undefined
+        ? {}
+        : { overlapAcoustic: reviewOverlapArtifact }),
     });
     reviewPackagePath = review.packagePath;
     reviewPagePath = review.pagePath;

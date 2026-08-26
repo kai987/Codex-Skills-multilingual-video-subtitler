@@ -313,7 +313,7 @@ Dialogue: 0,0:00:03.00,0:00:04.00,Music,,0,0,0,,♪ 人が確認した歌 ♪
     expect(
       review.items[0]?.candidateSuggestions[0]?.automaticMutationEligible,
     ).toBe(false);
-    expect(review.items[0]?.audioError).toBe("AUDIO_GENERATION_NOT_REQUESTED");
+    expect(review.items[0]?.audioError).toBe("AUDIO_DISABLED_BY_USER");
   });
 
   it("materializes final-integrity findings as resolvable review decisions", async () => {

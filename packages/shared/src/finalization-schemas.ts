@@ -224,6 +224,35 @@ export const finalizationMetricsSchema = z
       .nonnegative()
       .default(0),
     reviewAudioCoverageFailureCount: z.number().int().nonnegative().default(0),
+    reviewAudioPhysicalFileCount: z.number().int().nonnegative().default(0),
+    reviewAudioReferencedCount: z.number().int().nonnegative().default(0),
+    reviewAudioPlayableCount: z.number().int().nonnegative().default(0),
+    reviewAudioReusedExistingCount: z.number().int().nonnegative().default(0),
+    reviewAudioReusedOverlapCount: z.number().int().nonnegative().default(0),
+    reviewAudioGeneratedCount: z.number().int().nonnegative().default(0),
+    reviewAudioHashMismatchCount: z.number().int().nonnegative().default(0),
+    reviewAudioMetadataFailureCount: z.number().int().nonnegative().default(0),
+    mappedTokenEvidenceCount: z.number().int().nonnegative().default(0),
+    rawVadEvidenceCount: z.number().int().nonnegative().default(0),
+    decodedSegmentEvidenceCount: z.number().int().nonnegative().default(0),
+    mappedTokenBoundaryCopiedFromEvidenceDpCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    unresolvedEvidenceReferenceCount: z.number().int().nonnegative().default(0),
+    rootReviewDataMismatchCount: z.number().int().nonnegative().default(0),
+    finalizationReviewMetricMismatchCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    reviewPageBrokenAudioReferenceCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    reviewDeliveryIntegrityPassed: z.boolean().default(false),
     forcedAlignmentAnalyzedCueCount: z.number().int().nonnegative().default(0),
     forcedAlignmentAttemptCount: z.number().int().nonnegative().default(0),
     forcedAlignmentCacheHitCount: z.number().int().nonnegative().default(0),
@@ -284,6 +313,7 @@ export const subtitleFinalizationReportSchema = z
         formatSemanticParityPassed: z.boolean(),
         canonicalParityPassed: z.boolean().default(true),
         presentationParityPassed: z.boolean().default(true),
+        reviewDeliveryIntegrityPassed: z.boolean().default(false),
         rollbackApplied: z.boolean(),
         sourceReadOnlyVerified: z.boolean(),
         serializedSrtContainsOverlap: z.boolean().default(false),
@@ -303,6 +333,7 @@ export const subtitleFinalizationReportSchema = z
         subtitlePackage: relativePathSchema,
         reviewPackage: relativePathSchema.nullable(),
         reviewPage: relativePathSchema.nullable(),
+        reviewDeliveryIntegrity: relativePathSchema.nullable().default(null),
         correctionFeedback: relativePathSchema.nullable(),
         presentationResolution: relativePathSchema.nullable().default(null),
         overlapAcousticResolution: relativePathSchema.nullable().default(null),
@@ -343,6 +374,59 @@ export const sourceFingerprintSchema = z
   })
   .strict();
 
+export const reviewBoundaryEvidenceSchema = z
+  .object({
+    evidenceId: z.string().min(1),
+    evidenceLineageId: z.string().min(1),
+    sourceType: z.enum([
+      "mfa-narrow",
+      "mfa-expanded",
+      "evidence-dp",
+      "trusted-mapped-token",
+      "trusted-no-vad-token",
+      "raw-vad",
+      "decoded-segment",
+      "source-cue-prior",
+      "forced-alignment-selected",
+      "pause",
+    ]),
+    scope: z.enum(["cue", "pair", "component"]),
+    cueIds: z.array(z.string().min(1)),
+    componentId: z.string().min(1),
+    interval: subtitleIntervalSchema,
+    sideSupport: z.enum(["start", "end", "both", "none"]),
+    timingUsable: z.boolean(),
+    acousticEvidence: z.boolean().default(true),
+    trustScore: z.number().min(0).max(1).nullable(),
+    alignmentScore: z.number().min(0).max(1).nullable(),
+    boundaryConfidence: z.number().min(0).max(1).nullable(),
+    neighborIntrusionRatio: z.number().min(0).max(1).nullable(),
+    profile: z.string().min(1).nullable(),
+    attemptId: z.string().min(1).nullable(),
+    parentSegmentId: z.string().min(1).nullable(),
+    selectedBoundarySource: z.string().min(1).nullable().default(null),
+    windowType: z.string().min(1).nullable().default(null),
+    wordInterval: subtitleIntervalSchema.nullable().default(null),
+    phoneInterval: subtitleIntervalSchema.nullable().default(null),
+    startPinnedToWindowEdge: z.boolean().nullable().default(null),
+    endPinnedToWindowEdge: z.boolean().nullable().default(null),
+    wordCoverageRatio: z.number().min(0).max(1).nullable().default(null),
+    phoneCoverageRatio: z.number().min(0).max(1).nullable().default(null),
+    readingCoverageRatio: z.number().min(0).max(1).nullable().default(null),
+    rawInterval: subtitleIntervalSchema.nullable().default(null),
+    normalizedInterval: subtitleIntervalSchema.nullable().default(null),
+    healthStatus: z.string().min(1).nullable().default(null),
+    normalizationApplied: z.boolean().nullable().default(null),
+    normalizationDeltaStart: z.number().nonnegative().nullable().default(null),
+    normalizationDeltaEnd: z.number().nonnegative().nullable().default(null),
+    sourceArtifactType: z.string().min(1),
+    sourceArtifactHash: hashSchema,
+    sourceObjectId: z.string().min(1),
+    blockers: z.array(z.string().min(1)),
+    notes: z.array(z.string().min(1)),
+  })
+  .strict();
+
 export const subtitleReviewItemSchema = z
   .object({
     reviewId: z.string().min(1),
@@ -374,13 +458,65 @@ export const subtitleReviewItemSchema = z
     ),
     audioClipPath: relativePathSchema.nullable(),
     audioError: z.string().min(1).nullable(),
+    audioSource: z
+      .enum([
+        "generated-from-source-video",
+        "reused-existing-review-audio",
+        "reused-overlap-audio",
+        "inherited-verified-review-audio",
+        "disabled-by-user",
+        "unavailable",
+      ])
+      .default("unavailable"),
+    audioValidationStatus: z
+      .enum([
+        "validated",
+        "hash-mismatch",
+        "coverage-incomplete",
+        "invalid-wav",
+        "source-missing",
+        "disabled",
+        "unavailable",
+      ])
+      .default("unavailable"),
+    audioSourceArtifact: z.string().min(1).nullable().default(null),
+    audioSourceAudioPath: relativePathSchema.nullable().default(null),
+    audioSourceComponentId: z.string().min(1).nullable().default(null),
+    audioSourceEvidenceLineageIds: z.array(z.string().min(1)).default([]),
+    audioHandoffMethod: z
+      .enum(["existing", "copy", "hardlink", "generated", "none"])
+      .default("none"),
     componentUnionInterval: subtitleIntervalSchema.optional(),
     audioRequestedInterval: subtitleIntervalSchema.nullable().default(null),
     audioExtractedInterval: subtitleIntervalSchema.nullable().default(null),
     audioDurationSeconds: z.number().nonnegative().nullable().default(null),
+    audioActualDurationSeconds: z
+      .number()
+      .nonnegative()
+      .nullable()
+      .default(null),
+    audioSampleRate: z.number().int().positive().nullable().default(null),
+    audioChannelCount: z.number().int().positive().nullable().default(null),
+    audioBitsPerSample: z.number().int().positive().nullable().default(null),
+    audioFrameCount: z.number().int().nonnegative().nullable().default(null),
+    audioInspectionMethod: z.string().min(1).nullable().default(null),
     audioSha256: hashSchema.nullable().default(null),
     audioContextSeconds: z.number().nonnegative().default(0),
+    audioContextBeforeSeconds: z.number().nonnegative().default(0),
+    audioContextAfterSeconds: z.number().nonnegative().default(0),
     audioFullyCoversComponent: z.boolean().default(false),
+    boundaryEvidence: z.array(reviewBoundaryEvidenceSchema).default([]),
+    componentRawVadIntervals: z.array(reviewBoundaryEvidenceSchema).default([]),
+    componentDecodedSegments: z.array(reviewBoundaryEvidenceSchema).default([]),
+    componentMappedTokenEvidence: z
+      .array(reviewBoundaryEvidenceSchema)
+      .default([]),
+    componentPauseEvidence: z.array(reviewBoundaryEvidenceSchema).default([]),
+    evidenceReconciliationHash: hashSchema.nullable().default(null),
+    evidenceSourceResolutionStatus: z
+      .enum(["legacy", "resolved", "partial", "unresolved"])
+      .default("legacy"),
+    unresolvedEvidenceReferences: z.array(z.string().min(1)).default([]),
     forcedAlignmentEvidence: z
       .object({
         disclaimer: z.literal(
@@ -433,6 +569,11 @@ export const subtitleReviewPackageSchema = z
     baseSubtitlePackageHash: hashSchema,
     baseCueHash: hashSchema,
     inputEvidenceHash: hashSchema,
+    evidenceReconciliationHash: hashSchema.nullable().default(null),
+    evidenceReconciliationStatus: z
+      .enum(["legacy", "observed", "enforced"])
+      .default("legacy"),
+    deliveryIntegrityPolicyVersion: z.string().min(1).nullable().default(null),
     items: z.array(subtitleReviewItemSchema),
     summary: z
       .object({
@@ -441,6 +582,27 @@ export const subtitleReviewPackageSchema = z
         audioClipCount: z.number().int().nonnegative(),
         audioFailureCount: z.number().int().nonnegative(),
         audioCoverageFailureCount: z.number().int().nonnegative().default(0),
+        audioPhysicalFileCount: z.number().int().nonnegative().default(0),
+        audioReferencedCount: z.number().int().nonnegative().default(0),
+        audioPlayableCount: z.number().int().nonnegative().default(0),
+        audioReusedExistingCount: z.number().int().nonnegative().default(0),
+        audioReusedOverlapCount: z.number().int().nonnegative().default(0),
+        audioGeneratedCount: z.number().int().nonnegative().default(0),
+        audioHashMismatchCount: z.number().int().nonnegative().default(0),
+        audioMetadataFailureCount: z.number().int().nonnegative().default(0),
+        mappedTokenEvidenceCount: z.number().int().nonnegative().default(0),
+        rawVadEvidenceCount: z.number().int().nonnegative().default(0),
+        decodedSegmentEvidenceCount: z.number().int().nonnegative().default(0),
+        mappedTokenBoundaryCopiedFromEvidenceDpCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .default(0),
+        unresolvedEvidenceReferenceCount: z
+          .number()
+          .int()
+          .nonnegative()
+          .default(0),
       })
       .strict(),
   })
@@ -575,6 +737,9 @@ export type SubtitleFinalizationReport = z.infer<
   typeof subtitleFinalizationReportSchema
 >;
 export type SubtitleReviewPackage = z.infer<typeof subtitleReviewPackageSchema>;
+export type ReviewBoundaryEvidence = z.infer<
+  typeof reviewBoundaryEvidenceSchema
+>;
 export type SourceFingerprint = z.infer<typeof sourceFingerprintSchema>;
 export type HumanReviewResolutions = z.infer<
   typeof humanReviewResolutionsSchema

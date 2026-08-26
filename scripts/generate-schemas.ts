@@ -89,6 +89,8 @@ import {
   mfaSampleProbeSchema,
   c5171RuntimePreparationSummarySchema,
   c5171FreshCacheObserveValidationSchema,
+  c5172ReviewDeliveryReplaySummarySchema,
+  subtitleReviewDeliveryIntegritySchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -118,6 +120,16 @@ const schemas = [
     fileName: "c5-17-1-fresh-cache-observe-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c5-17-1-fresh-cache-observe-validation.schema.json",
     schema: c5171FreshCacheObserveValidationSchema,
+  },
+  {
+    fileName: "subtitle-review-delivery-integrity.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-review-delivery-integrity.schema.json",
+    schema: subtitleReviewDeliveryIntegritySchema,
+  },
+  {
+    fileName: "c5-17-2-review-delivery-replay-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-17-2-review-delivery-replay-summary.schema.json",
+    schema: c5172ReviewDeliveryReplaySummarySchema,
   },
   {
     fileName: "subtitle-canonical-alignment-input.schema.json",
