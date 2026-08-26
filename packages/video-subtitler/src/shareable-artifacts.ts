@@ -25,6 +25,10 @@ import {
   c5172ReviewDeliveryReplaySummarySchema,
   subtitleReviewDeliveryIntegritySchema,
   reviewActionValidationReportSchema,
+  speakerEvidenceRuntimeCapabilitySchema,
+  subtitleLocalSpeakerEvidenceSchema,
+  c518SpeakerEvidenceReplaySummarySchema,
+  c518FreshCacheObserveValidationSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -74,6 +78,13 @@ const artifactSchemas = {
   "c5-17-2-review-delivery-replay-summary.json":
     c5172ReviewDeliveryReplaySummarySchema,
   "review-action-validation-report.json": reviewActionValidationReportSchema,
+  "speaker-evidence-runtime-capability.json":
+    speakerEvidenceRuntimeCapabilitySchema,
+  "subtitle-local-speaker-evidence.json": subtitleLocalSpeakerEvidenceSchema,
+  "c5-18-speaker-evidence-replay-summary.json":
+    c518SpeakerEvidenceReplaySummarySchema,
+  "c5-18-fresh-cache-observe-validation.json":
+    c518FreshCacheObserveValidationSchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -422,6 +433,12 @@ export async function generateC5161ShareableArtifacts(input: {
     replaySummaryPath: string;
     reviewActionValidationReportPath?: string;
   };
+  c518Artifacts?: {
+    runtimeCapabilityPath: string;
+    localSpeakerEvidencePath: string;
+    replaySummaryPath: string;
+    freshCacheObserveValidationPath?: string;
+  };
 }): Promise<{
   outputDirectory: string;
   manifestPath: string;
@@ -539,6 +556,30 @@ export async function generateC5161ShareableArtifacts(input: {
         name: "review-action-validation-report.json",
         sourcePath: path.resolve(
           input.c5172Artifacts.reviewActionValidationReportPath,
+        ),
+      });
+    }
+  }
+  if (input.c518Artifacts !== undefined) {
+    sources.push(
+      {
+        name: "speaker-evidence-runtime-capability.json",
+        sourcePath: path.resolve(input.c518Artifacts.runtimeCapabilityPath),
+      },
+      {
+        name: "subtitle-local-speaker-evidence.json",
+        sourcePath: path.resolve(input.c518Artifacts.localSpeakerEvidencePath),
+      },
+      {
+        name: "c5-18-speaker-evidence-replay-summary.json",
+        sourcePath: path.resolve(input.c518Artifacts.replaySummaryPath),
+      },
+    );
+    if (input.c518Artifacts.freshCacheObserveValidationPath !== undefined) {
+      sources.push({
+        name: "c5-18-fresh-cache-observe-validation.json",
+        sourcePath: path.resolve(
+          input.c518Artifacts.freshCacheObserveValidationPath,
         ),
       });
     }
@@ -662,6 +703,7 @@ export async function generateC5161ShareableArtifacts(input: {
     schemaVersion: "1.0.0",
     artifactType: "shareable-artifact-manifest",
     policyVersion:
+      input.c518Artifacts !== undefined ||
       input.c5172Artifacts?.reviewActionValidationReportPath !== undefined
         ? C518_SHAREABLE_POLICY_VERSION
         : input.c5172Artifacts !== undefined
@@ -711,6 +753,142 @@ export async function generateC5161ShareableArtifacts(input: {
   );
   await atomicWriteJson(manifestPath, manifest, { overwrite: true });
   return { outputDirectory, manifestPath, manifest };
+}
+
+export async function appendC518ValidationToShareable(input: {
+  taskRoot: string;
+  validationPath: string;
+}): Promise<{
+  manifest: ShareableArtifactManifest;
+  validationPassed: boolean;
+  absolutePathLeakCount: number;
+  prohibitedSecretCount: number;
+  brokenRelativeReferenceCount: number;
+}> {
+  const taskRoot = path.resolve(input.taskRoot);
+  const validationPath = path.resolve(input.validationPath);
+  if (!validationPath.startsWith(`${taskRoot}${path.sep}`)) {
+    throw new Error(
+      "C5.18 validation must be materialized inside the task root before sharing.",
+    );
+  }
+  const directory = path.join(taskRoot, "shareable");
+  const manifestPath = path.join(directory, "shareable-artifact-manifest.json");
+  const existingManifest = shareableArtifactManifestSchema.parse(
+    JSON.parse(await readFile(manifestPath, "utf8")) as unknown,
+  );
+  if (existingManifest.policyVersion !== C518_SHAREABLE_POLICY_VERSION) {
+    throw new Error("C5.18 validation requires a C5.18 shareable manifest.");
+  }
+
+  const validationName = "c5-18-fresh-cache-observe-validation.json" as const;
+  const validationSource = await readFile(validationPath);
+  const sanitized = sanitizeShareableValue({
+    value: JSON.parse(validationSource.toString("utf8")) as unknown,
+    taskRoot,
+  });
+  const validation = c518FreshCacheObserveValidationSchema.parse(
+    sanitized.value,
+  );
+  const validationScan = scanShareableValue(validation);
+  const validationTarget = path.join(directory, validationName);
+  await atomicWriteJson(validationTarget, validation, { overwrite: true });
+
+  const retainedItems = existingManifest.items.filter((item) => {
+    const name = path.basename(item.shareablePath);
+    return name !== validationName && name !== "execution-summary.json";
+  });
+  const identitySources = [
+    ...retainedItems.map((item) => ({
+      name: path.basename(item.shareablePath),
+      hash: item.sourceArtifactHash,
+    })),
+    { name: validationName, hash: sha256(validationSource) },
+  ];
+  const taskIdentityHash = sha256(stable(identitySources));
+
+  const executionTarget = path.join(directory, "execution-summary.json");
+  const executionItem = existingManifest.items.find(
+    (item) => path.basename(item.shareablePath) === "execution-summary.json",
+  );
+  if (executionItem === undefined) {
+    throw new Error("Shareable manifest is missing execution-summary.json.");
+  }
+  const execution = c5161ShareableExecutionSummarySchema.parse(
+    JSON.parse(await readFile(executionTarget, "utf8")) as unknown,
+  );
+  const validationRelativePath = path
+    .relative(taskRoot, validationPath)
+    .split(path.sep)
+    .join("/");
+  const updatedExecution = c5161ShareableExecutionSummarySchema.parse({
+    ...execution,
+    taskIdentityHash,
+    internalArtifacts: [
+      ...execution.internalArtifacts.filter(
+        (item) => item !== validationRelativePath,
+      ),
+      validationRelativePath,
+    ],
+  });
+  await atomicWriteJson(executionTarget, updatedExecution, { overwrite: true });
+  const executionScan = scanShareableValue(updatedExecution);
+
+  const items: ShareableArtifactManifest["items"] = [
+    ...retainedItems,
+    {
+      sourceArtifactName: path.basename(validationPath),
+      sourceArtifactHash: sha256(validationSource),
+      shareablePath: path.posix.join(path.basename(directory), validationName),
+      shareableHash: await sha256File(validationTarget),
+      schemaName: "c5-18-fresh-cache-observe-validation.schema.json",
+      pathReplacementCount: sanitized.pathReplacementCount,
+      secretRedactionCount: sanitized.secretRedactionCount,
+      absolutePathLeakCount: validationScan.absolutePathLeakCount,
+      prohibitedSecretCount: validationScan.prohibitedSecretCount,
+      validationPassed:
+        validationScan.absolutePathLeakCount === 0 &&
+        validationScan.prohibitedSecretCount === 0,
+    },
+    {
+      ...executionItem,
+      shareableHash: await sha256File(executionTarget),
+      absolutePathLeakCount: executionScan.absolutePathLeakCount,
+      prohibitedSecretCount: executionScan.prohibitedSecretCount,
+      validationPassed:
+        executionScan.absolutePathLeakCount === 0 &&
+        executionScan.prohibitedSecretCount === 0,
+    },
+  ];
+  const manifest = shareableArtifactManifestSchema.parse({
+    ...existingManifest,
+    generatedAt: new Date().toISOString(),
+    taskIdentityHash,
+    items,
+    summary: {
+      artifactCount: items.length,
+      validationPassedCount: items.filter((item) => item.validationPassed)
+        .length,
+      absolutePathLeakCount: items.reduce(
+        (sum, item) => sum + item.absolutePathLeakCount,
+        0,
+      ),
+      prohibitedSecretCount: items.reduce(
+        (sum, item) => sum + item.prohibitedSecretCount,
+        0,
+      ),
+      pathReplacementCount: items.reduce(
+        (sum, item) => sum + item.pathReplacementCount,
+        0,
+      ),
+      secretRedactionCount: items.reduce(
+        (sum, item) => sum + item.secretRedactionCount,
+        0,
+      ),
+    },
+  });
+  await atomicWriteJson(manifestPath, manifest, { overwrite: true });
+  return auditC5161ShareableArtifacts(directory);
 }
 
 export async function auditC5161ShareableArtifacts(

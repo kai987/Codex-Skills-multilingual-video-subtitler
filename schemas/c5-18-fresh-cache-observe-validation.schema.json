@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c5-18-fresh-cache-observe-validation.schema.json",
+  "title": "c5-18-fresh-cache-observe-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c5-18-fresh-cache-observe-validation"
+    },
+    "validationVersion": { "type": "string", "const": "C5.18" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "freshRunId": { "type": "string", "minLength": 1 },
+    "observeRunId": { "type": "string", "minLength": 1 },
+    "cacheReplayRunId": { "type": "string", "minLength": 1 },
+    "freshSpeakerEvidenceSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "observeSpeakerEvidenceSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "cacheSpeakerEvidenceSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "freshComponentDecisionHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "observeComponentDecisionHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "cacheComponentDecisionHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "freshMutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "observeMutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "cacheMutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "freshOutputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "observeOutputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "cacheOutputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "freshInferenceCount": { "type": "integer", "minimum": 0, "maximum": 14 },
+    "observeInferenceCount": { "type": "integer", "minimum": 0, "maximum": 14 },
+    "cacheHitCount": { "type": "number", "const": 14 },
+    "cacheInferenceCount": { "type": "number", "const": 0 },
+    "cacheModelLoadCount": { "type": "number", "const": 0 },
+    "observeTimingMutationCount": { "type": "number", "const": 0 },
+    "speakerEvidenceSemanticParity": { "type": "boolean" },
+    "componentDecisionParity": { "type": "boolean" },
+    "mutationParity": { "type": "boolean" },
+    "outputCueParity": { "type": "boolean" },
+    "validationPassed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "validationVersion",
+    "generatedAt",
+    "freshRunId",
+    "observeRunId",
+    "cacheReplayRunId",
+    "freshSpeakerEvidenceSemanticHash",
+    "observeSpeakerEvidenceSemanticHash",
+    "cacheSpeakerEvidenceSemanticHash",
+    "freshComponentDecisionHash",
+    "observeComponentDecisionHash",
+    "cacheComponentDecisionHash",
+    "freshMutationHash",
+    "observeMutationHash",
+    "cacheMutationHash",
+    "freshOutputCueHash",
+    "observeOutputCueHash",
+    "cacheOutputCueHash",
+    "freshInferenceCount",
+    "observeInferenceCount",
+    "cacheHitCount",
+    "cacheInferenceCount",
+    "cacheModelLoadCount",
+    "observeTimingMutationCount",
+    "speakerEvidenceSemanticParity",
+    "componentDecisionParity",
+    "mutationParity",
+    "outputCueParity",
+    "validationPassed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

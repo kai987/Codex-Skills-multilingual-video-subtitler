@@ -92,6 +92,14 @@ import {
   c5172ReviewDeliveryReplaySummarySchema,
   subtitleReviewDeliveryIntegritySchema,
   reviewActionValidationReportSchema,
+  speakerRuntimeManifestSchema,
+  speakerModelManifestSchema,
+  speakerEvidenceRuntimeCapabilitySchema,
+  subtitleLocalSpeakerEvidenceSchema,
+  speakerEvidenceCacheEntrySchema,
+  speakerEvidenceCacheManifestSchema,
+  c518SpeakerEvidenceReplaySummarySchema,
+  c518FreshCacheObserveValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -136,6 +144,46 @@ const schemas = [
     fileName: "review-action-validation-report.schema.json",
     id: "https://schemas.local/multilingual-video-learning/review-action-validation-report.schema.json",
     schema: reviewActionValidationReportSchema,
+  },
+  {
+    fileName: "speaker-runtime-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/speaker-runtime-manifest.schema.json",
+    schema: speakerRuntimeManifestSchema,
+  },
+  {
+    fileName: "speaker-model-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/speaker-model-manifest.schema.json",
+    schema: speakerModelManifestSchema,
+  },
+  {
+    fileName: "speaker-evidence-runtime-capability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/speaker-evidence-runtime-capability.schema.json",
+    schema: speakerEvidenceRuntimeCapabilitySchema,
+  },
+  {
+    fileName: "subtitle-local-speaker-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/subtitle-local-speaker-evidence.schema.json",
+    schema: subtitleLocalSpeakerEvidenceSchema,
+  },
+  {
+    fileName: "speaker-evidence-cache-entry.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/speaker-evidence-cache-entry.schema.json",
+    schema: speakerEvidenceCacheEntrySchema,
+  },
+  {
+    fileName: "speaker-evidence-cache-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/speaker-evidence-cache-manifest.schema.json",
+    schema: speakerEvidenceCacheManifestSchema,
+  },
+  {
+    fileName: "c5-18-speaker-evidence-replay-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-18-speaker-evidence-replay-summary.schema.json",
+    schema: c518SpeakerEvidenceReplaySummarySchema,
+  },
+  {
+    fileName: "c5-18-fresh-cache-observe-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c5-18-fresh-cache-observe-validation.schema.json",
+    schema: c518FreshCacheObserveValidationSchema,
   },
   {
     fileName: "subtitle-canonical-alignment-input.schema.json",

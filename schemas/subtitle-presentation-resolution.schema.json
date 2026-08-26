@@ -11,7 +11,15 @@
     },
     "resolutionVersion": {
       "type": "string",
-      "enum": ["C5.14", "C5.15", "C5.15.1", "C5.16", "C5.16.1", "C5.17"]
+      "enum": [
+        "C5.14",
+        "C5.15",
+        "C5.15.1",
+        "C5.16",
+        "C5.16.1",
+        "C5.17",
+        "C5.18"
+      ]
     },
     "generatedAt": { "type": "string", "minLength": 1 },
     "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
@@ -409,7 +417,8 @@
                     "speech",
                     "vad",
                     "source",
-                    "canonical-forced-alignment"
+                    "canonical-forced-alignment",
+                    "local-speaker-evidence"
                   ]
                 }
               },
@@ -514,7 +523,8 @@
             "enum": [
               "presentation-only",
               "targeted-acoustic",
-              "canonical-forced-alignment"
+              "canonical-forced-alignment",
+              "local-speaker-evidence"
             ]
           },
           "acousticEvidenceIds": {

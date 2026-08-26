@@ -99,6 +99,35 @@ Audit a legacy C5.15 artifact with `npm run audit:c5-15-token-timestamps -- --ar
 
 C5.16/C5.16.1 can use the pinned repo-local whisper.cpp v1.9.3 runtime patch to expose official mapped-token timestamps and raw VAD boundaries. C5.16.1 measures each extracted WAV from frame count, preserves every raw interval, and normalizes only an explainable boundary overrun within the configurable 50 ms default tolerance (100 ms hard maximum). Larger or structurally invalid intervals remain quarantined. The patched server creates a fresh `whisper_state` for every MVL inference request while retaining one server process and one loaded model, so correctness no longer depends on arranging no-VAD before VAD requests. Cache identity includes the raw-VAD boundary and worker-state-isolation policy versions.
 
+C5.18 hardens every review action route through one action registry and adds bounded, local speaker-activity evidence for the seven verified C5.17.2 review WAVs. Speaker labels are anonymous and component-local. Standard diarization supplies overlap evidence, Exclusive diarization supplies mutually exclusive turns and change points, and acoustic prominence remains an uncalibrated heuristic. None of those identify a person, character, or gender. Speaker evidence alone can never change canonical text or timing.
+
+The speaker runtime pins `pyannote/speaker-diarization-community-1` to commit `3533c8cf8e369892e6b79ff1bf80f7b0286a54ee`, records the bundled embedding, PLDA, and segmentation identities, and runs offline after preparation. Community-1 is gated and CC BY 4.0: accept its official terms first and expose a read-capable token only through the named environment variable. The token is not accepted as a CLI value and is removed from inference-worker environments.
+
+```bash
+npm run prepare:speaker-runtime -- \
+  --create-runtime \
+  --fetch-speaker-models \
+  --speaker-model "pyannote/speaker-diarization-community-1" \
+  --model-revision "3533c8cf8e369892e6b79ff1bf80f7b0286a54ee" \
+  --hf-token-env HF_TOKEN
+
+npm run verify:c5-18-speaker-runtime -- \
+  --runtime-manifest "/path/to/speaker-runtime-manifest.json" \
+  --probe-audio "/path/to/one-review.wav"
+
+npm run replay:c5-18-speaker-evidence -- \
+  --task "/path/to/c5-17-2-task" \
+  --speaker-runtime-manifest "/path/to/speaker-runtime-manifest.json" \
+  --speaker-evidence enforce \
+  --speaker-window-mode dual \
+  --speaker-device auto \
+  --speaker-evidence-concurrency 1 \
+  --speaker-presentation-resolution enforce \
+  --asr-cache-mode read-write
+```
+
+Run Observe and read-only Cache Replay from the Fresh task, then validate all three with `npm run validate:c5-18-runs -- --fresh <task> --observe <task> --cache-replay <task>`. Acceptance requires 14/14 speaker-cache hits, zero cache-replay model loads/inferences, semantic parity, unchanged human text, and passing review/shareable integrity. Real model integration tests are opt-in with `MVL_SPEAKER_INTEGRATION_TEST=1`; normal CI never downloads the model.
+
 Local task artifacts retain full diagnostic paths. For sharing, generate strict relative-path copies and audit them for absolute paths and secret-like values:
 
 ```bash

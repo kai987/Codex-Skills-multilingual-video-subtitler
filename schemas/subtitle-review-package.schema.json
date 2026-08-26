@@ -57,6 +57,56 @@
       "default": null,
       "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
     },
+    "speakerEvidenceArtifactPath": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+        },
+        { "type": "null" }
+      ]
+    },
+    "speakerEvidenceArtifactHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerRuntimeIdentityHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerModelSnapshotHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerEvidencePolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "speakerAssignmentHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerRelationshipHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
     "items": {
       "type": "array",
       "items": {
@@ -415,6 +465,10 @@
           "findingIds": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerEvidenceComponentId": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
           },
           "blockers": {
             "type": "array",
@@ -2214,6 +2268,7 @@
           "candidateSuggestions",
           "candidateActionBindings",
           "findingIds",
+          "speakerEvidenceComponentId",
           "blockers",
           "allowedHumanActions",
           "audioClipPath",
@@ -2397,6 +2452,13 @@
     "evidenceReconciliationStatus",
     "deliveryIntegrityPolicyVersion",
     "reviewActionPolicyVersion",
+    "speakerEvidenceArtifactPath",
+    "speakerEvidenceArtifactHash",
+    "speakerRuntimeIdentityHash",
+    "speakerModelSnapshotHash",
+    "speakerEvidencePolicyVersion",
+    "speakerAssignmentHash",
+    "speakerRelationshipHash",
     "items",
     "summary"
   ],

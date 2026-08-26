@@ -128,6 +128,7 @@ export const timingMutationSchema = z
       "vad",
       "source",
       "canonical-forced-alignment",
+      "local-speaker-evidence",
     ]),
   })
   .strict();
@@ -196,6 +197,7 @@ export const overlapDecisionSchema = z
         "presentation-only",
         "targeted-acoustic",
         "canonical-forced-alignment",
+        "local-speaker-evidence",
       ])
       .default("presentation-only"),
     acousticEvidenceIds: z.array(z.string().min(1)).default([]),
@@ -217,6 +219,7 @@ export const subtitlePresentationResolutionSchema = z
       "C5.16",
       "C5.16.1",
       "C5.17",
+      "C5.18",
     ]),
     generatedAt: z.string().min(1),
     baseCueHash: hashSchema,

@@ -8,6 +8,7 @@ import {
   subtitlePackageSchema,
   subtitleReviewPackageSchema,
   type ReviewBoundaryEvidence,
+  type SubtitleLocalSpeakerEvidence,
 } from "@mvl/shared";
 import {
   applyHumanReviewResolutions,
@@ -223,15 +224,65 @@ function reviewPackage() {
   });
 }
 
-async function renderPage() {
+async function renderPage(withSpeakerEvidence = false) {
   const root = await mkdtemp(path.join(tmpdir(), "mvl-c5172-page-"));
   temporaryDirectories.push(root);
-  const review = reviewPackage();
+  const baseReview = reviewPackage();
+  const review = withSpeakerEvidence
+    ? subtitleReviewPackageSchema.parse({
+        ...baseReview,
+        speakerEvidenceArtifactPath: "./subtitle-local-speaker-evidence.json",
+        speakerEvidenceArtifactHash: HASH,
+        speakerRuntimeIdentityHash: HASH,
+        speakerModelSnapshotHash: HASH,
+        speakerEvidencePolicyVersion: "c5.18-local-speaker-evidence-v1",
+        speakerAssignmentHash: HASH,
+        speakerRelationshipHash: HASH,
+        items: baseReview.items.map((item) => ({
+          ...item,
+          speakerEvidenceComponentId: "component-a",
+        })),
+      })
+    : baseReview;
+  const speakerEvidence = {
+    components: [
+      {
+        componentId: "component-a",
+        speakerTracks: [
+          {
+            speakerId: "component-component-a-speaker-01",
+            standardTurns: [
+              {
+                startMediaGlobal: 10,
+                endMediaGlobal: 11,
+                evidenceLineageId: "speaker-standard-a",
+              },
+            ],
+            exclusiveTurns: [
+              {
+                startMediaGlobal: 10,
+                endMediaGlobal: 11,
+                evidenceLineageId: "speaker-exclusive-a",
+              },
+            ],
+          },
+        ],
+        overlapSpeechIntervals: [],
+        speakerChangePoints: [],
+        cueSpeakerHypotheses: [],
+        prominenceEvidence: [],
+        relationshipHypotheses: [],
+        selectedRelationship: "single-speaker-only",
+        windowStability: { stable: true },
+      },
+    ],
+  } as unknown as SubtitleLocalSpeakerEvidence;
   await writeSubtitleReviewPage({
     subtitleDirectory: root,
     reviewPackage: review,
+    ...(withSpeakerEvidence ? { speakerEvidence } : {}),
   });
-  const [html, css, javascript, data] = await Promise.all([
+  const [html, css, javascript, data, speakerData] = await Promise.all([
     readFile(path.join(root, "review", "index.html"), "utf8"),
     readFile(path.join(root, "review", "assets", "review.css"), "utf8"),
     readFile(path.join(root, "review", "assets", "review.js"), "utf8"),
@@ -239,8 +290,19 @@ async function renderPage() {
       path.join(root, "review", "data", "subtitle-review-package.json"),
       "utf8",
     ),
+    withSpeakerEvidence
+      ? readFile(
+          path.join(
+            root,
+            "review",
+            "data",
+            "subtitle-local-speaker-evidence.json",
+          ),
+          "utf8",
+        )
+      : Promise.resolve(""),
   ]);
-  return { root, review, html, css, javascript, data };
+  return { root, review, html, css, javascript, data, speakerData };
 }
 
 describe("C5.17.2 local review page", () => {
@@ -314,6 +376,32 @@ describe("C5.17.2 local review page", () => {
     expect(page.javascript).toContain("shortcutHints(item)");
     expect(page.javascript).not.toContain(
       "if(e.key==='a')resolution(item,'ACCEPT_SUGGESTION')",
+    );
+  });
+
+  it("renders anonymous Standard/Exclusive speaker tracks with local audio seeking", async () => {
+    const page = await renderPage(true);
+    for (const text of [
+      "Standard · ",
+      "Exclusive · ",
+      "Overlap · ",
+      "Change · ",
+      "Cue assignment, prominence, and relationship hypotheses",
+      "Speaker labels are anonymous and local to this review component.",
+      "Diarization evidence does not identify a real person.",
+      "Acoustic prominence is a heuristic and does not prove foreground/background identity.",
+    ]) {
+      expect(page.javascript).toContain(text);
+    }
+    expect(page.javascript).toContain("data-speaker-start");
+    expect(page.javascript).toContain(
+      "media-(item.audioExtractedInterval?.start??0)",
+    );
+    expect(page.css).toContain(".bar.speaker.standard");
+    expect(page.css).toContain(".bar.speaker.exclusive");
+    expect(page.speakerData).toContain("component-component-a-speaker-01");
+    expect(`${page.javascript}${page.speakerData}`).not.toMatch(
+      /realPerson|gender|characterIdentity/iu,
     );
   });
 

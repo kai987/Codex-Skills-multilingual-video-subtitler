@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c5-18-speaker-evidence-replay-summary.schema.json",
+  "title": "c5-18-speaker-evidence-replay-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c5-18-speaker-evidence-replay-summary"
+    },
+    "replayVersion": { "type": "string", "const": "C5.18" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "runId": { "type": "string", "minLength": 1 },
+    "sourceTaskName": { "type": "string", "minLength": 1 },
+    "outputTaskName": { "type": "string", "minLength": 1 },
+    "reviewActionHardening": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "speakerEvidenceMode": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "speakerPresentationResolution": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "cacheMode": { "type": "string", "enum": ["off", "read", "read-write"] },
+    "runtimeCapabilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "speakerEvidenceArtifactHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "cacheManifestHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewActionValidationReportHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewDeliveryIntegrityHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceReviewPackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "outputReviewPackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalCueHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalCueHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHashBefore": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalTimingHashAfter": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "presentationHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "componentDecisionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTaskCriticalArtifactsReadOnly": { "type": "boolean" },
+    "sourceVideoReadOnly": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sizeBefore": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "sizeAfter": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "mtimeMsBefore": { "type": "number", "minimum": 0 },
+            "mtimeMsAfter": { "type": "number", "minimum": 0 },
+            "sha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "sha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "verified": { "type": "boolean" }
+          },
+          "required": [
+            "sizeBefore",
+            "sizeAfter",
+            "mtimeMsBefore",
+            "mtimeMsAfter",
+            "sha256Before",
+            "sha256After",
+            "verified"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "humanSubtitleReadOnly": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sizeBefore": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "sizeAfter": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "mtimeMsBefore": { "type": "number", "minimum": 0 },
+            "mtimeMsAfter": { "type": "number", "minimum": 0 },
+            "sha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "sha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "verified": { "type": "boolean" }
+          },
+          "required": [
+            "sizeBefore",
+            "sizeAfter",
+            "mtimeMsBefore",
+            "mtimeMsAfter",
+            "sha256Before",
+            "sha256After",
+            "verified"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "speakerInferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 14
+        },
+        "speakerModelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wholeMediaSpeakerInferenceCount": { "type": "number", "const": 0 },
+        "wholeMediaAsrRequestCount": { "type": "number", "const": 0 },
+        "whisperRequestCount": { "type": "number", "const": 0 },
+        "mfaProcessCount": { "type": "number", "const": 0 },
+        "openAiRequestCount": { "type": "number", "const": 0 },
+        "onlineSubtitleSearchCount": { "type": "number", "const": 0 },
+        "networkUsedDuringInference": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "speakerInferenceCount",
+        "speakerModelLoadCount",
+        "wholeMediaSpeakerInferenceCount",
+        "wholeMediaAsrRequestCount",
+        "whisperRequestCount",
+        "mfaProcessCount",
+        "openAiRequestCount",
+        "onlineSubtitleSearchCount",
+        "networkUsedDuringInference"
+      ],
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "speakerRuntimeIdentityVerified": { "type": "boolean" },
+        "speakerModelSnapshotVerified": { "type": "boolean" },
+        "targetComponentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "targetCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewItemCountBefore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewItemCountAfter": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioPlayableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewDeliveryIntegrityPassed": { "type": "boolean" },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextMutationCount": { "type": "number", "const": 0 },
+        "timingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "finalStatus": { "type": "string", "const": "needs-review" },
+        "finalizationMethod": { "type": "string", "const": "none" },
+        "skill2CompatibilityPassed": { "type": "boolean" },
+        "skill3CompatibilityPassed": { "type": "boolean" }
+      },
+      "required": [
+        "speakerRuntimeIdentityVerified",
+        "speakerModelSnapshotVerified",
+        "targetComponentCount",
+        "targetCueCount",
+        "reviewItemCountBefore",
+        "reviewItemCountAfter",
+        "reviewAudioPlayableCount",
+        "reviewDeliveryIntegrityPassed",
+        "cueCount",
+        "canonicalTextMutationCount",
+        "timingMutationCount",
+        "finalStatus",
+        "finalizationMethod",
+        "skill2CompatibilityPassed",
+        "skill3CompatibilityPassed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "replayVersion",
+    "generatedAt",
+    "runId",
+    "sourceTaskName",
+    "outputTaskName",
+    "reviewActionHardening",
+    "speakerEvidenceMode",
+    "speakerPresentationResolution",
+    "cacheMode",
+    "runtimeCapabilityHash",
+    "speakerEvidenceArtifactHash",
+    "cacheManifestHash",
+    "reviewActionValidationReportHash",
+    "reviewDeliveryIntegrityHash",
+    "sourceReviewPackageHash",
+    "outputReviewPackageHash",
+    "canonicalCueHashBefore",
+    "canonicalCueHashAfter",
+    "canonicalTimingHashBefore",
+    "canonicalTimingHashAfter",
+    "presentationHashBefore",
+    "presentationHashAfter",
+    "componentDecisionHash",
+    "mutationHash",
+    "sourceTaskCriticalArtifactsReadOnly",
+    "sourceVideoReadOnly",
+    "humanSubtitleReadOnly",
+    "execution",
+    "outcome",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

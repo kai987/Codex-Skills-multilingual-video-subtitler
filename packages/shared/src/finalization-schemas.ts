@@ -268,6 +268,36 @@ export const finalizationMetricsSchema = z
       .nonnegative()
       .default(0),
     untrustedForcedAlignmentTimingUseCount: z.literal(0).default(0),
+    speakerTargetComponentCount: z.number().int().nonnegative().default(0),
+    speakerTargetCueCount: z.number().int().nonnegative().default(0),
+    speakerInferenceCount: z.number().int().nonnegative().default(0),
+    speakerCacheHitCount: z.number().int().nonnegative().default(0),
+    speakerModelLoadCount: z.number().int().nonnegative().default(0),
+    speakerStableComponentCount: z.number().int().nonnegative().default(0),
+    speakerResolvedComponentCount: z.number().int().nonnegative().default(0),
+    speakerPresentationOnlyComponentCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    speakerTimingOnlyComponentCount: z.number().int().nonnegative().default(0),
+    speakerUnresolvedComponentCount: z.number().int().nonnegative().default(0),
+    duplicateSpeakerEvidenceLineageCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    speakerEvidenceDoubleCountPreventedCount: z
+      .number()
+      .int()
+      .nonnegative()
+      .default(0),
+    speakerConfidenceFabricatedCount: z.literal(0).default(0),
+    crossComponentSpeakerLinkCount: z.literal(0).default(0),
+    realPersonIdentificationCount: z.literal(0).default(0),
+    rawEmbeddingInShareableCount: z.literal(0).default(0),
+    forbiddenSpeakerIdentityEvidenceUseCount: z.literal(0).default(0),
+    forbiddenSpeakerTimingHeuristicUseCount: z.literal(0).default(0),
   })
   .strict();
 
@@ -350,6 +380,14 @@ export const subtitleFinalizationReportSchema = z
           .default(null),
         canonicalPronunciation: relativePathSchema.nullable().default(null),
         sudachiRuntimeCapability: relativePathSchema.nullable().default(null),
+        speakerRuntimeCapability: relativePathSchema.nullable().default(null),
+        localSpeakerEvidence: relativePathSchema.nullable().default(null),
+        speakerEvidenceCacheManifest: relativePathSchema
+          .nullable()
+          .default(null),
+        reviewActionValidationReport: relativePathSchema
+          .nullable()
+          .default(null),
         subtitledVideo: relativePathSchema.nullable(),
       })
       .strict(),
@@ -455,6 +493,7 @@ export const subtitleReviewItemSchema = z
       )
       .default([]),
     findingIds: z.array(z.string().min(1)),
+    speakerEvidenceComponentId: z.string().min(1).nullable().default(null),
     blockers: z.array(z.string().min(1)),
     allowedHumanActions: z.array(
       z.enum([
@@ -588,6 +627,13 @@ export const subtitleReviewPackageSchema = z
       .default("legacy"),
     deliveryIntegrityPolicyVersion: z.string().min(1).nullable().default(null),
     reviewActionPolicyVersion: z.string().min(1).nullable().default(null),
+    speakerEvidenceArtifactPath: relativePathSchema.nullable().default(null),
+    speakerEvidenceArtifactHash: hashSchema.nullable().default(null),
+    speakerRuntimeIdentityHash: hashSchema.nullable().default(null),
+    speakerModelSnapshotHash: hashSchema.nullable().default(null),
+    speakerEvidencePolicyVersion: z.string().min(1).nullable().default(null),
+    speakerAssignmentHash: hashSchema.nullable().default(null),
+    speakerRelationshipHash: hashSchema.nullable().default(null),
     items: z.array(subtitleReviewItemSchema),
     summary: z
       .object({

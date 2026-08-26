@@ -651,6 +651,108 @@
           "default": 0,
           "type": "number",
           "const": 0
+        },
+        "speakerTargetComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerTargetCueCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerInferenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerCacheHitCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerModelLoadCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerStableComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerResolvedComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerPresentationOnlyComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerTimingOnlyComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerUnresolvedComponentCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateSpeakerEvidenceLineageCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerEvidenceDoubleCountPreventedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerConfidenceFabricatedCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
+        },
+        "crossComponentSpeakerLinkCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
+        },
+        "realPersonIdentificationCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
+        },
+        "rawEmbeddingInShareableCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
+        },
+        "forbiddenSpeakerIdentityEvidenceUseCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
+        },
+        "forbiddenSpeakerTimingHeuristicUseCount": {
+          "default": 0,
+          "type": "number",
+          "const": 0
         }
       },
       "required": [
@@ -726,7 +828,25 @@
         "forcedAlignmentMfaProcessCount",
         "forcedAlignmentResolvedComponentCount",
         "forcedAlignmentUnresolvedComponentCount",
-        "untrustedForcedAlignmentTimingUseCount"
+        "untrustedForcedAlignmentTimingUseCount",
+        "speakerTargetComponentCount",
+        "speakerTargetCueCount",
+        "speakerInferenceCount",
+        "speakerCacheHitCount",
+        "speakerModelLoadCount",
+        "speakerStableComponentCount",
+        "speakerResolvedComponentCount",
+        "speakerPresentationOnlyComponentCount",
+        "speakerTimingOnlyComponentCount",
+        "speakerUnresolvedComponentCount",
+        "duplicateSpeakerEvidenceLineageCount",
+        "speakerEvidenceDoubleCountPreventedCount",
+        "speakerConfidenceFabricatedCount",
+        "crossComponentSpeakerLinkCount",
+        "realPersonIdentificationCount",
+        "rawEmbeddingInShareableCount",
+        "forbiddenSpeakerIdentityEvidenceUseCount",
+        "forbiddenSpeakerTimingHeuristicUseCount"
       ],
       "additionalProperties": false
     },
@@ -943,6 +1063,50 @@
             { "type": "null" }
           ]
         },
+        "speakerRuntimeCapability": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "localSpeakerEvidence": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "speakerEvidenceCacheManifest": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
+        "reviewActionValidationReport": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            { "type": "null" }
+          ]
+        },
         "subtitledVideo": {
           "anyOf": [
             {
@@ -972,6 +1136,10 @@
         "forcedAlignmentCacheManifest",
         "canonicalPronunciation",
         "sudachiRuntimeCapability",
+        "speakerRuntimeCapability",
+        "localSpeakerEvidence",
+        "speakerEvidenceCacheManifest",
+        "reviewActionValidationReport",
         "subtitledVideo"
       ],
       "additionalProperties": false
