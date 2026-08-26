@@ -68,6 +68,8 @@
     "validate:c5-18-1-runs": "tsx scripts/validate-c5-18-1-runs.ts",
     "replay:c5-19-series-memory": "tsx scripts/replay-c5-19-series-memory.ts",
     "validate:c5-19-runs": "tsx scripts/validate-c5-19-runs.ts",
+    "investigate:c6-0-finalization-risk": "tsx scripts/investigate-c6-0-finalization-risk.ts",
+    "validate:c6-0-investigation": "tsx scripts/validate-c6-0-investigation.ts",
     "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
     "verify:c4-persistent-worker": "tsx scripts/verify-c4-persistent-worker.ts",
     "validate:c4-real-runs": "tsx scripts/validate-c4-real-runs.ts",

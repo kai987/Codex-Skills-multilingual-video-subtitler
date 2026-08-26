@@ -121,11 +121,65 @@ import {
   c519CausalValidationSchema,
   seriesMemoryQualityAuditSchema,
   c519RunValidationSchema,
+  c60BlockerInventorySchema,
+  c60BlockerOntologySchema,
+  c60BlockerSupersessionAuditSchema,
+  c60BlockerRootCauseGraphSchema,
+  c60ComponentRiskAuditSchema,
+  c60FinalizationCounterfactualSchema,
+  c60HumanAuthorityDependencyAuditSchema,
+  c60ZeroTouchReadinessSchema,
+  c60InvestigationSummarySchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "c6-0-blocker-inventory.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-blocker-inventory.schema.json",
+    schema: c60BlockerInventorySchema,
+  },
+  {
+    fileName: "c6-0-blocker-ontology.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-blocker-ontology.schema.json",
+    schema: c60BlockerOntologySchema,
+  },
+  {
+    fileName: "c6-0-blocker-supersession-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-blocker-supersession-audit.schema.json",
+    schema: c60BlockerSupersessionAuditSchema,
+  },
+  {
+    fileName: "c6-0-blocker-root-cause-graph.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-blocker-root-cause-graph.schema.json",
+    schema: c60BlockerRootCauseGraphSchema,
+  },
+  {
+    fileName: "c6-0-component-risk-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-component-risk-audit.schema.json",
+    schema: c60ComponentRiskAuditSchema,
+  },
+  {
+    fileName: "c6-0-finalization-counterfactual.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-finalization-counterfactual.schema.json",
+    schema: c60FinalizationCounterfactualSchema,
+  },
+  {
+    fileName: "c6-0-human-authority-dependency-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-human-authority-dependency-audit.schema.json",
+    schema: c60HumanAuthorityDependencyAuditSchema,
+  },
+  {
+    fileName: "c6-0-zero-touch-readiness.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-zero-touch-readiness.schema.json",
+    schema: c60ZeroTouchReadinessSchema,
+  },
+  {
+    fileName: "c6-0-investigation-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-investigation-summary.schema.json",
+    schema: c60InvestigationSummarySchema,
+  },
   {
     fileName: "subtitle-canonical-pronunciation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/subtitle-canonical-pronunciation.schema.json",

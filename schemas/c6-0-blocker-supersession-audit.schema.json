@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-blocker-supersession-audit.schema.json",
+  "title": "c6-0-blocker-supersession-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "investigationVersion": { "type": "string", "const": "C6.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceSnapshot": {
+      "type": "object",
+      "properties": {
+        "sourceTaskName": { "type": "string", "minLength": 1 },
+        "sourceTaskHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceStatus": { "type": "string", "const": "needs-review" },
+        "sourceFinalizationMethod": { "type": "string", "const": "none" },
+        "sourceReviewItemCount": { "type": "number", "const": 7 },
+        "sourceFinalArtifactPresent": { "type": "boolean", "const": false },
+        "causalReplayParity": { "type": "boolean" },
+        "frozenReplayParity": { "type": "boolean" }
+      },
+      "required": [
+        "sourceTaskName",
+        "sourceTaskHash",
+        "canonicalCueHash",
+        "timingHash",
+        "outputCueHash",
+        "sourceStatus",
+        "sourceFinalizationMethod",
+        "sourceReviewItemCount",
+        "sourceFinalArtifactPresent",
+        "causalReplayParity",
+        "frozenReplayParity"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-blocker-supersession-audit"
+    },
+    "freshnessPolicyVersion": {
+      "type": "string",
+      "const": "c6-0-evidence-freshness-v1"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "componentId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "originalEvidenceRef": { "type": "string", "minLength": 1 },
+          "laterEvidenceRef": { "type": "string", "minLength": 1 },
+          "originalState": { "type": "string", "minLength": 1 },
+          "laterState": { "type": "string", "minLength": 1 },
+          "superseded": { "type": "boolean" },
+          "supersessionReason": { "type": "string", "minLength": 1 },
+          "canonicalTextChanged": { "type": "boolean", "const": false },
+          "timingChanged": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "code",
+          "componentId",
+          "cueIds",
+          "originalEvidenceRef",
+          "laterEvidenceRef",
+          "originalState",
+          "laterState",
+          "superseded",
+          "supersessionReason",
+          "canonicalTextChanged",
+          "timingChanged"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "unresolvedStaleBlockerCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "investigationVersion",
+    "generatedAt",
+    "sourceSnapshot",
+    "semanticHash",
+    "artifactType",
+    "freshnessPolicyVersion",
+    "entries",
+    "unresolvedStaleBlockerCount"
+  ],
+  "additionalProperties": false
+}

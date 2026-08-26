@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-human-authority-dependency-audit.schema.json",
+  "title": "c6-0-human-authority-dependency-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "investigationVersion": { "type": "string", "const": "C6.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceSnapshot": {
+      "type": "object",
+      "properties": {
+        "sourceTaskName": { "type": "string", "minLength": 1 },
+        "sourceTaskHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceStatus": { "type": "string", "const": "needs-review" },
+        "sourceFinalizationMethod": { "type": "string", "const": "none" },
+        "sourceReviewItemCount": { "type": "number", "const": 7 },
+        "sourceFinalArtifactPresent": { "type": "boolean", "const": false },
+        "causalReplayParity": { "type": "boolean" },
+        "frozenReplayParity": { "type": "boolean" }
+      },
+      "required": [
+        "sourceTaskName",
+        "sourceTaskHash",
+        "canonicalCueHash",
+        "timingHash",
+        "outputCueHash",
+        "sourceStatus",
+        "sourceFinalizationMethod",
+        "sourceReviewItemCount",
+        "sourceFinalArtifactPresent",
+        "causalReplayParity",
+        "frozenReplayParity"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-human-authority-dependency-audit"
+    },
+    "authority": { "type": "string", "const": "user-confirmed-human-review" },
+    "baselineCueCount": { "type": "number", "const": 192 },
+    "baselineReadOnlyVerified": { "type": "boolean", "const": true },
+    "humanAuthorityUsedForCanonicalText": { "type": "boolean", "const": true },
+    "humanAuthorityUsedForCanonicalTiming": {
+      "type": "boolean",
+      "const": true
+    },
+    "machineOnlyBlindProofPresent": { "type": "boolean" },
+    "humanBaselineCounterfactualReady": { "type": "boolean" },
+    "machineOnlyZeroTouchReady": { "type": "boolean" },
+    "dependencyRisks": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blindDatasetMethodology": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "investigationVersion",
+    "generatedAt",
+    "sourceSnapshot",
+    "semanticHash",
+    "artifactType",
+    "authority",
+    "baselineCueCount",
+    "baselineReadOnlyVerified",
+    "humanAuthorityUsedForCanonicalText",
+    "humanAuthorityUsedForCanonicalTiming",
+    "machineOnlyBlindProofPresent",
+    "humanBaselineCounterfactualReady",
+    "machineOnlyZeroTouchReady",
+    "dependencyRisks",
+    "blindDatasetMethodology"
+  ],
+  "additionalProperties": false
+}
