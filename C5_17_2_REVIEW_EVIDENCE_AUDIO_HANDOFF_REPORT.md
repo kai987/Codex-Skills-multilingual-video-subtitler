@@ -369,6 +369,7 @@ npm run validate:c5-17-2-review-delivery -- \
 | ----------------------- | ------------------------------------------------------------------ | ----- | ---- |
 | Canonical strict-v1 Cue | `8ec01ef362387aa4a4b61cb7c7cb3d2d4f4932f38aff3a4b5695deedfa1ccc83` | 同左  | true |
 | Canonical Timing        | `510c3f20b82ecd263cd2234057536eaddda0dc94efac599ffe72aa3fc843ec02` | 同左  | true |
+| Presentation Cue        | `9e1371375397df403bf2647cc805b8c70d6c2628eca1eb4f94dca32cc7eed4de` | 同左  | true |
 | Presentation Artifact   | `7ba2058662d21b3de386d5ec0085636f108ee3a8bf0902affdd96d299308efbf` | 同左  | true |
 
 Cue creation=0、deletion=0、text mutation=0、timing mutation=0；Finalization Report 的 `baseCueHash` 与 `outputCueHash` 完全一致。
