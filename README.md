@@ -128,6 +128,32 @@ npm run replay:c5-18-speaker-evidence -- \
 
 Run Observe and read-only Cache Replay from the Fresh task, then validate all three with `npm run validate:c5-18-runs -- --fresh <task> --observe <task> --cache-replay <task>`. Acceptance requires 14/14 speaker-cache hits, zero cache-replay model loads/inferences, semantic parity, unchanged human text, and passing review/shareable integrity. Real model integration tests are opt-in with `MVL_SPEAKER_INTEGRATION_TEST=1`; normal CI never downloads the model.
 
+C5.18.1 adds transcript-constrained local CTC alignment for only the 16 cues in those seven review components. It pins the Large Reazon Japanese Wav2Vec2 snapshot, runs one persistent offline worker, derives frame intervals from the model convolution geometry, and compares narrow and expanded windows independently on both boundary sides. CTC, greedy decoding, and candidate acoustic streams never author subtitle text. A timing-only repair needs stable dual-window CTC plus independent lexical evidence on both sides, non-contradictory speaker/neighbor evidence, a resolved joint component assignment, bounded movement, and atomic component application.
+
+The optional SepFormer fallback is `off|observe` only. Its outputs are named Candidate Stream A/B, are cross-domain experimental evidence, cannot authorize timing, and are never copied as WAVs into shareable output. Prepare and verify the independent CTC runtime, then replay and validate with:
+
+```bash
+npm run prepare:ctc-runtime -- --create-runtime --fetch-models
+npm run verify:c5-18-1-ctc-runtime -- \
+  --runtime-manifest "/path/to/ctc-runtime-manifest.json" \
+  --model-manifest "/path/to/ctc-model-manifest.json" \
+  --probe-audio "/path/to/review.wav"
+npm run replay:c5-18-1-ctc-boundary -- \
+  --task "/path/to/c5-18-fresh-task" \
+  --output "/path/to/new-c5-18-1-task" \
+  --ctc-runtime-manifest "/path/to/ctc-runtime-manifest.json" \
+  --ctc-boundary enforce \
+  --ctc-device auto \
+  --ctc-separation-fallback observe \
+  --ctc-cache-mode read-write
+npm run validate:c5-18-1-runs -- \
+  --fresh "/path/to/fresh" \
+  --observe "/path/to/observe" \
+  --cache-replay "/path/to/cache-replay"
+```
+
+The exact cache identity covers audio frames, target/token hashes, runtime/model/tokenizer/device, CTC policy, normalization, Viterbi, and frame mapping—not task paths or timestamps. Observe and Cache Replay must read every Fresh direct/separated CTC and separation result without loading either model.
+
 Local task artifacts retain full diagnostic paths. For sharing, generate strict relative-path copies and audit them for absolute paths and secret-like values:
 
 ```bash
