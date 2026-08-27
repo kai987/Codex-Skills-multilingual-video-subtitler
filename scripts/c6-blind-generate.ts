@@ -22,6 +22,7 @@ import {
   createC601EvaluationPolicy,
   createMachineShadowPolicy,
   emitMachineQualityRunArtifacts,
+  machineQualityProfileUsesVad,
   evaluateMachineShadowFinalization,
   sha256BlindFile,
   verifyBlindOutputFreeze,
@@ -173,8 +174,8 @@ if (
     qualityProfile,
   });
 }
-if (qualityProfile === "timing" && vadModelPath === null) {
-  throw new InputError("The timing profile requires --vad-model.");
+if (machineQualityProfileUsesVad(qualityProfile) && vadModelPath === null) {
+  throw new InputError("The timing and full profiles require --vad-model.");
 }
 
 if (await pathExists(outputPath)) {
@@ -387,7 +388,7 @@ const generationArguments = [
   whisperPath,
   "--whisper-execution-mode",
   "process",
-  ...(qualityProfile === "timing"
+  ...(machineQualityProfileUsesVad(qualityProfile)
     ? ["--whisper-vad-model", requiredResolvedPath(vadModelPath, "--vad-model")]
     : ["--no-whisper-vad"]),
   "--asr-cache-dir",
@@ -488,7 +489,7 @@ const machineQualityArtifacts = await emitMachineQualityRunArtifacts({
   mode: machineQualityRecovery,
   profile: qualityProfile,
   targetChunkSeconds: machineQualityRecovery === "enforce" ? 30 : null,
-  vadEnabled: qualityProfile === "timing",
+  vadEnabled: machineQualityProfileUsesVad(qualityProfile),
   sceneRouting:
     machineQualityRecovery === "enforce"
       ? qualityProfile === "full"

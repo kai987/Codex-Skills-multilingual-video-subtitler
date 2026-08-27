@@ -1,4 +1,8 @@
-import type { MachineQualityRecoveryMode, SubtitleCue } from "@mvl/shared";
+import type {
+  MachineQualityRecoveryMode,
+  MachineQualityRecoveryProfile,
+  SubtitleCue,
+} from "@mvl/shared";
 
 export const C6011_MACHINE_QUALITY_POLICY_VERSION =
   "c6.0.1.1-machine-quality-recovery-v1" as const;
@@ -32,4 +36,10 @@ export function allowRefinementContextPromptForMachineQuality(
   mode: MachineQualityRecoveryMode,
 ): boolean {
   return mode !== "enforce";
+}
+
+export function machineQualityProfileUsesVad(
+  profile: MachineQualityRecoveryProfile,
+): boolean {
+  return profile === "timing" || profile === "full";
 }

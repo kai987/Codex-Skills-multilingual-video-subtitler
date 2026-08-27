@@ -6,6 +6,7 @@ import {
 import {
   allowRefinementContextPromptForMachineQuality,
   machineQualityTargetChunkSeconds,
+  machineQualityProfileUsesVad,
   recoveryPromptCuesForMachineQuality,
 } from "@mvl/video-subtitler";
 import { buildCanonicalHallucinationIntegrityFindings } from "@mvl/transcription-core";
@@ -30,6 +31,13 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     expect(allowRefinementContextPromptForMachineQuality("enforce")).toBe(
       false,
     );
+  });
+  it("uses VAD for timing and combined full recovery only", () => {
+    expect(machineQualityProfileUsesVad("legacy")).toBe(false);
+    expect(machineQualityProfileUsesVad("diagnostics")).toBe(false);
+    expect(machineQualityProfileUsesVad("coverage")).toBe(false);
+    expect(machineQualityProfileUsesVad("timing")).toBe(true);
+    expect(machineQualityProfileUsesVad("full")).toBe(true);
   });
   it("keeps off and observe compatible while enforce isolates provisional prompt text", () => {
     expect(
