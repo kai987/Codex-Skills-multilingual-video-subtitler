@@ -27,7 +27,10 @@ import {
   type SubtitleCue,
 } from "@mvl/shared";
 import { parseAss } from "@mvl/subtitle-core";
-import { machineQualitySemanticHash } from "@mvl/video-subtitler";
+import {
+  machineQualitySemanticHash,
+  normalizeC601GoldAssTimestamps,
+} from "@mvl/video-subtitler";
 
 type StageLabel =
   | "baseline"
@@ -273,7 +276,7 @@ async function buildGoldLossAttribution(input: {
     readFile(input.goldSubtitlePath, "utf8"),
     sha256File(input.goldSubtitlePath),
   ]);
-  const goldCues = parseAss(goldText);
+  const goldCues = parseAss(normalizeC601GoldAssTimestamps(goldText).content);
   const atomsById = new Map(atomization.atoms.map((cue) => [cue.id, cue]));
   const finalTexts = input.stage.subtitlePackage.cues.map((cue) =>
     normalize(cue.text),
