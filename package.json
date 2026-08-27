@@ -74,6 +74,8 @@
     "validate:c6-0-protected-finalization": "tsx scripts/validate-c6-0-protected-finalization.ts",
     "c6:blind-generate": "tsx scripts/c6-blind-generate.ts",
     "c6:create-dual-freeze-barrier": "tsx scripts/c6-create-dual-freeze-barrier.ts",
+    "c6:gold-evaluate": "tsx scripts/c6-gold-evaluate.ts",
+    "validate:c6-0-1-blind-acceptance": "tsx scripts/validate-c6-0-1-blind-acceptance.ts",
     "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
     "verify:c4-persistent-worker": "tsx scripts/verify-c4-persistent-worker.ts",
     "validate:c4-real-runs": "tsx scripts/validate-c4-real-runs.ts",

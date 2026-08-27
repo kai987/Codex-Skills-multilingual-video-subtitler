@@ -116,6 +116,11 @@ export async function createBlindOutputFreeze(input: {
     "subtitle-finalization-report.json",
   );
   const memoryPath = path.join(taskDirectory, "machine-memory.json");
+  const memoryValue = (await readJson(memoryPath)) as {
+    entryCount?: unknown;
+    humanDerived?: unknown;
+    entries?: unknown;
+  };
   const frozenFiles = await Promise.all(
     (await listFrozenFiles(taskDirectory)).map(async (filePath) => {
       const info = await stat(filePath);
@@ -153,7 +158,11 @@ export async function createBlindOutputFreeze(input: {
     machineEvidenceCoverageHash: evidence.semanticHash,
     shadowPolicyHash: shadowPolicy.policyHash,
     shadowOutcome: shadow.shadowMachineOutcome,
-    seriesMemoryHash: await sha256BlindFile(memoryPath),
+    seriesMemoryHash: c60StableHash({
+      entryCount: memoryValue.entryCount,
+      humanDerived: memoryValue.humanDerived,
+      entries: memoryValue.entries,
+    }),
     provenanceHash: provenance.semanticHash,
     frozenFiles,
     frozenArtifactAggregateHash: aggregate,
