@@ -41,7 +41,7 @@ export function allowRefinementContextPromptForMachineQuality(
 export function machineQualityProfileUsesVad(
   profile: MachineQualityRecoveryProfile,
 ): boolean {
-  return profile === "timing" || profile === "full";
+  return profile === "timing";
 }
 
 export function allowBaselineCarryPromptForMachineQuality(

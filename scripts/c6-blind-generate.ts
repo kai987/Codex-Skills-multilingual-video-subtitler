@@ -175,7 +175,7 @@ if (
   });
 }
 if (machineQualityProfileUsesVad(qualityProfile) && vadModelPath === null) {
-  throw new InputError("The timing and full profiles require --vad-model.");
+  throw new InputError("The timing profile requires --vad-model.");
 }
 
 if (await pathExists(outputPath)) {

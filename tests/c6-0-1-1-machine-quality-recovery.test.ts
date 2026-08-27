@@ -38,12 +38,12 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     expect(allowBaselineCarryPromptForMachineQuality("observe")).toBe(true);
     expect(allowBaselineCarryPromptForMachineQuality("enforce")).toBe(false);
   });
-  it("uses VAD for timing and combined full recovery only", () => {
+  it("keeps untrusted stock VAD isolated to the diagnostic timing profile", () => {
     expect(machineQualityProfileUsesVad("legacy")).toBe(false);
     expect(machineQualityProfileUsesVad("diagnostics")).toBe(false);
     expect(machineQualityProfileUsesVad("coverage")).toBe(false);
     expect(machineQualityProfileUsesVad("timing")).toBe(true);
-    expect(machineQualityProfileUsesVad("full")).toBe(true);
+    expect(machineQualityProfileUsesVad("full")).toBe(false);
   });
   it("keeps off and observe compatible while enforce isolates provisional prompt text", () => {
     expect(
