@@ -712,27 +712,29 @@ const goldLossAttribution = await buildGoldLossAttribution({
   goldSubtitlePath: path.resolve(required(args, "--gold-subtitle")),
   generatedAt,
 });
+const evaluatedTraceStages = finalAArtifacts.trace.stages.map((entry) =>
+  entry.stage === "Final Machine"
+    ? {
+        ...entry,
+        qualityMetrics: {
+          goldCoverage: finalA.metrics.goldCoverage,
+          normalizedCer: finalA.metrics.normalizedCer,
+          materialErrorCount: finalA.metrics.materialErrorCount,
+          severeTimingErrorCount: finalA.metrics.severeTimingErrorCount,
+          overlapPairCount: finalA.metrics.overlapPairCount,
+        },
+        evidence: [
+          ...entry.evidence,
+          "post-hoc-gold-isolated-evaluation-attached",
+        ],
+      }
+    : entry,
+);
 const evaluatedTrace = machineStageQualityTraceSchema.parse({
   ...finalAArtifacts.trace,
   generatedAt,
-  stages: finalAArtifacts.trace.stages.map((entry) =>
-    entry.stage === "Final Machine"
-      ? {
-          ...entry,
-          qualityMetrics: {
-            goldCoverage: finalA.metrics.goldCoverage,
-            normalizedCer: finalA.metrics.normalizedCer,
-            materialErrorCount: finalA.metrics.materialErrorCount,
-            severeTimingErrorCount: finalA.metrics.severeTimingErrorCount,
-            overlapPairCount: finalA.metrics.overlapPairCount,
-          },
-          evidence: [
-            ...entry.evidence,
-            "post-hoc-gold-isolated-evaluation-attached",
-          ],
-        }
-      : entry,
-  ),
+  stages: evaluatedTraceStages,
+  semanticHash: machineQualitySemanticHash(evaluatedTraceStages),
 });
 await Promise.all([
   atomicWriteJson(path.join(outputPath, "c6-0-1-3-ablation.json"), ablation),
