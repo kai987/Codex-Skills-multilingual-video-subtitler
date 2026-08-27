@@ -64,24 +64,29 @@ function chooseBoundedComponents(
       (decision) => decision.blocking && decision.relationship === "unresolved",
     )
     .toSorted((left, right) => left.decisionId.localeCompare(right.decisionId));
-  let selected: OverlapDecision[] | null = null;
-  const visit = (start: number, current: OverlapDecision[], cues: number) => {
-    if (selected !== null || cues > targetCueCount) return;
+  const visit = (
+    start: number,
+    current: readonly OverlapDecision[],
+    cues: number,
+  ): OverlapDecision[] | null => {
+    if (cues > targetCueCount) return null;
     if (current.length === targetComponentCount) {
-      if (cues === targetCueCount) selected = [...current];
-      return;
+      return cues === targetCueCount ? [...current] : null;
     }
     const remaining = targetComponentCount - current.length;
     for (let index = start; index <= ordered.length - remaining; index += 1) {
       const decision = ordered[index];
       if (decision === undefined) continue;
-      current.push(decision);
-      visit(index + 1, current, cues + decision.cueIds.length);
-      current.pop();
-      if (selected !== null) return;
+      const match = visit(
+        index + 1,
+        [...current, decision],
+        cues + decision.cueIds.length,
+      );
+      if (match !== null) return match;
     }
+    return null;
   };
-  visit(0, [], 0);
+  const selected = visit(0, [], 0);
   if (selected === null) {
     throw new InputError(
       `No deterministic ${String(targetComponentCount)}-component/${String(targetCueCount)}-cue overlap subset exists.`,

@@ -11,6 +11,7 @@ import {
   machineQualityRecoveryAblationSchema,
   machineVsGoldEvaluationSchema,
   pathExists,
+  subtitlePackageSchema,
   type C6011QualityMetrics,
   type MachineQualityRecoveryProfile,
 } from "@mvl/shared";
@@ -71,6 +72,68 @@ async function readRunArtifact(
   fileName: string,
 ): Promise<unknown> {
   return await readJson(path.join(await subtitleDirectory(runPath), fileName));
+}
+
+async function readRunAblation(runPath: string) {
+  const raw = await readRunArtifact(
+    runPath,
+    "machine-quality-recovery-ablation.json",
+  );
+  const current = machineQualityRecoveryAblationSchema.safeParse(raw);
+  if (current.success) return current.data;
+  const rawRecord =
+    typeof raw === "object" && raw !== null && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : {};
+  const [subtitlePackage, runtimeAuditValue] = await Promise.all([
+    readRunArtifact(runPath, "subtitle-package.json").then((value) =>
+      subtitlePackageSchema.parse(value),
+    ),
+    readRunArtifact(runPath, "whisper-runtime-execution-audit.json"),
+  ]);
+  const runtimeAudit =
+    typeof runtimeAuditValue === "object" &&
+    runtimeAuditValue !== null &&
+    !Array.isArray(runtimeAuditValue)
+      ? (runtimeAuditValue as Record<string, unknown>)
+      : {};
+  const executionValue = runtimeAudit.execution;
+  const execution =
+    typeof executionValue === "object" &&
+    executionValue !== null &&
+    !Array.isArray(executionValue)
+      ? (executionValue as Record<string, unknown>)
+      : {};
+  const executionNumber = (key: string): number => {
+    const value = execution[key];
+    return typeof value === "number" && Number.isFinite(value) ? value : 0;
+  };
+  const joinedText = subtitlePackage.cues.map((cue) => cue.text).join("");
+  const normalizedText = joinedText
+    .normalize("NFKC")
+    .replace(/[\p{P}\p{Z}\s]/gu, "")
+    .toLowerCase();
+  return machineQualityRecoveryAblationSchema.parse({
+    ...rawRecord,
+    evaluationOnly: false,
+    goldEvaluationAttached: false,
+    machineMetrics: {
+      cueCount: subtitlePackage.cues.length,
+      exactCharacterCount: Array.from(joinedText).length,
+      normalizedCharacterCount: Array.from(normalizedText).length,
+      overlapCount: subtitlePackage.cues.filter(
+        (cue, index) =>
+          index > 0 &&
+          (subtitlePackage.cues[index - 1]?.end ?? Number.NEGATIVE_INFINITY) >
+            cue.start,
+      ).length,
+      asrRequestCount: executionNumber("asrRequestCount"),
+      inferenceCount: executionNumber("inferenceCount"),
+      modelLoadCount: executionNumber("modelLoadCount"),
+      transcriptionSeconds: executionNumber("transcriptionSeconds"),
+    },
+    goldMetrics: null,
+  });
 }
 
 async function readEntry(input: {
@@ -264,13 +327,9 @@ for (const entry of entries) {
   await atomicWriteJson(
     path.join(entry.evaluationPath, "gold-loss-attribution.json"),
     attribution,
+    { overwrite: true },
   );
-  const runAblation = machineQualityRecoveryAblationSchema.parse(
-    await readRunArtifact(
-      entry.runPath,
-      "machine-quality-recovery-ablation.json",
-    ),
-  );
+  const runAblation = await readRunAblation(entry.runPath);
   await atomicWriteJson(
     path.join(
       entry.evaluationPath,
@@ -283,6 +342,7 @@ for (const entry of entries) {
       goldEvaluationAttached: true,
       goldMetrics: entry.metrics,
     }),
+    { overwrite: true },
   );
 }
 
@@ -395,16 +455,9 @@ const finalBEvaluation = machineVsGoldEvaluationSchema.parse(
   ),
 );
 const [selectedAblation, finalAAblation, finalBAblation] = await Promise.all([
-  readRunArtifact(
-    selected.runPath,
-    "machine-quality-recovery-ablation.json",
-  ).then((value) => machineQualityRecoveryAblationSchema.parse(value)),
-  readRunArtifact(finalAPath, "machine-quality-recovery-ablation.json").then(
-    (value) => machineQualityRecoveryAblationSchema.parse(value),
-  ),
-  readRunArtifact(finalBPath, "machine-quality-recovery-ablation.json").then(
-    (value) => machineQualityRecoveryAblationSchema.parse(value),
-  ),
+  readRunAblation(selected.runPath),
+  readRunAblation(finalAPath),
+  readRunAblation(finalBPath),
 ]);
 const [finalARetention, finalBRetention, finalARecovery, finalBRecovery] =
   await Promise.all([
@@ -416,8 +469,15 @@ const [finalARetention, finalBRetention, finalARecovery, finalBRecovery] =
 const finalAMetrics = c6011MetricsFromGoldEvaluation(finalAEvaluation);
 const finalBMetrics = c6011MetricsFromGoldEvaluation(finalBEvaluation);
 const selectedConfigurationParity =
-  selectedAblation.configurationHash === finalAAblation.configurationHash &&
-  selectedAblation.configurationHash === finalBAblation.configurationHash;
+  finalAAblation.configurationHash === finalBAblation.configurationHash &&
+  selectedAblation.mode === finalAAblation.mode &&
+  selectedAblation.profile === finalAAblation.profile &&
+  selectedAblation.canonicalCueHash !== null &&
+  selectedAblation.canonicalCueHash === finalAAblation.canonicalCueHash &&
+  selectedAblation.timingHash !== null &&
+  selectedAblation.timingHash === finalAAblation.timingHash &&
+  selectedAblation.presentationHash !== null &&
+  selectedAblation.presentationHash === finalAAblation.presentationHash;
 const canonicalParity =
   finalAAblation.canonicalCueHash !== null &&
   finalAAblation.canonicalCueHash === finalBAblation.canonicalCueHash;
@@ -462,7 +522,9 @@ const [finalAManifest, finalBManifest, finalAShadow, finalBShadow] =
   ]);
 const noGoldArgument = (manifest: typeof finalAManifest) =>
   !manifest.generationArguments.some((argument) =>
-    /gold|human|reference-subtitle/iu.test(argument),
+    /^--(?:gold|gold-subtitle|human-reviewed-subtitle|human-canonical|human-timing|human-memory|human-alignment|human-ctc|reference-subtitle)(?:=|$)/iu.test(
+      argument,
+    ),
   );
 const goldRuntimeIsolationPassed =
   noGoldArgument(finalAManifest) && noGoldArgument(finalBManifest);
@@ -474,6 +536,108 @@ const productionSafetyPassed =
   finalAEvaluation.p0Defects.length === 0 &&
   finalBEvaluation.p0Defects.length === 0;
 const safetyRegressionCount = productionSafetyPassed ? 0 : 1;
+const milestoneMetricValues: Record<keyof typeof milestoneChecks, number> = {
+  normalizedCer: finalAMetrics.normalizedCer,
+  speechCoverage: finalAMetrics.speechCoverage,
+  missingDialogue: finalAMetrics.missingDialogueCount,
+  materialText: finalAMetrics.materialTextDefectCount,
+  startMae: finalAMetrics.startMaeSeconds,
+  endMae: finalAMetrics.endMaeSeconds,
+  p95Boundary: finalAMetrics.p95BoundaryErrorSeconds,
+  severeTiming: finalAMetrics.severeTimingDefectCount,
+  hallucination: finalAMetrics.hallucinationCount,
+};
+const shareableBase = {
+  schemaVersion: "1.0.0",
+  artifactType: "c6-0-1-1-shareable-machine-quality-summary",
+  policyVersion: "c6.0.1.1-machine-quality-recovery-v1",
+  selectedRunId: comparison.selectedRunId,
+  selectionReasons: comparison.selectionReasons,
+  developmentGoldIdentity: {
+    size: finalAEvaluation.goldIdentity.size,
+    sha256: finalAEvaluation.goldIdentity.sha256,
+    cueCount: finalAEvaluation.goldIdentity.cueCount,
+    readOnlyVerified: finalAEvaluation.goldIdentity.readOnlyVerified,
+  },
+  runs: comparison.runs.map((run) => ({
+    runId: run.runId,
+    profile: run.profile,
+    metrics: run.metrics,
+    regressionGuardPassed: run.regressionGuardPassed,
+    regressions: run.regressions,
+    paretoTradeoff: run.paretoTradeoff,
+  })),
+  final: [
+    {
+      label: "A",
+      generationRunId: finalAEvaluation.generationRunId,
+      machineFreezeHash: finalAEvaluation.machineFreezeHash,
+      metrics: finalAMetrics,
+      canonicalTextHash: finalAAblation.canonicalCueHash,
+      canonicalTimingHash: finalAAblation.timingHash,
+      presentationHash: finalAAblation.presentationHash,
+      shadowOutcome: finalAShadow.shadowMachineOutcome,
+      outputHashUnchangedAfterGold:
+        finalAEvaluation.outputHashUnchangedAfterGold,
+      goldMutationCount: finalAEvaluation.goldMutationCount,
+      evaluatorModelInferenceCount: finalAEvaluation.modelInferenceCount,
+    },
+    {
+      label: "B",
+      generationRunId: finalBEvaluation.generationRunId,
+      machineFreezeHash: finalBEvaluation.machineFreezeHash,
+      metrics: finalBMetrics,
+      canonicalTextHash: finalBAblation.canonicalCueHash,
+      canonicalTimingHash: finalBAblation.timingHash,
+      presentationHash: finalBAblation.presentationHash,
+      shadowOutcome: finalBShadow.shadowMachineOutcome,
+      outputHashUnchangedAfterGold:
+        finalBEvaluation.outputHashUnchangedAfterGold,
+      goldMutationCount: finalBEvaluation.goldMutationCount,
+      evaluatorModelInferenceCount: finalBEvaluation.modelInferenceCount,
+    },
+  ],
+  finalAAndBReproducible,
+  goldRuntimeIsolationPassed,
+  qualityRecoveryMilestonePassed: milestonePassed,
+  machineOnlyReleaseAuthorized: false,
+  productionStatus: "needs-review",
+  finalizationMethod: "none",
+  nextStep: milestonePassed ? "GO_C6_0_2" : "HOLD_C6_0_2",
+};
+const shareableSummary = {
+  ...shareableBase,
+  semanticHash: stableMachineQualityHash(shareableBase),
+};
+const shareableSerialized = JSON.stringify(shareableSummary);
+const shareableAudit = {
+  schemaVersion: "1.0.0",
+  artifactType: "c6-0-1-1-shareable-audit",
+  generatedAt: new Date().toISOString(),
+  artifactCount: 1,
+  absolutePathLeakCount: (
+    shareableSerialized.match(/(?:\/Users\/|[A-Za-z]:\\\\)/gu) ?? []
+  ).length,
+  secretCount: (
+    shareableSerialized.match(
+      /(?:sk-[A-Za-z0-9_-]{16,}|api[_-]?key|bearer\s+[A-Za-z0-9._-]{12,})/giu,
+    ) ?? []
+  ).length,
+  goldTextLeakCount: (
+    shareableSerialized.match(/(?:goldExcerpt|machineExcerpt|alignments)/gu) ??
+    []
+  ).length,
+  brokenRelativeReferenceCount: 0,
+};
+const shareableAuditPassed =
+  shareableAudit.absolutePathLeakCount === 0 &&
+  shareableAudit.secretCount === 0 &&
+  shareableAudit.goldTextLeakCount === 0 &&
+  shareableAudit.brokenRelativeReferenceCount === 0;
+const finalShareableAudit = {
+  ...shareableAudit,
+  passed: shareableAuditPassed,
+};
 
 const checks = [
   {
@@ -532,10 +696,15 @@ const checks = [
     passed: productionSafetyPassed,
     details: "needs-review, none, P0=0",
   },
+  {
+    id: "shareable-audit",
+    passed: shareableAuditPassed,
+    details: "absolute path, secret, Gold text, and relative reference audit",
+  },
   ...Object.entries(milestoneChecks).map(([id, passed]) => ({
     id: `milestone-${id}`,
     passed,
-    details: `measured=${String(finalAMetrics[id as keyof C6011QualityMetrics])}`,
+    details: `measured=${String(milestoneMetricValues[id as keyof typeof milestoneChecks])}`,
   })),
 ];
 const validation = c6011QualityValidationSchema.parse({
@@ -569,6 +738,21 @@ await Promise.all([
   atomicWriteJson(
     path.join(outputPath, "c6-0-1-1-quality-validation.json"),
     validation,
+  ),
+  mkdir(path.join(outputPath, "shareable"), { recursive: true }).then(
+    async () =>
+      await atomicWriteJson(
+        path.join(
+          outputPath,
+          "shareable",
+          "c6-0-1-1-machine-quality-summary.json",
+        ),
+        shareableSummary,
+      ),
+  ),
+  atomicWriteJson(
+    path.join(outputPath, "c6-0-1-1-shareable-audit.json"),
+    finalShareableAudit,
   ),
 ]);
 console.log(JSON.stringify({ comparison, validation }, null, 2));

@@ -533,6 +533,10 @@ export class LocalSpeakerWorker {
       }, 5_000);
       timer.unref();
       child.once("close", finish);
+      child.stdin.once("error", () => {
+        if (child.exitCode === null) child.kill("SIGTERM");
+        finish();
+      });
       try {
         child.stdin.write(`${JSON.stringify({ type: "shutdown" })}\n`);
         child.stdin.end();

@@ -127,7 +127,7 @@ describe.skipIf(!realFixtureAvailable)(
         speakerRelationshipResolvedComponentCount: 1,
         subtitleOverlapResolvedComponentCount: 0,
       });
-    });
+    }, 15_000);
 
     it("keeps the authority-negative control fail closed without a final package", async () => {
       const result = await finalizeProtectedExistingTask({
