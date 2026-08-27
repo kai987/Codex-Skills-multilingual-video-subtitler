@@ -20,6 +20,8 @@ import type {
   TextIntegrityMode,
   CoverageRecoveryMode,
   MachineQualityRecoveryMode,
+  CandidateConsensusMode,
+  GlobalTokenTimelineMode,
 } from "@mvl/shared";
 import type { MediaIdentityOverrides } from "@mvl/media-identity";
 import type {
@@ -194,6 +196,10 @@ export interface VideoSubtitlerOptions {
   referenceClassificationReviewThreshold?: number;
   /** C6.0.1.1 is opt-in; off preserves the pre-C6.0.1.1 pipeline. */
   machineQualityRecovery?: MachineQualityRecoveryMode;
+  /** C6.0.1.2 candidate-family and cross-window consensus policy. */
+  candidateConsensus?: CandidateConsensusMode;
+  /** C6.0.1.2 trusted original-media token timeline policy. */
+  globalTokenTimeline?: GlobalTokenTimelineMode;
 }
 
 export interface VideoSubtitlerDependencies {

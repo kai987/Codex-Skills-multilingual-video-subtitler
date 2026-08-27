@@ -173,6 +173,8 @@ interface SubtitleCliOptions extends GlobalOptions {
   finalization: "auto" | "review-fallback" | "human";
   prepareReview?: boolean;
   machineQualityRecovery: "off" | "observe" | "enforce";
+  candidateConsensus: "off" | "observe" | "enforce";
+  globalTokenTimeline: "off" | "observe" | "enforce";
 }
 
 interface FinalizeCliOptions extends GlobalOptions {
@@ -509,6 +511,22 @@ program
   .addOption(
     new Option("--reference-repair <mode>", "optional Phase C repair scope")
       .choices(["off", "missing-only", "conflicts", "all"])
+      .default("off"),
+  )
+  .addOption(
+    new Option(
+      "--candidate-consensus <mode>",
+      "C6.0.1.2 acoustic-event family and cross-window consensus policy",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("off"),
+  )
+  .addOption(
+    new Option(
+      "--global-token-timeline <mode>",
+      "C6.0.1.2 trusted original-media token timeline policy",
+    )
+      .choices(["off", "observe", "enforce"])
       .default("off"),
   )
   .addOption(
@@ -1030,6 +1048,8 @@ program
       referenceClassificationReviewThreshold:
         options.referenceClassificationReviewThreshold,
       machineQualityRecovery: options.machineQualityRecovery,
+      candidateConsensus: options.candidateConsensus,
+      globalTokenTimeline: options.globalTokenTimeline,
       fullSecondPass: options.fullSecondPass ?? false,
       refine: options.refine ?? false,
       allowQualityFallback: options.allowQualityFallback ?? false,

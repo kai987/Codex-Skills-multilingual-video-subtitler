@@ -52,6 +52,9 @@ import {
   type IntraCueRepetitionRepairArtifact,
   type ReferenceTimelineArtifact,
   type SubtitleCue,
+  type AsrRequestTimelineContract,
+  type CandidateConsensusMode,
+  type GlobalTokenTimelineMode,
   type TranscriptionQuality,
   subtitlePackageSchema,
   toAppError,
@@ -98,6 +101,7 @@ import type {
   VideoSubtitlerOptions,
   VideoSubtitlerResult,
 } from "./types.js";
+import { runCandidatePrecisionWorkflow } from "./machine-quality/candidate-precision-workflow.js";
 
 async function loadJapaneseTerminology(
   filePath: string | undefined,
@@ -162,8 +166,23 @@ function runTopScoreTextPipeline(input: {
   lyricsValidation: "conservative" | "balanced";
   textIntegrity: "off" | "observe" | "enforce";
   timingQaConfig: VideoSubtitlerOptions["timingQaConfig"];
+  requestTimelineContract?: AsrRequestTimelineContract;
+  candidateConsensus?: CandidateConsensusMode;
+  globalTokenTimeline?: GlobalTokenTimelineMode;
 }) {
-  const evidenceCues = input.evidenceCues ?? input.cues;
+  const originalEvidenceCues = input.evidenceCues ?? input.cues;
+  const candidatePrecision =
+    input.requestTimelineContract === undefined
+      ? null
+      : runCandidatePrecisionWorkflow({
+          cues: input.cues,
+          evidenceCues: originalEvidenceCues,
+          requestTimelineContract: input.requestTimelineContract,
+          candidateConsensus: input.candidateConsensus ?? "off",
+          globalTokenTimeline: input.globalTokenTimeline ?? "off",
+        });
+  const pipelineCues = candidatePrecision?.cues ?? input.cues;
+  const evidenceCues = candidatePrecision?.evidenceCues ?? originalEvidenceCues;
   const semanticValidation = validateSemanticCandidates({
     cues: evidenceCues,
     ...(input.referenceTimeline === undefined
@@ -176,7 +195,7 @@ function runTopScoreTextPipeline(input: {
     entries: input.terminologyEntries,
   });
   const hypothesisResolution = resolveCompetingHypotheses({
-    cues: input.cues,
+    cues: pipelineCues,
     evidenceCues,
     mode: input.hypothesisMode,
     terminology: terminologyEvidence,
@@ -273,6 +292,7 @@ function runTopScoreTextPipeline(input: {
     lyricsValidity: postRepairLyricsValidity,
   });
   return {
+    candidatePrecision,
     semanticValidation,
     terminologyEvidence,
     hypothesisResolution,
@@ -415,6 +435,61 @@ async function persistManifest(
 ): Promise<void> {
   manifest.updatedAt = new Date().toISOString();
   await atomicWriteJson(pathName, manifest, { overwrite });
+}
+
+async function persistCandidatePrecisionArtifacts(input: {
+  subtitleDirectory: string;
+  overwrite: boolean;
+  artifacts: NonNullable<ReturnType<typeof runCandidatePrecisionWorkflow>>;
+}): Promise<void> {
+  await Promise.all([
+    atomicWriteJson(
+      path.join(
+        input.subtitleDirectory,
+        "machine-acoustic-event-families.json",
+      ),
+      input.artifacts.acousticEventFamilies,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-cross-window-consensus.json"),
+      input.artifacts.crossWindowConsensus,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "asr-request-timeline-contract.json"),
+      input.artifacts.requestTimelineContract,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-global-token-timeline.json"),
+      input.artifacts.globalTokenTimeline,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-cue-timeline-evidence.json"),
+      input.artifacts.cueTimelineEvidence,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-timing-non-degradation.json"),
+      input.artifacts.timingNonDegradation,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-lexical-conservation.json"),
+      input.artifacts.lexicalConservation,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(
+        input.subtitleDirectory,
+        "machine-overlap-event-classification.json",
+      ),
+      input.artifacts.overlapEventClassification,
+      { overwrite: input.overwrite },
+    ),
+  ]);
 }
 
 export async function runVideoSubtitler(
@@ -994,7 +1069,17 @@ export async function runVideoSubtitler(
           lyricsValidation: lyricsValidationMode,
           textIntegrity: textIntegrityMode,
           timingQaConfig: options.timingQaConfig,
+          requestTimelineContract: adaptive.requestTimelineContract,
+          candidateConsensus: options.candidateConsensus ?? "off",
+          globalTokenTimeline: options.globalTokenTimeline ?? "off",
         });
+        if (textPipeline.candidatePrecision !== null) {
+          await persistCandidatePrecisionArtifacts({
+            subtitleDirectory,
+            overwrite,
+            artifacts: textPipeline.candidatePrecision,
+          });
+        }
         const {
           semanticValidation,
           terminologyEvidence,

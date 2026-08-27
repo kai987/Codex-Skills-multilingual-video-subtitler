@@ -67,6 +67,7 @@ import {
   type TranscriptionQuality,
   type WhisperExecutionMetrics,
   type WhisperModelCapability,
+  type AsrRequestTimelineContract,
 } from "@mvl/shared";
 
 import type {
@@ -80,6 +81,7 @@ import {
   machineQualityTargetChunkSeconds,
   recoveryPromptCuesForMachineQuality,
 } from "./machine-quality/policy.js";
+import { buildCompleteAsrRequestTimelineContract } from "./machine-quality/request-timeline-contract.js";
 
 function benchmarkCandidates(
   capabilities: readonly WhisperModelCapability[],
@@ -389,6 +391,7 @@ export interface AdaptiveLocalTranscriptionResult {
     canonicalUtteranceCount: number;
   };
   missingDialogueRecovery: MissingDialogueRecoveryArtifact;
+  requestTimelineContract: AsrRequestTimelineContract;
   lyricsTranscription: LyricsTranscriptionArtifact;
   vocalRegions: ReturnType<typeof detectSongRegions>;
   supportedLyricsCueIds: string[];
@@ -2070,6 +2073,15 @@ export async function runAdaptiveLocalTranscription(input: {
       refinementCacheHits +
       recovery.cacheHits +
       lyricsResult.cacheHits;
+    const requestTimelineContract =
+      await buildCompleteAsrRequestTimelineContract({
+        sourceMediaSha256: input.sourceMediaSha256,
+        recovery: parsedRecovery,
+        lyrics: parsedLyrics,
+        ...(input.asrCache === undefined
+          ? {}
+          : { cacheManifest: input.asrCache.manifest() }),
+      });
     workerPool.recordCacheHits(cacheHits);
     await workerPool.close();
     const executionMetrics = workerPool.metrics();
@@ -2115,6 +2127,7 @@ export async function runAdaptiveLocalTranscription(input: {
         canonicalUtteranceCount: baseline.canonicalUtteranceCount,
       },
       missingDialogueRecovery: parsedRecovery,
+      requestTimelineContract,
       lyricsTranscription: parsedLyrics,
       vocalRegions,
       supportedLyricsCueIds: lyricsResult.supportedCueIds,

@@ -165,11 +165,83 @@ import {
   machineQualityRecoveryAblationSchema,
   c6011QualityComparisonSchema,
   c6011QualityValidationSchema,
+  machineAcousticEventFamiliesSchema,
+  machineCrossWindowConsensusSchema,
+  asrRequestTimelineContractSchema,
+  machineGlobalTokenTimelineSchema,
+  machineCueTimelineEvidenceSchema,
+  machineTimingNonDegradationSchema,
+  machineLexicalConservationSchema,
+  machineOverlapEventClassificationSchema,
+  c6012QualityPolicySchema,
+  c6012AblationSchema,
+  c6012QualityComparisonSchema,
+  c6012ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "machine-acoustic-event-families.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-acoustic-event-families.schema.json",
+    schema: machineAcousticEventFamiliesSchema,
+  },
+  {
+    fileName: "machine-cross-window-consensus.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-window-consensus.schema.json",
+    schema: machineCrossWindowConsensusSchema,
+  },
+  {
+    fileName: "asr-request-timeline-contract.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/asr-request-timeline-contract.schema.json",
+    schema: asrRequestTimelineContractSchema,
+  },
+  {
+    fileName: "machine-global-token-timeline.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-global-token-timeline.schema.json",
+    schema: machineGlobalTokenTimelineSchema,
+  },
+  {
+    fileName: "machine-cue-timeline-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cue-timeline-evidence.schema.json",
+    schema: machineCueTimelineEvidenceSchema,
+  },
+  {
+    fileName: "machine-timing-non-degradation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-timing-non-degradation.schema.json",
+    schema: machineTimingNonDegradationSchema,
+  },
+  {
+    fileName: "machine-lexical-conservation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-lexical-conservation.schema.json",
+    schema: machineLexicalConservationSchema,
+  },
+  {
+    fileName: "machine-overlap-event-classification.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-overlap-event-classification.schema.json",
+    schema: machineOverlapEventClassificationSchema,
+  },
+  {
+    fileName: "c6-0-1-2-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-2-quality-policy.schema.json",
+    schema: c6012QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-2-ablation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-2-ablation.schema.json",
+    schema: c6012AblationSchema,
+  },
+  {
+    fileName: "c6-0-1-2-quality-comparison.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-2-quality-comparison.schema.json",
+    schema: c6012QualityComparisonSchema,
+  },
+  {
+    fileName: "c6-0-1-2-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-2-validation.schema.json",
+    schema: c6012ValidationSchema,
+  },
   {
     fileName: "machine-generation-survival-funnel.schema.json",
     id: "https://schemas.local/multilingual-video-learning/machine-generation-survival-funnel.schema.json",

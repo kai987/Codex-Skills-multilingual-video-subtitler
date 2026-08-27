@@ -11,6 +11,8 @@ import {
   InputError,
   machineQualityRecoveryModeSchema,
   machineQualityRecoveryProfileSchema,
+  candidateConsensusModeSchema,
+  globalTokenTimelineModeSchema,
   pathExists,
   portableAsrCacheEntryV2Schema,
 } from "@mvl/shared";
@@ -22,6 +24,7 @@ import {
   createC601EvaluationPolicy,
   createMachineShadowPolicy,
   emitMachineQualityRunArtifacts,
+  emitCandidatePrecisionPolicyArtifact,
   machineQualityProfileUsesVad,
   machineQualityProfileRetainsReviewEvidence,
   evaluateMachineShadowFinalization,
@@ -49,6 +52,8 @@ function parseArguments(argv: readonly string[]): Map<string, string> {
     "--vad-model",
     "--asr-cache-import-run",
     "--asr-cache-import-failed-run",
+    "--candidate-consensus",
+    "--global-token-timeline",
   ]);
   const result = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 2) {
@@ -129,6 +134,12 @@ const device = args.get("--device") ?? "local";
 const runLabel = args.get("--run-label") ?? "blind";
 const machineQualityRecovery = machineQualityRecoveryModeSchema.parse(
   args.get("--machine-quality-recovery") ?? "off",
+);
+const candidateConsensus = candidateConsensusModeSchema.parse(
+  args.get("--candidate-consensus") ?? "off",
+);
+const globalTokenTimeline = globalTokenTimelineModeSchema.parse(
+  args.get("--global-token-timeline") ?? "off",
 );
 const qualityProfile = machineQualityRecoveryProfileSchema.parse(
   args.get("--quality-profile") ??
@@ -416,6 +427,10 @@ const generationArguments = [
     : []),
   "--machine-quality-recovery",
   machineQualityRecovery,
+  "--candidate-consensus",
+  candidateConsensus,
+  "--global-token-timeline",
+  globalTokenTimeline,
   "--finalization",
   "human",
 ];
@@ -501,6 +516,12 @@ const machineQualityArtifacts = await emitMachineQualityRunArtifacts({
         : "balanced"
       : "observe",
   whisperExecutablePath: whisperPath,
+});
+const candidatePrecisionPolicy = await emitCandidatePrecisionPolicyArtifact({
+  outputDirectory: outputPath,
+  candidateConsensus,
+  globalTokenTimeline,
+  generatedAt: generationCompletedAt,
 });
 await atomicWriteJson(
   path.join(outputPath, "blind-generation-execution.json"),
@@ -589,6 +610,9 @@ console.log(
       machineQualityRecovery,
       qualityProfile,
       machineQualityArtifactCount: machineQualityArtifacts.artifactCount,
+      candidateConsensus,
+      globalTokenTimeline,
+      candidatePrecisionPolicyHash: candidatePrecisionPolicy.policySemanticHash,
     },
     null,
     2,
