@@ -331,6 +331,61 @@ function snapshot(input: {
   };
 }
 
+export function deriveMachineIntegrationSummaryCounts(
+  artifactType:
+    | "machine-mfa-integration"
+    | "machine-ctc-integration"
+    | "machine-speaker-overlap-recovery",
+  artifact: JsonRecord,
+) {
+  const summary = summaryOf(artifact);
+  return artifactType === "machine-mfa-integration"
+    ? {
+        modelInferenceCount: countFrom(summary, "mfaProcessCount"),
+        cacheHitCount: countFrom(summary, "cacheHitCount"),
+        candidateCount: countFrom(summary, "eligibleCueCount", "cueCount"),
+        appliedCount: countFrom(summary, "timingMutationCount"),
+        canonicalCueMutationCount: countFrom(
+          summary,
+          "canonicalTextMutationCount",
+        ),
+        canonicalTimingMutationCount: countFrom(summary, "timingMutationCount"),
+      }
+    : artifactType === "machine-ctc-integration"
+      ? {
+          modelInferenceCount: countFrom(summary, "directInferenceCount"),
+          cacheHitCount: countFrom(summary, "directCacheHitCount"),
+          candidateCount: countFrom(
+            summary,
+            "targetEncodableCueCount",
+            "targetCueCount",
+          ),
+          appliedCount: countFrom(summary, "timingMutationCueCount"),
+          canonicalCueMutationCount: countFrom(
+            summary,
+            "canonicalTextMutationCount",
+          ),
+          canonicalTimingMutationCount: countFrom(
+            summary,
+            "timingMutationCueCount",
+          ),
+        }
+      : {
+          modelInferenceCount: countFrom(summary, "pipelineInferenceCount"),
+          cacheHitCount: countFrom(summary, "cacheHitCount"),
+          candidateCount: countFrom(summary, "targetComponentCount"),
+          appliedCount: countFrom(summary, "resolvedComponentCount"),
+          canonicalCueMutationCount: countFrom(
+            summary,
+            "canonicalTextMutationCount",
+          ),
+          canonicalTimingMutationCount: countFrom(
+            summary,
+            "timingMutationCount",
+          ),
+        };
+}
+
 async function integrationArtifact(input: {
   subtitleDirectory: string;
   fileName: string;
@@ -345,56 +400,10 @@ async function integrationArtifact(input: {
   const artifact = await readJsonOrEmpty(artifactPath);
   const exists = Object.keys(artifact).length > 0;
   const parsed = exists && input.parser.safeParse(artifact).success;
-  const summary = summaryOf(artifact);
-  const counts =
-    input.artifactType === "machine-mfa-integration"
-      ? {
-          modelInferenceCount: countFrom(summary, "mfaProcessCount"),
-          cacheHitCount: countFrom(summary, "cacheHitCount"),
-          candidateCount: countFrom(summary, "eligibleCueCount", "cueCount"),
-          appliedCount: countFrom(summary, "timingMutationCount"),
-          canonicalCueMutationCount: countFrom(
-            summary,
-            "canonicalTextMutationCount",
-          ),
-          canonicalTimingMutationCount: countFrom(
-            summary,
-            "timingMutationCount",
-          ),
-        }
-      : input.artifactType === "machine-ctc-integration"
-        ? {
-            modelInferenceCount: countFrom(summary, "directInferenceCount"),
-            cacheHitCount: countFrom(summary, "directCacheHitCount"),
-            candidateCount: countFrom(
-              summary,
-              "targetEncodableCueCount",
-              "targetCueCount",
-            ),
-            appliedCount: countFrom(summary, "timingMutationCueCount"),
-            canonicalCueMutationCount: countFrom(
-              summary,
-              "canonicalTextMutationCount",
-            ),
-            canonicalTimingMutationCount: countFrom(
-              summary,
-              "timingMutationCueCount",
-            ),
-          }
-        : {
-            modelInferenceCount: countFrom(summary, "pipelineInferenceCount"),
-            cacheHitCount: countFrom(summary, "cacheHitCount"),
-            candidateCount: countFrom(summary, "targetComponentCount"),
-            appliedCount: countFrom(summary, "resolvedComponentCount"),
-            canonicalCueMutationCount: countFrom(
-              summary,
-              "canonicalTextMutationCount",
-            ),
-            canonicalTimingMutationCount: countFrom(
-              summary,
-              "timingMutationCount",
-            ),
-          };
+  const counts = deriveMachineIntegrationSummaryCounts(
+    input.artifactType,
+    artifact,
+  );
   const referenceValue =
     input.artifactType === "machine-ctc-integration"
       ? artifact.ctcRuntimeCapabilityRef

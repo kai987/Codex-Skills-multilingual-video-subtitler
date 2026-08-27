@@ -6,6 +6,7 @@ import {
 import {
   allowBaselineCarryPromptForMachineQuality,
   allowRefinementContextPromptForMachineQuality,
+  deriveMachineIntegrationSummaryCounts,
   machineQualityTargetChunkSeconds,
   machineQualityProfileUsesVad,
   recoveryPromptCuesForMachineQuality,
@@ -187,6 +188,35 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     });
     expect(parsed.execution.inferenceCount).toBe(30);
     expect(parsed.execution.modelLoadCount).toBe(30);
+  });
+
+  it("derives integration counts once from each strict artifact summary", () => {
+    const artifact = {
+      summary: {
+        directInferenceCount: 32,
+        directCacheHitCount: 4,
+        targetEncodableCueCount: 14,
+        timingMutationCueCount: 2,
+        canonicalTextMutationCount: 0,
+      },
+      attempts: Array.from({ length: 32 }, () => ({
+        inferenceCount: 1,
+        cacheHitCount: 0,
+      })),
+    };
+    expect(
+      deriveMachineIntegrationSummaryCounts(
+        "machine-ctc-integration",
+        artifact,
+      ),
+    ).toEqual({
+      modelInferenceCount: 32,
+      cacheHitCount: 4,
+      candidateCount: 14,
+      appliedCount: 2,
+      canonicalCueMutationCount: 0,
+      canonicalTimingMutationCount: 2,
+    });
   });
 
   it("does not fabricate one-occurrence cross-utterance repetition evidence", () => {
