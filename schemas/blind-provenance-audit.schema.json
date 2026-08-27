@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/blind-provenance-audit.schema.json",
+  "title": "blind-provenance-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "blind-provenance-audit" },
+    "auditVersion": { "type": "string", "const": "c6.0.1-blind-provenance-v1" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "generationRunId": { "type": "string", "minLength": 1 },
+    "inputManifestHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nodes": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nodeId": { "type": "string", "minLength": 1 },
+          "artifactType": { "type": "string", "minLength": 1 },
+          "origin": {
+            "type": "string",
+            "enum": ["machine", "generic-resource"]
+          },
+          "authorityType": {
+            "type": "string",
+            "enum": ["none", "machine", "generic"]
+          },
+          "relativePath": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+              },
+              { "type": "null" }
+            ]
+          },
+          "artifactHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "parentNodeIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "humanDerived": { "type": "boolean", "const": false },
+          "mediaSpecific": { "type": "boolean" }
+        },
+        "required": [
+          "nodeId",
+          "artifactType",
+          "origin",
+          "authorityType",
+          "relativePath",
+          "artifactHash",
+          "parentNodeIds",
+          "humanDerived",
+          "mediaSpecific"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "lineageRoots": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "knownHumanIdentityMatches": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "nodeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "machineNodeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "genericNodeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "humanDerivedNodeCount": { "type": "number", "const": 0 },
+        "unknownProvenanceNodeCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "nodeCount",
+        "machineNodeCount",
+        "genericNodeCount",
+        "humanDerivedNodeCount",
+        "unknownProvenanceNodeCount"
+      ],
+      "additionalProperties": false
+    },
+    "isolationViolations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "passed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "auditVersion",
+    "generatedAt",
+    "generationRunId",
+    "inputManifestHash",
+    "nodes",
+    "lineageRoots",
+    "knownHumanIdentityMatches",
+    "summary",
+    "isolationViolations",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

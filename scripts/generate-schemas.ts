@@ -138,11 +138,83 @@ import {
   subtitleReviewEffectiveDispositionSchema,
   c60ProtectedFinalizationReplaySummarySchema,
   c60ProtectedFinalizationValidationSchema,
+  blindGenerationInputManifestSchema,
+  blindProvenanceAuditSchema,
+  machineBaselineEvidenceCoverageSchema,
+  machineShadowFinalizationPolicySchema,
+  machineShadowFinalizationSchema,
+  blindOutputFreezeSchema,
+  zeroTouchBlindGenerationProofSchema,
+  dualBlindFreezeBarrierSchema,
+  blindEvaluationPolicySchema,
+  machineVsGoldEvaluationSchema,
+  c601BlindAcceptanceDecisionSchema,
+  c601BlindAcceptanceValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "blind-generation-input-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/blind-generation-input-manifest.schema.json",
+    schema: blindGenerationInputManifestSchema,
+  },
+  {
+    fileName: "blind-provenance-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/blind-provenance-audit.schema.json",
+    schema: blindProvenanceAuditSchema,
+  },
+  {
+    fileName: "machine-baseline-evidence-coverage.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-baseline-evidence-coverage.schema.json",
+    schema: machineBaselineEvidenceCoverageSchema,
+  },
+  {
+    fileName: "machine-shadow-finalization-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-shadow-finalization-policy.schema.json",
+    schema: machineShadowFinalizationPolicySchema,
+  },
+  {
+    fileName: "machine-shadow-finalization.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-shadow-finalization.schema.json",
+    schema: machineShadowFinalizationSchema,
+  },
+  {
+    fileName: "blind-output-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/blind-output-freeze.schema.json",
+    schema: blindOutputFreezeSchema,
+  },
+  {
+    fileName: "zero-touch-blind-generation-proof.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/zero-touch-blind-generation-proof.schema.json",
+    schema: zeroTouchBlindGenerationProofSchema,
+  },
+  {
+    fileName: "dual-blind-freeze-barrier.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/dual-blind-freeze-barrier.schema.json",
+    schema: dualBlindFreezeBarrierSchema,
+  },
+  {
+    fileName: "blind-evaluation-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/blind-evaluation-policy.schema.json",
+    schema: blindEvaluationPolicySchema,
+  },
+  {
+    fileName: "machine-vs-gold-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-vs-gold-evaluation.schema.json",
+    schema: machineVsGoldEvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-blind-acceptance-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-blind-acceptance-decision.schema.json",
+    schema: c601BlindAcceptanceDecisionSchema,
+  },
+  {
+    fileName: "c6-0-1-blind-acceptance-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-blind-acceptance-validation.schema.json",
+    schema: c601BlindAcceptanceValidationSchema,
+  },
   {
     fileName: "c6-0-protected-risk-policy.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-protected-risk-policy.schema.json",

@@ -50,3 +50,7 @@ export * from "./shareable-artifacts.js";
 export * from "./transport.js";
 export * from "./types.js";
 export * from "./workflow.js";
+export * from "./blind-acceptance/gold-isolation.js";
+export * from "./blind-acceptance/machine-shadow.js";
+export * from "./blind-acceptance/output-freeze.js";
+export * from "./blind-acceptance/policy.js";

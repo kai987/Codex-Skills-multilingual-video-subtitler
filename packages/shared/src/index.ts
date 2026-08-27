@@ -21,6 +21,7 @@ export * from "./c5-18-1-schemas.js";
 export * from "./c5-19-schemas.js";
 export * from "./c6-0-investigation-schemas.js";
 export * from "./c6-0-protected-schemas.js";
+export * from "./c6-0-1-blind-acceptance-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";
