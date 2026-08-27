@@ -341,28 +341,89 @@ async function integrationArtifact(input: {
   header: ReturnType<typeof buildHeader>;
   parser: { safeParse(value: unknown): { success: boolean } };
 }) {
-  const artifact = await readJsonOrEmpty(
-    path.join(input.subtitleDirectory, input.fileName),
-  );
+  const artifactPath = path.join(input.subtitleDirectory, input.fileName);
+  const artifact = await readJsonOrEmpty(artifactPath);
   const exists = Object.keys(artifact).length > 0;
   const parsed = exists && input.parser.safeParse(artifact).success;
-  const modelInferenceCount = countNumericKeys(
-    artifact,
-    new Set(["modelInferenceCount", "inferenceCount"]),
-  );
-  const cacheHitCount = countNumericKeys(artifact, new Set(["cacheHitCount"]));
-  const appliedCount = countNumericKeys(
-    artifact,
-    new Set([
-      "appliedCount",
-      "appliedBoundaryCount",
-      "resolvedComponentCount",
-      "acceptedCount",
-    ]),
-  );
-  const candidateCount = countNumericKeys(
-    artifact,
-    new Set(["candidateCount", "componentCount", "alignmentCount"]),
+  const summary = summaryOf(artifact);
+  const counts =
+    input.artifactType === "machine-mfa-integration"
+      ? {
+          modelInferenceCount: countFrom(summary, "mfaProcessCount"),
+          cacheHitCount: countFrom(summary, "cacheHitCount"),
+          candidateCount: countFrom(summary, "eligibleCueCount", "cueCount"),
+          appliedCount: countFrom(summary, "timingMutationCount"),
+          canonicalCueMutationCount: countFrom(
+            summary,
+            "canonicalTextMutationCount",
+          ),
+          canonicalTimingMutationCount: countFrom(
+            summary,
+            "timingMutationCount",
+          ),
+        }
+      : input.artifactType === "machine-ctc-integration"
+        ? {
+            modelInferenceCount: countFrom(summary, "directInferenceCount"),
+            cacheHitCount: countFrom(summary, "directCacheHitCount"),
+            candidateCount: countFrom(
+              summary,
+              "targetEncodableCueCount",
+              "targetCueCount",
+            ),
+            appliedCount: countFrom(summary, "timingMutationCueCount"),
+            canonicalCueMutationCount: countFrom(
+              summary,
+              "canonicalTextMutationCount",
+            ),
+            canonicalTimingMutationCount: countFrom(
+              summary,
+              "timingMutationCueCount",
+            ),
+          }
+        : {
+            modelInferenceCount: countFrom(summary, "pipelineInferenceCount"),
+            cacheHitCount: countFrom(summary, "cacheHitCount"),
+            candidateCount: countFrom(summary, "targetComponentCount"),
+            appliedCount: countFrom(summary, "resolvedComponentCount"),
+            canonicalCueMutationCount: countFrom(
+              summary,
+              "canonicalTextMutationCount",
+            ),
+            canonicalTimingMutationCount: countFrom(
+              summary,
+              "timingMutationCount",
+            ),
+          };
+  const referenceValue =
+    input.artifactType === "machine-ctc-integration"
+      ? artifact.ctcRuntimeCapabilityRef
+      : artifact.runtimeCapabilityRef;
+  const referenceRecord = record(referenceValue);
+  const referencePath =
+    typeof referenceValue === "string"
+      ? referenceValue
+      : typeof referenceRecord.path === "string"
+        ? referenceRecord.path
+        : null;
+  const resolvedCapabilityPath =
+    referencePath === null
+      ? null
+      : path.resolve(input.subtitleDirectory, referencePath);
+  const capability =
+    resolvedCapabilityPath !== null &&
+    (resolvedCapabilityPath === input.subtitleDirectory ||
+      resolvedCapabilityPath.startsWith(
+        `${input.subtitleDirectory}${path.sep}`,
+      ))
+      ? await readJsonOrEmpty(resolvedCapabilityPath)
+      : {};
+  const firstAttempt = record(array(artifact.attempts)[0]);
+  const runtimeIdentity = text(
+    capability.runtimeIdentityHash ??
+      firstAttempt.runtimeIdentityHash ??
+      artifact.runtimeIdentity,
+    "",
   );
   const integration = {
     ...input.header,
@@ -370,25 +431,25 @@ async function integrationArtifact(input: {
     integration: {
       status: !exists
         ? ("unavailable" as const)
-        : appliedCount > 0
+        : counts.appliedCount > 0
           ? ("applied" as const)
           : parsed
             ? ("observed" as const)
             : ("rejected" as const),
-      runtimeIdentity:
-        typeof artifact.runtimeIdentity === "string"
-          ? artifact.runtimeIdentity
-          : null,
-      modelInferenceCount,
-      cacheHitCount,
-      candidateCount,
-      appliedCount,
-      canonicalCueMutationCount: 0,
-      canonicalTimingMutationCount: appliedCount,
+      runtimeIdentity: runtimeIdentity.length > 0 ? runtimeIdentity : null,
+      modelInferenceCount: counts.modelInferenceCount,
+      cacheHitCount: counts.cacheHitCount,
+      candidateCount: counts.candidateCount,
+      appliedCount: counts.appliedCount,
+      canonicalCueMutationCount: counts.canonicalCueMutationCount,
+      canonicalTimingMutationCount: counts.canonicalTimingMutationCount,
       reasons: !exists
         ? ["integration-artifact-not-produced-by-this-machine-only-run"]
         : parsed
-          ? ["artifact-schema-validated", "counts-derived-from-real-artifact"]
+          ? [
+              "artifact-schema-validated",
+              "counts-derived-once-from-strict-artifact-summary",
+            ]
           : ["artifact-schema-validation-failed"],
     },
     evidenceQuality: {
@@ -399,7 +460,7 @@ async function integrationArtifact(input: {
           : ("rejected" as const),
       inspectedArtifactCount: exists ? 1 : 0,
       schemaValidatedArtifactCount: parsed ? 1 : 0,
-      semanticEvidenceCount: candidateCount,
+      semanticEvidenceCount: counts.candidateCount,
       reasons: !exists
         ? ["no-current-run-evidence"]
         : parsed
