@@ -4,6 +4,7 @@ import {
   type SubtitleCue,
 } from "@mvl/shared";
 import {
+  allowRefinementContextPromptForMachineQuality,
   machineQualityTargetChunkSeconds,
   recoveryPromptCuesForMachineQuality,
 } from "@mvl/video-subtitler";
@@ -23,6 +24,13 @@ const cue: SubtitleCue = {
 };
 
 describe("C6.0.1.1 machine-only quality recovery", () => {
+  it("blocks provisional cue text from enforce-mode refinement prompts", () => {
+    expect(allowRefinementContextPromptForMachineQuality("off")).toBe(true);
+    expect(allowRefinementContextPromptForMachineQuality("observe")).toBe(true);
+    expect(allowRefinementContextPromptForMachineQuality("enforce")).toBe(
+      false,
+    );
+  });
   it("keeps off and observe compatible while enforce isolates provisional prompt text", () => {
     expect(
       recoveryPromptCuesForMachineQuality({

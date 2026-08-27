@@ -75,6 +75,7 @@ import type {
   VideoSubtitlerOptions,
 } from "./types.js";
 import {
+  allowRefinementContextPromptForMachineQuality,
   machineQualityTargetChunkSeconds,
   recoveryPromptCuesForMachineQuality,
 } from "./machine-quality/policy.js";
@@ -1146,6 +1147,9 @@ export async function runAdaptiveLocalTranscription(input: {
         ffmpegPath: input.ffmpegPath,
         intervals: sceneExtraSensitiveIntervals,
         contextCues: baseline.cues,
+        allowContextTextPrompt: allowRefinementContextPromptForMachineQuality(
+          machineQualityRecovery,
+        ),
         ...(language === undefined ? {} : { language }),
         promptNames: promptNames(
           input.identity,
@@ -1213,6 +1217,9 @@ export async function runAdaptiveLocalTranscription(input: {
         ffmpegPath: input.ffmpegPath,
         intervals: noVadIntervals,
         contextCues: baseline.cues,
+        allowContextTextPrompt: allowRefinementContextPromptForMachineQuality(
+          machineQualityRecovery,
+        ),
         ...(language === undefined ? {} : { language }),
         promptNames: promptNames(
           input.identity,
@@ -1397,6 +1404,9 @@ export async function runAdaptiveLocalTranscription(input: {
           promptNames: promptNames(
             input.identity,
             input.options.transcriptionPromptNames ?? [],
+          ),
+          allowContextTextPrompt: allowRefinementContextPromptForMachineQuality(
+            machineQualityRecovery,
           ),
           ...(language === undefined ? {} : { language }),
           ...(input.asrCache === undefined ? {} : { asrCache: input.asrCache }),

@@ -295,11 +295,14 @@ function promptForRefinement(input: {
   names: readonly string[];
   cues: readonly SubtitleCue[];
   interval: Interval;
+  allowCueContext: boolean;
 }): string {
-  const before = input.cues
-    .filter((cue) => cue.end <= input.interval.start)
-    .at(-1)?.text;
-  const after = input.cues.find((cue) => cue.start >= input.interval.end)?.text;
+  const before = input.allowCueContext
+    ? input.cues.filter((cue) => cue.end <= input.interval.start).at(-1)?.text
+    : undefined;
+  const after = input.allowCueContext
+    ? input.cues.find((cue) => cue.start >= input.interval.end)?.text
+    : undefined;
   return [
     input.names.length === 0
       ? ""
@@ -596,6 +599,7 @@ export async function transcribeIntervalsForComparison(input: {
   language?: LanguageTag;
   promptNames?: readonly string[];
   contextCues?: readonly SubtitleCue[];
+  allowContextTextPrompt?: boolean;
   asrCache?: PortableAsrCache | undefined;
 }): Promise<{
   cues: SubtitleCue[];
@@ -610,6 +614,7 @@ export async function transcribeIntervalsForComparison(input: {
       names: input.promptNames ?? [],
       cues: input.contextCues ?? [],
       interval: planned.expandedInterval,
+      allowCueContext: input.allowContextTextPrompt ?? true,
     });
     const transcribed = await transcribeInterval({
       mediaPath: input.mediaPath,
@@ -758,6 +763,7 @@ export async function runTargetedRefinement(input: {
   speechIntervals?: readonly Interval[];
   language?: LanguageTag;
   promptNames?: readonly string[];
+  allowContextTextPrompt?: boolean;
   originalLanguageReferences?: readonly SubtitleCue[];
   vadNoVadComparisons?: readonly VadNoVadComparison[];
   acousticScenes?: readonly AcousticSceneSegment[] | undefined;
@@ -950,6 +956,7 @@ export async function runTargetedRefinement(input: {
         names: input.promptNames ?? [],
         cues: acceptedContextCues,
         interval: expanded,
+        allowCueContext: input.allowContextTextPrompt ?? true,
       });
       const transcribed = await transcribeInterval({
         mediaPath: input.mediaPath,

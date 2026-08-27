@@ -22,3 +22,14 @@ export function recoveryPromptCuesForMachineQuality(input: {
 }): readonly SubtitleCue[] {
   return input.mode === "enforce" ? [] : input.provisionalCues;
 }
+
+/**
+ * Comparative and targeted refinement may use accepted cues for arbitration,
+ * but enforce mode must not feed those still-machine-provisional strings back
+ * into the decoder prompt.
+ */
+export function allowRefinementContextPromptForMachineQuality(
+  mode: MachineQualityRecoveryMode,
+): boolean {
+  return mode !== "enforce";
+}
