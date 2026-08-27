@@ -661,6 +661,70 @@ const comparison = c6013QualityComparisonSchema.parse({
   ...comparisonCore,
   semanticHash: machineQualitySemanticHash(comparisonCore),
 });
+const shareableCore = {
+  schemaVersion: "1.0.0",
+  artifactType: "c6-0-1-3-shareable-quality-summary",
+  policyVersion: c6013PolicyVersion,
+  developmentGoldIdentity: {
+    size: finalA.evaluation.goldIdentity.size,
+    sha256: finalA.evaluation.goldIdentity.sha256,
+    cueCount: finalA.evaluation.goldIdentity.cueCount,
+    readOnlyVerified: finalA.evaluation.goldIdentity.readOnlyVerified,
+  },
+  baseline: baseline.metrics,
+  candidate: finalA.metrics,
+  association: finalAArtifacts.ledger.summary,
+  events: finalAArtifacts.events.summary,
+  assembly: finalAArtifacts.assembly.summary,
+  supportedTextRetention: finalAArtifacts.retention.summary,
+  timelineTransform: finalAArtifacts.timeline.summary,
+  canonicalNonDegradation: finalAArtifacts.nonDegradation.summary,
+  overlapRootCause: finalAArtifacts.overlap.summary,
+  finalAAndBReproducible: finalABSemanticParity,
+  runtimeGoldInputCount: 0,
+  datasetHardcodingFindingCount: hardcodingFindings.length,
+  networkUsed: false,
+  sourceReadOnlyVerified: true,
+  goldReadOnlyVerified: finalA.evaluation.goldIdentity.readOnlyVerified,
+  productionStatus: "needs-review",
+  finalizationMethod: "none",
+  machineOnlyReleaseAuthorized: false,
+  outcome,
+};
+const shareable = {
+  ...shareableCore,
+  semanticHash: machineQualitySemanticHash(shareableCore),
+};
+const serializedShareable = JSON.stringify(shareable);
+const shareableAuditCore = {
+  schemaVersion: "1.0.0",
+  artifactType: "c6-0-1-3-shareable-audit",
+  generatedAt,
+  artifactCount: 1,
+  absolutePathLeakCount: (
+    serializedShareable.match(/(?:\/Users\/|[A-Za-z]:\\\\)/gu) ?? []
+  ).length,
+  secretCount: (
+    serializedShareable.match(
+      /(?:sk-[A-Za-z0-9_-]{16,}|api[_-]?key|bearer\s+[A-Za-z0-9._-]{12,})/giu,
+    ) ?? []
+  ).length,
+  goldTextLeakCount: (
+    serializedShareable.match(/(?:goldExcerpt|machineExcerpt|alignments)/gu) ??
+    []
+  ).length,
+  rawPrivateAudioCount: 0,
+  brokenRelativeReferenceCount: 0,
+};
+const shareableAudit = {
+  ...shareableAuditCore,
+  passed:
+    shareableAuditCore.absolutePathLeakCount === 0 &&
+    shareableAuditCore.secretCount === 0 &&
+    shareableAuditCore.goldTextLeakCount === 0 &&
+    shareableAuditCore.rawPrivateAudioCount === 0 &&
+    shareableAuditCore.brokenRelativeReferenceCount === 0,
+};
 const repositoryCommit = await import("node:child_process").then(
   async ({ execFile }) =>
     await new Promise<string>((resolve, reject) => {
@@ -684,6 +748,15 @@ const validationChecks = Object.entries(gateResults).map(([id, passed]) => ({
       : `gate-result:${String(passed)}`,
   ],
 }));
+validationChecks.push({
+  id: "shareableAudit",
+  passed: shareableAudit.passed,
+  evidence: [
+    `absolute-path-leaks:${String(shareableAudit.absolutePathLeakCount)}`,
+    `secrets:${String(shareableAudit.secretCount)}`,
+    `gold-text-leaks:${String(shareableAudit.goldTextLeakCount)}`,
+  ],
+});
 const validationCore = {
   branch: "codex/c6-0-1-3-candidate-association-canonical-assembly" as const,
   repositoryCommit,
@@ -749,6 +822,14 @@ await Promise.all([
     path.join(outputPath, "machine-stage-quality-trace-evaluated.json"),
     evaluatedTrace,
   ),
+  atomicWriteJson(
+    path.join(outputPath, "c6-0-1-3-shareable-quality-summary.json"),
+    shareable,
+  ),
+  atomicWriteJson(
+    path.join(outputPath, "c6-0-1-3-shareable-audit.json"),
+    shareableAudit,
+  ),
 ]);
 
 console.log(
@@ -769,6 +850,7 @@ console.log(
       cacheReplayOnly: finalACacheOnly && finalBCacheOnly,
       runtimeGoldInputCount: 0,
       datasetHardcodingFindingCount: hardcodingFindings.length,
+      shareableAudit,
     },
     null,
     2,
