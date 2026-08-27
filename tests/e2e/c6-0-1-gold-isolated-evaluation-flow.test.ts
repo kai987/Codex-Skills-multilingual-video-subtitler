@@ -15,6 +15,7 @@ import {
   c60SemanticHash,
   createC601EvaluationPolicy,
   evaluateDualBlindRunsAgainstGold,
+  evaluateFrozenBlindRunAgainstGold,
   sha256BlindFile,
 } from "@mvl/video-subtitler";
 import { afterEach, describe, expect, it } from "vitest";
@@ -273,5 +274,29 @@ describe("C6.0.1 Gold-isolated evaluation flow", () => {
     expect(result.runA.goldMutationCount).toBe(0);
     expect(result.replaySemanticHashes.runA).toBe(result.runA.semanticHash);
     expect(result.replaySemanticHashes.runB).toBe(result.runB.semanticHash);
+  });
+
+  it("evaluates a frozen development ablation without relaxing final A/B rules", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "mvl-c6011-e2e-"));
+    temporaryDirectories.push(root);
+    const runPath = path.join(root, "coverage-ablation");
+    await mkdir(runPath);
+    const run = await createRun(runPath, "A");
+    const goldPath = path.join(root, "synthetic-gold.ass");
+    const gold = formatAss(run.cues);
+    await writeFile(goldPath, gold);
+    const goldBuffer = Buffer.from(gold);
+    const result = await evaluateFrozenBlindRunAgainstGold({
+      taskDirectory: runPath,
+      goldPath,
+      expectedGoldSize: goldBuffer.byteLength,
+      expectedGoldSha256: createHash("sha256").update(goldBuffer).digest("hex"),
+      generatedAt: "2026-08-27T00:30:00.000Z",
+      frozenBeforeGoldAt: "2026-08-27T00:20:00.000Z",
+    });
+    expect(result.evaluation.globalTextMetrics.normalized.cer).toBe(0);
+    expect(result.evaluation.modelInferenceCount).toBe(0);
+    expect(result.evaluation.outputHashUnchangedAfterGold).toBe(true);
+    expect(result.replaySemanticHash).toBe(result.evaluation.semanticHash);
   });
 });

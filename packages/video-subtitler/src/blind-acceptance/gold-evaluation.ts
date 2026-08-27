@@ -67,6 +67,14 @@ interface DualEvaluationResult {
   };
 }
 
+export interface FrozenRunEvaluationResult {
+  goldFirstReadAt: string;
+  goldIdentity: MachineVsGoldEvaluation["goldIdentity"];
+  evaluation: MachineVsGoldEvaluation;
+  replaySemanticHash: string;
+  outputHashAfterGold: string;
+}
+
 function normalizedText(text: string): string {
   return text
     .normalize("NFKC")
@@ -920,5 +928,112 @@ export async function evaluateDualBlindRunsAgainstGold(input: {
       runA: freezeAfterA.frozenArtifactAggregateHash,
       runB: freezeAfterB.frozenArtifactAggregateHash,
     },
+  };
+}
+
+/**
+ * Evaluate one already-frozen development ablation without weakening the
+ * independent A/B barrier used for the final acceptance runs. The caller must
+ * create its pre-Gold proof before invoking this function. Gold is first read
+ * only after the machine manifest, output freeze, and evaluation policy have
+ * all been loaded and verified.
+ */
+export async function evaluateFrozenBlindRunAgainstGold(input: {
+  taskDirectory: string;
+  goldPath: string;
+  expectedGoldSize: number;
+  expectedGoldSha256: string;
+  generatedAt: string;
+  frozenBeforeGoldAt: string;
+}): Promise<FrozenRunEvaluationResult> {
+  const taskDirectory = path.resolve(input.taskDirectory);
+  const run = await loadMachineRun(taskDirectory);
+  if (run.policy.frozenAt > input.frozenBeforeGoldAt) {
+    throw new InputError(
+      "Evaluation policy was not frozen before Gold authorization.",
+    );
+  }
+
+  // This is intentionally the first filesystem operation against goldPath.
+  const goldFirstReadAt = new Date().toISOString();
+  const goldBuffer = await readFile(input.goldPath);
+  const goldHash = createHash("sha256").update(goldBuffer).digest("hex");
+  if (
+    goldBuffer.byteLength !== input.expectedGoldSize ||
+    goldHash !== input.expectedGoldSha256
+  ) {
+    throw new InputError(
+      "Gold identity does not match the frozen evaluation contract.",
+      {
+        expectedSize: input.expectedGoldSize,
+        actualSize: goldBuffer.byteLength,
+        expectedSha256: input.expectedGoldSha256,
+        actualSha256: goldHash,
+      },
+    );
+  }
+  const normalizedGoldAss = normalizeC601GoldAssTimestamps(
+    goldBuffer.toString("utf8"),
+  );
+  const goldCues = parseAss(normalizedGoldAss.content).map((cue, index) => ({
+    id: `gold-${String(index + 1).padStart(4, "0")}`,
+    start: cue.start,
+    end: cue.end,
+    text: cue.text,
+  }));
+  const goldIdentity = {
+    fileName: path.basename(input.goldPath),
+    size: goldBuffer.byteLength,
+    sha256: goldHash,
+    cueCount: goldCues.length,
+    timestampNormalizationCount: normalizedGoldAss.replacementCount,
+    firstReadAt: goldFirstReadAt,
+    readOnlyVerified: false,
+  };
+  const start = Date.now();
+  const [freezeAfter, goldAfter, goldInfo] = await Promise.all([
+    verifyBlindOutputFreeze({ taskDirectory }),
+    readFile(input.goldPath),
+    stat(input.goldPath),
+  ]);
+  const goldAfterHash = createHash("sha256").update(goldAfter).digest("hex");
+  if (
+    goldAfter.byteLength !== goldBuffer.byteLength ||
+    goldAfterHash !== goldHash ||
+    !goldInfo.isFile()
+  ) {
+    throw new InputError("Gold changed during read-only evaluation.");
+  }
+  if (freezeAfter.freezeSemanticHash !== run.freeze.freezeSemanticHash) {
+    throw new InputError(
+      "Frozen machine output changed during Gold evaluation.",
+    );
+  }
+  const verifiedGoldIdentity = { ...goldIdentity, readOnlyVerified: true };
+  const elapsed = Math.max(0, Date.now() - start);
+  const evaluate = (evaluationWallTimeMs: number) =>
+    evaluateMachineCues({
+      generatedAt: input.generatedAt,
+      generationRunId: run.manifest.generationRunId,
+      sourceIdentity: run.manifest.sourceVideo,
+      freeze: run.freeze,
+      machineCues: run.cues,
+      goldCues,
+      goldIdentity: verifiedGoldIdentity,
+      policy: run.policy,
+      evaluationWallTimeMs,
+      outputHashAfterGold: freezeAfter.frozenArtifactAggregateHash,
+    });
+  const evaluation = evaluate(elapsed);
+  const replay = evaluate(elapsed + 1);
+  if (evaluation.semanticHash !== replay.semanticHash) {
+    throw new InputError("Gold evaluator deterministic replay failed.");
+  }
+  return {
+    goldFirstReadAt,
+    goldIdentity: verifiedGoldIdentity,
+    evaluation,
+    replaySemanticHash: replay.semanticHash,
+    outputHashAfterGold: freezeAfter.frozenArtifactAggregateHash,
   };
 }

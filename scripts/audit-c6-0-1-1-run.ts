@@ -45,6 +45,12 @@ const manifest = blindGenerationInputManifestSchema.parse(
 const targetChunkSeconds =
   mode === "enforce" ? Number(args.get("--target-chunk") ?? "30") : null;
 const vadEnabled = args.get("--vad") === "true";
+const whisperArgumentIndex =
+  manifest.generationArguments.indexOf("--whisper-cpp-path");
+const whisperExecutablePath =
+  whisperArgumentIndex < 0
+    ? null
+    : (manifest.generationArguments[whisperArgumentIndex + 1] ?? null);
 const result = await emitMachineQualityRunArtifacts({
   outputDirectory,
   runId: manifest.generationRunId,
@@ -57,5 +63,6 @@ const result = await emitMachineQualityRunArtifacts({
   sceneRouting:
     args.get("--scene-routing") ??
     (mode === "enforce" ? "balanced" : "observe"),
+  whisperExecutablePath,
 });
 console.log(JSON.stringify(result, null, 2));

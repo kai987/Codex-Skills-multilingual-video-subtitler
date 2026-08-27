@@ -367,16 +367,20 @@ export function buildCanonicalHallucinationIntegrityFindings(
     );
     const exactSentenceLoop =
       group.length >= 3 && new Set(normalized).size === 1;
-    const repetitionEvidence = group
-      .map((item) => item.repetitionEvidence)
-      .find((evidence) => evidence !== undefined) ??
-      analyzeRepetitionWindow(group) ?? {
-        normalizedCorePhrase: normalized[0] ?? "",
-        occurrences: group.length,
-        contributingSegmentIds: group.map((item) => item.id),
-        suffixVariants: [],
-        repeatedCharacterRatio: 1,
-      };
+    const detectedRepetitionEvidence =
+      group
+        .map((item) => item.repetitionEvidence)
+        .find((evidence) => evidence !== undefined) ??
+      analyzeRepetitionWindow(group);
+    // A single utterance can be rejected by its own long-phrase loop detector
+    // without providing cross-utterance repetition evidence. Do not fabricate
+    // a one-occurrence RepetitionEvidence record: that contract represents at
+    // least two independently observed occurrences.
+    const repetitionEvidence =
+      detectedRepetitionEvidence !== null &&
+      detectedRepetitionEvidence.occurrences >= 2
+        ? detectedRepetitionEvidence
+        : undefined;
     return {
       id: `canonical-integrity-${String(index + 1).padStart(5, "0")}`,
       code: exactSentenceLoop
@@ -389,7 +393,7 @@ export function buildCanonicalHallucinationIntegrityFindings(
         end: group.at(-1)?.end ?? group[0]?.end ?? 0.001,
       },
       cueIds: group.map((item) => item.id),
-      repetitionEvidence,
+      ...(repetitionEvidence === undefined ? {} : { repetitionEvidence }),
       reasons: [
         "canonical-utterance-qa-rejected-final-projection",
         "suspected-hallucination",

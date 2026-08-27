@@ -19,7 +19,7 @@ const policyVersion = z.literal("c6.0.1.1-machine-quality-recovery-v1");
 const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const gitCommitSchema = z.string().regex(/^[a-f0-9]{40}$/u);
 const nullableSha256Schema = sha256Schema.nullable();
-const finiteNonNegative = z.number().finite().nonnegative();
+const finiteNonNegative = z.number().nonnegative();
 const count = z.number().int().nonnegative();
 
 const runIdentitySchema = z
@@ -34,7 +34,7 @@ const runIdentitySchema = z
 const artifactHeader = {
   schemaVersion,
   policyVersion,
-  generatedAt: z.string().datetime(),
+  generatedAt: z.iso.datetime(),
   mode: machineQualityRecoveryModeSchema,
   profile: machineQualityRecoveryProfileSchema,
   run: runIdentitySchema,
@@ -61,10 +61,78 @@ export const machineGenerationSurvivalFunnelSchema = z
           inputCount: count,
           outputCount: count,
           droppedCount: count,
-          retentionRatio: z.number().finite().min(0).max(1),
+          retentionRatio: z.number().min(0).max(1),
           lossReasons: z.array(
             z.object({ reason: z.string().min(1), count }).strict(),
           ),
+        })
+        .strict(),
+    ),
+    snapshots: z.array(
+      z
+        .object({
+          id: z.enum([
+            "source-media",
+            "speech-region",
+            "asr-request",
+            "raw-asr-segment",
+            "raw-asr-token",
+            "normalized-asr-segment",
+            "candidate",
+            "localized-candidate",
+            "associated-candidate",
+            "deduplicated-candidate",
+            "accepted-canonical-unit",
+            "merged-canonical-unit",
+            "final-machine-cue",
+          ]),
+          unitCount: count,
+          textCharacterCount: count,
+          temporalCoverageSeconds: finiteNonNegative,
+          uniqueTemporalCoverageSeconds: finiteNonNegative,
+          sourceUnitIds: z.array(z.string().min(1)),
+        })
+        .strict(),
+    ),
+    finalCueLineage: z.array(
+      z
+        .object({
+          finalCueId: z.string().min(1),
+          rawAsrSegmentIds: z.array(z.string().min(1)),
+          sourceRequestIds: z.array(z.string().min(1)),
+          audioIntervals: z.array(
+            z
+              .object({ start: finiteNonNegative, end: finiteNonNegative })
+              .strict(),
+          ),
+          decisionPath: z.array(z.string().min(1)),
+          unresolvedLineageReasons: z.array(z.string().min(1)),
+        })
+        .strict(),
+    ),
+    rejectedUnits: z.array(
+      z
+        .object({
+          unitId: z.string().min(1),
+          stage: z.string().min(1),
+          reason: z.enum([
+            "empty-text",
+            "low-confidence",
+            "duplicate",
+            "broad-window-only",
+            "ambiguous-association",
+            "missing-local-interval",
+            "partial-fragment",
+            "hallucination-risk",
+            "repetition-collapse",
+            "overlap-conflict",
+            "timing-integrity-failure",
+            "candidate-not-selected",
+            "post-merge-absorbed",
+            "quality-gate-rejected",
+            "unknown",
+          ]),
+          evidenceIds: z.array(z.string().min(1)),
         })
         .strict(),
     ),
@@ -79,6 +147,9 @@ export const machineGenerationSurvivalFunnelSchema = z
         finalCueCount: count,
         dominantLossStage: z.string().nullable(),
         dominantLossCount: count,
+        unknownRejectionCount: count,
+        lineageCompleteCueCount: count,
+        lineageIncompleteCueCount: count,
       })
       .strict(),
   })
@@ -129,9 +200,14 @@ export const whisperRuntimeExecutionAuditSchema = z
     artifactType: z.literal("whisper-runtime-execution-audit"),
     runtime: z
       .object({
+        intendedVersion: z.string(),
+        actualVersion: z.string(),
         whisperCppVersion: z.string(),
         modelName: z.string(),
         modelSha256: nullableSha256Schema,
+        binarySha256: nullableSha256Schema,
+        runtimeManifest: z.string(),
+        compatibilityReason: z.string(),
         device: z.string(),
         requestedMode: z.string(),
         actualMode: z.string(),
@@ -142,10 +218,20 @@ export const whisperRuntimeExecutionAuditSchema = z
         asrRequestCount: count,
         cacheHitCount: count,
         inferenceCount: count,
+        processCount: count,
         workerStartCount: count,
         modelLoadCount: count,
         transcriptionSeconds: finiteNonNegative,
         fallbackProcessCount: count,
+        uniqueAudioIntervalCount: count,
+        duplicateIntervalCount: count,
+        narrowRequestCount: count,
+        broadRequestCount: count,
+        recoveryRequestCount: count,
+        primaryGenerationRequestCount: count,
+        averageAudioSeconds: finiteNonNegative,
+        totalAudioSecondsProcessed: finiteNonNegative,
+        duplicateAudioSecondsProcessed: finiteNonNegative,
       })
       .strict(),
     evidenceQuality: evidenceQualitySchema,
@@ -160,7 +246,7 @@ export const machineSpeechCoverageGapSchema = z
     cueCount: count,
     speechSeconds: finiteNonNegative,
     coveredSpeechSeconds: finiteNonNegative,
-    coverageRatio: z.number().finite().min(0).max(1),
+    coverageRatio: z.number().min(0).max(1),
     gaps: z.array(
       z
         .object({
@@ -285,8 +371,8 @@ export const machineQualityRecoveryPolicySchema = z
       .strict(),
     milestone: z
       .object({
-        normalizedCerMaximum: z.number().finite().min(0),
-        coverageMinimum: z.number().finite().min(0).max(1),
+        normalizedCerMaximum: z.number().min(0),
+        coverageMinimum: z.number().min(0).max(1),
         missingDialogueMaximum: count,
         materialTextDefectMaximum: count,
         startMaeSecondsMaximum: finiteNonNegative,
@@ -319,7 +405,7 @@ export const goldLossAttributionSchema = z
   .object({
     schemaVersion,
     policyVersion,
-    generatedAt: z.string().datetime(),
+    generatedAt: z.iso.datetime(),
     artifactType: z.literal("gold-loss-attribution"),
     evaluationOnly: z.literal(true),
     goldRuntimeInputCount: z.literal(0),
@@ -328,8 +414,8 @@ export const goldLossAttributionSchema = z
     machineMetrics: z
       .object({
         cueCount: count,
-        normalizedCer: z.number().finite().nonnegative(),
-        speechCoverage: z.number().finite().min(0).max(1),
+        normalizedCer: z.number().nonnegative(),
+        speechCoverage: z.number().min(0).max(1),
         missingDialogueCount: count,
         materialTextDefectCount: count,
         severeTimingDefectCount: count,
@@ -350,8 +436,8 @@ export const goldLossAttributionSchema = z
 export const c6011QualityMetricsSchema = z
   .object({
     cueCount: count,
-    normalizedCer: z.number().finite().nonnegative(),
-    speechCoverage: z.number().finite().min(0).max(1),
+    normalizedCer: z.number().nonnegative(),
+    speechCoverage: z.number().min(0).max(1),
     missingDialogueCount: count,
     materialTextDefectCount: count,
     severeTimingDefectCount: count,
@@ -367,7 +453,7 @@ export const c6011QualityComparisonSchema = z
   .object({
     schemaVersion,
     policyVersion,
-    generatedAt: z.string().datetime(),
+    generatedAt: z.iso.datetime(),
     artifactType: z.literal("c6-0-1-1-quality-comparison"),
     runs: z.array(
       z
@@ -390,7 +476,7 @@ export const c6011QualityValidationSchema = z
   .object({
     schemaVersion,
     policyVersion,
-    generatedAt: z.string().datetime(),
+    generatedAt: z.iso.datetime(),
     artifactType: z.literal("c6-0-1-1-quality-validation"),
     baselineSchemaCount: z.literal(149),
     generatedSchemaCount: count,

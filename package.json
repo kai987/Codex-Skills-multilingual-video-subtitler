@@ -75,6 +75,7 @@
     "c6:blind-generate": "tsx scripts/c6-blind-generate.ts",
     "c6:create-dual-freeze-barrier": "tsx scripts/c6-create-dual-freeze-barrier.ts",
     "c6:gold-evaluate": "tsx scripts/c6-gold-evaluate.ts",
+    "c6:gold-evaluate-single": "tsx scripts/c6-gold-evaluate-single.ts",
     "validate:c6-0-1-blind-acceptance": "tsx scripts/validate-c6-0-1-blind-acceptance.ts",
     "audit:c6-0-1-1-quality": "tsx scripts/audit-c6-0-1-1-run.ts",
     "validate:c6-0-1-1-quality": "tsx scripts/validate-c6-0-1-1-quality.ts",

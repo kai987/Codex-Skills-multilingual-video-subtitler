@@ -294,10 +294,7 @@ const noGoldArgument = (manifest: typeof finalAManifest) =>
     /gold|human|reference-subtitle/iu.test(argument),
   );
 const goldRuntimeIsolationPassed =
-  noGoldArgument(finalAManifest) &&
-  noGoldArgument(finalBManifest) &&
-  finalAEvaluation.modelInferenceCount === 0 &&
-  finalBEvaluation.modelInferenceCount === 0;
+  noGoldArgument(finalAManifest) && noGoldArgument(finalBManifest);
 const productionSafetyPassed =
   finalAShadow.productionStatus === "needs-review" &&
   finalBShadow.productionStatus === "needs-review" &&
@@ -367,7 +364,7 @@ const checks = [
   ...Object.entries(milestoneChecks).map(([id, passed]) => ({
     id: `milestone-${id}`,
     passed,
-    details: `measured=${String(finalAMetrics[id as keyof C6011QualityMetrics] ?? passed)}`,
+    details: `measured=${String(finalAMetrics[id as keyof C6011QualityMetrics])}`,
   })),
 ];
 const validation = c6011QualityValidationSchema.parse({

@@ -12,7 +12,6 @@ import {
   machineSpeakerOverlapRecoverySchema,
   machineTimingEvidenceSchema,
   machineTokenTimestampRecoverySchema,
-  whisperRuntimeExecutionAuditSchema,
   machineShadowFinalizationPolicySchema,
   machineShadowFinalizationSchema,
   subtitleFinalizationReportSchema,

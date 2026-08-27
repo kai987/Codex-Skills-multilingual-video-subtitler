@@ -110,9 +110,10 @@
         "properties": {
           "path": { "type": "string", "minLength": 1 },
           "artifactType": { "type": "string", "minLength": 1 },
-          "provenance": { "type": "string", "minLength": 1 }
+          "provenance": { "type": "string", "const": "machine-only-verified" },
+          "artifactHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
         },
-        "required": ["path", "artifactType", "provenance"],
+        "required": ["path", "artifactType", "provenance", "artifactHash"],
         "additionalProperties": false
       }
     },
@@ -157,7 +158,10 @@
         "onlineSubtitleSearchUsed": { "type": "boolean", "const": false },
         "cloudProviderConfigured": { "type": "boolean", "const": false },
         "guidanceMode": { "type": "string", "const": "reference-free" },
-        "mediaCacheMode": { "type": "string", "const": "fresh-isolated" },
+        "mediaCacheMode": {
+          "type": "string",
+          "enum": ["fresh-isolated", "verified-machine-only"]
+        },
         "machineMemoryMode": { "type": "string", "const": "fresh-empty" }
       },
       "required": [

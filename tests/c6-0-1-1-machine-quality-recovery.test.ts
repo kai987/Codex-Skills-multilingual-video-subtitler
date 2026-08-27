@@ -7,6 +7,7 @@ import {
   machineQualityTargetChunkSeconds,
   recoveryPromptCuesForMachineQuality,
 } from "@mvl/video-subtitler";
+import { buildCanonicalHallucinationIntegrityFindings } from "@mvl/transcription-core";
 import { describe, expect, it } from "vitest";
 
 const hash = (character: string): string => character.repeat(64);
@@ -123,9 +124,14 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
         goldRuntimeInputCount: 0,
       },
       runtime: {
+        intendedVersion: "1.9.1",
+        actualVersion: "whisper.cpp version: 1.9.1",
         whisperCppVersion: "1.9.1",
         modelName: "large-v3",
         modelSha256: hash("c"),
+        binarySha256: hash("d"),
+        runtimeManifest: "blind-generation-input-manifest.json",
+        compatibilityReason: "pinned-runtime-matched",
         device: "Apple M1 Pro",
         requestedMode: "process",
         actualMode: "process",
@@ -134,10 +140,20 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
         asrRequestCount: 31,
         cacheHitCount: 1,
         inferenceCount: 30,
+        processCount: 30,
         workerStartCount: 30,
         modelLoadCount: 30,
         transcriptionSeconds: 120,
         fallbackProcessCount: 0,
+        uniqueAudioIntervalCount: 30,
+        duplicateIntervalCount: 1,
+        narrowRequestCount: 30,
+        broadRequestCount: 1,
+        recoveryRequestCount: 1,
+        primaryGenerationRequestCount: 30,
+        averageAudioSeconds: 30,
+        totalAudioSecondsProcessed: 930,
+        duplicateAudioSecondsProcessed: 30,
       },
       evidenceQuality: {
         status: "verified",
@@ -149,5 +165,21 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     });
     expect(parsed.execution.inferenceCount).toBe(30);
     expect(parsed.execution.modelLoadCount).toBe(30);
+  });
+
+  it("does not fabricate one-occurrence cross-utterance repetition evidence", () => {
+    const findings = buildCanonicalHallucinationIntegrityFindings([
+      {
+        id: "canonical-1",
+        start: 1,
+        end: 3,
+        text: "同じ長い句を同じ長い句を同じ長い句を繰り返す",
+        qualityStatus: "suspected-hallucination",
+        qualityReasons: ["LONG_PHRASE_LOOP"],
+      },
+    ]);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.repetitionEvidence).toBeUndefined();
+    expect(findings[0]?.reasons).toContain("LONG_PHRASE_LOOP");
   });
 });

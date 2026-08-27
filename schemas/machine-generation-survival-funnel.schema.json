@@ -89,6 +89,139 @@
         "additionalProperties": false
       }
     },
+    "snapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "source-media",
+              "speech-region",
+              "asr-request",
+              "raw-asr-segment",
+              "raw-asr-token",
+              "normalized-asr-segment",
+              "candidate",
+              "localized-candidate",
+              "associated-candidate",
+              "deduplicated-candidate",
+              "accepted-canonical-unit",
+              "merged-canonical-unit",
+              "final-machine-cue"
+            ]
+          },
+          "unitCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "textCharacterCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "temporalCoverageSeconds": { "type": "number", "minimum": 0 },
+          "uniqueTemporalCoverageSeconds": { "type": "number", "minimum": 0 },
+          "sourceUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "unitCount",
+          "textCharacterCount",
+          "temporalCoverageSeconds",
+          "uniqueTemporalCoverageSeconds",
+          "sourceUnitIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "finalCueLineage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "finalCueId": { "type": "string", "minLength": 1 },
+          "rawAsrSegmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceRequestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "audioIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "decisionPath": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "unresolvedLineageReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "finalCueId",
+          "rawAsrSegmentIds",
+          "sourceRequestIds",
+          "audioIntervals",
+          "decisionPath",
+          "unresolvedLineageReasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rejectedUnits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "unitId": { "type": "string", "minLength": 1 },
+          "stage": { "type": "string", "minLength": 1 },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "empty-text",
+              "low-confidence",
+              "duplicate",
+              "broad-window-only",
+              "ambiguous-association",
+              "missing-local-interval",
+              "partial-fragment",
+              "hallucination-risk",
+              "repetition-collapse",
+              "overlap-conflict",
+              "timing-integrity-failure",
+              "candidate-not-selected",
+              "post-merge-absorbed",
+              "quality-gate-rejected",
+              "unknown"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["unitId", "stage", "reason", "evidenceIds"],
+        "additionalProperties": false
+      }
+    },
     "summary": {
       "type": "object",
       "properties": {
@@ -134,6 +267,21 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
+        },
+        "unknownRejectionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lineageCompleteCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lineageIncompleteCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
         }
       },
       "required": [
@@ -145,7 +293,10 @@
         "rawSegmentCount",
         "finalCueCount",
         "dominantLossStage",
-        "dominantLossCount"
+        "dominantLossCount",
+        "unknownRejectionCount",
+        "lineageCompleteCueCount",
+        "lineageIncompleteCueCount"
       ],
       "additionalProperties": false
     }
@@ -159,6 +310,9 @@
     "run",
     "artifactType",
     "stages",
+    "snapshots",
+    "finalCueLineage",
+    "rejectedUnits",
     "summary"
   ],
   "additionalProperties": false

@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { execFile } from "node:child_process";
-import { mkdir, readFile, stat } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -11,6 +12,7 @@ import {
   machineQualityRecoveryModeSchema,
   machineQualityRecoveryProfileSchema,
   pathExists,
+  portableAsrCacheEntryV2Schema,
 } from "@mvl/shared";
 import {
   auditBlindRunProvenance,
@@ -44,6 +46,7 @@ function parseArguments(argv: readonly string[]): Map<string, string> {
     "--quality-profile",
     "--vad-model",
     "--asr-cache-import-run",
+    "--asr-cache-import-failed-run",
   ]);
   const result = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 2) {
@@ -139,6 +142,25 @@ const vadModelPath = args.has("--vad-model")
 const asrCacheImportRun = args.has("--asr-cache-import-run")
   ? path.resolve(required(args, "--asr-cache-import-run"))
   : null;
+const asrCacheImportFailedRun = args.has("--asr-cache-import-failed-run")
+  ? path.resolve(required(args, "--asr-cache-import-failed-run"))
+  : null;
+
+function requiredResolvedPath(
+  value: string | null,
+  optionName: string,
+): string {
+  if (value === null) {
+    throw new InputError(`${optionName} path is required for this run mode.`);
+  }
+  return value;
+}
+
+if (asrCacheImportRun !== null && asrCacheImportFailedRun !== null) {
+  throw new InputError(
+    "Choose either a frozen cache import or a failed-run cache recovery, not both.",
+  );
+}
 
 if (
   (machineQualityRecovery === "off" && qualityProfile !== "legacy") ||
@@ -194,37 +216,143 @@ if (
     },
   );
 }
+const modelHash = await sha256BlindFile(modelPath);
+
+async function verifyFailedRunCache(input: {
+  failedRunPath: string;
+  sourceHash: string;
+  modelHash: string;
+}): Promise<{ path: string; artifactHash: string; entryCount: number }> {
+  const [rawManifest, failureLog] = await Promise.all([
+    readFile(
+      path.join(input.failedRunPath, "blind-generation-input-manifest.json"),
+      "utf8",
+    ).then(
+      (value) =>
+        JSON.parse(value) as {
+          sourceVideo?: { sha256?: unknown };
+          humanArtifacts?: { used?: unknown; inputCount?: unknown }[];
+        },
+    ),
+    readFile(path.join(input.failedRunPath, "blind-generation.log"), "utf8"),
+  ]);
+  if (
+    rawManifest.sourceVideo?.sha256 !== input.sourceHash ||
+    (rawManifest.humanArtifacts ?? []).some(
+      (artifact) => artifact.used !== false || artifact.inputCount !== 0,
+    )
+  ) {
+    throw new InputError(
+      "Failed-run cache source or human-input provenance is invalid.",
+    );
+  }
+  if (
+    !failureLog.includes("[UNEXPECTED_ERROR]") ||
+    (await pathExists(
+      path.join(input.failedRunPath, "blind-generation-execution.json"),
+    )) ||
+    (await pathExists(
+      path.join(input.failedRunPath, "blind-output-freeze.json"),
+    ))
+  ) {
+    throw new InputError(
+      "Failed-run cache recovery requires a fail-closed run without a completion or freeze artifact.",
+    );
+  }
+  const cacheRoot = path.join(input.failedRunPath, "isolated-asr-cache");
+  const entries: { cacheKey: string; resultSha256: string }[] = [];
+  for (const directory of await readdir(cacheRoot, { withFileTypes: true })) {
+    if (!directory.isDirectory() || !/^[a-f0-9]{2}$/u.test(directory.name)) {
+      continue;
+    }
+    for (const name of await readdir(path.join(cacheRoot, directory.name))) {
+      if (!/^[a-f0-9]{64}\.json$/u.test(name)) continue;
+      const parsed = portableAsrCacheEntryV2Schema.parse(
+        JSON.parse(
+          await readFile(path.join(cacheRoot, directory.name, name), "utf8"),
+        ) as unknown,
+      );
+      if (
+        `${parsed.cacheKey}.json` !== name ||
+        parsed.cacheKey.slice(0, 2) !== directory.name ||
+        parsed.identity.modelHash !== input.modelHash
+      ) {
+        throw new InputError("Failed-run cache entry identity mismatch.", {
+          name,
+        });
+      }
+      entries.push({
+        cacheKey: parsed.cacheKey,
+        resultSha256: parsed.resultSha256,
+      });
+    }
+  }
+  if (entries.length === 0) {
+    throw new InputError(
+      "Failed-run cache recovery found no verified entries.",
+    );
+  }
+  entries.sort((left, right) => left.cacheKey.localeCompare(right.cacheKey));
+  return {
+    path: cacheRoot,
+    artifactHash: createHash("sha256")
+      .update(JSON.stringify(entries))
+      .digest("hex"),
+    entryCount: entries.length,
+  };
+}
 const importedCache =
-  asrCacheImportRun === null
+  asrCacheImportRun === null && asrCacheImportFailedRun === null
     ? null
-    : await (async () => {
-        if (machineQualityRecovery === "off") {
-          throw new InputError("Off mode cannot import a prior media cache.");
-        }
-        const [freeze, importedManifest] = await Promise.all([
-          verifyBlindOutputFreeze({ taskDirectory: asrCacheImportRun }),
-          readFile(
-            path.join(
-              asrCacheImportRun,
-              "blind-generation-input-manifest.json",
+    : asrCacheImportRun !== null
+      ? await (async () => {
+          if (machineQualityRecovery === "off") {
+            throw new InputError("Off mode cannot import a prior media cache.");
+          }
+          const [freeze, importedManifest] = await Promise.all([
+            verifyBlindOutputFreeze({ taskDirectory: asrCacheImportRun }),
+            readFile(
+              path.join(
+                asrCacheImportRun,
+                "blind-generation-input-manifest.json",
+              ),
+              "utf8",
+            ).then(
+              (value) =>
+                JSON.parse(value) as { sourceVideo?: { sha256?: unknown } },
             ),
-            "utf8",
-          ).then(
-            (value) =>
-              JSON.parse(value) as { sourceVideo?: { sha256?: unknown } },
-          ),
-        ]);
-        if (importedManifest.sourceVideo?.sha256 !== sourceHashBefore) {
-          throw new InputError(
-            "Imported machine cache source identity mismatch.",
-          );
-        }
-        return {
-          path: asrCacheImportRun,
-          artifactType: "portable-asr-cache-v2",
-          artifactHash: freeze.freezeSemanticHash,
-        };
-      })();
+          ]);
+          if (importedManifest.sourceVideo?.sha256 !== sourceHashBefore) {
+            throw new InputError(
+              "Imported machine cache source identity mismatch.",
+            );
+          }
+          return {
+            path: asrCacheImportRun,
+            artifactType: "portable-asr-cache-v2",
+            artifactHash: freeze.freezeSemanticHash,
+          };
+        })()
+      : await (async () => {
+          if (machineQualityRecovery !== "enforce") {
+            throw new InputError(
+              "Failed-run cache recovery is limited to enforce-mode development runs.",
+            );
+          }
+          const recovered = await verifyFailedRunCache({
+            failedRunPath: requiredResolvedPath(
+              asrCacheImportFailedRun,
+              "--asr-cache-import-failed-run",
+            ),
+            sourceHash: sourceHashBefore,
+            modelHash,
+          });
+          return {
+            path: recovered.path,
+            artifactType: "portable-asr-cache-v2",
+            artifactHash: recovered.artifactHash,
+          };
+        })();
 const repositoryCommit = (
   await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: process.cwd() })
 ).stdout.trim();
@@ -260,7 +388,7 @@ const generationArguments = [
   "--whisper-execution-mode",
   "process",
   ...(qualityProfile === "timing"
-    ? ["--whisper-vad-model", vadModelPath as string]
+    ? ["--whisper-vad-model", requiredResolvedPath(vadModelPath, "--vad-model")]
     : ["--no-whisper-vad"]),
   "--asr-cache-dir",
   asrCachePath,
@@ -367,6 +495,7 @@ const machineQualityArtifacts = await emitMachineQualityRunArtifacts({
         ? "aggressive"
         : "balanced"
       : "observe",
+  whisperExecutablePath: whisperPath,
 });
 await atomicWriteJson(
   path.join(outputPath, "blind-generation-execution.json"),

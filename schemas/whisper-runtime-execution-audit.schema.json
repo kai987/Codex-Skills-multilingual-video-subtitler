@@ -42,6 +42,8 @@
     "runtime": {
       "type": "object",
       "properties": {
+        "intendedVersion": { "type": "string" },
+        "actualVersion": { "type": "string" },
         "whisperCppVersion": { "type": "string" },
         "modelName": { "type": "string" },
         "modelSha256": {
@@ -50,14 +52,27 @@
             { "type": "null" }
           ]
         },
+        "binarySha256": {
+          "anyOf": [
+            { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            { "type": "null" }
+          ]
+        },
+        "runtimeManifest": { "type": "string" },
+        "compatibilityReason": { "type": "string" },
         "device": { "type": "string" },
         "requestedMode": { "type": "string" },
         "actualMode": { "type": "string" }
       },
       "required": [
+        "intendedVersion",
+        "actualVersion",
         "whisperCppVersion",
         "modelName",
         "modelSha256",
+        "binarySha256",
+        "runtimeManifest",
+        "compatibilityReason",
         "device",
         "requestedMode",
         "actualMode"
@@ -82,6 +97,11 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "processCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
         "workerStartCount": {
           "type": "integer",
           "minimum": 0,
@@ -97,16 +117,59 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
-        }
+        },
+        "uniqueAudioIntervalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateIntervalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "narrowRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "broadRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recoveryRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "primaryGenerationRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "averageAudioSeconds": { "type": "number", "minimum": 0 },
+        "totalAudioSecondsProcessed": { "type": "number", "minimum": 0 },
+        "duplicateAudioSecondsProcessed": { "type": "number", "minimum": 0 }
       },
       "required": [
         "asrRequestCount",
         "cacheHitCount",
         "inferenceCount",
+        "processCount",
         "workerStartCount",
         "modelLoadCount",
         "transcriptionSeconds",
-        "fallbackProcessCount"
+        "fallbackProcessCount",
+        "uniqueAudioIntervalCount",
+        "duplicateIntervalCount",
+        "narrowRequestCount",
+        "broadRequestCount",
+        "recoveryRequestCount",
+        "primaryGenerationRequestCount",
+        "averageAudioSeconds",
+        "totalAudioSecondsProcessed",
+        "duplicateAudioSecondsProcessed"
       ],
       "additionalProperties": false
     },
