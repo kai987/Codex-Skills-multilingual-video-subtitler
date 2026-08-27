@@ -133,15 +133,7 @@ async function tokenMetrics(
     "machine-timeline-transform-chain.json",
   );
   if (await pathExists(transformPath)) {
-    const artifact = machineTimelineTransformChainSchema.parse(
-      await json(transformPath),
-    );
-    return {
-      trusted: artifact.summary.requestMappedTokenCount,
-      ambiguous: artifact.chains
-        .filter((chain) => chain.status !== "VERIFIED")
-        .reduce((sum, chain) => sum + chain.tokenCount, 0),
-    };
+    machineTimelineTransformChainSchema.parse(await json(transformPath));
   }
   const timelinePath = path.join(
     subtitlePath,
