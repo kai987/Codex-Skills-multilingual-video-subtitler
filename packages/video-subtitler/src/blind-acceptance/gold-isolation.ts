@@ -15,10 +15,6 @@ import {
 
 import { c60SemanticHash, c60StableHash } from "../finalization-risk-policy.js";
 
-const KNOWN_GOLD_HASH =
-  "a758701ed7c6e7ccf02ddda7646d7c46ffe4432e0f7dce0a7f6933146f6f100e";
-const KNOWN_HUMAN_HASH_PREFIXES = ["8ec01ef", "510c3f"] as const;
-
 const HUMAN_ARTIFACT_CLASSES = [
   "human-subtitle",
   "human-canonical",
@@ -95,6 +91,11 @@ export interface ProvenanceGraphValidation {
   unknownNodeIds: string[];
   knownHumanIdentityMatches: string[];
   passed: boolean;
+}
+
+export interface KnownHumanArtifactIdentities {
+  exactHashes?: readonly string[];
+  hashPrefixes?: readonly string[];
 }
 
 export async function sha256BlindFile(filePath: string): Promise<string> {
@@ -303,6 +304,7 @@ export function assertGoldIsolatedGenerationInput(
 
 export function validateBlindProvenanceGraph(
   nodes: readonly ProvenanceGraphNodeInput[],
+  knownHumanIdentities: KnownHumanArtifactIdentities = {},
 ): ProvenanceGraphValidation {
   const byId = new Map(nodes.map((node) => [node.nodeId, node]));
   const humanDerivedNodeIds = nodes
@@ -324,8 +326,8 @@ export function validateBlindProvenanceGraph(
   const knownHumanIdentityMatches = nodes
     .filter(
       (node) =>
-        node.artifactHash === KNOWN_GOLD_HASH ||
-        KNOWN_HUMAN_HASH_PREFIXES.some((prefix) =>
+        (knownHumanIdentities.exactHashes ?? []).includes(node.artifactHash) ||
+        (knownHumanIdentities.hashPrefixes ?? []).some((prefix) =>
           node.artifactHash.startsWith(prefix),
         ),
     )

@@ -173,6 +173,25 @@ describe("C6.0.1 blind isolation", () => {
     expect(result.violations).not.toContain("HUMAN_DERIVED_LINEAGE:model");
   });
 
+  it("accepts evaluator-supplied human identities without embedding dataset hashes in runtime code", () => {
+    const result = validateBlindProvenanceGraph(
+      [
+        {
+          nodeId: "candidate-cache",
+          artifactType: "candidate-cache",
+          origin: "machine",
+          authorityType: "machine",
+          artifactHash: hash("4"),
+          parentNodeIds: [],
+          humanDerived: false,
+        },
+      ],
+      { exactHashes: [hash("4")] },
+    );
+
+    expect(result.knownHumanIdentityMatches).toEqual(["candidate-cache"]);
+  });
+
   it("freezes policy semantics before Gold and keeps machine release closed", () => {
     const policy = createMachineShadowPolicy();
     expect(machineShadowFinalizationPolicySchema.parse(policy)).toMatchObject({

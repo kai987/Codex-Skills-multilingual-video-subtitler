@@ -506,6 +506,12 @@ const comparison = c6012QualityComparisonSchema.parse({
 });
 
 const hardcodingFindings = await datasetHardcodingFindings();
+if (hardcodingFindings.length > 0) {
+  throw new InputError(
+    "C6.0.1.2 dataset-hardcoding audit rejected production source.",
+    { findings: hardcodingFindings },
+  );
+}
 const generatedSchemaCount = await schemaCount();
 const testsPassed = args.get("--tests-passed") === "true";
 const checks = [
