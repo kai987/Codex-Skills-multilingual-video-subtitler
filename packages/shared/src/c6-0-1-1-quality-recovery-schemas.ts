@@ -419,13 +419,47 @@ export const goldLossAttributionSchema = z
         missingDialogueCount: count,
         materialTextDefectCount: count,
         severeTimingDefectCount: count,
+        rawAsr: z
+          .object({
+            cueCount: count,
+            exactCer: z.number().nonnegative(),
+            normalizedCer: z.number().nonnegative(),
+            speechCoverage: z.number().min(0).max(1),
+            missingDialogueCount: count,
+            materialTextDefectCount: count,
+            severeTimingDefectCount: count,
+          })
+          .strict()
+          .nullable(),
+        finalVsRaw: z
+          .object({
+            cueCountDelta: z.number().int(),
+            normalizedCerDelta: z.number(),
+            speechCoverageDelta: z.number(),
+            missingDialogueDelta: z.number().int(),
+            materialTextDefectDelta: z.number().int(),
+            severeTimingDefectDelta: z.number().int(),
+          })
+          .strict()
+          .nullable(),
       })
       .strict(),
     attribution: z.array(
       z
         .object({
           stage: z.string(),
+          lossClass: z.enum([
+            "never-detected-speech",
+            "detected-then-filtered",
+            "association-loss",
+            "deduplication-loss",
+            "merge-or-fragment-loss",
+            "finalization-loss",
+            "coverage-recovery-gain",
+            "unattributed-machine-unit-loss",
+          ]),
           estimatedGoldLossCount: count,
+          machineUnitDropCount: count,
           evidence: z.array(z.string()),
         })
         .strict(),
@@ -463,12 +497,23 @@ export const c6011QualityComparisonSchema = z
           metrics: c6011QualityMetricsSchema,
           runtimeGoldInputCount: z.literal(0),
           machineArtifactHash: sha256Schema,
+          regressionGuardPassed: z.boolean(),
+          regressions: z.array(z.string()),
+          paretoTradeoff: z.boolean(),
         })
         .strict(),
     ),
     deterministicRanking: z.array(z.string()),
     selectedRunId: z.string().nullable(),
     selectionReasons: z.array(z.string()),
+    nonSelectedRunReasons: z.array(
+      z
+        .object({
+          runId: z.string(),
+          reasons: z.array(z.string()),
+        })
+        .strict(),
+    ),
   })
   .strict();
 

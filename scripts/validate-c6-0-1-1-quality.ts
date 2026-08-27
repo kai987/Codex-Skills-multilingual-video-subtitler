@@ -79,11 +79,21 @@ async function readEntry(input: {
   runPath: string;
   evaluationPath: string;
 }): Promise<Entry> {
-  const evaluation = machineVsGoldEvaluationSchema.parse(
-    await readJson(
+  const [evaluation, manifest] = await Promise.all([
+    readJson(
       path.join(input.evaluationPath, "machine-vs-gold-evaluation.json"),
-    ),
-  );
+    ).then((value) => machineVsGoldEvaluationSchema.parse(value)),
+    readJson(
+      path.join(input.runPath, "blind-generation-input-manifest.json"),
+    ).then((value) => blindGenerationInputManifestSchema.parse(value)),
+  ]);
+  if (evaluation.generationRunId !== manifest.generationRunId) {
+    throw new InputError("Gold evaluation does not belong to the named run.", {
+      runPath: input.runPath,
+      expectedRunId: manifest.generationRunId,
+      actualRunId: evaluation.generationRunId,
+    });
+  }
   return {
     ...input,
     evaluation,
@@ -133,6 +143,61 @@ for (const entry of entries) {
   )) as {
     stages?: { id?: string; droppedCount?: number }[];
   };
+  const rawEvaluationPath = path.join(
+    entry.evaluationPath,
+    "raw-asr-vs-gold-evaluation.json",
+  );
+  const rawEvaluation = (await pathExists(rawEvaluationPath))
+    ? machineVsGoldEvaluationSchema.parse(await readJson(rawEvaluationPath))
+    : null;
+  const rawMetrics =
+    rawEvaluation === null
+      ? null
+      : {
+          cueCount: rawEvaluation.alignmentMetrics.machineCueCount,
+          exactCer: rawEvaluation.globalTextMetrics.exact.cer,
+          normalizedCer: rawEvaluation.globalTextMetrics.normalized.cer,
+          speechCoverage: rawEvaluation.coverageMetrics.goldTextCoverageRatio,
+          missingDialogueCount: rawEvaluation.missingDialogueCandidates.length,
+          materialTextDefectCount: rawEvaluation.materialTextErrors.length,
+          severeTimingDefectCount: rawEvaluation.severeTimingErrors.length,
+        };
+  const finalVsRaw =
+    rawMetrics === null
+      ? null
+      : {
+          cueCountDelta: entry.metrics.cueCount - rawMetrics.cueCount,
+          normalizedCerDelta:
+            entry.metrics.normalizedCer - rawMetrics.normalizedCer,
+          speechCoverageDelta:
+            entry.metrics.speechCoverage - rawMetrics.speechCoverage,
+          missingDialogueDelta:
+            entry.metrics.missingDialogueCount -
+            rawMetrics.missingDialogueCount,
+          materialTextDefectDelta:
+            entry.metrics.materialTextDefectCount -
+            rawMetrics.materialTextDefectCount,
+          severeTimingDefectDelta:
+            entry.metrics.severeTimingDefectCount -
+            rawMetrics.severeTimingDefectCount,
+        };
+  const lossClassForStage = (stageId: string) => {
+    if (stageId.includes("cluster") || stageId.includes("winner")) {
+      return "association-loss" as const;
+    }
+    if (stageId.includes("deduplication")) {
+      return "deduplication-loss" as const;
+    }
+    if (stageId.includes("fragment") || stageId.includes("normalization")) {
+      return "merge-or-fragment-loss" as const;
+    }
+    if (stageId.includes("segmentation") || stageId.includes("integrity")) {
+      return "finalization-loss" as const;
+    }
+    return "unattributed-machine-unit-loss" as const;
+  };
+  const rawMissing =
+    rawMetrics?.missingDialogueCount ?? entry.metrics.missingDialogueCount;
   const attribution = goldLossAttributionSchema.parse({
     schemaVersion: "1.0.0",
     policyVersion: "c6.0.1.1-machine-quality-recovery-v1",
@@ -149,20 +214,50 @@ for (const entry of entries) {
       missingDialogueCount: entry.metrics.missingDialogueCount,
       materialTextDefectCount: entry.metrics.materialTextDefectCount,
       severeTimingDefectCount: entry.metrics.severeTimingDefectCount,
+      rawAsr: rawMetrics,
+      finalVsRaw,
     },
     attribution: [
       {
-        stage: "initial-machine-speech-undercoverage",
-        estimatedGoldLossCount: entry.metrics.missingDialogueCount,
+        stage: "raw-asr-detection",
+        lossClass: "never-detected-speech",
+        estimatedGoldLossCount: rawMissing,
+        machineUnitDropCount: 0,
+        evidence: ["raw-asr-vs-gold-evaluation", "machine-speech-coverage-gap"],
+      },
+      {
+        stage: "raw-asr-to-final-machine",
+        lossClass: "detected-then-filtered",
+        estimatedGoldLossCount: Math.max(
+          0,
+          entry.metrics.missingDialogueCount - rawMissing,
+        ),
+        machineUnitDropCount: 0,
         evidence: [
-          "gold-evaluation-unmatched-dialogue-groups",
-          "machine-speech-coverage-gap",
+          "raw-asr-vs-gold-evaluation",
+          "final-machine-vs-gold-evaluation",
+          "machine-generation-survival-funnel",
         ],
+      },
+      {
+        stage: "coverage-recovery",
+        lossClass: "coverage-recovery-gain",
+        estimatedGoldLossCount: Math.max(
+          0,
+          rawMissing - entry.metrics.missingDialogueCount,
+        ),
+        machineUnitDropCount: 0,
+        evidence: ["machine-coverage-recovery"],
       },
       ...(funnel.stages ?? []).map((stage) => ({
         stage: stage.id ?? "unknown-stage",
-        estimatedGoldLossCount: Math.max(0, stage.droppedCount ?? 0),
-        evidence: ["machine-generation-survival-funnel"],
+        lossClass: lossClassForStage(stage.id ?? "unknown-stage"),
+        estimatedGoldLossCount: 0,
+        machineUnitDropCount: Math.max(0, stage.droppedCount ?? 0),
+        evidence: [
+          "machine-generation-survival-funnel",
+          "Gold loss is not causally assigned without exact surviving lineage",
+        ],
       })),
     ],
   });
@@ -172,12 +267,53 @@ for (const entry of entries) {
   );
 }
 
+const baselineEntry = entries.find((entry) => entry.label === "baseline");
+if (baselineEntry === undefined) throw new Error("Baseline entry is missing.");
+const regressionsFor = (entry: Entry): string[] => {
+  if (entry.label === "baseline") return [];
+  const regressions: string[] = [];
+  if (entry.metrics.normalizedCer > baselineEntry.metrics.normalizedCer) {
+    regressions.push("normalized-cer-worse-than-baseline");
+  }
+  if (entry.metrics.speechCoverage < baselineEntry.metrics.speechCoverage) {
+    regressions.push("speech-coverage-worse-than-baseline");
+  }
+  if (
+    entry.metrics.materialTextDefectCount >
+    baselineEntry.metrics.materialTextDefectCount
+  ) {
+    regressions.push("material-text-defects-worse-than-baseline");
+  }
+  if (
+    entry.metrics.severeTimingDefectCount >
+      baselineEntry.metrics.severeTimingDefectCount ||
+    entry.metrics.startMaeSeconds > baselineEntry.metrics.startMaeSeconds ||
+    entry.metrics.endMaeSeconds > baselineEntry.metrics.endMaeSeconds ||
+    entry.metrics.p95BoundaryErrorSeconds >
+      baselineEntry.metrics.p95BoundaryErrorSeconds
+  ) {
+    regressions.push("timing-worse-than-baseline");
+  }
+  if (
+    entry.metrics.hallucinationCount >
+    Math.max(2, baselineEntry.metrics.hallucinationCount)
+  ) {
+    regressions.push("hallucination-guard-failed");
+  }
+  return regressions;
+};
+const runRegressions = new Map(
+  entries.map((entry) => [entry.label, regressionsFor(entry)] as const),
+);
 const ranked = entries.toSorted(
   (left, right) =>
     compareC6011QualityMetrics(left.metrics, right.metrics) ||
     left.label.localeCompare(right.label),
 );
-const selected = ranked[0];
+const eligibleRanked = ranked.filter(
+  (entry) => (runRegressions.get(entry.label) ?? []).length === 0,
+);
+const selected = eligibleRanked[0];
 if (selected === undefined) throw new Error("No C6.0.1.1 run was available.");
 const comparison = c6011QualityComparisonSchema.parse({
   schemaVersion: "1.0.0",
@@ -190,10 +326,17 @@ const comparison = c6011QualityComparisonSchema.parse({
     metrics: entry.metrics,
     runtimeGoldInputCount: 0,
     machineArtifactHash: entry.evaluation.machineFreezeHash,
+    regressionGuardPassed: (runRegressions.get(entry.label) ?? []).length === 0,
+    regressions: runRegressions.get(entry.label) ?? [],
+    paretoTradeoff:
+      entry.label !== "baseline" &&
+      (runRegressions.get(entry.label) ?? []).length > 0 &&
+      compareC6011QualityMetrics(entry.metrics, baselineEntry.metrics) < 0,
   })),
   deterministicRanking: ranked.map((entry) => entry.evaluation.generationRunId),
   selectedRunId: selected.evaluation.generationRunId,
   selectionReasons: [
+    "regression-guard-required-before-ranking",
     "minimum-p1-defect-count",
     "then-minimum-missing-dialogue",
     "then-minimum-material-text-defects",
@@ -203,6 +346,15 @@ const comparison = c6011QualityComparisonSchema.parse({
     "then-minimum-hallucination-count",
     "then-stable-run-label",
   ],
+  nonSelectedRunReasons: entries
+    .filter((entry) => entry !== selected)
+    .map((entry) => ({
+      runId: entry.evaluation.generationRunId,
+      reasons:
+        (runRegressions.get(entry.label) ?? []).length > 0
+          ? (runRegressions.get(entry.label) ?? [])
+          : ["ranked-below-selected-run-by-frozen-selection-policy"],
+    })),
 });
 
 const finalAPath = path.resolve(required(args, "--final-a-run"));

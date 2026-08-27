@@ -90,21 +90,39 @@
           "machineArtifactHash": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
-          }
+          },
+          "regressionGuardPassed": { "type": "boolean" },
+          "regressions": { "type": "array", "items": { "type": "string" } },
+          "paretoTradeoff": { "type": "boolean" }
         },
         "required": [
           "runId",
           "profile",
           "metrics",
           "runtimeGoldInputCount",
-          "machineArtifactHash"
+          "machineArtifactHash",
+          "regressionGuardPassed",
+          "regressions",
+          "paretoTradeoff"
         ],
         "additionalProperties": false
       }
     },
     "deterministicRanking": { "type": "array", "items": { "type": "string" } },
     "selectedRunId": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
-    "selectionReasons": { "type": "array", "items": { "type": "string" } }
+    "selectionReasons": { "type": "array", "items": { "type": "string" } },
+    "nonSelectedRunReasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "runId": { "type": "string" },
+          "reasons": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["runId", "reasons"],
+        "additionalProperties": false
+      }
+    }
   },
   "required": [
     "schemaVersion",
@@ -114,7 +132,8 @@
     "runs",
     "deterministicRanking",
     "selectedRunId",
-    "selectionReasons"
+    "selectionReasons",
+    "nonSelectedRunReasons"
   ],
   "additionalProperties": false
 }
