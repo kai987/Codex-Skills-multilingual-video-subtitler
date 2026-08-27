@@ -342,6 +342,7 @@ export function deriveMachineIntegrationSummaryCounts(
   return artifactType === "machine-mfa-integration"
     ? {
         modelInferenceCount: countFrom(summary, "mfaProcessCount"),
+        modelLoadCount: countFrom(summary, "mfaProcessCount"),
         cacheHitCount: countFrom(summary, "cacheHitCount"),
         candidateCount: countFrom(summary, "eligibleCueCount", "cueCount"),
         appliedCount: countFrom(summary, "timingMutationCount"),
@@ -354,6 +355,7 @@ export function deriveMachineIntegrationSummaryCounts(
     : artifactType === "machine-ctc-integration"
       ? {
           modelInferenceCount: countFrom(summary, "directInferenceCount"),
+          modelLoadCount: countFrom(summary, "modelLoadCount"),
           cacheHitCount: countFrom(summary, "directCacheHitCount"),
           candidateCount: countFrom(
             summary,
@@ -372,6 +374,7 @@ export function deriveMachineIntegrationSummaryCounts(
         }
       : {
           modelInferenceCount: countFrom(summary, "pipelineInferenceCount"),
+          modelLoadCount: countFrom(summary, "modelLoadCount"),
           cacheHitCount: countFrom(summary, "cacheHitCount"),
           candidateCount: countFrom(summary, "targetComponentCount"),
           appliedCount: countFrom(summary, "resolvedComponentCount"),
@@ -447,6 +450,7 @@ async function integrationArtifact(input: {
             : ("rejected" as const),
       runtimeIdentity: runtimeIdentity.length > 0 ? runtimeIdentity : null,
       modelInferenceCount: counts.modelInferenceCount,
+      modelLoadCount: counts.modelLoadCount,
       cacheHitCount: counts.cacheHitCount,
       candidateCount: counts.candidateCount,
       appliedCount: counts.appliedCount,
@@ -1307,6 +1311,11 @@ export async function emitMachineQualityRunArtifacts(
       vtt: await sha256BlindFile(path.join(subtitleDirectory, vtt)),
     });
   }
+  const machineMemory = await readJsonOrEmpty(
+    path.join(input.outputDirectory, "machine-memory.json"),
+  );
+  const machineMemoryEntryCount = countFrom(machineMemory, "entryCount");
+  const humanDerivedMachineMemory = machineMemory.humanDerived === true;
   const ablation = machineQualityRecoveryAblationSchema.parse({
     ...header,
     artifactType: "machine-quality-recovery-ablation",
@@ -1317,6 +1326,12 @@ export async function emitMachineQualityRunArtifacts(
         targetChunkSeconds: input.targetChunkSeconds,
         vadEnabled: input.vadEnabled,
         sceneRouting: input.sceneRouting,
+        reviewEvidenceRetention:
+          input.mode === "enforce" && input.profile === "full",
+        mfaStatus: parsedMfa.integration.status,
+        ctcStatus: parsedCtc.integration.status,
+        speakerStatus: parsedSpeaker.integration.status,
+        machineMemoryHumanDerived: humanDerivedMachineMemory,
       }),
     ),
     enabledStrategies: [
@@ -1334,16 +1349,44 @@ export async function emitMachineQualityRunArtifacts(
       input.mode === "enforce"
         ? "refinement-context-prompt-isolation"
         : "legacy-refinement-context-prompts",
+      ...(input.mode === "enforce" && input.profile === "full"
+        ? ["machine-evidence-retained-for-blocked-review"]
+        : []),
+      ...(parsedMfa.integration.status === "unavailable"
+        ? []
+        : [`machine-mfa-${parsedMfa.integration.status}`]),
+      ...(parsedCtc.integration.status === "unavailable"
+        ? []
+        : [`machine-ctc-${parsedCtc.integration.status}`]),
+      ...(parsedSpeaker.integration.status === "unavailable"
+        ? []
+        : [`machine-speaker-${parsedSpeaker.integration.status}`]),
+      ...(humanDerivedMachineMemory
+        ? []
+        : [
+            machineMemoryEntryCount === 0
+              ? "machine-memory-start-empty"
+              : "machine-memory-causal-entries",
+          ]),
     ],
-    rejectedStrategies:
-      input.vadEnabled && mappedTokenCount === 0
+    rejectedStrategies: [
+      ...(input.vadEnabled && mappedTokenCount === 0
         ? [
             {
               strategy: "stock-vad-canonical-timing",
               reason: "verified-mapped-token-evidence-unavailable",
             },
           ]
-        : [],
+        : []),
+      ...(humanDerivedMachineMemory
+        ? [
+            {
+              strategy: "human-derived-machine-memory",
+              reason: "human-derived-runtime-input-forbidden",
+            },
+          ]
+        : []),
+    ],
     runtimeGoldInputCount: 0,
     evaluationOnly: false,
     goldEvaluationAttached: false,
@@ -1365,12 +1408,20 @@ export async function emitMachineQualityRunArtifacts(
           (finalCues[index - 1]?.end ?? Number.NEGATIVE_INFINITY) > cue.start,
       ).length,
       asrRequestCount: countFrom(executionMetrics, "asrRequestCount"),
-      inferenceCount: Math.max(
-        0,
-        countFrom(executionMetrics, "asrRequestCount") -
-          countFrom(executionMetrics, "cacheHitCount"),
-      ),
-      modelLoadCount: countFrom(executionMetrics, "modelLoadCount"),
+      inferenceCount:
+        Math.max(
+          0,
+          countFrom(executionMetrics, "asrRequestCount") -
+            countFrom(executionMetrics, "cacheHitCount"),
+        ) +
+        parsedMfa.integration.modelInferenceCount +
+        parsedCtc.integration.modelInferenceCount +
+        parsedSpeaker.integration.modelInferenceCount,
+      modelLoadCount:
+        countFrom(executionMetrics, "modelLoadCount") +
+        parsedMfa.integration.modelLoadCount +
+        parsedCtc.integration.modelLoadCount +
+        parsedSpeaker.integration.modelLoadCount,
       transcriptionSeconds: countFrom(executionMetrics, "transcriptionSeconds"),
     },
     goldMetrics: null,

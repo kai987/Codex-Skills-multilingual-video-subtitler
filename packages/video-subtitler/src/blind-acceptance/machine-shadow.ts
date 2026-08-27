@@ -426,6 +426,9 @@ export async function buildMachineBaselineEvidenceCoverage(input: {
   const speakerInferenceCount = firstFiniteInteger(speaker, [
     "modelInferenceCount",
   ]);
+  const mfaModelLoadCount = firstFiniteInteger(mfa, ["modelLoadCount"]);
+  const ctcModelLoadCount = firstFiniteInteger(ctc, ["modelLoadCount"]);
+  const speakerModelLoadCount = firstFiniteInteger(speaker, ["modelLoadCount"]);
   const required = dimensions.filter((item) => item.requiredForFinalCandidate);
   const unknownSignalCount = dimensions.filter(
     (item) => item.status === "unknown",
@@ -449,7 +452,11 @@ export async function buildMachineBaselineEvidenceCoverage(input: {
       sudachi: 0,
       openai: 0 as const,
       onlineSubtitleSearch: 0 as const,
-      modelLoadCount: firstFiniteInteger(metrics, ["modelLoadCount"]),
+      modelLoadCount:
+        firstFiniteInteger(metrics, ["modelLoadCount"]) +
+        mfaModelLoadCount +
+        ctcModelLoadCount +
+        speakerModelLoadCount,
       modelInferenceCount:
         whisperInferenceCount +
         mfaInferenceCount +

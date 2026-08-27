@@ -334,6 +334,7 @@ const integrationSchema = (artifactType: string) =>
           ]),
           runtimeIdentity: z.string().nullable(),
           modelInferenceCount: count,
+          modelLoadCount: count,
           cacheHitCount: count,
           candidateCount: count,
           appliedCount: count,

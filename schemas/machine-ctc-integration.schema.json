@@ -57,6 +57,11 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
         "cacheHitCount": {
           "type": "integer",
           "minimum": 0,
@@ -88,6 +93,7 @@
         "status",
         "runtimeIdentity",
         "modelInferenceCount",
+        "modelLoadCount",
         "cacheHitCount",
         "candidateCount",
         "appliedCount",

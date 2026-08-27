@@ -208,6 +208,7 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     const artifact = {
       summary: {
         directInferenceCount: 32,
+        modelLoadCount: 1,
         directCacheHitCount: 4,
         targetEncodableCueCount: 14,
         timingMutationCueCount: 2,
@@ -225,6 +226,7 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
       ),
     ).toEqual({
       modelInferenceCount: 32,
+      modelLoadCount: 1,
       cacheHitCount: 4,
       candidateCount: 14,
       appliedCount: 2,
