@@ -245,11 +245,11 @@ for (const entry of entries) {
             rawMetrics.severeTimingDefectCount,
         };
   const lossClassForStage = (stageId: string) => {
-    if (stageId.includes("cluster") || stageId.includes("winner")) {
-      return "association-loss" as const;
-    }
     if (stageId.includes("deduplication")) {
       return "deduplication-loss" as const;
+    }
+    if (stageId.includes("cluster") || stageId.includes("winner")) {
+      return "association-loss" as const;
     }
     if (stageId.includes("fragment") || stageId.includes("normalization")) {
       return "merge-or-fragment-loss" as const;
