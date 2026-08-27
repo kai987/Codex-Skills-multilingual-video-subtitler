@@ -385,6 +385,22 @@ export const machineQualityRecoveryPolicySchema = z
   })
   .strict();
 
+const qualityMetricsValueSchema = z
+  .object({
+    cueCount: count,
+    normalizedCer: z.number().nonnegative(),
+    speechCoverage: z.number().min(0).max(1),
+    missingDialogueCount: count,
+    materialTextDefectCount: count,
+    severeTimingDefectCount: count,
+    startMaeSeconds: finiteNonNegative,
+    endMaeSeconds: finiteNonNegative,
+    p95BoundaryErrorSeconds: finiteNonNegative,
+    hallucinationCount: count,
+    p1DefectCount: count,
+  })
+  .strict();
+
 export const machineQualityRecoveryAblationSchema = z
   .object({
     ...artifactHeader,
@@ -395,6 +411,21 @@ export const machineQualityRecoveryAblationSchema = z
       z.object({ strategy: z.string(), reason: z.string() }).strict(),
     ),
     runtimeGoldInputCount: z.literal(0),
+    evaluationOnly: z.boolean(),
+    goldEvaluationAttached: z.boolean(),
+    machineMetrics: z
+      .object({
+        cueCount: count,
+        exactCharacterCount: count,
+        normalizedCharacterCount: count,
+        overlapCount: count,
+        asrRequestCount: count,
+        inferenceCount: count,
+        modelLoadCount: count,
+        transcriptionSeconds: finiteNonNegative,
+      })
+      .strict(),
+    goldMetrics: qualityMetricsValueSchema.nullable(),
     canonicalCueHash: nullableSha256Schema,
     timingHash: nullableSha256Schema,
     presentationHash: nullableSha256Schema,
@@ -467,21 +498,7 @@ export const goldLossAttributionSchema = z
   })
   .strict();
 
-export const c6011QualityMetricsSchema = z
-  .object({
-    cueCount: count,
-    normalizedCer: z.number().nonnegative(),
-    speechCoverage: z.number().min(0).max(1),
-    missingDialogueCount: count,
-    materialTextDefectCount: count,
-    severeTimingDefectCount: count,
-    startMaeSeconds: finiteNonNegative,
-    endMaeSeconds: finiteNonNegative,
-    p95BoundaryErrorSeconds: finiteNonNegative,
-    hallucinationCount: count,
-    p1DefectCount: count,
-  })
-  .strict();
+export const c6011QualityMetricsSchema = qualityMetricsValueSchema;
 
 export const c6011QualityComparisonSchema = z
   .object({

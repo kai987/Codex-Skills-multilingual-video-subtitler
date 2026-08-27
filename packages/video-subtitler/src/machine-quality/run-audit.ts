@@ -1240,6 +1240,35 @@ export async function emitMachineQualityRunArtifacts(
           ]
         : [],
     runtimeGoldInputCount: 0,
+    evaluationOnly: false,
+    goldEvaluationAttached: false,
+    machineMetrics: {
+      cueCount: finalCues.length,
+      exactCharacterCount: Array.from(finalCues.map((cue) => cue.text).join(""))
+        .length,
+      normalizedCharacterCount: Array.from(
+        finalCues
+          .map((cue) => cue.text)
+          .join("")
+          .normalize("NFKC")
+          .replace(/[\p{P}\p{Z}\s]/gu, "")
+          .toLowerCase(),
+      ).length,
+      overlapCount: finalCues.filter(
+        (cue, index) =>
+          index > 0 &&
+          (finalCues[index - 1]?.end ?? Number.NEGATIVE_INFINITY) > cue.start,
+      ).length,
+      asrRequestCount: countFrom(executionMetrics, "asrRequestCount"),
+      inferenceCount: Math.max(
+        0,
+        countFrom(executionMetrics, "asrRequestCount") -
+          countFrom(executionMetrics, "cacheHitCount"),
+      ),
+      modelLoadCount: countFrom(executionMetrics, "modelLoadCount"),
+      transcriptionSeconds: countFrom(executionMetrics, "transcriptionSeconds"),
+    },
+    goldMetrics: null,
     canonicalCueHash:
       finalCues.length === 0 ? null : c601CanonicalTextHash(finalCues),
     timingHash:

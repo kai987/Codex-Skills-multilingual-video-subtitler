@@ -265,6 +265,25 @@ for (const entry of entries) {
     path.join(entry.evaluationPath, "gold-loss-attribution.json"),
     attribution,
   );
+  const runAblation = machineQualityRecoveryAblationSchema.parse(
+    await readRunArtifact(
+      entry.runPath,
+      "machine-quality-recovery-ablation.json",
+    ),
+  );
+  await atomicWriteJson(
+    path.join(
+      entry.evaluationPath,
+      "machine-quality-recovery-ablation.evaluation.json",
+    ),
+    machineQualityRecoveryAblationSchema.parse({
+      ...runAblation,
+      generatedAt: new Date().toISOString(),
+      evaluationOnly: true,
+      goldEvaluationAttached: true,
+      goldMetrics: entry.metrics,
+    }),
+  );
 }
 
 const baselineEntry = entries.find((entry) => entry.label === "baseline");

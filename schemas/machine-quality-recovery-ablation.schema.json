@@ -54,6 +54,119 @@
       }
     },
     "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "evaluationOnly": { "type": "boolean" },
+    "goldEvaluationAttached": { "type": "boolean" },
+    "machineMetrics": {
+      "type": "object",
+      "properties": {
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactCharacterCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "normalizedCharacterCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "asrRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "transcriptionSeconds": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "cueCount",
+        "exactCharacterCount",
+        "normalizedCharacterCount",
+        "overlapCount",
+        "asrRequestCount",
+        "inferenceCount",
+        "modelLoadCount",
+        "transcriptionSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "goldMetrics": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "cueCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "normalizedCer": { "type": "number", "minimum": 0 },
+            "speechCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+            "missingDialogueCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "materialTextDefectCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "severeTimingDefectCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "startMaeSeconds": { "type": "number", "minimum": 0 },
+            "endMaeSeconds": { "type": "number", "minimum": 0 },
+            "p95BoundaryErrorSeconds": { "type": "number", "minimum": 0 },
+            "hallucinationCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "p1DefectCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "cueCount",
+            "normalizedCer",
+            "speechCoverage",
+            "missingDialogueCount",
+            "materialTextDefectCount",
+            "severeTimingDefectCount",
+            "startMaeSeconds",
+            "endMaeSeconds",
+            "p95BoundaryErrorSeconds",
+            "hallucinationCount",
+            "p1DefectCount"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
     "canonicalCueHash": {
       "anyOf": [
         { "type": "string", "pattern": "^[a-f0-9]{64}$" },
@@ -85,6 +198,10 @@
     "enabledStrategies",
     "rejectedStrategies",
     "runtimeGoldInputCount",
+    "evaluationOnly",
+    "goldEvaluationAttached",
+    "machineMetrics",
+    "goldMetrics",
     "canonicalCueHash",
     "timingHash",
     "presentationHash"
