@@ -175,6 +175,9 @@ interface SubtitleCliOptions extends GlobalOptions {
   machineQualityRecovery: "off" | "observe" | "enforce";
   candidateConsensus: "off" | "observe" | "enforce";
   globalTokenTimeline: "off" | "observe" | "enforce";
+  candidateAssociation: "off" | "observe" | "enforce";
+  canonicalAssembly: "off" | "observe" | "enforce";
+  timelineTransformChain: "off" | "observe" | "enforce";
 }
 
 interface FinalizeCliOptions extends GlobalOptions {
@@ -525,6 +528,30 @@ program
     new Option(
       "--global-token-timeline <mode>",
       "C6.0.1.2 trusted original-media token timeline policy",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("off"),
+  )
+  .addOption(
+    new Option(
+      "--candidate-association <mode>",
+      "C6.0.1.3 candidate-to-event association policy",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("off"),
+  )
+  .addOption(
+    new Option(
+      "--canonical-assembly <mode>",
+      "C6.0.1.3 event-first canonical assembly policy",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("off"),
+  )
+  .addOption(
+    new Option(
+      "--timeline-transform-chain <mode>",
+      "C6.0.1.3 explicit request/token timeline composition policy",
     )
       .choices(["off", "observe", "enforce"])
       .default("off"),
@@ -1050,6 +1077,9 @@ program
       machineQualityRecovery: options.machineQualityRecovery,
       candidateConsensus: options.candidateConsensus,
       globalTokenTimeline: options.globalTokenTimeline,
+      candidateAssociation: options.candidateAssociation,
+      canonicalAssembly: options.canonicalAssembly,
+      timelineTransformChain: options.timelineTransformChain,
       fullSecondPass: options.fullSecondPass ?? false,
       refine: options.refine ?? false,
       allowQualityFallback: options.allowQualityFallback ?? false,

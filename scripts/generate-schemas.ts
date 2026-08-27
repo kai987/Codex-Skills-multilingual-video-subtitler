@@ -177,11 +177,89 @@ import {
   c6012AblationSchema,
   c6012QualityComparisonSchema,
   c6012ValidationSchema,
+  machineCandidateAssociationLedgerSchema,
+  goldCandidateAssociationLossAttributionSchema,
+  machineCanonicalEventsSchema,
+  machineCanonicalAssemblySchema,
+  machineSupportedTextRetentionSchema,
+  machineTimelineTransformChainSchema,
+  machineCanonicalNonDegradationLedgerSchema,
+  machineStageQualityTraceSchema,
+  machineOverlapRootCauseSchema,
+  c6013QualityPolicySchema,
+  c6013AblationSchema,
+  c6013QualityComparisonSchema,
+  c6013ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "machine-candidate-association-ledger.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-candidate-association-ledger.schema.json",
+    schema: machineCandidateAssociationLedgerSchema,
+  },
+  {
+    fileName: "gold-candidate-association-loss-attribution.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-candidate-association-loss-attribution.schema.json",
+    schema: goldCandidateAssociationLossAttributionSchema,
+  },
+  {
+    fileName: "machine-canonical-events.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-canonical-events.schema.json",
+    schema: machineCanonicalEventsSchema,
+  },
+  {
+    fileName: "machine-canonical-assembly.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-canonical-assembly.schema.json",
+    schema: machineCanonicalAssemblySchema,
+  },
+  {
+    fileName: "machine-supported-text-retention.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-supported-text-retention.schema.json",
+    schema: machineSupportedTextRetentionSchema,
+  },
+  {
+    fileName: "machine-timeline-transform-chain.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-timeline-transform-chain.schema.json",
+    schema: machineTimelineTransformChainSchema,
+  },
+  {
+    fileName: "machine-canonical-non-degradation-ledger.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-canonical-non-degradation-ledger.schema.json",
+    schema: machineCanonicalNonDegradationLedgerSchema,
+  },
+  {
+    fileName: "machine-stage-quality-trace.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-stage-quality-trace.schema.json",
+    schema: machineStageQualityTraceSchema,
+  },
+  {
+    fileName: "machine-overlap-root-cause.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-overlap-root-cause.schema.json",
+    schema: machineOverlapRootCauseSchema,
+  },
+  {
+    fileName: "c6-0-1-3-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-3-quality-policy.schema.json",
+    schema: c6013QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-3-ablation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-3-ablation.schema.json",
+    schema: c6013AblationSchema,
+  },
+  {
+    fileName: "c6-0-1-3-quality-comparison.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-3-quality-comparison.schema.json",
+    schema: c6013QualityComparisonSchema,
+  },
+  {
+    fileName: "c6-0-1-3-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-3-validation.schema.json",
+    schema: c6013ValidationSchema,
+  },
   {
     fileName: "machine-acoustic-event-families.schema.json",
     id: "https://schemas.local/multilingual-video-learning/machine-acoustic-event-families.schema.json",

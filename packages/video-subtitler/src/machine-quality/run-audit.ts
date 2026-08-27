@@ -227,15 +227,19 @@ function stage(input: {
   inputCount: number;
   outputCount: number;
   lossReason: string;
+  losslessGrouping?: boolean;
 }) {
-  const droppedCount = Math.max(0, input.inputCount - input.outputCount);
+  const droppedCount = input.losslessGrouping
+    ? 0
+    : Math.max(0, input.inputCount - input.outputCount);
   return {
     id: input.id,
     inputCount: input.inputCount,
     outputCount: input.outputCount,
     droppedCount,
-    retentionRatio:
-      input.inputCount === 0
+    retentionRatio: input.losslessGrouping
+      ? 1
+      : input.inputCount === 0
         ? input.outputCount === 0
           ? 1
           : 0
@@ -681,7 +685,11 @@ export async function emitMachineQualityRunArtifacts(
       id: "candidate-to-cluster",
       inputCount: candidateCount,
       outputCount: clusterCount,
-      lossReason: "candidate-clustering-or-noncompetitive-evidence",
+      lossReason: "candidate-unassigned-from-cluster",
+      // Atomic clustering is a many-to-one grouping operation. The member
+      // ledger, not the difference between candidate and cluster counts,
+      // determines whether any candidate was actually lost.
+      losslessGrouping: true,
     }),
     stage({
       id: "cluster-to-winner",

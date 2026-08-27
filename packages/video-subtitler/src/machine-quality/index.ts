@@ -12,3 +12,4 @@ export * from "./lexical-conservation.js";
 export * from "./overlap-event-classification.js";
 export * from "./candidate-precision-workflow.js";
 export * from "./candidate-precision-run-audit.js";
+export * from "./candidate-association-assembly.js";

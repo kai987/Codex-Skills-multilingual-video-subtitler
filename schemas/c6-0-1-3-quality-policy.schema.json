@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-3-quality-policy.schema.json",
+  "title": "c6-0-1-3-quality-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.3-candidate-association-canonical-assembly-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-3-quality-policy" },
+    "candidateAssociation": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "canonicalAssembly": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "timelineTransformChain": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "gates": {
+      "type": "object",
+      "properties": {
+        "minimumCoverage": { "type": "number", "const": 0.9 },
+        "maximumMissing": { "type": "number", "const": 15 },
+        "maximumHallucinations": { "type": "number", "const": 2 },
+        "maximumMaterialErrors": { "type": "number", "const": 45 },
+        "maximumSevereTimingErrors": { "type": "number", "const": 30 },
+        "maximumNormalizedCer": { "type": "number", "const": 0.55 },
+        "maximumStartMaeSeconds": { "type": "number", "const": 1.2 },
+        "maximumEndMaeSeconds": { "type": "number", "const": 1.2 },
+        "maximumP95BoundaryErrorSeconds": { "type": "number", "const": 3.5 },
+        "maximumOverlapPairs": { "type": "number", "const": 20 },
+        "minimumTrustedMappedTokens": { "type": "number", "const": 500 },
+        "maximumAmbiguousTokens": { "type": "number", "const": 100 },
+        "maximumUnsupportedStrongTextDeletion": {
+          "type": "number",
+          "const": 0
+        },
+        "maximumUnknownCandidateDrop": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "minimumCoverage",
+        "maximumMissing",
+        "maximumHallucinations",
+        "maximumMaterialErrors",
+        "maximumSevereTimingErrors",
+        "maximumNormalizedCer",
+        "maximumStartMaeSeconds",
+        "maximumEndMaeSeconds",
+        "maximumP95BoundaryErrorSeconds",
+        "maximumOverlapPairs",
+        "minimumTrustedMappedTokens",
+        "maximumAmbiguousTokens",
+        "maximumUnsupportedStrongTextDeletion",
+        "maximumUnknownCandidateDrop"
+      ],
+      "additionalProperties": false
+    },
+    "artifactSemanticHashes": {
+      "minItems": 7,
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "candidateAssociation",
+    "canonicalAssembly",
+    "timelineTransformChain",
+    "runtimeGoldInputCount",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "gates",
+    "artifactSemanticHashes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

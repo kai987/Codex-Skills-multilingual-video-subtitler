@@ -22,6 +22,9 @@ import type {
   MachineQualityRecoveryMode,
   CandidateConsensusMode,
   GlobalTokenTimelineMode,
+  CandidateAssociationMode,
+  CanonicalAssemblyMode,
+  TimelineTransformChainMode,
 } from "@mvl/shared";
 import type { MediaIdentityOverrides } from "@mvl/media-identity";
 import type {
@@ -200,6 +203,12 @@ export interface VideoSubtitlerOptions {
   candidateConsensus?: CandidateConsensusMode;
   /** C6.0.1.2 trusted original-media token timeline policy. */
   globalTokenTimeline?: GlobalTokenTimelineMode;
+  /** C6.0.1.3 candidate-to-event association policy. */
+  candidateAssociation?: CandidateAssociationMode;
+  /** C6.0.1.3 event-first canonical assembly policy. */
+  canonicalAssembly?: CanonicalAssemblyMode;
+  /** C6.0.1.3 explicit request/token timeline composition policy. */
+  timelineTransformChain?: TimelineTransformChainMode;
 }
 
 export interface VideoSubtitlerDependencies {

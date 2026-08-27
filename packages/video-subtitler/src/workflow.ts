@@ -55,6 +55,9 @@ import {
   type AsrRequestTimelineContract,
   type CandidateConsensusMode,
   type GlobalTokenTimelineMode,
+  type CandidateAssociationMode,
+  type CanonicalAssemblyMode,
+  type TimelineTransformChainMode,
   type TranscriptionQuality,
   subtitlePackageSchema,
   toAppError,
@@ -102,6 +105,7 @@ import type {
   VideoSubtitlerResult,
 } from "./types.js";
 import { runCandidatePrecisionWorkflow } from "./machine-quality/candidate-precision-workflow.js";
+import { runCandidateAssociationAssembly } from "./machine-quality/candidate-association-assembly.js";
 
 async function loadJapaneseTerminology(
   filePath: string | undefined,
@@ -169,6 +173,9 @@ function runTopScoreTextPipeline(input: {
   requestTimelineContract?: AsrRequestTimelineContract;
   candidateConsensus?: CandidateConsensusMode;
   globalTokenTimeline?: GlobalTokenTimelineMode;
+  candidateAssociation?: CandidateAssociationMode;
+  canonicalAssembly?: CanonicalAssemblyMode;
+  timelineTransformChain?: TimelineTransformChainMode;
 }) {
   const originalEvidenceCues = input.evidenceCues ?? input.cues;
   const candidatePrecision =
@@ -204,8 +211,27 @@ function runTopScoreTextPipeline(input: {
       ? {}
       : { referenceTimeline: input.referenceTimeline }),
   });
+  const associationAssembly =
+    candidatePrecision === null ||
+    ((input.candidateAssociation ?? "off") === "off" &&
+      (input.canonicalAssembly ?? "off") === "off" &&
+      (input.timelineTransformChain ?? "off") === "off")
+      ? null
+      : runCandidateAssociationAssembly({
+          atoms: hypothesisResolution.atomization.atoms,
+          atomicClusters: hypothesisResolution.atomicClusters,
+          candidateEvidence: hypothesisResolution.candidateEvidence,
+          topScoreResolution: hypothesisResolution.topScoreResolution,
+          winnerCues: hypothesisResolution.cues,
+          acousticEventFamilies: candidatePrecision.acousticEventFamilies,
+          globalTokenTimeline: candidatePrecision.globalTokenTimeline,
+          requestTimelineContract: candidatePrecision.requestTimelineContract,
+          candidateAssociation: input.candidateAssociation ?? "off",
+          canonicalAssembly: input.canonicalAssembly ?? "off",
+          timelineTransformChain: input.timelineTransformChain ?? "off",
+        });
   const winnerDeduplication = deduplicateTopScoreWinners(
-    hypothesisResolution.cues,
+    associationAssembly?.cues ?? hypothesisResolution.cues,
   );
   const fragmentRepair = repairTopScoreFragments(winnerDeduplication.cues);
   const winnerTimingRepair = repairTopScoreWinnerTiming({
@@ -293,6 +319,7 @@ function runTopScoreTextPipeline(input: {
   });
   return {
     candidatePrecision,
+    associationAssembly,
     semanticValidation,
     terminologyEvidence,
     hypothesisResolution,
@@ -487,6 +514,69 @@ async function persistCandidatePrecisionArtifacts(input: {
         "machine-overlap-event-classification.json",
       ),
       input.artifacts.overlapEventClassification,
+      { overwrite: input.overwrite },
+    ),
+  ]);
+}
+
+async function persistCandidateAssociationAssemblyArtifacts(input: {
+  subtitleDirectory: string;
+  overwrite: boolean;
+  artifacts: NonNullable<
+    ReturnType<typeof runTopScoreTextPipeline>["associationAssembly"]
+  >;
+}): Promise<void> {
+  await Promise.all([
+    atomicWriteJson(
+      path.join(
+        input.subtitleDirectory,
+        "machine-candidate-association-ledger.json",
+      ),
+      input.artifacts.candidateAssociationLedger,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-canonical-events.json"),
+      input.artifacts.canonicalEvents,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-canonical-assembly.json"),
+      input.artifacts.canonicalAssembly,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(
+        input.subtitleDirectory,
+        "machine-supported-text-retention.json",
+      ),
+      input.artifacts.supportedTextRetention,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(
+        input.subtitleDirectory,
+        "machine-timeline-transform-chain.json",
+      ),
+      input.artifacts.timelineTransformChain,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(
+        input.subtitleDirectory,
+        "machine-canonical-non-degradation-ledger.json",
+      ),
+      input.artifacts.canonicalNonDegradation,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-stage-quality-trace.json"),
+      input.artifacts.stageQualityTrace,
+      { overwrite: input.overwrite },
+    ),
+    atomicWriteJson(
+      path.join(input.subtitleDirectory, "machine-overlap-root-cause.json"),
+      input.artifacts.overlapRootCause,
       { overwrite: input.overwrite },
     ),
   ]);
@@ -1072,12 +1162,22 @@ export async function runVideoSubtitler(
           requestTimelineContract: adaptive.requestTimelineContract,
           candidateConsensus: options.candidateConsensus ?? "off",
           globalTokenTimeline: options.globalTokenTimeline ?? "off",
+          candidateAssociation: options.candidateAssociation ?? "off",
+          canonicalAssembly: options.canonicalAssembly ?? "off",
+          timelineTransformChain: options.timelineTransformChain ?? "off",
         });
         if (textPipeline.candidatePrecision !== null) {
           await persistCandidatePrecisionArtifacts({
             subtitleDirectory,
             overwrite,
             artifacts: textPipeline.candidatePrecision,
+          });
+        }
+        if (textPipeline.associationAssembly !== null) {
+          await persistCandidateAssociationAssemblyArtifacts({
+            subtitleDirectory,
+            overwrite,
+            artifacts: textPipeline.associationAssembly,
           });
         }
         const {
