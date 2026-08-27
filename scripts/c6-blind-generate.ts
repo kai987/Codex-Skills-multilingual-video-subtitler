@@ -13,6 +13,11 @@ import {
   machineQualityRecoveryProfileSchema,
   candidateConsensusModeSchema,
   globalTokenTimelineModeSchema,
+  candidateAssociationModeSchema,
+  canonicalAssemblyModeSchema,
+  timelineTransformChainModeSchema,
+  c6013PolicyVersion,
+  c6013QualityPolicySchema,
   pathExists,
   portableAsrCacheEntryV2Schema,
 } from "@mvl/shared";
@@ -25,6 +30,7 @@ import {
   createMachineShadowPolicy,
   emitMachineQualityRunArtifacts,
   emitCandidatePrecisionPolicyArtifact,
+  machineQualitySemanticHash,
   machineQualityProfileUsesVad,
   machineQualityProfileRetainsReviewEvidence,
   evaluateMachineShadowFinalization,
@@ -54,6 +60,9 @@ function parseArguments(argv: readonly string[]): Map<string, string> {
     "--asr-cache-import-failed-run",
     "--candidate-consensus",
     "--global-token-timeline",
+    "--candidate-association",
+    "--canonical-assembly",
+    "--timeline-transform-chain",
   ]);
   const result = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 2) {
@@ -140,6 +149,15 @@ const candidateConsensus = candidateConsensusModeSchema.parse(
 );
 const globalTokenTimeline = globalTokenTimelineModeSchema.parse(
   args.get("--global-token-timeline") ?? "off",
+);
+const candidateAssociation = candidateAssociationModeSchema.parse(
+  args.get("--candidate-association") ?? "off",
+);
+const canonicalAssembly = canonicalAssemblyModeSchema.parse(
+  args.get("--canonical-assembly") ?? "off",
+);
+const timelineTransformChain = timelineTransformChainModeSchema.parse(
+  args.get("--timeline-transform-chain") ?? "off",
 );
 const qualityProfile = machineQualityRecoveryProfileSchema.parse(
   args.get("--quality-profile") ??
@@ -442,6 +460,12 @@ const generationArguments = [
   candidateConsensus,
   "--global-token-timeline",
   globalTokenTimeline,
+  "--candidate-association",
+  candidateAssociation,
+  "--canonical-assembly",
+  canonicalAssembly,
+  "--timeline-transform-chain",
+  timelineTransformChain,
   "--finalization",
   "human",
 ];
@@ -534,6 +558,85 @@ const candidatePrecisionPolicy = await emitCandidatePrecisionPolicyArtifact({
   globalTokenTimeline,
   generatedAt: generationCompletedAt,
 });
+let candidateAssociationPolicyHash: string | null = null;
+if (
+  candidateAssociation !== "off" ||
+  canonicalAssembly !== "off" ||
+  timelineTransformChain !== "off"
+) {
+  const subtitleChild = (await readdir(outputPath, { withFileTypes: true }))
+    .filter(
+      (entry) => entry.isDirectory() && entry.name.startsWith("subtitle-"),
+    )
+    .map((entry) => entry.name)
+    .toSorted()[0];
+  if (subtitleChild === undefined) {
+    throw new InputError("C6.0.1.3 subtitle artifact directory is missing.");
+  }
+  const subtitlePath = path.join(outputPath, subtitleChild);
+  const artifactNames = [
+    "machine-candidate-association-ledger.json",
+    "machine-canonical-events.json",
+    "machine-canonical-assembly.json",
+    "machine-supported-text-retention.json",
+    "machine-timeline-transform-chain.json",
+    "machine-canonical-non-degradation-ledger.json",
+    "machine-stage-quality-trace.json",
+    "machine-overlap-root-cause.json",
+  ];
+  const artifactSemanticHashes = await Promise.all(
+    artifactNames.map(async (fileName) => {
+      const value = JSON.parse(
+        await readFile(path.join(subtitlePath, fileName), "utf8"),
+      ) as { semanticHash?: unknown };
+      if (typeof value.semanticHash !== "string") {
+        throw new InputError("C6.0.1.3 artifact semantic hash is missing.", {
+          fileName,
+        });
+      }
+      return value.semanticHash;
+    }),
+  );
+  const policyCore = {
+    candidateAssociation,
+    canonicalAssembly,
+    timelineTransformChain,
+    runtimeGoldInputCount: 0 as const,
+    productionStatus: "needs-review" as const,
+    finalizationMethod: "none" as const,
+    machineOnlyReleaseAuthorized: false as const,
+    gates: {
+      minimumCoverage: 0.9 as const,
+      maximumMissing: 15 as const,
+      maximumHallucinations: 2 as const,
+      maximumMaterialErrors: 45 as const,
+      maximumSevereTimingErrors: 30 as const,
+      maximumNormalizedCer: 0.55 as const,
+      maximumStartMaeSeconds: 1.2 as const,
+      maximumEndMaeSeconds: 1.2 as const,
+      maximumP95BoundaryErrorSeconds: 3.5 as const,
+      maximumOverlapPairs: 20 as const,
+      minimumTrustedMappedTokens: 500 as const,
+      maximumAmbiguousTokens: 100 as const,
+      maximumUnsupportedStrongTextDeletion: 0 as const,
+      maximumUnknownCandidateDrop: 0 as const,
+    },
+    artifactSemanticHashes,
+  };
+  const policy = c6013QualityPolicySchema.parse({
+    schemaVersion: "1.0.0",
+    policyVersion: c6013PolicyVersion,
+    generatedAt: generationCompletedAt,
+    artifactType: "c6-0-1-3-quality-policy",
+    ...policyCore,
+    semanticHash: machineQualitySemanticHash(policyCore),
+  });
+  candidateAssociationPolicyHash = policy.semanticHash;
+  await atomicWriteJson(
+    path.join(subtitlePath, "c6-0-1-3-quality-policy.json"),
+    policy,
+  );
+}
 await atomicWriteJson(
   path.join(outputPath, "blind-generation-execution.json"),
   {
@@ -623,6 +726,10 @@ console.log(
       machineQualityArtifactCount: machineQualityArtifacts.artifactCount,
       candidateConsensus,
       globalTokenTimeline,
+      candidateAssociation,
+      canonicalAssembly,
+      timelineTransformChain,
+      candidateAssociationPolicyHash,
       candidatePrecisionPolicyHash: candidatePrecisionPolicy.policySemanticHash,
     },
     null,
