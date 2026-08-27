@@ -12,6 +12,7 @@ import {
 import { formatAss } from "@mvl/subtitle-core";
 import {
   c60StableHash,
+  c60SemanticHash,
   createC601EvaluationPolicy,
   evaluateDualBlindRunsAgainstGold,
   sha256BlindFile,
@@ -207,7 +208,7 @@ async function createRun(root: string, label: "A" | "B") {
   };
   const freeze = blindOutputFreezeSchema.parse({
     ...freezeBase,
-    freezeSemanticHash: c60StableHash(freezeBase),
+    freezeSemanticHash: c60SemanticHash(freezeBase),
   });
   await writeJson(path.join(root, "blind-output-freeze.json"), freeze);
   return { manifest, freeze, cues };
@@ -246,12 +247,15 @@ describe("C6.0.1 Gold-isolated evaluation flow", () => {
     };
     const barrier = dualBlindFreezeBarrierSchema.parse({
       ...barrierBase,
-      semanticHash: c60StableHash(barrierBase),
+      semanticHash: c60SemanticHash(barrierBase),
     });
     const barrierPath = path.join(root, "barrier.json");
     await writeJson(barrierPath, barrier);
     const goldPath = path.join(root, "synthetic-gold.ass");
-    const gold = formatAss(runA.cues);
+    const gold = formatAss(runA.cues).replace(
+      /^(Dialogue:\s*[^,]+,\s*\d+:\d{2}:\d{2})\.(\d{2}),/mu,
+      "$1,$2,",
+    );
     await writeFile(goldPath, gold);
     const goldBuffer = Buffer.from(gold);
     const result = await evaluateDualBlindRunsAgainstGold({
@@ -264,6 +268,7 @@ describe("C6.0.1 Gold-isolated evaluation flow", () => {
     expect(result.runA.globalTextMetrics.normalized.cer).toBe(0);
     expect(result.runB.globalTextMetrics.normalized.cer).toBe(0);
     expect(result.runA.modelInferenceCount).toBe(0);
+    expect(result.runA.goldIdentity.timestampNormalizationCount).toBe(1);
     expect(result.runA.outputHashUnchangedAfterGold).toBe(true);
     expect(result.runA.goldMutationCount).toBe(0);
     expect(result.replaySemanticHashes.runA).toBe(result.runA.semanticHash);

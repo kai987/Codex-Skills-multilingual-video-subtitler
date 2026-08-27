@@ -184,6 +184,12 @@ export async function verifyBlindOutputFreeze(input: {
     blindOutputFreezeSchema.parse(
       await readJson(path.join(taskDirectory, "blind-output-freeze.json")),
     );
+  const { freezeSemanticHash, ...freezeBase } = freeze;
+  if (c60SemanticHash(freezeBase) !== freezeSemanticHash) {
+    throw new InputError("Blind output freeze semantic hash is invalid.", {
+      taskDirectory,
+    });
+  }
   const currentFiles = (await listFrozenFiles(taskDirectory)).map((filePath) =>
     posixRelative(taskDirectory, filePath),
   );

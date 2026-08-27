@@ -494,6 +494,7 @@ export const machineVsGoldEvaluationSchema = z
         size: nonNegativeIntegerSchema,
         sha256: c601HashSchema,
         cueCount: nonNegativeIntegerSchema,
+        timestampNormalizationCount: nonNegativeIntegerSchema,
         firstReadAt: z.iso.datetime(),
         readOnlyVerified: z.boolean(),
       })

@@ -17,7 +17,7 @@ import {
 import { parseAss } from "@mvl/subtitle-core";
 
 import { locateSubtitlePackage } from "../finalization-support.js";
-import { c60StableHash } from "../finalization-risk-policy.js";
+import { c60SemanticHash, c60StableHash } from "../finalization-risk-policy.js";
 import { verifyBlindOutputFreeze } from "./output-freeze.js";
 
 interface EvaluationCue {
@@ -76,6 +76,31 @@ function normalizedText(text: string): string {
 
 function exactText(text: string): string {
   return text.normalize("NFC");
+}
+
+export function normalizeC601GoldAssTimestamps(content: string): {
+  content: string;
+  replacementCount: number;
+} {
+  let replacementCount = 0;
+  const replace = (
+    _match: string,
+    prefix: string,
+    fraction: string,
+    delimiter: string,
+  ): string => {
+    replacementCount += 1;
+    return `${prefix}.${fraction}${delimiter}`;
+  };
+  let normalized = content.replace(
+    /^(\s*Dialogue:\s*[^,\r\n]*,\s*\d+:\d{2}:\d{2}),(\d{1,2})(,)/gimu,
+    replace,
+  );
+  normalized = normalized.replace(
+    /^(\s*Dialogue:\s*[^,\r\n]*,\s*\d+:\d{2}:\d{2}(?:\.\d{1,2})?\s*,\s*\d+:\d{2}:\d{2}),(\d{1,2})(,)/gimu,
+    replace,
+  );
+  return { content: normalized, replacementCount };
 }
 
 function joinCueText(
@@ -729,7 +754,7 @@ function validateBarrierSemanticHash(
   barrier: ReturnType<typeof dualBlindFreezeBarrierSchema.parse>,
 ): void {
   const { semanticHash, ...base } = barrier;
-  if (c60StableHash(base) !== semanticHash) {
+  if (c60SemanticHash(base) !== semanticHash) {
     throw new InputError("Dual blind freeze barrier semantic hash is invalid.");
   }
 }
@@ -792,7 +817,10 @@ export async function evaluateDualBlindRunsAgainstGold(input: {
       },
     );
   }
-  const goldCues = parseAss(goldBuffer.toString("utf8")).map((cue, index) => ({
+  const normalizedGoldAss = normalizeC601GoldAssTimestamps(
+    goldBuffer.toString("utf8"),
+  );
+  const goldCues = parseAss(normalizedGoldAss.content).map((cue, index) => ({
     id: `gold-${String(index + 1).padStart(4, "0")}`,
     start: cue.start,
     end: cue.end,
@@ -803,6 +831,7 @@ export async function evaluateDualBlindRunsAgainstGold(input: {
     size: goldBuffer.byteLength,
     sha256: goldHash,
     cueCount: goldCues.length,
+    timestampNormalizationCount: normalizedGoldAss.replacementCount,
     firstReadAt: goldFirstReadAt,
     readOnlyVerified: false,
   };

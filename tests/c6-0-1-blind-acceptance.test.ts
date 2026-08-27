@@ -9,6 +9,7 @@ import {
 } from "@mvl/shared";
 import {
   assertGoldIsolatedGenerationInput,
+  c60SemanticHash,
   c60StableHash,
   createC601EvaluationPolicy,
   createMachineShadowPolicy,
@@ -193,7 +194,7 @@ describe("C6.0.1 blind isolation", () => {
     };
     const freeze = blindOutputFreezeSchema.parse({
       ...base,
-      freezeSemanticHash: c60StableHash(base),
+      freezeSemanticHash: c60SemanticHash(base),
     });
     await writeFile(
       path.join(root, "blind-output-freeze.json"),

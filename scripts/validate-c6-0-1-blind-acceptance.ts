@@ -50,6 +50,8 @@ function shareableSummary(
       size: evaluation.goldIdentity.size,
       sha256: evaluation.goldIdentity.sha256,
       cueCount: evaluation.goldIdentity.cueCount,
+      timestampNormalizationCount:
+        evaluation.goldIdentity.timestampNormalizationCount,
       readOnlyVerified: evaluation.goldIdentity.readOnlyVerified,
     },
     evaluationPolicyVersion: evaluation.evaluationPolicyVersion,
