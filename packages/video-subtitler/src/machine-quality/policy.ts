@@ -44,6 +44,12 @@ export function machineQualityProfileUsesVad(
   return profile === "timing";
 }
 
+export function machineQualityProfileRetainsReviewEvidence(
+  profile: MachineQualityRecoveryProfile,
+): boolean {
+  return profile === "full";
+}
+
 export function allowBaselineCarryPromptForMachineQuality(
   mode: MachineQualityRecoveryMode,
 ): boolean {

@@ -23,6 +23,7 @@ import {
   createMachineShadowPolicy,
   emitMachineQualityRunArtifacts,
   machineQualityProfileUsesVad,
+  machineQualityProfileRetainsReviewEvidence,
   evaluateMachineShadowFinalization,
   sha256BlindFile,
   verifyBlindOutputFreeze,
@@ -409,6 +410,9 @@ const generationArguments = [
         "--coverage-recovery",
         qualityProfile === "timing" ? "auto" : "deep",
       ]
+    : []),
+  ...(machineQualityProfileRetainsReviewEvidence(qualityProfile)
+    ? ["--text-integrity", "observe"]
     : []),
   "--machine-quality-recovery",
   machineQualityRecovery,

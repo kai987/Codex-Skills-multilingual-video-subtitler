@@ -9,6 +9,7 @@ import {
   deriveMachineIntegrationSummaryCounts,
   machineQualityTargetChunkSeconds,
   machineQualityProfileUsesVad,
+  machineQualityProfileRetainsReviewEvidence,
   recoveryPromptCuesForMachineQuality,
 } from "@mvl/video-subtitler";
 import { buildCanonicalHallucinationIntegrityFindings } from "@mvl/transcription-core";
@@ -45,6 +46,15 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     expect(machineQualityProfileUsesVad("coverage")).toBe(false);
     expect(machineQualityProfileUsesVad("timing")).toBe(true);
     expect(machineQualityProfileUsesVad("full")).toBe(false);
+  });
+  it("retains machine-supported review evidence only in the full profile", () => {
+    expect(machineQualityProfileRetainsReviewEvidence("legacy")).toBe(false);
+    expect(machineQualityProfileRetainsReviewEvidence("diagnostics")).toBe(
+      false,
+    );
+    expect(machineQualityProfileRetainsReviewEvidence("coverage")).toBe(false);
+    expect(machineQualityProfileRetainsReviewEvidence("timing")).toBe(false);
+    expect(machineQualityProfileRetainsReviewEvidence("full")).toBe(true);
   });
   it("keeps off and observe compatible while enforce isolates provisional prompt text", () => {
     expect(
