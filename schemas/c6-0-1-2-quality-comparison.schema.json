@@ -195,43 +195,19 @@
     "deltas": {
       "type": "object",
       "properties": {
-        "cueCount": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9007199254740991
-        },
-        "exactCer": { "type": "number", "minimum": 0 },
-        "normalizedCer": { "type": "number", "minimum": 0 },
-        "goldCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
-        "missingCount": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9007199254740991
-        },
-        "hallucinationCount": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9007199254740991
-        },
-        "materialErrorCount": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9007199254740991
-        },
-        "severeTimingErrorCount": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9007199254740991
-        },
-        "startMaeSeconds": { "type": "number", "minimum": 0 },
-        "endMaeSeconds": { "type": "number", "minimum": 0 },
-        "p95BoundaryErrorSeconds": { "type": "number", "minimum": 0 },
-        "meanTemporalIou": { "type": "number", "minimum": 0, "maximum": 1 },
-        "overlapPairCount": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9007199254740991
-        }
+        "cueCount": { "type": "number" },
+        "exactCer": { "type": "number" },
+        "normalizedCer": { "type": "number" },
+        "goldCoverage": { "type": "number" },
+        "missingCount": { "type": "number" },
+        "hallucinationCount": { "type": "number" },
+        "materialErrorCount": { "type": "number" },
+        "severeTimingErrorCount": { "type": "number" },
+        "startMaeSeconds": { "type": "number" },
+        "endMaeSeconds": { "type": "number" },
+        "p95BoundaryErrorSeconds": { "type": "number" },
+        "meanTemporalIou": { "type": "number" },
+        "overlapPairCount": { "type": "number" }
       },
       "required": [
         "cueCount",

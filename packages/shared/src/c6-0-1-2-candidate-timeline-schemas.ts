@@ -528,6 +528,7 @@ export const c6012QualityPolicySchema = z
     productionStatus: z.literal("needs-review"),
     finalizationMethod: z.literal("none"),
     machineOnlyRelease: z.literal(false),
+    artifactSemanticHashes: z.array(sha256).length(8),
     gates: z
       .object({
         minimumCoverage: z.literal(0.9),

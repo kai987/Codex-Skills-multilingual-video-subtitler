@@ -27,6 +27,12 @@
     "productionStatus": { "type": "string", "const": "needs-review" },
     "finalizationMethod": { "type": "string", "const": "none" },
     "machineOnlyRelease": { "type": "boolean", "const": false },
+    "artifactSemanticHashes": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
     "gates": {
       "type": "object",
       "properties": {
@@ -68,6 +74,7 @@
     "productionStatus",
     "finalizationMethod",
     "machineOnlyRelease",
+    "artifactSemanticHashes",
     "gates",
     "semanticHash"
   ],
