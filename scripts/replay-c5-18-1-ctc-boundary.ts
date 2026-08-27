@@ -83,6 +83,7 @@ const { values } = parseArgs({
     "ctc-cache-import": { type: "string", multiple: true },
     "ctc-cache-mode": { type: "string", default: "read-write" },
     "ctc-separation-fallback": { type: "string", default: "observe" },
+    "machine-quality-mode": { type: "boolean", default: false },
   },
   strict: true,
 });
@@ -118,6 +119,7 @@ const cacheMode = ctcCacheModeSchema.parse(values["ctc-cache-mode"]);
 const separationMode = sourceSeparationFallbackSchema.parse(
   values["ctc-separation-fallback"],
 );
+const machineQualityMode = values["machine-quality-mode"];
 type SubtitleReviewItem = SubtitleReviewPackage["items"][number];
 
 async function exists(filePath: string): Promise<boolean> {
@@ -166,6 +168,110 @@ function sameCueSet(left: readonly string[], right: readonly string[]) {
     orderedLeft.length === orderedRight.length &&
     orderedLeft.every((cueId, index) => cueId === orderedRight[index])
   );
+}
+
+function sameInterval(
+  left: { start: number; end: number } | null | undefined,
+  right: { start: number; end: number } | null | undefined,
+): boolean {
+  if (left === null || left === undefined) return right == null;
+  return (
+    right !== null &&
+    right !== undefined &&
+    Math.abs(left.start - right.start) <= 0.000_001 &&
+    Math.abs(left.end - right.end) <= 0.000_001
+  );
+}
+
+function reviewPackageSummary(
+  items: SubtitleReviewPackage["items"],
+): SubtitleReviewPackage["summary"] {
+  const evidence = (item: SubtitleReviewItem) => [
+    ...item.boundaryEvidence,
+    ...item.componentRawVadIntervals,
+    ...item.componentDecodedSegments,
+    ...item.componentMappedTokenEvidence,
+    ...item.componentPauseEvidence,
+  ];
+  const unique = (sourceType: string) =>
+    new Set(
+      items.flatMap((item) =>
+        evidence(item)
+          .filter((value) => value.sourceType === sourceType)
+          .map((value) => value.evidenceLineageId),
+      ),
+    ).size;
+  const copiedCount = items.reduce((sum, item) => {
+    const mappedByCue = new Map(
+      item.boundaryEvidence
+        .filter((value) =>
+          ["trusted-mapped-token", "trusted-no-vad-token"].includes(
+            value.sourceType,
+          ),
+        )
+        .map((value) => [value.cueIds[0] ?? "", value]),
+    );
+    return (
+      sum +
+      (item.forcedAlignmentEvidence?.cues.filter((cue) => {
+        if (
+          cue.mappedTokenBoundary === null ||
+          cue.evidenceDpBoundary === null ||
+          !sameInterval(cue.mappedTokenBoundary, cue.evidenceDpBoundary)
+        ) {
+          return false;
+        }
+        const mapped = mappedByCue.get(cue.cueId);
+        return mapped === undefined || mapped.sourceType === "evidence-dp";
+      }).length ?? 0)
+    );
+  }, 0);
+  return {
+    itemCount: items.length,
+    mandatoryItemCount: items.filter((item) => item.requiresHumanReview).length,
+    audioClipCount: items.filter((item) => item.audioClipPath !== null).length,
+    audioFailureCount: items.filter((item) => item.audioError !== null).length,
+    audioCoverageFailureCount: items.filter(
+      (item) => !item.audioFullyCoversComponent,
+    ).length,
+    audioPhysicalFileCount: items.filter(
+      (item) => item.audioValidationStatus === "validated",
+    ).length,
+    audioReferencedCount: items.filter((item) => item.audioClipPath !== null)
+      .length,
+    audioPlayableCount: items.filter(
+      (item) =>
+        item.audioClipPath !== null &&
+        item.audioValidationStatus === "validated" &&
+        item.audioFullyCoversComponent,
+    ).length,
+    audioReusedExistingCount: items.filter((item) =>
+      [
+        "reused-existing-review-audio",
+        "inherited-verified-review-audio",
+      ].includes(item.audioSource),
+    ).length,
+    audioReusedOverlapCount: items.filter(
+      (item) => item.audioSource === "reused-overlap-audio",
+    ).length,
+    audioGeneratedCount: items.filter(
+      (item) => item.audioSource === "generated-from-source-video",
+    ).length,
+    audioHashMismatchCount: items.filter(
+      (item) => item.audioValidationStatus === "hash-mismatch",
+    ).length,
+    audioMetadataFailureCount: items.filter(
+      (item) => item.audioValidationStatus === "invalid-wav",
+    ).length,
+    mappedTokenEvidenceCount:
+      unique("trusted-mapped-token") + unique("trusted-no-vad-token"),
+    rawVadEvidenceCount: unique("raw-vad"),
+    decodedSegmentEvidenceCount: unique("decoded-segment"),
+    mappedTokenBoundaryCopiedFromEvidenceDpCount: copiedCount,
+    unresolvedEvidenceReferenceCount: new Set(
+      items.flatMap((item) => item.unresolvedEvidenceReferences),
+    ).size,
+  };
 }
 
 function seedInterval(
@@ -875,7 +981,7 @@ try {
     subtitleDirectory,
     "subtitle-local-speaker-evidence.json",
   );
-  const sourceReviewPackage = subtitleReviewPackageSchema.parse(
+  const unfilteredSourceReviewPackage = subtitleReviewPackageSchema.parse(
     JSON.parse(await readFile(reviewPackagePath, "utf8")) as unknown,
   );
   const sourceReviewPackageHash = await sha256File(reviewPackagePath);
@@ -893,6 +999,19 @@ try {
   const speakerEvidence = subtitleLocalSpeakerEvidenceSchema.parse(
     JSON.parse(await readFile(speakerEvidencePath, "utf8")) as unknown,
   );
+  const speakerComponentIds = new Set(
+    speakerEvidence.components.map((component) => component.componentId),
+  );
+  const selectedReviewItems = unfilteredSourceReviewPackage.items.filter(
+    (item) => speakerComponentIds.has(targetComponentId(item)),
+  );
+  const sourceReviewPackage = machineQualityMode
+    ? subtitleReviewPackageSchema.parse({
+        ...unfilteredSourceReviewPackage,
+        items: selectedReviewItems,
+        summary: reviewPackageSummary(selectedReviewItems),
+      })
+    : unfilteredSourceReviewPackage;
   if (
     sourceReviewPackage.items.length !== 7 ||
     sourceAlignment.cues.length !== 16 ||
@@ -911,7 +1030,7 @@ try {
   const sourcePackage = subtitlePackageSchema.parse(
     JSON.parse(await readFile(finalPackagePath, "utf8")) as unknown,
   );
-  if (sourcePackage.cues.length !== 192) {
+  if (!machineQualityMode && sourcePackage.cues.length !== 192) {
     throw new InputError("C5.18.1 requires the 192-cue human baseline.");
   }
   const sourceOutputCueHash = sha256Value(sourcePackage.cues);
@@ -1514,23 +1633,7 @@ try {
     ctcJointAssignmentHash: ctcEvidence.jointAssignmentHash,
     sourceSeparationEvidenceHash: separationEvidenceHash,
     items: boundItems,
-    summary: {
-      ...sourceReviewPackage.summary,
-      itemCount: boundItems.length,
-      mandatoryItemCount: boundItems.filter((item) => item.requiresHumanReview)
-        .length,
-      audioClipCount: boundItems.filter((item) => item.audioClipPath !== null)
-        .length,
-      audioReferencedCount: boundItems.filter(
-        (item) => item.audioClipPath !== null,
-      ).length,
-      audioPlayableCount: boundItems.filter(
-        (item) =>
-          item.audioClipPath !== null &&
-          item.audioValidationStatus === "validated" &&
-          item.audioFullyCoversComponent,
-      ).length,
-    },
+    summary: reviewPackageSummary(boundItems),
   });
   await atomicWriteJson(reviewPackagePath, reviewPackage, { overwrite: true });
   await writeSubtitleReviewPage({
@@ -1546,8 +1649,14 @@ try {
     ...sourceFinalization,
     finalizationVersion: "C5.18.1-local-ctc-boundary-refinement-v1",
     generatedAt: new Date().toISOString(),
-    status: reviewPackage.items.length === 0 ? "finalized" : "needs-review",
-    finalizationMethod: reviewPackage.items.length === 0 ? "automatic" : "none",
+    status:
+      machineQualityMode || reviewPackage.items.length > 0
+        ? "needs-review"
+        : "finalized",
+    finalizationMethod:
+      machineQualityMode || reviewPackage.items.length > 0
+        ? "none"
+        : "automatic",
     metrics: {
       ...sourceFinalization.metrics,
       reviewItemCount: reviewPackage.items.length,
@@ -1582,7 +1691,8 @@ try {
         separationEvidence.summary.separationCacheHitCount,
       separatedStreamCtcAttemptCount:
         separationEvidence.summary.separatedStreamCtcAttemptCount,
-      speakerRelationshipResolvedComponentCount: 1,
+      speakerRelationshipResolvedComponentCount:
+        speakerEvidence.summary.resolvedComponentCount,
       subtitleOverlapResolvedComponentCount:
         ctcEvidence.summary.resolvedSubtitleOverlapComponentCount,
     },
@@ -1627,217 +1737,277 @@ try {
   if (!sourceReadOnlyVerified) {
     throw new InputError("C5.18 source artifacts changed during replay.");
   }
-  const summaryBase = {
-    schemaVersion: "1.0.0" as const,
-    artifactType: "c5-18-1-ctc-boundary-replay-summary" as const,
-    replayVersion: "C5.18.1" as const,
-    generatedAt: new Date().toISOString(),
-    runId: `c5-18-1-${randomUUID()}`,
-    sourceTaskName: path.basename(sourceTask),
-    outputTaskName: path.basename(outputTask),
-    mode,
-    cacheMode,
-    sourceSeparationMode: separationMode,
-    runtimeIdentityHash: capability.runtimeIdentityHash,
-    modelSnapshotHash: capability.modelSnapshotHash,
-    deviceRequested,
-    deviceUsed: capability.deviceUsed,
-    counts: {
-      targetComponentCount: 7 as const,
-      targetCueCount: 16 as const,
-      directCtcRequestCount: 32 as const,
-      directCtcInferenceCount: ctcEvidence.summary.directInferenceCount,
-      directCtcCacheHitCount: ctcEvidence.summary.directCacheHitCount,
-      ctcModelLoadCount: ctcEvidence.summary.modelLoadCount,
-      wholeMediaCtcInferenceCount: 0 as const,
-      speakerInferenceCount: 0 as const,
-      mfaProcessCount: 0 as const,
-      whisperRequestCount: 0 as const,
-      wholeMediaAsrRequestCount: 0 as const,
-      openAiRequestCount: 0 as const,
-      onlineSubtitleSearchCount: 0 as const,
-      separationInferenceCount:
-        separationEvidence.summary.separationInferenceCount,
-      separationCacheHitCount:
-        separationEvidence.summary.separationCacheHitCount,
-      separationModelLoadCount:
-        separationEvidence.summary.separationModelLoadCount,
-      separatedStreamCtcAttemptCount:
-        separationEvidence.summary.separatedStreamCtcAttemptCount,
-      separatedStreamCtcInferenceCount:
-        separationEvidence.summary.separatedStreamCtcInferenceCount,
-      separatedStreamCtcCacheHitCount:
-        separationEvidence.summary.separatedStreamCtcCacheHitCount,
-      canonicalTextMutationCount: 0 as const,
-      canonicalTimingMutationCount: ctcEvidence.mutations.length,
-      greedyTextMutationCount: 0 as const,
-      tokenRatioRepairCount: 0 as const,
-      forbiddenTimingHeuristicUseCount: 0 as const,
-      speakerRelationshipResolvedComponentCount: 1 as const,
-      subtitleOverlapResolvedComponentCount:
-        ctcEvidence.summary.resolvedSubtitleOverlapComponentCount,
-      remainingReviewComponentCount: reviewPackage.items.length,
-    },
-    hashes: {
-      ctcAlignmentInputSemanticHash: alignmentInput.semanticHash,
-      ctcEvidenceSemanticHash: ctcEvidence.semanticHash,
-      jointAssignmentHash: ctcEvidence.jointAssignmentHash,
-      sourceSeparationEvidenceHash: separationEvidence.semanticHash,
-      componentDecisionHash: ctcEvidence.componentDecisionHash,
-      mutationHash: ctcEvidence.mutationHash,
-      outputCueHash,
-      timingHash,
-      presentationHash: presentation.presentationCueHash,
-    },
-    runtimeCapabilityPath: "./ctc-runtime-capability.json",
-    alignmentInputPath: "./subtitle-ctc-alignment-input.json",
-    boundaryEvidencePath: "./subtitle-local-ctc-boundary-evidence.json",
-    cacheManifestPath: "./ctc-alignment-cache-manifest.json",
-    separatedStreamEvidencePath:
-      "./subtitle-local-separated-stream-evidence.json",
-    reviewDeliveryIntegrityPassed:
-      delivery.artifact.summary.reviewDeliveryIntegrityPassed,
-    shareableAuditPassed: true,
-    networkUsedDuringInference: false as const,
-    sourceReadOnlyVerified,
-    humanSubtitleReadOnlyVerified: true,
-    finalStatus:
-      reviewPackage.items.length === 0
-        ? ("finalized" as const)
-        : ("needs-review" as const),
-    finalizationMethod:
-      reviewPackage.items.length === 0
-        ? ("automatic" as const)
-        : ("none" as const),
-  };
-  const summary = c5181CtcBoundaryReplaySummarySchema.parse({
-    ...summaryBase,
-    semanticHash: sha256Value({ ...summaryBase, generatedAt: null }),
-  });
-  const summaryPath = path.join(
-    stagingTask,
-    "c5-18-1-ctc-boundary-replay-summary.json",
-  );
-  await atomicWriteJson(summaryPath, summary, { overwrite: true });
-
-  const sourceShareable = path.join(sourceTask, "shareable");
-  await generateC5161ShareableArtifacts({
-    taskRoot: stagingTask,
-    subtitleDirectory,
-    localExecutionSummaryPath: summaryPath,
-    stockPatchedRuntimeAbPath: path.join(
-      sourceShareable,
-      "c5-16-stock-patched-runtime-ab.json",
-    ),
-    outputDirectory: path.join(stagingTask, "shareable"),
-    externalFiles: [],
-    c517Artifacts: {
-      runtimeCapabilityPath: path.join(
-        subtitleDirectory,
-        "forced-alignment-runtime-capability.json",
-      ),
-      canonicalInputPath: canonicalAlignmentPath,
-      forcedAlignmentPath: path.join(
-        subtitleDirectory,
-        "subtitle-canonical-forced-alignment.json",
-      ),
-      replaySummaryPath: path.join(
-        stagingTask,
-        "c5-17-forced-alignment-replay-summary.json",
-      ),
-      pronunciationPath: path.join(
-        subtitleDirectory,
-        "subtitle-canonical-pronunciation.json",
-      ),
-      sudachiRuntimeCapabilityPath: path.join(
-        subtitleDirectory,
-        "sudachi-runtime-capability.json",
-      ),
-      cacheManifestPath: path.join(
-        subtitleDirectory,
-        "forced-alignment-cache-manifest.json",
-      ),
-      runtimePreparationSummaryPath: path.join(
-        sourceShareable,
-        "c5-17-1-runtime-preparation-summary.json",
-      ),
-      freshCacheObserveValidationPath: path.join(
-        stagingTask,
-        "c5-17-1-fresh-cache-observe-validation.json",
-      ),
-    },
-    c5172Artifacts: {
-      deliveryIntegrityPath: delivery.path,
-      replaySummaryPath: path.join(
-        stagingTask,
-        "c5-17-2-review-delivery-replay-summary.json",
-      ),
-      reviewActionValidationReportPath: path.join(
-        subtitleDirectory,
-        "review-action-validation-report.json",
-      ),
-    },
-    c518Artifacts: {
-      runtimeCapabilityPath: path.join(
-        subtitleDirectory,
-        "speaker-evidence-runtime-capability.json",
-      ),
-      localSpeakerEvidencePath: speakerEvidencePath,
-      replaySummaryPath: path.join(
-        stagingTask,
-        "c5-18-speaker-evidence-replay-summary.json",
-      ),
-      freshCacheObserveValidationPath: path.join(
-        stagingTask,
-        "c5-18-fresh-cache-observe-validation.json",
-      ),
-    },
-    c5181Artifacts: {
-      runtimeCapabilityPath: capabilityPath,
-      alignmentInputPath,
-      boundaryEvidencePath: evidencePath,
-      cacheManifestPath,
-      separatedStreamEvidencePath: separationPath,
-      replaySummaryPath: summaryPath,
-    },
-  });
-  const shareableAudit = await auditC5161ShareableArtifacts(
-    path.join(stagingTask, "shareable"),
-  );
-  if (!shareableAudit.validationPassed) {
-    throw new InputError("C5.18.1 shareable artifact audit failed.");
-  }
-
-  await rename(stagingTask, outputTask);
-  completed = true;
-  process.stdout.write(
-    `${JSON.stringify(
-      {
-        ok: true,
-        outputTask,
-        subtitleDirectory: path.join(
-          outputTask,
-          path.relative(stagingTask, subtitleDirectory),
-        ),
+  machineQualityReplay: {
+    if (machineQualityMode) {
+      const machineSummary = {
+        schemaVersion: "1.0.0",
+        artifactType: "c6-0-1-1-machine-ctc-replay-summary",
+        replayVersion: "C6.0.1.1",
+        generatedAt: new Date().toISOString(),
+        sourceTaskName: path.basename(sourceTask),
+        outputTaskName: path.basename(outputTask),
         runtimeIdentityHash: capability.runtimeIdentityHash,
         modelSnapshotHash: capability.modelSnapshotHash,
+        deviceRequested,
         deviceUsed: capability.deviceUsed,
-        directCtcRequests: 32,
+        targetComponentCount: ctcEvidence.summary.targetComponentCount,
+        targetCueCount: ctcEvidence.summary.targetCueCount,
+        directCtcRequestCount: ctcEvidence.summary.directAttemptCount,
         directCtcInferenceCount: ctcEvidence.summary.directInferenceCount,
         directCtcCacheHitCount: ctcEvidence.summary.directCacheHitCount,
         ctcModelLoadCount: ctcEvidence.summary.modelLoadCount,
-        pathSuccessCount: ctcEvidence.summary.pathSuccessCount,
-        windowStableCueCount: ctcEvidence.summary.windowStableCueCount,
-        timingMutationCount: ctcEvidence.mutations.length,
+        ctcPathSuccessCount: ctcEvidence.summary.pathSuccessCount,
+        ctcTimingMutationCount: ctcEvidence.mutations.length,
+        speakerRelationshipResolvedComponentCount:
+          speakerEvidence.summary.resolvedComponentCount,
+        subtitleOverlapResolvedComponentCount:
+          ctcEvidence.summary.resolvedSubtitleOverlapComponentCount,
         remainingReviewComponentCount: reviewPackage.items.length,
+        canonicalTextMutationCount: 0,
+        outputCueHash,
+        timingHash,
+        presentationHash: presentation.presentationCueHash,
+        ctcAlignmentInputSemanticHash: alignmentInput.semanticHash,
+        ctcEvidenceSemanticHash: ctcEvidence.semanticHash,
+        productionStatus: "needs-review",
+        finalizationMethod: "none",
+        machineOnlyReleaseAuthorized: false,
+        goldRuntimeInputCount: 0,
+        humanRuntimeInputCount: 0,
+        networkUsedDuringInference: false,
+        sourceReadOnlyVerified,
         reviewDeliveryIntegrityPassed:
           delivery.artifact.summary.reviewDeliveryIntegrityPassed,
-        shareableAuditPassed: shareableAudit.validationPassed,
+      };
+      await atomicWriteJson(
+        path.join(stagingTask, "c6-0-1-1-machine-ctc-replay-summary.json"),
+        {
+          ...machineSummary,
+          semanticHash: sha256Value({
+            ...machineSummary,
+            generatedAt: null,
+          }),
+        },
+        { overwrite: true },
+      );
+      await rename(stagingTask, outputTask);
+      completed = true;
+      process.stdout.write(`${JSON.stringify(machineSummary, null, 2)}\n`);
+      break machineQualityReplay;
+    }
+
+    const summaryBase = {
+      schemaVersion: "1.0.0" as const,
+      artifactType: "c5-18-1-ctc-boundary-replay-summary" as const,
+      replayVersion: "C5.18.1" as const,
+      generatedAt: new Date().toISOString(),
+      runId: `c5-18-1-${randomUUID()}`,
+      sourceTaskName: path.basename(sourceTask),
+      outputTaskName: path.basename(outputTask),
+      mode,
+      cacheMode,
+      sourceSeparationMode: separationMode,
+      runtimeIdentityHash: capability.runtimeIdentityHash,
+      modelSnapshotHash: capability.modelSnapshotHash,
+      deviceRequested,
+      deviceUsed: capability.deviceUsed,
+      counts: {
+        targetComponentCount: 7 as const,
+        targetCueCount: 16 as const,
+        directCtcRequestCount: 32 as const,
+        directCtcInferenceCount: ctcEvidence.summary.directInferenceCount,
+        directCtcCacheHitCount: ctcEvidence.summary.directCacheHitCount,
+        ctcModelLoadCount: ctcEvidence.summary.modelLoadCount,
+        wholeMediaCtcInferenceCount: 0 as const,
+        speakerInferenceCount: 0 as const,
+        mfaProcessCount: 0 as const,
+        whisperRequestCount: 0 as const,
+        wholeMediaAsrRequestCount: 0 as const,
+        openAiRequestCount: 0 as const,
+        onlineSubtitleSearchCount: 0 as const,
+        separationInferenceCount:
+          separationEvidence.summary.separationInferenceCount,
+        separationCacheHitCount:
+          separationEvidence.summary.separationCacheHitCount,
+        separationModelLoadCount:
+          separationEvidence.summary.separationModelLoadCount,
+        separatedStreamCtcAttemptCount:
+          separationEvidence.summary.separatedStreamCtcAttemptCount,
+        separatedStreamCtcInferenceCount:
+          separationEvidence.summary.separatedStreamCtcInferenceCount,
+        separatedStreamCtcCacheHitCount:
+          separationEvidence.summary.separatedStreamCtcCacheHitCount,
+        canonicalTextMutationCount: 0 as const,
+        canonicalTimingMutationCount: ctcEvidence.mutations.length,
+        greedyTextMutationCount: 0 as const,
+        tokenRatioRepairCount: 0 as const,
+        forbiddenTimingHeuristicUseCount: 0 as const,
+        speakerRelationshipResolvedComponentCount: 1 as const,
+        subtitleOverlapResolvedComponentCount:
+          ctcEvidence.summary.resolvedSubtitleOverlapComponentCount,
+        remainingReviewComponentCount: reviewPackage.items.length,
       },
-      null,
-      2,
-    )}\n`,
-  );
+      hashes: {
+        ctcAlignmentInputSemanticHash: alignmentInput.semanticHash,
+        ctcEvidenceSemanticHash: ctcEvidence.semanticHash,
+        jointAssignmentHash: ctcEvidence.jointAssignmentHash,
+        sourceSeparationEvidenceHash: separationEvidence.semanticHash,
+        componentDecisionHash: ctcEvidence.componentDecisionHash,
+        mutationHash: ctcEvidence.mutationHash,
+        outputCueHash,
+        timingHash,
+        presentationHash: presentation.presentationCueHash,
+      },
+      runtimeCapabilityPath: "./ctc-runtime-capability.json",
+      alignmentInputPath: "./subtitle-ctc-alignment-input.json",
+      boundaryEvidencePath: "./subtitle-local-ctc-boundary-evidence.json",
+      cacheManifestPath: "./ctc-alignment-cache-manifest.json",
+      separatedStreamEvidencePath:
+        "./subtitle-local-separated-stream-evidence.json",
+      reviewDeliveryIntegrityPassed:
+        delivery.artifact.summary.reviewDeliveryIntegrityPassed,
+      shareableAuditPassed: true,
+      networkUsedDuringInference: false as const,
+      sourceReadOnlyVerified,
+      humanSubtitleReadOnlyVerified: true,
+      finalStatus:
+        reviewPackage.items.length === 0
+          ? ("finalized" as const)
+          : ("needs-review" as const),
+      finalizationMethod:
+        reviewPackage.items.length === 0
+          ? ("automatic" as const)
+          : ("none" as const),
+    };
+    const summary = c5181CtcBoundaryReplaySummarySchema.parse({
+      ...summaryBase,
+      semanticHash: sha256Value({ ...summaryBase, generatedAt: null }),
+    });
+    const summaryPath = path.join(
+      stagingTask,
+      "c5-18-1-ctc-boundary-replay-summary.json",
+    );
+    await atomicWriteJson(summaryPath, summary, { overwrite: true });
+
+    const sourceShareable = path.join(sourceTask, "shareable");
+    await generateC5161ShareableArtifacts({
+      taskRoot: stagingTask,
+      subtitleDirectory,
+      localExecutionSummaryPath: summaryPath,
+      stockPatchedRuntimeAbPath: path.join(
+        sourceShareable,
+        "c5-16-stock-patched-runtime-ab.json",
+      ),
+      outputDirectory: path.join(stagingTask, "shareable"),
+      externalFiles: [],
+      c517Artifacts: {
+        runtimeCapabilityPath: path.join(
+          subtitleDirectory,
+          "forced-alignment-runtime-capability.json",
+        ),
+        canonicalInputPath: canonicalAlignmentPath,
+        forcedAlignmentPath: path.join(
+          subtitleDirectory,
+          "subtitle-canonical-forced-alignment.json",
+        ),
+        replaySummaryPath: path.join(
+          stagingTask,
+          "c5-17-forced-alignment-replay-summary.json",
+        ),
+        pronunciationPath: path.join(
+          subtitleDirectory,
+          "subtitle-canonical-pronunciation.json",
+        ),
+        sudachiRuntimeCapabilityPath: path.join(
+          subtitleDirectory,
+          "sudachi-runtime-capability.json",
+        ),
+        cacheManifestPath: path.join(
+          subtitleDirectory,
+          "forced-alignment-cache-manifest.json",
+        ),
+        runtimePreparationSummaryPath: path.join(
+          sourceShareable,
+          "c5-17-1-runtime-preparation-summary.json",
+        ),
+        freshCacheObserveValidationPath: path.join(
+          stagingTask,
+          "c5-17-1-fresh-cache-observe-validation.json",
+        ),
+      },
+      c5172Artifacts: {
+        deliveryIntegrityPath: delivery.path,
+        replaySummaryPath: path.join(
+          stagingTask,
+          "c5-17-2-review-delivery-replay-summary.json",
+        ),
+        reviewActionValidationReportPath: path.join(
+          subtitleDirectory,
+          "review-action-validation-report.json",
+        ),
+      },
+      c518Artifacts: {
+        runtimeCapabilityPath: path.join(
+          subtitleDirectory,
+          "speaker-evidence-runtime-capability.json",
+        ),
+        localSpeakerEvidencePath: speakerEvidencePath,
+        replaySummaryPath: path.join(
+          stagingTask,
+          "c5-18-speaker-evidence-replay-summary.json",
+        ),
+        freshCacheObserveValidationPath: path.join(
+          stagingTask,
+          "c5-18-fresh-cache-observe-validation.json",
+        ),
+      },
+      c5181Artifacts: {
+        runtimeCapabilityPath: capabilityPath,
+        alignmentInputPath,
+        boundaryEvidencePath: evidencePath,
+        cacheManifestPath,
+        separatedStreamEvidencePath: separationPath,
+        replaySummaryPath: summaryPath,
+      },
+    });
+    const shareableAudit = await auditC5161ShareableArtifacts(
+      path.join(stagingTask, "shareable"),
+    );
+    if (!shareableAudit.validationPassed) {
+      throw new InputError("C5.18.1 shareable artifact audit failed.");
+    }
+
+    await rename(stagingTask, outputTask);
+    completed = true;
+    process.stdout.write(
+      `${JSON.stringify(
+        {
+          ok: true,
+          outputTask,
+          subtitleDirectory: path.join(
+            outputTask,
+            path.relative(stagingTask, subtitleDirectory),
+          ),
+          runtimeIdentityHash: capability.runtimeIdentityHash,
+          modelSnapshotHash: capability.modelSnapshotHash,
+          deviceUsed: capability.deviceUsed,
+          directCtcRequests: 32,
+          directCtcInferenceCount: ctcEvidence.summary.directInferenceCount,
+          directCtcCacheHitCount: ctcEvidence.summary.directCacheHitCount,
+          ctcModelLoadCount: ctcEvidence.summary.modelLoadCount,
+          pathSuccessCount: ctcEvidence.summary.pathSuccessCount,
+          windowStableCueCount: ctcEvidence.summary.windowStableCueCount,
+          timingMutationCount: ctcEvidence.mutations.length,
+          remainingReviewComponentCount: reviewPackage.items.length,
+          reviewDeliveryIntegrityPassed:
+            delivery.artifact.summary.reviewDeliveryIntegrityPassed,
+          shareableAuditPassed: shareableAudit.validationPassed,
+        },
+        null,
+        2,
+      )}\n`,
+    );
+  }
 } finally {
   await runtimeState.worker?.close();
   await separationRuntimeState.worker?.close();

@@ -197,6 +197,8 @@ interface FinalizeCliOptions extends GlobalOptions {
   mfaDictionaryModel?: string;
   mfaG2pModel?: string;
   mfaTemporaryDirectory?: string;
+  sudachiRuntimeManifest?: string;
+  sudachiPythonExecutable?: string;
   forcedAlignmentNarrowContext: number;
   forcedAlignmentExpandedContext: number;
   maxForcedAlignmentAttempts: number;
@@ -1258,6 +1260,14 @@ program
     "local-only MFA temporary directory",
   )
   .option(
+    "--sudachi-runtime-manifest <path>",
+    "verified C5.17.1 Sudachi runtime manifest",
+  )
+  .option(
+    "--sudachi-python-executable <path>",
+    "verified C5.17.1 Sudachi Python executable",
+  )
+  .option(
     "--forced-alignment-narrow-context <seconds>",
     "narrow cue alignment context (maximum 1.0)",
     nonNegativeNumber,
@@ -1506,6 +1516,13 @@ program
       ...(options.mfaTemporaryDirectory === undefined
         ? {}
         : { mfaTemporaryDirectory: options.mfaTemporaryDirectory }),
+      ...(options.sudachiRuntimeManifest === undefined
+        ? {}
+        : { sudachiRuntimeManifestPath: options.sudachiRuntimeManifest }),
+      ...(options.sudachiPythonExecutable === undefined
+        ? {}
+        : { sudachiPythonExecutable: options.sudachiPythonExecutable }),
+      sudachiRequirementsPath: path.resolve("scripts/requirements-sudachi.txt"),
       sudachiHelperPath: path.resolve("scripts/sudachi-readings.py"),
       mfaParserHelperPath: path.resolve("scripts/parse-mfa-output.py"),
       ...(options.forcedAlignmentCacheDir === undefined
