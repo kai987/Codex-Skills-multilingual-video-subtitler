@@ -305,6 +305,7 @@ function runFinalPresentationPipeline(input: {
   >[0]["vocalRegions"];
   supportedLyricsCueIds?: readonly string[];
   referenceTimeline?: ReferenceTimelineArtifact;
+  preserveUnresolvedOverlapForReview?: boolean;
 }) {
   const preliminarySubtitleIntegrity = evaluateFinalSubtitleIntegrity({
     cues: input.cues,
@@ -368,6 +369,9 @@ function runFinalPresentationPipeline(input: {
       : { supportedLyricsCueIds: input.supportedLyricsCueIds }),
     supportedLongCueIds: finalSubtitleRepair.supportedLongCueIds,
     strictPresentationConstraints: true,
+    ...(input.preserveUnresolvedOverlapForReview === true
+      ? { reviewOnlyRetentionCodes: ["SUBTITLE_OVERLAP" as const] }
+      : {}),
   });
   const lineLayoutIntegrity = evaluateLineLayoutIntegrity(
     finalSubtitleGate.cues,
@@ -1012,6 +1016,9 @@ export async function runVideoSubtitler(
           cueSegmentation: cueSegmentationMode,
           japaneseTextAnalyzer,
           textIntegrity: textIntegrityMode,
+          preserveUnresolvedOverlapForReview:
+            options.machineQualityRecovery === "enforce" &&
+            textIntegrityMode === "observe",
           timingQaConfig: options.timingQaConfig,
           vocalRegions: adaptive.vocalRegions,
           supportedLyricsCueIds,
@@ -1814,6 +1821,9 @@ export async function runVideoSubtitler(
           cueSegmentation: cueSegmentationMode,
           japaneseTextAnalyzer,
           textIntegrity: textIntegrityMode,
+          preserveUnresolvedOverlapForReview:
+            options.machineQualityRecovery === "enforce" &&
+            textIntegrityMode === "observe",
           timingQaConfig: options.timingQaConfig,
           supportedLyricsCueIds,
           ...(preparedReference === null

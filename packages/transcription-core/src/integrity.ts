@@ -934,8 +934,12 @@ export function runFinalSubtitleIntegrityGate(input: {
   supportedLongCueIds?: readonly string[] | undefined;
   generatedAt?: string | undefined;
   strictPresentationConstraints?: boolean | undefined;
+  reviewOnlyRetentionCodes?: readonly FinalSubtitleIntegrityCode[] | undefined;
 }): { cues: SubtitleCue[]; artifact: FinalSubtitleIntegrityArtifact } {
   const candidate = evaluateFinalSubtitleIntegrity(input);
+  const reviewOnlyRetentionCodes = new Set(
+    input.reviewOnlyRetentionCodes ?? [],
+  );
   const quarantineCodes = new Set<FinalSubtitleIntegrityCode>([
     "PRESENTATION_DUPLICATE_LINE",
     "CROSS_CUE_EXACT_DUPLICATE",
@@ -1006,7 +1010,9 @@ export function runFinalSubtitleIntegrityGate(input: {
       candidate.findings
         .filter(
           (finding) =>
-            finding.severity === "hard" && quarantineCodes.has(finding.code),
+            finding.severity === "hard" &&
+            quarantineCodes.has(finding.code) &&
+            !reviewOnlyRetentionCodes.has(finding.code),
         )
         .flatMap(chooseQuarantinedCueIds),
     ),

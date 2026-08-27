@@ -12,7 +12,10 @@ import {
   machineQualityProfileRetainsReviewEvidence,
   recoveryPromptCuesForMachineQuality,
 } from "@mvl/video-subtitler";
-import { buildCanonicalHallucinationIntegrityFindings } from "@mvl/transcription-core";
+import {
+  buildCanonicalHallucinationIntegrityFindings,
+  runFinalSubtitleIntegrityGate,
+} from "@mvl/transcription-core";
 import { describe, expect, it } from "vitest";
 
 const hash = (character: string): string => character.repeat(64);
@@ -244,5 +247,22 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     expect(findings).toHaveLength(1);
     expect(findings[0]?.repetitionEvidence).toBeUndefined();
     expect(findings[0]?.reasons).toContain("LONG_PHRASE_LOOP");
+  });
+
+  it("retains unresolved overlap only as blocked review evidence", () => {
+    const overlapping = [
+      { ...cue, id: "left", start: 1, end: 3, text: "先に話します。" },
+      { ...cue, id: "right", start: 2, end: 4, text: "同時に話します。" },
+    ];
+    const strict = runFinalSubtitleIntegrityGate({ cues: overlapping });
+    const reviewOnly = runFinalSubtitleIntegrityGate({
+      cues: overlapping,
+      reviewOnlyRetentionCodes: ["SUBTITLE_OVERLAP"],
+    });
+    expect(strict.cues).toHaveLength(1);
+    expect(reviewOnly.cues).toHaveLength(2);
+    expect(reviewOnly.artifact.validationStatus).toBe("needs-review");
+    expect(reviewOnly.artifact.gateFailures).toContain("SUBTITLE_OVERLAP");
+    expect(reviewOnly.artifact.quarantinedCueIds).toEqual([]);
   });
 });
