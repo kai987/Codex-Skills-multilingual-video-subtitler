@@ -88,6 +88,14 @@ await Promise.all([
     replaySemanticHash: result.replaySemanticHash,
     deterministic: result.evaluation.semanticHash === result.replaySemanticHash,
   }),
+  ...(result.rawAsrEvaluation === null
+    ? []
+    : [
+        atomicWriteJson(
+          path.join(outputPath, "raw-asr-vs-gold-evaluation.json"),
+          result.rawAsrEvaluation,
+        ),
+      ]),
 ]);
 console.log(
   JSON.stringify(
@@ -102,6 +110,24 @@ console.log(
       modelInferenceCount: result.evaluation.modelInferenceCount,
       deterministicReplay:
         result.evaluation.semanticHash === result.replaySemanticHash,
+      rawAsr:
+        result.rawAsrEvaluation === null
+          ? null
+          : {
+              cueCount:
+                result.rawAsrEvaluation.alignmentMetrics.machineCueCount,
+              exactCer: result.rawAsrEvaluation.globalTextMetrics.exact.cer,
+              normalizedCer:
+                result.rawAsrEvaluation.globalTextMetrics.normalized.cer,
+              coverage:
+                result.rawAsrEvaluation.coverageMetrics.goldTextCoverageRatio,
+              missingDialogue:
+                result.rawAsrEvaluation.missingDialogueCandidates.length,
+              materialTextErrors:
+                result.rawAsrEvaluation.materialTextErrors.length,
+              severeTimingErrors:
+                result.rawAsrEvaluation.severeTimingErrors.length,
+            },
     },
     null,
     2,

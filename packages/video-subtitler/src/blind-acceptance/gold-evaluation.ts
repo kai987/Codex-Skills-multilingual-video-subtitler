@@ -71,8 +71,47 @@ export interface FrozenRunEvaluationResult {
   goldFirstReadAt: string;
   goldIdentity: MachineVsGoldEvaluation["goldIdentity"];
   evaluation: MachineVsGoldEvaluation;
+  rawAsrEvaluation: MachineVsGoldEvaluation | null;
   replaySemanticHash: string;
   outputHashAfterGold: string;
+}
+
+function rawAsrCuesFrom(value: unknown): EvaluationCue[] {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return [];
+  }
+  const segments = (value as { rawSegments?: unknown }).rawSegments;
+  if (!Array.isArray(segments)) return [];
+  return segments.flatMap((segment, index) => {
+    if (
+      typeof segment !== "object" ||
+      segment === null ||
+      Array.isArray(segment)
+    ) {
+      return [];
+    }
+    const item = segment as Record<string, unknown>;
+    if (
+      typeof item.start !== "number" ||
+      typeof item.end !== "number" ||
+      typeof item.text !== "string" ||
+      item.end <= item.start ||
+      item.text.trim().length === 0
+    ) {
+      return [];
+    }
+    return [
+      {
+        id:
+          typeof item.id === "string"
+            ? item.id
+            : `raw-asr-${String(index + 1).padStart(5, "0")}`,
+        start: item.start,
+        end: item.end,
+        text: item.text,
+      },
+    ];
+  });
 }
 
 function normalizedText(text: string): string {
@@ -725,6 +764,7 @@ async function loadMachineRun(taskDirectory: string): Promise<{
   freeze: BlindOutputFreeze;
   policy: BlindEvaluationPolicy;
   cues: EvaluationCue[];
+  rawAsrCues: EvaluationCue[];
 }> {
   const [manifest, freeze, policy, located] = await Promise.all([
     readFile(
@@ -745,6 +785,12 @@ async function loadMachineRun(taskDirectory: string): Promise<{
   const packageValue = subtitlePackageSchema.parse(
     JSON.parse(await readFile(located.packagePath, "utf8")) as unknown,
   );
+  const rawAsrValue = await readFile(
+    path.join(located.subtitleDirectory, "canonical-asr-segments.json"),
+    "utf8",
+  )
+    .then((value) => JSON.parse(value) as unknown)
+    .catch(() => null);
   return {
     manifest,
     freeze,
@@ -755,6 +801,7 @@ async function loadMachineRun(taskDirectory: string): Promise<{
       end: cue.end,
       text: cue.text,
     })),
+    rawAsrCues: rawAsrCuesFrom(rawAsrValue),
   };
 }
 
@@ -1029,10 +1076,26 @@ export async function evaluateFrozenBlindRunAgainstGold(input: {
   if (evaluation.semanticHash !== replay.semanticHash) {
     throw new InputError("Gold evaluator deterministic replay failed.");
   }
+  const rawAsrEvaluation =
+    run.rawAsrCues.length === 0
+      ? null
+      : evaluateMachineCues({
+          generatedAt: input.generatedAt,
+          generationRunId: `${run.manifest.generationRunId}-raw-asr`,
+          sourceIdentity: run.manifest.sourceVideo,
+          freeze: run.freeze,
+          machineCues: run.rawAsrCues,
+          goldCues,
+          goldIdentity: verifiedGoldIdentity,
+          policy: run.policy,
+          evaluationWallTimeMs: elapsed,
+          outputHashAfterGold: freezeAfter.frozenArtifactAggregateHash,
+        });
   return {
     goldFirstReadAt,
     goldIdentity: verifiedGoldIdentity,
     evaluation,
+    rawAsrEvaluation,
     replaySemanticHash: replay.semanticHash,
     outputHashAfterGold: freezeAfter.frozenArtifactAggregateHash,
   };
