@@ -55,13 +55,18 @@
           "enum": ["off", "on", "evidence-gated"]
         },
         "sceneRouting": { "type": "string" },
-        "adjacentPromptPolicy": { "type": "string" }
+        "adjacentPromptPolicy": { "type": "string" },
+        "reviewEvidenceRetention": {
+          "type": "string",
+          "enum": ["strict-quarantine", "needs-review-only"]
+        }
       },
       "required": [
         "targetChunkSeconds",
         "vadMode",
         "sceneRouting",
-        "adjacentPromptPolicy"
+        "adjacentPromptPolicy",
+        "reviewEvidenceRetention"
       ],
       "additionalProperties": false
     },

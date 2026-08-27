@@ -122,6 +122,7 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
         vadMode: "off",
         sceneRouting: "aggressive",
         adjacentPromptPolicy: "disabled-unverified-context",
+        reviewEvidenceRetention: "needs-review-only",
       },
       milestone: {
         normalizedCerMaximum: 0.65,

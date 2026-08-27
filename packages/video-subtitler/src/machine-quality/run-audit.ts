@@ -1271,6 +1271,10 @@ export async function emitMachineQualityRunArtifacts(
         input.mode === "enforce"
           ? "disabled-unverified-context"
           : "legacy-all-cues",
+      reviewEvidenceRetention:
+        input.mode === "enforce" && input.profile === "full"
+          ? "needs-review-only"
+          : "strict-quarantine",
     },
     milestone: {
       normalizedCerMaximum: 0.65,

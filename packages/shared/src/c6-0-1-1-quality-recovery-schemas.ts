@@ -371,6 +371,10 @@ export const machineQualityRecoveryPolicySchema = z
         vadMode: z.enum(["off", "on", "evidence-gated"]),
         sceneRouting: z.string(),
         adjacentPromptPolicy: z.string(),
+        reviewEvidenceRetention: z.enum([
+          "strict-quarantine",
+          "needs-review-only",
+        ]),
       })
       .strict(),
     milestone: z
