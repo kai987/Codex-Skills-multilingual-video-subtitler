@@ -9,7 +9,11 @@ import {
   machineTimelineTransformChainSchema,
   type SubtitleCue,
 } from "@mvl/shared";
-import { resolveCompetingHypotheses } from "@mvl/transcription-core";
+import {
+  deduplicateTopScoreWinners,
+  repairTopScoreFragments,
+  resolveCompetingHypotheses,
+} from "@mvl/transcription-core";
 import {
   buildAcousticEventFamilies,
   buildGlobalTokenTimeline,
@@ -172,5 +176,52 @@ describe("C6.0.1.3 candidate association and canonical assembly", () => {
     expect(checks.every((check) => check.success)).toBe(true);
     expect(result.stageQualityTrace.runtimeGoldInputCount).toBe(0);
     expect(JSON.stringify(result)).not.toMatch(/gold(?:en)?[ -_]?subtitle/iu);
+  });
+
+  it("preserves sequential repeated speech and blocks unsupported cross-event merges", () => {
+    const repeatedLeft: SubtitleCue = {
+      ...baselineCue,
+      id: "repeated-left",
+      start: 20,
+      end: 21,
+      text: "だんじりや!",
+      provenance: {
+        ...baselineCue.provenance,
+        sourceRequestIds: ["request-left"],
+      },
+    };
+    const repeatedRight: SubtitleCue = {
+      ...repeatedLeft,
+      id: "repeated-right",
+      start: 21,
+      end: 22,
+      provenance: {
+        ...baselineCue.provenance,
+        sourceRequestIds: ["request-right"],
+      },
+    };
+    expect(
+      deduplicateTopScoreWinners(
+        [repeatedLeft, repeatedRight],
+        "pre-normalization",
+        { requireTemporalOverlap: true },
+      ).cues,
+    ).toHaveLength(2);
+
+    const fragmentLeft: SubtitleCue = {
+      ...repeatedLeft,
+      id: "fragment-left",
+      text: "行くわけ",
+    };
+    const fragmentRight: SubtitleCue = {
+      ...repeatedRight,
+      id: "fragment-right",
+      text: "ほら!行ってきます!",
+    };
+    expect(
+      repairTopScoreFragments([fragmentLeft, fragmentRight], {
+        eventFirst: true,
+      }).cues,
+    ).toHaveLength(2);
   });
 });

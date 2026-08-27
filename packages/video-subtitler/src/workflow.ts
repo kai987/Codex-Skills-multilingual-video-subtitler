@@ -232,8 +232,12 @@ function runTopScoreTextPipeline(input: {
         });
   const winnerDeduplication = deduplicateTopScoreWinners(
     associationAssembly?.cues ?? hypothesisResolution.cues,
+    "pre-normalization",
+    { requireTemporalOverlap: associationAssembly !== null },
   );
-  const fragmentRepair = repairTopScoreFragments(winnerDeduplication.cues);
+  const fragmentRepair = repairTopScoreFragments(winnerDeduplication.cues, {
+    eventFirst: associationAssembly !== null,
+  });
   const winnerTimingRepair = repairTopScoreWinnerTiming({
     cues: fragmentRepair.cues,
     equivalentCandidates: hypothesisResolution.atomization.atoms,
@@ -251,6 +255,7 @@ function runTopScoreTextPipeline(input: {
   });
   const postNormalizationDeduplication = deduplicateNormalizedWinners(
     japaneseNormalization.cues,
+    { requireTemporalOverlap: associationAssembly !== null },
   );
   const segmentation = buildAcousticSemanticCueSegments(
     postNormalizationDeduplication.cues,

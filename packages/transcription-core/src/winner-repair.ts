@@ -86,6 +86,7 @@ function isSuffix(left: SubtitleCue, right: SubtitleCue): boolean {
 function shouldMerge(
   left: SubtitleCue,
   right: SubtitleCue,
+  options: { eventFirst?: boolean } = {},
 ): {
   merge: boolean;
   reasons: string[];
@@ -105,6 +106,23 @@ function shouldMerge(
   }
   const strongBoundary =
     boundary.boundarySplitsWord && boundary.confidence >= 0.8;
+  const sharedRequest = (left.provenance?.sourceRequestIds ?? []).some(
+    (requestId) =>
+      (right.provenance?.sourceRequestIds ?? []).includes(requestId),
+  );
+  const sharedRecoveryUnit =
+    left.provenance?.recoveryUnitId !== null &&
+    left.provenance?.recoveryUnitId !== undefined &&
+    left.provenance.recoveryUnitId === right.provenance?.recoveryUnitId;
+  const crossSourceLayer =
+    left.provenance?.sourceLayer !== right.provenance?.sourceLayer;
+  if (
+    options.eventFirst === true &&
+    ((crossSourceLayer && !sharedRequest && !sharedRecoveryUnit) ||
+      (!strongBoundary && !sharedRequest && !sharedRecoveryUnit))
+  ) {
+    return { merge: false, reasons: [] };
+  }
   const incompleteClauseContinuation =
     leftAnalysis.likelyIncompleteClause && gap <= 0.25;
   const merge =
@@ -299,6 +317,7 @@ function merge(left: SubtitleCue, right: SubtitleCue, id: string): SubtitleCue {
 
 export function repairTopScoreFragments(
   inputCues: readonly SubtitleCue[],
+  options: { eventFirst?: boolean } = {},
 ): FragmentRepairResult {
   const sorted = [...inputCues].toSorted(
     (left, right) =>
@@ -350,7 +369,7 @@ export function repairTopScoreFragments(
     }
     const previous = output.at(-1);
     if (previous !== undefined) {
-      const decision = shouldMerge(previous, cue);
+      const decision = shouldMerge(previous, cue, options);
       if (decision.merge) {
         const merged = merge(
           previous,
@@ -374,7 +393,7 @@ export function repairTopScoreFragments(
     // incompatible. Otherwise keep the first fragment in the output so the
     // following iteration can apply the required previous-first policy.
     if (previous !== undefined && next !== undefined) {
-      const decision = shouldMerge(cue, next);
+      const decision = shouldMerge(cue, next, options);
       if (decision.merge) {
         const merged = merge(cue, next, `${cue.id}+${next.id}-fragment-repair`);
         output.push(merged);

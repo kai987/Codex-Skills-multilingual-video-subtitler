@@ -198,6 +198,7 @@ function preferred(
 export function deduplicateTopScoreWinners(
   inputCues: readonly SubtitleCue[],
   stage: WinnerDeduplicationStage = "pre-normalization",
+  options: { requireTemporalOverlap?: boolean } = {},
 ): WinnerDeduplicationResult {
   const working = [...inputCues].toSorted(
     (left, right) =>
@@ -224,6 +225,13 @@ export function deduplicateTopScoreWinners(
       if (right.start - left.end > 0.8) break;
       const kind = duplicateKind(left, right, stage);
       if (kind === null) continue;
+      if (
+        options.requireTemporalOverlap === true &&
+        kind !== "trusted-reference-original-lyrics" &&
+        overlapSeconds(left, right) <= 0.1
+      ) {
+        continue;
+      }
       const keep = preferred(left, right, kind);
       const discard = keep.id === left.id ? right : left;
       const useTimingDonor =
@@ -342,6 +350,7 @@ export function deduplicateTopScoreWinners(
 
 export function deduplicateNormalizedWinners(
   cues: readonly SubtitleCue[],
+  options: { requireTemporalOverlap?: boolean } = {},
 ): WinnerDeduplicationResult {
-  return deduplicateTopScoreWinners(cues, "post-normalization");
+  return deduplicateTopScoreWinners(cues, "post-normalization", options);
 }
