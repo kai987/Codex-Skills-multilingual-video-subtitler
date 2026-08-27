@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-global-token-timeline.schema.json",
+  "title": "machine-global-token-timeline",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.2-candidate-precision-global-timeline-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-global-token-timeline"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "requestContractSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tokenId": { "type": "string", "minLength": 1 },
+          "cueId": { "type": "string", "minLength": 1 },
+          "requestId": { "type": "string", "minLength": 1 },
+          "text": { "type": "string" },
+          "localInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "globalInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "coordinateSystem": {
+            "type": "string",
+            "enum": [
+              "original-audio-local",
+              "vad-processed-local",
+              "original-media-global",
+              "unknown"
+            ]
+          },
+          "mappingMethod": {
+            "type": "string",
+            "enum": [
+              "verified-extraction-offset",
+              "official-mapped-token-getter",
+              "quarantined-vad-token",
+              "unmapped"
+            ]
+          },
+          "trustScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "trusted": { "type": "boolean" },
+          "mappingStatus": {
+            "type": "string",
+            "enum": ["TRUSTED", "USABLE_WITH_CAUTION", "UNTRUSTED", "UNMAPPED"]
+          },
+          "failureReason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "missing-request-contract",
+                  "offset-unverified",
+                  "stale-cache",
+                  "out-of-request",
+                  "non-monotonic",
+                  "invalid-token-time",
+                  "segment-containment-failure",
+                  "source-containment-failure",
+                  "parent-lineage-mismatch",
+                  "ambiguous-time-base",
+                  "unknown"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "tokenId",
+          "cueId",
+          "requestId",
+          "text",
+          "localInterval",
+          "globalInterval",
+          "coordinateSystem",
+          "mappingMethod",
+          "trustScore",
+          "trusted",
+          "mappingStatus",
+          "failureReason",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "tokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lexicalTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trustedMappedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "quarantinedVadTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmappedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trustedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cautionTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappingFailureReasons": {
+          "type": "object",
+          "propertyNames": { "type": "string" },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "requestCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cueCoverage": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": [
+        "tokenCount",
+        "lexicalTokenCount",
+        "trustedMappedTokenCount",
+        "quarantinedVadTokenCount",
+        "unmappedTokenCount",
+        "trustedRequestCount",
+        "rawTokenCount",
+        "mappedTokenCount",
+        "cautionTokenCount",
+        "rejectedTokenCount",
+        "mappingFailureReasons",
+        "requestCoverage",
+        "cueCoverage"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "requestContractSemanticHash",
+    "tokens",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

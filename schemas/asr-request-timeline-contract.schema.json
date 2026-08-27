@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/asr-request-timeline-contract.schema.json",
+  "title": "asr-request-timeline-contract",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.2-candidate-precision-global-timeline-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "asr-request-timeline-contract"
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "manifestRequestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "requestAliases": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceMediaSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "requestType": {
+            "type": "string",
+            "enum": [
+              "baseline",
+              "refinement",
+              "recovery",
+              "coverage",
+              "lyrics",
+              "overlap"
+            ]
+          },
+          "requestedInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "extractedInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "sourceMediaStartSeconds": { "type": "number", "minimum": 0 },
+          "sourceMediaEndSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "requestedIntervalStart": { "type": "number", "minimum": 0 },
+          "requestedIntervalEnd": { "type": "number", "exclusiveMinimum": 0 },
+          "extractedAudioStart": { "type": "number", "minimum": 0 },
+          "extractedAudioEnd": { "type": "number", "exclusiveMinimum": 0 },
+          "extractedAudioDurationSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "sampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sampleCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "decoderChunkStartSeconds": { "type": "number", "const": 0 },
+          "ffmpegSeekMode": {
+            "type": "string",
+            "const": "input-seek-before-i"
+          },
+          "ffmpegInputSeekSeconds": { "type": "number", "minimum": 0 },
+          "ffmpegOutputTrimSeconds": { "type": "number", "const": 0 },
+          "ffmpegSeekPlacement": { "type": "string", "const": "before-input" },
+          "ffmpegOutputTimeOrigin": { "type": "string", "const": "zero" },
+          "decodeAudioZero": { "type": "number", "const": 0 },
+          "decoderReportedSegmentStart": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "decoderReportedSegmentEnd": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "tokenTimeBase": {
+            "type": "string",
+            "enum": ["original-audio-local", "vad-processed-local", "unknown"]
+          },
+          "cacheIdentity": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "cacheLineage": {
+            "type": "object",
+            "properties": {
+              "currentKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "legacyKeys": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "entryStatus": {
+                "type": "string",
+                "enum": ["portable-verified", "artifact-derived", "unavailable"]
+              }
+            },
+            "required": ["currentKey", "legacyKeys", "entryStatus"],
+            "additionalProperties": false
+          },
+          "parentRequestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "vadEnabled": { "type": "boolean" },
+          "coordinateSystem": {
+            "type": "string",
+            "enum": ["original-audio-local", "vad-processed-local", "unknown"]
+          },
+          "mappingMethod": {
+            "type": "string",
+            "enum": [
+              "verified-extraction-offset",
+              "official-mapped-token-getter",
+              "unverified-vad-coordinate",
+              "unavailable"
+            ]
+          },
+          "contractStatus": {
+            "type": "string",
+            "enum": ["verified", "quarantined", "unavailable"]
+          },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "exactGlobalOffset": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "offsetSource": { "type": "string", "minLength": 1 },
+          "offsetVerified": { "type": "boolean" },
+          "timelineSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "requestId",
+          "manifestRequestId",
+          "requestAliases",
+          "sourceMediaSha256",
+          "requestType",
+          "requestedInterval",
+          "extractedInterval",
+          "sourceMediaStartSeconds",
+          "sourceMediaEndSeconds",
+          "requestedIntervalStart",
+          "requestedIntervalEnd",
+          "extractedAudioStart",
+          "extractedAudioEnd",
+          "extractedAudioDurationSeconds",
+          "sampleRate",
+          "sampleCount",
+          "decoderChunkStartSeconds",
+          "ffmpegSeekMode",
+          "ffmpegInputSeekSeconds",
+          "ffmpegOutputTrimSeconds",
+          "ffmpegSeekPlacement",
+          "ffmpegOutputTimeOrigin",
+          "decodeAudioZero",
+          "decoderReportedSegmentStart",
+          "decoderReportedSegmentEnd",
+          "tokenTimeBase",
+          "cacheIdentity",
+          "cacheLineage",
+          "parentRequestId",
+          "vadEnabled",
+          "coordinateSystem",
+          "mappingMethod",
+          "contractStatus",
+          "evidence",
+          "exactGlobalOffset",
+          "offsetSource",
+          "offsetVerified",
+          "timelineSemanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "requestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifiedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "quarantinedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailableRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "requestCount",
+        "verifiedRequestCount",
+        "quarantinedRequestCount",
+        "unavailableRequestCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "requests",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

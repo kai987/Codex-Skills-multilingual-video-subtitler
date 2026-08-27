@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-acoustic-event-families.schema.json",
+  "title": "machine-acoustic-event-families",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.2-candidate-precision-global-timeline-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-acoustic-event-families"
+    },
+    "familyVersion": {
+      "type": "string",
+      "const": "c6.0.1.2-acoustic-event-family-v1"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": {
+          "anyOf": [
+            { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            { "type": "null" }
+          ]
+        },
+        "goldRuntimeInputCount": { "type": "number", "const": 0 }
+      },
+      "required": ["sourceMediaSha256", "goldRuntimeInputCount"],
+      "additionalProperties": false
+    },
+    "inputCandidateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "families": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "familyId": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "normalizedText": { "type": "string", "minLength": 1 },
+          "candidateIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "representativeCueId": { "type": "string", "minLength": 1 },
+          "sourceRequestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceWindowIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceProfileIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerHypotheses": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "textVariants": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "temporalAgreement": { "type": "number", "minimum": 0, "maximum": 1 },
+          "lexicalAgreement": { "type": "number", "minimum": 0, "maximum": 1 },
+          "correlationGroupIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentEvidenceGroupIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentEvidenceFamilies": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "correlatedEvidenceGroups": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["stable", "ambiguous", "rejected"]
+          },
+          "ambiguityStatus": {
+            "type": "string",
+            "enum": ["assigned", "ambiguous", "rejected"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "familyId",
+          "interval",
+          "normalizedText",
+          "candidateIds",
+          "representativeCueId",
+          "sourceRequestIds",
+          "requestIds",
+          "sourceWindowIds",
+          "sourceProfileIds",
+          "speakerHypotheses",
+          "textVariants",
+          "temporalAgreement",
+          "lexicalAgreement",
+          "correlationGroupIds",
+          "independentEvidenceGroupIds",
+          "independentEvidenceFamilies",
+          "correlatedEvidenceGroups",
+          "status",
+          "ambiguityStatus",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "unassignedCandidates": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "ambiguousAssignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "familyIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["candidateId", "familyIds", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "familyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "stableFamilyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousFamilyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "collapsedDuplicateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "correlatedDuplicateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "candidateCount",
+        "familyCount",
+        "stableFamilyCount",
+        "ambiguousFamilyCount",
+        "collapsedDuplicateCount",
+        "correlatedDuplicateCount"
+      ],
+      "additionalProperties": false
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "familyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singletonFamilyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiCandidateFamilyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiSpeakerFamilyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "candidateCount",
+        "familyCount",
+        "singletonFamilyCount",
+        "multiCandidateFamilyCount",
+        "multiSpeakerFamilyCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "familyVersion",
+    "mode",
+    "sourceIdentity",
+    "inputCandidateHash",
+    "inputSemanticHash",
+    "outputSemanticHash",
+    "families",
+    "unassignedCandidates",
+    "ambiguousAssignments",
+    "summary",
+    "stats",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
