@@ -43,3 +43,9 @@ export function machineQualityProfileUsesVad(
 ): boolean {
   return profile === "timing" || profile === "full";
 }
+
+export function allowBaselineCarryPromptForMachineQuality(
+  mode: MachineQualityRecoveryMode,
+): boolean {
+  return mode !== "enforce";
+}

@@ -75,6 +75,7 @@ import type {
   VideoSubtitlerOptions,
 } from "./types.js";
 import {
+  allowBaselineCarryPromptForMachineQuality,
   allowRefinementContextPromptForMachineQuality,
   machineQualityTargetChunkSeconds,
   recoveryPromptCuesForMachineQuality,
@@ -931,6 +932,9 @@ export async function runAdaptiveLocalTranscription(input: {
           input.identity,
           input.options.transcriptionPromptNames ?? [],
         ),
+        allowPreviousSegmentPrompt: allowBaselineCarryPromptForMachineQuality(
+          machineQualityRecovery,
+        ),
         ...(input.asrCache === undefined ? {} : { asrCache: input.asrCache }),
       });
     } catch (error) {
@@ -1013,6 +1017,9 @@ export async function runAdaptiveLocalTranscription(input: {
         promptNames: promptNames(
           input.identity,
           input.options.transcriptionPromptNames ?? [],
+        ),
+        allowPreviousSegmentPrompt: allowBaselineCarryPromptForMachineQuality(
+          machineQualityRecovery,
         ),
         ...(input.asrCache === undefined ? {} : { asrCache: input.asrCache }),
       });

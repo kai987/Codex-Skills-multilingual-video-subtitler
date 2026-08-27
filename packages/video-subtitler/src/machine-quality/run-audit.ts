@@ -506,6 +506,7 @@ export async function emitMachineQualityRunArtifacts(
   const recoveryAttempts = recoveryUnits.flatMap((unit) =>
     array(record(unit).attempts),
   );
+  const requestRecords = array(executionMetrics.requests).map(record);
   const requestIntervals = [
     ...array(audioManifest.chunks).flatMap((value) => {
       const chunk = record(value);
@@ -904,6 +905,16 @@ export async function emitMachineQualityRunArtifacts(
     },
     promptContamination: {
       recoveryAttemptCount: recoveryAttempts.length,
+      baselineCarryPromptCount:
+        input.mode === "enforce"
+          ? 0
+          : Math.max(0, array(audioManifest.chunks).length - 1),
+      refinementContextPromptCount:
+        input.mode === "enforce"
+          ? 0
+          : requestRecords.filter((request) =>
+              text(request.requestId).startsWith("refinement:"),
+            ).length,
       attemptsWithAdjacentText: recoveryAttempts.filter(
         (attempt) =>
           array(record(record(attempt).prompt).adjacentOriginalLanguageText)
@@ -919,8 +930,23 @@ export async function emitMachineQualityRunArtifacts(
                 ).length > 0,
             ).length,
       uniqueAdjacentPromptCount: uniqueAdjacentPrompts.size,
+      provisionalMachineTextPromptCount:
+        input.mode === "enforce"
+          ? 0
+          : Math.max(0, array(audioManifest.chunks).length - 1) +
+            requestRecords.filter((request) =>
+              text(request.requestId).startsWith("refinement:"),
+            ).length +
+            adjacentPrompts.length,
+      promptIsolationPassed:
+        input.mode !== "enforce" || adjacentPrompts.length === 0,
       contaminationDetected:
-        input.mode !== "enforce" && adjacentPrompts.length > 0,
+        input.mode !== "enforce" &&
+        (adjacentPrompts.length > 0 ||
+          array(audioManifest.chunks).length > 1 ||
+          requestRecords.some((request) =>
+            text(request.requestId).startsWith("refinement:"),
+          )),
     },
   });
 
@@ -936,7 +962,6 @@ export async function emitMachineQualityRunArtifacts(
   const runtimeIdentity = array(blindManifest.runtimeIdentities)
     .map(record)
     .find((runtime) => runtime.name === "whisper.cpp");
-  const requestRecords = array(executionMetrics.requests).map(record);
   const intervalKeys = requestIntervals.map(
     (interval) => `${interval.start.toFixed(3)}:${interval.end.toFixed(3)}`,
   );
@@ -1229,6 +1254,12 @@ export async function emitMachineQualityRunArtifacts(
       input.mode === "enforce"
         ? "unverified-recovery-prompt-isolation"
         : "legacy-recovery-prompts",
+      input.mode === "enforce"
+        ? "cross-chunk-context-prompt-isolation"
+        : "legacy-cross-chunk-context-prompts",
+      input.mode === "enforce"
+        ? "refinement-context-prompt-isolation"
+        : "legacy-refinement-context-prompts",
     ],
     rejectedStrategies:
       input.vadEnabled && mappedTokenCount === 0

@@ -294,6 +294,7 @@ export interface TranscriptionWorkflowOptions {
   ffmpegPath?: string;
   language?: LanguageTag;
   promptNames?: readonly string[];
+  allowPreviousSegmentPrompt?: boolean;
   timestampStrategy?: TimestampStrategy;
   targetChunkSeconds?: number;
   silenceThresholdDb?: number;

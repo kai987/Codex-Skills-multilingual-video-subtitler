@@ -68,7 +68,10 @@ export async function transcribeMedia(
   let cacheHits = 0;
   let transcribedChunks = 0;
   for (const chunk of manifest.chunks) {
-    const prompt = promptFor(options.promptNames ?? [], previousText);
+    const prompt = promptFor(
+      options.promptNames ?? [],
+      options.allowPreviousSegmentPrompt === false ? "" : previousText,
+    );
     const legacyInput = {
       sha256: chunk.sha256,
       interval: { start: chunk.start, end: chunk.end },

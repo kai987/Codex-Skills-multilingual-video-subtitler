@@ -150,6 +150,16 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "baselineCarryPromptCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "refinementContextPromptCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
         "attemptsWithAdjacentText": {
           "type": "integer",
           "minimum": 0,
@@ -165,13 +175,23 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
+        "provisionalMachineTextPromptCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "promptIsolationPassed": { "type": "boolean" },
         "contaminationDetected": { "type": "boolean" }
       },
       "required": [
         "recoveryAttemptCount",
+        "baselineCarryPromptCount",
+        "refinementContextPromptCount",
         "attemptsWithAdjacentText",
         "attemptsWithUnverifiedAdjacentText",
         "uniqueAdjacentPromptCount",
+        "provisionalMachineTextPromptCount",
+        "promptIsolationPassed",
         "contaminationDetected"
       ],
       "additionalProperties": false

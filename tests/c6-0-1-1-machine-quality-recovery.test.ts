@@ -4,6 +4,7 @@ import {
   type SubtitleCue,
 } from "@mvl/shared";
 import {
+  allowBaselineCarryPromptForMachineQuality,
   allowRefinementContextPromptForMachineQuality,
   machineQualityTargetChunkSeconds,
   machineQualityProfileUsesVad,
@@ -31,6 +32,11 @@ describe("C6.0.1.1 machine-only quality recovery", () => {
     expect(allowRefinementContextPromptForMachineQuality("enforce")).toBe(
       false,
     );
+  });
+  it("blocks cross-chunk machine text carry in enforce mode", () => {
+    expect(allowBaselineCarryPromptForMachineQuality("off")).toBe(true);
+    expect(allowBaselineCarryPromptForMachineQuality("observe")).toBe(true);
+    expect(allowBaselineCarryPromptForMachineQuality("enforce")).toBe(false);
   });
   it("uses VAD for timing and combined full recovery only", () => {
     expect(machineQualityProfileUsesVad("legacy")).toBe(false);

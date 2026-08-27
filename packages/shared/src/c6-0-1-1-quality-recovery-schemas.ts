@@ -185,9 +185,13 @@ export const asrRetentionAuditSchema = z
     promptContamination: z
       .object({
         recoveryAttemptCount: count,
+        baselineCarryPromptCount: count,
+        refinementContextPromptCount: count,
         attemptsWithAdjacentText: count,
         attemptsWithUnverifiedAdjacentText: count,
         uniqueAdjacentPromptCount: count,
+        provisionalMachineTextPromptCount: count,
+        promptIsolationPassed: z.boolean(),
         contaminationDetected: z.boolean(),
       })
       .strict(),
