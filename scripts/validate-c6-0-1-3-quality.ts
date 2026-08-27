@@ -92,6 +92,10 @@ function required(values: ReadonlyMap<string, string>, flag: string): string {
   return value;
 }
 
+function isZeroCount(value: number): boolean {
+  return value === 0;
+}
+
 async function json(filePath: string): Promise<unknown> {
   return JSON.parse(await readFile(filePath, "utf8")) as unknown;
 }
@@ -444,9 +448,16 @@ async function generationHashes(stage: Stage) {
     presentationHash?: unknown;
   };
   return {
-    canonicalCueHash: String(artifact.canonicalCueHash ?? ""),
-    timingHash: String(artifact.timingHash ?? ""),
-    presentationHash: String(artifact.presentationHash ?? ""),
+    canonicalCueHash:
+      typeof artifact.canonicalCueHash === "string"
+        ? artifact.canonicalCueHash
+        : "",
+    timingHash:
+      typeof artifact.timingHash === "string" ? artifact.timingHash : "",
+    presentationHash:
+      typeof artifact.presentationHash === "string"
+        ? artifact.presentationHash
+        : "",
   };
 }
 
@@ -597,11 +608,12 @@ const gateResults = {
   overlap: finalA.metrics.overlapPairCount <= 20,
   trustedMappedTokens: finalA.metrics.trustedMappedTokenCount >= 500,
   ambiguousTokens: finalA.metrics.ambiguousTokenCount <= 100,
-  unsupportedStrongTextDeletion:
-    finalAArtifacts.retention.summary.unsupportedStrongTextDeletionCount === 0,
+  unsupportedStrongTextDeletion: isZeroCount(
+    finalAArtifacts.retention.summary.unsupportedStrongTextDeletionCount,
+  ),
   unknownCandidateDrop:
-    finalAArtifacts.ledger.summary.unknownReasonCount === 0 &&
-    finalAArtifacts.ledger.summary.unaccountedCandidateCount === 0,
+    isZeroCount(finalAArtifacts.ledger.summary.unknownReasonCount) &&
+    isZeroCount(finalAArtifacts.ledger.summary.unaccountedCandidateCount),
   runtimeNonDegradation:
     finalAArtifacts.nonDegradation.summary.runtimeNonDegradationPassed,
   finalABSemanticParity,
@@ -733,7 +745,8 @@ const repositoryCommit = await import("node:child_process").then(
         ["rev-parse", "HEAD"],
         { cwd: process.cwd() },
         (error, stdout) => {
-          if (error !== null) reject(error);
+          if (error !== null)
+            reject(new Error("git rev-parse HEAD failed.", { cause: error }));
           else resolve(stdout.trim());
         },
       );

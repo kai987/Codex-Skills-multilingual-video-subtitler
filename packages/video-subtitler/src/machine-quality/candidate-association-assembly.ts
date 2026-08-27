@@ -213,7 +213,7 @@ export function runCandidateAssociationAssembly(input: {
   }
   const trustedTokenIntervalsByCue = new Map<
     string,
-    Array<{ start: number; end: number }>
+    { start: number; end: number }[]
   >();
   for (const token of input.globalTokenTimeline.tokens) {
     if (!token.trusted || token.globalInterval === null) continue;
@@ -255,7 +255,7 @@ export function runCandidateAssociationAssembly(input: {
       | "DUPLICATE"
       | "AMBIGUOUS"
       | "REJECTED";
-    let reasons: Array<
+    let reasons: (
       | "NO_COMPATIBLE_CLUSTER"
       | "PREFIX_SHADOWED"
       | "SUFFIX_SHADOWED"
@@ -264,7 +264,7 @@ export function runCandidateAssociationAssembly(input: {
       | "MULTIPLE_VALID_CLUSTERS"
       | "WEAK_ACOUSTIC_SUPPORT"
       | "HALLUCINATION_RISK"
-    > = [];
+    )[] = [];
     if (cluster === undefined) {
       disposition = "REJECTED";
       reasons = ["NO_COMPATIBLE_CLUSTER"];
@@ -307,6 +307,7 @@ export function runCandidateAssociationAssembly(input: {
     ].filter((value, index, values) => values.indexOf(value) === index);
     const hasTrustedToken =
       (trustedTokenIntervalsByCue.get(sourceCueId(cue.id))?.length ?? 0) > 0;
+    const winnerSpeaker = winner?.speaker;
     return {
       candidateId: cue.id,
       sourceCueId: sourceCueId(cue.id),
@@ -331,11 +332,11 @@ export function runCandidateAssociationAssembly(input: {
               : 0.5,
         acousticCompatibility: evidence?.acousticSupport ?? 0,
         speakerCompatibility:
-          winner === undefined ||
-          winner.speaker === null ||
+          winnerSpeaker === undefined ||
+          winnerSpeaker === null ||
           cue.speaker === null
             ? 0.5
-            : winner.speaker === cue.speaker
+            : winnerSpeaker === cue.speaker
               ? 1
               : 0,
         timelineTrust: hasTrustedToken ? 1 : 0,
@@ -531,7 +532,7 @@ export function runCandidateAssociationAssembly(input: {
   });
 
   const winnerById = new Map(input.winnerCues.map((cue) => [cue.id, cue]));
-  const assemblyOperations: Array<{
+  const assemblyOperations: {
     operationId: string;
     eventId: string;
     inputCandidateIds: string[];
@@ -549,7 +550,7 @@ export function runCandidateAssociationAssembly(input: {
     beforeInterval: { start: number; end: number } | null;
     afterInterval: { start: number; end: number } | null;
     reasons: string[];
-  }> = [];
+  }[] = [];
   const assembledCues: SubtitleCue[] = [];
   for (const event of canonicalEvents.events) {
     const clusterId = event.eventId.replace(
@@ -1112,7 +1113,6 @@ export function runCandidateAssociationAssembly(input: {
       const cues = values.filter(
         (value): value is SubtitleCue =>
           typeof value === "object" &&
-          value !== null &&
           "text" in value &&
           "start" in value &&
           "end" in value,

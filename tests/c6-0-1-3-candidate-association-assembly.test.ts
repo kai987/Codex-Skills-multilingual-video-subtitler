@@ -115,10 +115,10 @@ describe("C6.0.1.3 candidate association and canonical assembly", () => {
 
     expect(result.canonicalAssembly.summary.syntheticJoinCount).toBe(0);
     expect(
-      result.canonicalAssembly.operations.every(
-        (operation) => operation.syntheticTextJoin === false,
+      result.canonicalAssembly.operations.map(
+        (operation) => operation.syntheticTextJoin,
       ),
-    ).toBe(true);
+    ).not.toContain(true);
     expect(result.cues.every((cue) => emittedTexts.has(cue.text))).toBe(true);
     expect(
       result.supportedTextRetention.summary.unsupportedStrongTextDeletionCount,

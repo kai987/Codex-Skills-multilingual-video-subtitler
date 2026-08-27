@@ -15,7 +15,7 @@ const schemaVersion = z.literal("1.0.0");
 const policyVersion = z.literal(c6013PolicyVersion);
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/u);
 const count = z.number().int().nonnegative();
-const finite = z.number().finite();
+const finite = z.number();
 const interval = z
   .object({ start: z.number().nonnegative(), end: z.number().positive() })
   .strict()
