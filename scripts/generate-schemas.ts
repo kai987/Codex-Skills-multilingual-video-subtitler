@@ -150,11 +150,101 @@ import {
   machineVsGoldEvaluationSchema,
   c601BlindAcceptanceDecisionSchema,
   c601BlindAcceptanceValidationSchema,
+  machineGenerationSurvivalFunnelSchema,
+  asrRetentionAuditSchema,
+  whisperRuntimeExecutionAuditSchema,
+  goldLossAttributionSchema,
+  machineSpeechCoverageGapSchema,
+  machineCoverageRecoverySchema,
+  machineTokenTimestampRecoverySchema,
+  machineTimingEvidenceSchema,
+  machineMfaIntegrationSchema,
+  machineCtcIntegrationSchema,
+  machineSpeakerOverlapRecoverySchema,
+  machineQualityRecoveryPolicySchema,
+  machineQualityRecoveryAblationSchema,
+  c6011QualityComparisonSchema,
+  c6011QualityValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
 
 const schemas = [
+  {
+    fileName: "machine-generation-survival-funnel.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-generation-survival-funnel.schema.json",
+    schema: machineGenerationSurvivalFunnelSchema,
+  },
+  {
+    fileName: "asr-retention-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/asr-retention-audit.schema.json",
+    schema: asrRetentionAuditSchema,
+  },
+  {
+    fileName: "whisper-runtime-execution-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/whisper-runtime-execution-audit.schema.json",
+    schema: whisperRuntimeExecutionAuditSchema,
+  },
+  {
+    fileName: "gold-loss-attribution.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-loss-attribution.schema.json",
+    schema: goldLossAttributionSchema,
+  },
+  {
+    fileName: "machine-speech-coverage-gap.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-speech-coverage-gap.schema.json",
+    schema: machineSpeechCoverageGapSchema,
+  },
+  {
+    fileName: "machine-coverage-recovery.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-coverage-recovery.schema.json",
+    schema: machineCoverageRecoverySchema,
+  },
+  {
+    fileName: "machine-token-timestamp-recovery.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-token-timestamp-recovery.schema.json",
+    schema: machineTokenTimestampRecoverySchema,
+  },
+  {
+    fileName: "machine-timing-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-timing-evidence.schema.json",
+    schema: machineTimingEvidenceSchema,
+  },
+  {
+    fileName: "machine-mfa-integration.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-mfa-integration.schema.json",
+    schema: machineMfaIntegrationSchema,
+  },
+  {
+    fileName: "machine-ctc-integration.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-ctc-integration.schema.json",
+    schema: machineCtcIntegrationSchema,
+  },
+  {
+    fileName: "machine-speaker-overlap-recovery.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-speaker-overlap-recovery.schema.json",
+    schema: machineSpeakerOverlapRecoverySchema,
+  },
+  {
+    fileName: "machine-quality-recovery-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-quality-recovery-policy.schema.json",
+    schema: machineQualityRecoveryPolicySchema,
+  },
+  {
+    fileName: "machine-quality-recovery-ablation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-quality-recovery-ablation.schema.json",
+    schema: machineQualityRecoveryAblationSchema,
+  },
+  {
+    fileName: "c6-0-1-1-quality-comparison.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-1-quality-comparison.schema.json",
+    schema: c6011QualityComparisonSchema,
+  },
+  {
+    fileName: "c6-0-1-1-quality-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-1-quality-validation.schema.json",
+    schema: c6011QualityValidationSchema,
+  },
   {
     fileName: "blind-generation-input-manifest.schema.json",
     id: "https://schemas.local/multilingual-video-learning/blind-generation-input-manifest.schema.json",

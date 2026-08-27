@@ -56,3 +56,4 @@ export * from "./blind-acceptance/acceptance-decision.js";
 export * from "./blind-acceptance/machine-shadow.js";
 export * from "./blind-acceptance/output-freeze.js";
 export * from "./blind-acceptance/policy.js";
+export * from "./machine-quality/index.js";

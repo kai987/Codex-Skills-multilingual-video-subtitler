@@ -5,6 +5,14 @@ import {
   blindProvenanceAuditSchema,
   InputError,
   machineBaselineEvidenceCoverageSchema,
+  asrRetentionAuditSchema,
+  machineCoverageRecoverySchema,
+  machineCtcIntegrationSchema,
+  machineMfaIntegrationSchema,
+  machineSpeakerOverlapRecoverySchema,
+  machineTimingEvidenceSchema,
+  machineTokenTimestampRecoverySchema,
+  whisperRuntimeExecutionAuditSchema,
   machineShadowFinalizationPolicySchema,
   machineShadowFinalizationSchema,
   subtitleFinalizationReportSchema,
@@ -98,18 +106,65 @@ async function artifactDimension(input: {
   dimensionId: string;
   relativePath: string;
   required?: boolean;
+  semanticKeys?: readonly string[];
 }): Promise<EvidenceDimension> {
-  const present = await isFile(
+  const artifact = await readJsonRecord(
     path.join(input.subtitleDirectory, input.relativePath),
   );
+  const present = artifact !== null;
+  const semanticallyPopulated =
+    present && (input.semanticKeys ?? []).every((key) => key in artifact);
   return dimension({
     dimensionId: input.dimensionId,
     ...(input.required === undefined ? {} : { required: input.required }),
-    status: present ? "passed" : "unknown",
+    status: present
+      ? semanticallyPopulated || (input.semanticKeys ?? []).length === 0
+        ? "passed"
+        : "failed"
+      : "unknown",
     evidenceRefs: present ? [input.relativePath] : [],
     reasonCodes: present
-      ? []
+      ? semanticallyPopulated || (input.semanticKeys ?? []).length === 0
+        ? []
+        : [`${input.dimensionId.toUpperCase()}_SEMANTIC_EVIDENCE_INVALID`]
       : [`${input.dimensionId.toUpperCase()}_EVIDENCE_ABSENT`],
+  });
+}
+
+async function strictQualityDimension(input: {
+  subtitleDirectory: string;
+  dimensionId: string;
+  relativePath: string;
+  required?: boolean;
+  schema: { safeParse(value: unknown): { success: boolean; data?: unknown } };
+  evaluate?: (artifact: Record<string, unknown>) => EvidenceStatus;
+}): Promise<EvidenceDimension> {
+  const artifact = await readJsonRecord(
+    path.join(input.subtitleDirectory, input.relativePath),
+  );
+  if (artifact === null) {
+    return dimension({
+      dimensionId: input.dimensionId,
+      ...(input.required === undefined ? {} : { required: input.required }),
+      status: "unknown",
+      reasonCodes: [`${input.dimensionId.toUpperCase()}_EVIDENCE_ABSENT`],
+    });
+  }
+  const parsed = input.schema.safeParse(artifact);
+  const status = parsed.success
+    ? (input.evaluate?.(artifact) ?? "passed")
+    : "failed";
+  return dimension({
+    dimensionId: input.dimensionId,
+    ...(input.required === undefined ? {} : { required: input.required }),
+    status,
+    evidenceRefs: [input.relativePath],
+    reasonCodes:
+      status === "passed"
+        ? []
+        : status === "unknown"
+          ? [`${input.dimensionId.toUpperCase()}_SEMANTIC_EVIDENCE_UNAVAILABLE`]
+          : [`${input.dimensionId.toUpperCase()}_STRICT_SCHEMA_FAILED`],
   });
 }
 
@@ -242,11 +297,13 @@ export async function buildMachineBaselineEvidenceCoverage(input: {
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "transcription-quality",
       relativePath: "transcription-quality.json",
+      semanticKeys: ["summary", "needsHumanReviewCount"],
     }),
     await artifactDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "final-integrity",
       relativePath: "final-subtitle-integrity.json",
+      semanticKeys: ["validationStatus", "metrics", "gateFailures"],
     }),
     dimension({
       dimensionId: "asr-provenance",
@@ -266,49 +323,78 @@ export async function buildMachineBaselineEvidenceCoverage(input: {
         ? []
         : ["RAW_TRANSCRIPTION_PROVENANCE_ABSENT"],
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "token-timestamp-evidence",
-      relativePath: "subtitle-timestamp-evidence-integrity.json",
+      relativePath: "machine-token-timestamp-recovery.json",
+      schema: machineTokenTimestampRecoverySchema,
+      evaluate: (artifact) =>
+        artifact.trustedForCanonicalTiming === true ? "passed" : "unknown",
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "vad-evidence",
-      relativePath: "acoustic-scenes.json",
+      relativePath: "machine-timing-evidence.json",
+      schema: machineTimingEvidenceSchema,
+      evaluate: (artifact) =>
+        artifact.timingEvidenceApplied === true ? "passed" : "unknown",
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "mapped-token-evidence",
-      relativePath: "subtitle-timestamp-evidence-integrity.json",
+      relativePath: "machine-token-timestamp-recovery.json",
       required: false,
+      schema: machineTokenTimestampRecoverySchema,
+      evaluate: (artifact) =>
+        artifact.mappedTokenCount !== 0 ? "passed" : "unknown",
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "mfa-evidence",
-      relativePath: "subtitle-canonical-forced-alignment.json",
+      relativePath: "machine-mfa-integration.json",
       required: false,
+      schema: machineMfaIntegrationSchema,
+      evaluate: (artifact) =>
+        (artifact.integration as Record<string, unknown> | undefined)
+          ?.status === "applied"
+          ? "passed"
+          : "unknown",
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "ctc-evidence",
-      relativePath: "subtitle-local-ctc-boundary-evidence.json",
+      relativePath: "machine-ctc-integration.json",
       required: false,
+      schema: machineCtcIntegrationSchema,
+      evaluate: (artifact) =>
+        (artifact.integration as Record<string, unknown> | undefined)
+          ?.status === "applied"
+          ? "passed"
+          : "unknown",
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "speaker-evidence",
-      relativePath: "subtitle-local-speaker-evidence.json",
+      relativePath: "machine-speaker-overlap-recovery.json",
       required: false,
+      schema: machineSpeakerOverlapRecoverySchema,
+      evaluate: (artifact) =>
+        (artifact.integration as Record<string, unknown> | undefined)
+          ?.status === "applied"
+          ? "passed"
+          : "unknown",
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "missing-dialogue-evidence",
-      relativePath: "missing-dialogue-recovery.json",
+      relativePath: "machine-coverage-recovery.json",
+      schema: machineCoverageRecoverySchema,
     }),
-    await artifactDimension({
+    await strictQualityDimension({
       subtitleDirectory: located.subtitleDirectory,
       dimensionId: "hallucination-evidence",
-      relativePath: "transcription-quality.json",
+      relativePath: "asr-retention-audit.json",
+      schema: asrRetentionAuditSchema,
     }),
     await artifactDimension({
       subtitleDirectory: located.subtitleDirectory,
@@ -318,8 +404,29 @@ export async function buildMachineBaselineEvidenceCoverage(input: {
   ];
 
   const metrics = await readJsonRecord(
-    path.join(located.subtitleDirectory, "whisper-execution-metrics.json"),
+    path.join(
+      located.subtitleDirectory,
+      "whisper-runtime-execution-audit.json",
+    ),
   );
+  const mfa = await readJsonRecord(
+    path.join(located.subtitleDirectory, "machine-mfa-integration.json"),
+  );
+  const ctc = await readJsonRecord(
+    path.join(located.subtitleDirectory, "machine-ctc-integration.json"),
+  );
+  const speaker = await readJsonRecord(
+    path.join(
+      located.subtitleDirectory,
+      "machine-speaker-overlap-recovery.json",
+    ),
+  );
+  const whisperInferenceCount = firstFiniteInteger(metrics, ["inferenceCount"]);
+  const mfaInferenceCount = firstFiniteInteger(mfa, ["modelInferenceCount"]);
+  const ctcInferenceCount = firstFiniteInteger(ctc, ["modelInferenceCount"]);
+  const speakerInferenceCount = firstFiniteInteger(speaker, [
+    "modelInferenceCount",
+  ]);
   const required = dimensions.filter((item) => item.requiredForFinalCandidate);
   const unknownSignalCount = dimensions.filter(
     (item) => item.status === "unknown",
@@ -335,16 +442,20 @@ export async function buildMachineBaselineEvidenceCoverage(input: {
     dimensions,
     modelRuntimeIdentities: input.manifest.runtimeIdentities,
     modelExecutionCounts: {
-      whisper: firstFiniteInteger(metrics, ["asrRequestCount"]),
-      mfa: 0,
-      ctc: 0,
-      speaker: 0,
+      whisper: whisperInferenceCount,
+      mfa: mfaInferenceCount,
+      ctc: ctcInferenceCount,
+      speaker: speakerInferenceCount,
       separation: 0,
       sudachi: 0,
       openai: 0 as const,
       onlineSubtitleSearch: 0 as const,
       modelLoadCount: firstFiniteInteger(metrics, ["modelLoadCount"]),
-      modelInferenceCount: firstFiniteInteger(metrics, ["asrRequestCount"]),
+      modelInferenceCount:
+        whisperInferenceCount +
+        mfaInferenceCount +
+        ctcInferenceCount +
+        speakerInferenceCount,
     },
     summary: {
       requiredDimensionCount: required.length,

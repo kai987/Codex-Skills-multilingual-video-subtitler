@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { execFile } from "node:child_process";
-import { mkdir, stat } from "node:fs/promises";
+import { mkdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -8,6 +8,8 @@ import {
   atomicWriteFile,
   atomicWriteJson,
   InputError,
+  machineQualityRecoveryModeSchema,
+  machineQualityRecoveryProfileSchema,
   pathExists,
 } from "@mvl/shared";
 import {
@@ -17,8 +19,10 @@ import {
   createBlindOutputFreeze,
   createC601EvaluationPolicy,
   createMachineShadowPolicy,
+  emitMachineQualityRunArtifacts,
   evaluateMachineShadowFinalization,
   sha256BlindFile,
+  verifyBlindOutputFreeze,
 } from "@mvl/video-subtitler";
 
 const execFileAsync = promisify(execFile);
@@ -36,6 +40,10 @@ function parseArguments(argv: readonly string[]): Map<string, string> {
     "--whisper-version",
     "--device",
     "--run-label",
+    "--machine-quality-recovery",
+    "--quality-profile",
+    "--vad-model",
+    "--asr-cache-import-run",
   ]);
   const result = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 2) {
@@ -114,6 +122,38 @@ const modelName = args.get("--model-name") ?? "large-v3";
 const whisperVersion = args.get("--whisper-version") ?? "unknown";
 const device = args.get("--device") ?? "local";
 const runLabel = args.get("--run-label") ?? "blind";
+const machineQualityRecovery = machineQualityRecoveryModeSchema.parse(
+  args.get("--machine-quality-recovery") ?? "off",
+);
+const qualityProfile = machineQualityRecoveryProfileSchema.parse(
+  args.get("--quality-profile") ??
+    (machineQualityRecovery === "off"
+      ? "legacy"
+      : machineQualityRecovery === "observe"
+        ? "diagnostics"
+        : "full"),
+);
+const vadModelPath = args.has("--vad-model")
+  ? path.resolve(required(args, "--vad-model"))
+  : null;
+const asrCacheImportRun = args.has("--asr-cache-import-run")
+  ? path.resolve(required(args, "--asr-cache-import-run"))
+  : null;
+
+if (
+  (machineQualityRecovery === "off" && qualityProfile !== "legacy") ||
+  (machineQualityRecovery === "observe" && qualityProfile !== "diagnostics") ||
+  (machineQualityRecovery === "enforce" &&
+    ["legacy", "diagnostics"].includes(qualityProfile))
+) {
+  throw new InputError("Machine quality mode/profile combination is invalid.", {
+    machineQualityRecovery,
+    qualityProfile,
+  });
+}
+if (qualityProfile === "timing" && vadModelPath === null) {
+  throw new InputError("The timing profile requires --vad-model.");
+}
 
 if (await pathExists(outputPath)) {
   throw new InputError(
@@ -132,6 +172,12 @@ for (const [label, filePath] of [
   if (!info.isFile())
     throw new InputError(`${label} must be a regular file.`, { filePath });
 }
+if (vadModelPath !== null) {
+  const info = await stat(vadModelPath);
+  if (!info.isFile()) {
+    throw new InputError("VAD model must be a regular file.", { vadModelPath });
+  }
+}
 const sourceInfo = await stat(videoPath);
 const sourceHashBefore = await sha256BlindFile(videoPath);
 if (
@@ -148,6 +194,37 @@ if (
     },
   );
 }
+const importedCache =
+  asrCacheImportRun === null
+    ? null
+    : await (async () => {
+        if (machineQualityRecovery === "off") {
+          throw new InputError("Off mode cannot import a prior media cache.");
+        }
+        const [freeze, importedManifest] = await Promise.all([
+          verifyBlindOutputFreeze({ taskDirectory: asrCacheImportRun }),
+          readFile(
+            path.join(
+              asrCacheImportRun,
+              "blind-generation-input-manifest.json",
+            ),
+            "utf8",
+          ).then(
+            (value) =>
+              JSON.parse(value) as { sourceVideo?: { sha256?: unknown } },
+          ),
+        ]);
+        if (importedManifest.sourceVideo?.sha256 !== sourceHashBefore) {
+          throw new InputError(
+            "Imported machine cache source identity mismatch.",
+          );
+        }
+        return {
+          path: asrCacheImportRun,
+          artifactType: "portable-asr-cache-v2",
+          artifactHash: freeze.freezeSemanticHash,
+        };
+      })();
 const repositoryCommit = (
   await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: process.cwd() })
 ).stdout.trim();
@@ -182,13 +259,30 @@ const generationArguments = [
   whisperPath,
   "--whisper-execution-mode",
   "process",
-  "--no-whisper-vad",
+  ...(qualityProfile === "timing"
+    ? ["--whisper-vad-model", vadModelPath as string]
+    : ["--no-whisper-vad"]),
   "--asr-cache-dir",
   asrCachePath,
   "--asr-cache-mode",
   "read-write",
+  ...(importedCache === null
+    ? []
+    : ["--asr-cache-import", importedCache.path, "--migrate-asr-cache"]),
   "--scene-analysis",
-  "observe",
+  machineQualityRecovery === "enforce" ? "route" : "observe",
+  ...(machineQualityRecovery === "enforce"
+    ? [
+        "--scene-routing",
+        qualityProfile === "full" ? "aggressive" : "balanced",
+        "--target-audio-chunk-seconds",
+        "30",
+        "--coverage-recovery",
+        qualityProfile === "timing" ? "auto" : "deep",
+      ]
+    : []),
+  "--machine-quality-recovery",
+  machineQualityRecovery,
   "--finalization",
   "human",
 ];
@@ -212,6 +306,7 @@ const manifest = await createBlindGenerationInputManifest({
   ],
   generationArguments,
   machineMemoryStoreId: `c6-0-1-empty-memory-${runLabel.toLowerCase()}-${repositoryCommit.slice(0, 12)}`,
+  ...(importedCache === null ? {} : { importedMachineCaches: [importedCache] }),
 });
 const evaluationPolicy = createC601EvaluationPolicy(generatedAt);
 const machineMemoryBase = {
@@ -257,6 +352,22 @@ if (sourceHashAfter !== sourceHashBefore) {
     sourceHashAfter,
   });
 }
+const machineQualityArtifacts = await emitMachineQualityRunArtifacts({
+  outputDirectory: outputPath,
+  runId: manifest.generationRunId,
+  repositoryCommit,
+  sourceMediaSha256: sourceHashBefore,
+  mode: machineQualityRecovery,
+  profile: qualityProfile,
+  targetChunkSeconds: machineQualityRecovery === "enforce" ? 30 : null,
+  vadEnabled: qualityProfile === "timing",
+  sceneRouting:
+    machineQualityRecovery === "enforce"
+      ? qualityProfile === "full"
+        ? "aggressive"
+        : "balanced"
+      : "observe",
+});
 await atomicWriteJson(
   path.join(outputPath, "blind-generation-execution.json"),
   {
@@ -341,6 +452,9 @@ console.log(
       productionStatus: shadow.productionStatus,
       productionFinalizationMethod: shadow.productionFinalizationMethod,
       freezeHash: freeze.freezeSemanticHash,
+      machineQualityRecovery,
+      qualityProfile,
+      machineQualityArtifactCount: machineQualityArtifacts.artifactCount,
     },
     null,
     2,

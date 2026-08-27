@@ -172,6 +172,7 @@ interface SubtitleCliOptions extends GlobalOptions {
   subtitleTailPaddingSeconds: number;
   finalization: "auto" | "review-fallback" | "human";
   prepareReview?: boolean;
+  machineQualityRecovery: "off" | "observe" | "enforce";
 }
 
 interface FinalizeCliOptions extends GlobalOptions {
@@ -819,6 +820,14 @@ program
     "target chunk length before silence-boundary adjustment",
     positiveOneBasedInteger,
   )
+  .addOption(
+    new Option(
+      "--machine-quality-recovery <mode>",
+      "C6.0.1.1 machine-only quality recovery policy",
+    )
+      .choices(["off", "observe", "enforce"])
+      .default("off"),
+  )
   .option(
     "--dialogue-long-duration-warning-seconds <seconds>",
     "timing QA warning threshold for normal dialogue",
@@ -1018,6 +1027,7 @@ program
         : { migrateAsrCache: options.migrateAsrCache }),
       referenceClassificationReviewThreshold:
         options.referenceClassificationReviewThreshold,
+      machineQualityRecovery: options.machineQualityRecovery,
       fullSecondPass: options.fullSecondPass ?? false,
       refine: options.refine ?? false,
       allowQualityFallback: options.allowQualityFallback ?? false,

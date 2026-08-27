@@ -39,7 +39,6 @@ const FORBIDDEN_GENERATION_ARGUMENTS = [
   "--prior-human-review-resolutions",
   "--human-verified-sequence-evidence",
   "--series-memory",
-  "--asr-cache-import",
 ] as const;
 
 const FORBIDDEN_PROVENANCE_TERMS = [
@@ -73,6 +72,11 @@ export interface CreateBlindInputManifestInput {
   runtimes: readonly BlindRuntimeInput[];
   generationArguments: readonly string[];
   machineMemoryStoreId: string;
+  importedMachineCaches?: readonly {
+    path: string;
+    artifactType: string;
+    artifactHash: string;
+  }[];
 }
 
 export interface ProvenanceGraphNodeInput {
@@ -178,7 +182,12 @@ export async function createBlindGenerationInputManifest(
       ...memoryBase,
       storeHash: c60StableHash(memoryBase),
     },
-    importedMediaCaches: [],
+    importedMediaCaches: (input.importedMachineCaches ?? []).map((cache) => ({
+      path: path.resolve(cache.path),
+      artifactType: cache.artifactType,
+      provenance: "machine-only-verified" as const,
+      artifactHash: cache.artifactHash,
+    })),
     humanArtifacts: HUMAN_ARTIFACT_CLASSES.map((artifactClass) => ({
       artifactClass,
       used: false as const,
@@ -191,7 +200,10 @@ export async function createBlindGenerationInputManifest(
       onlineSubtitleSearchUsed: false as const,
       cloudProviderConfigured: false as const,
       guidanceMode: "reference-free" as const,
-      mediaCacheMode: "fresh-isolated" as const,
+      mediaCacheMode:
+        (input.importedMachineCaches ?? []).length === 0
+          ? ("fresh-isolated" as const)
+          : ("verified-machine-only" as const),
       machineMemoryMode: "fresh-empty" as const,
     },
   };
@@ -208,7 +220,10 @@ export function assertGoldIsolatedGenerationInput(
 ): void {
   const untrusted = manifest as unknown as {
     generationArguments: string[];
-    importedMediaCaches: unknown[];
+    importedMediaCaches: {
+      provenance?: unknown;
+      artifactHash?: unknown;
+    }[];
     machineMemoryInitialState: { entryCount: number; humanDerived: boolean };
     humanArtifacts: { used: boolean; inputCount: number }[];
     environmentSummary: {
@@ -230,8 +245,35 @@ export function assertGoldIsolatedGenerationInput(
       violations.push(`FORBIDDEN_GENERATION_ARGUMENT:${forbidden}`);
     }
   }
-  if (untrusted.importedMediaCaches.length > 0) {
-    violations.push("PRIOR_MEDIA_SPECIFIC_CACHE_IMPORTED");
+  const qualityModeIndex = loweredArguments.indexOf(
+    "--machine-quality-recovery",
+  );
+  const qualityMode =
+    qualityModeIndex < 0
+      ? null
+      : (loweredArguments[qualityModeIndex + 1] ?? null);
+  const cacheArgumentPresent = loweredArguments.some(
+    (argument) =>
+      argument === "--asr-cache-import" ||
+      argument.startsWith("--asr-cache-import="),
+  );
+  const verifiedMachineOnlyCache =
+    untrusted.importedMediaCaches.length > 0 &&
+    untrusted.importedMediaCaches.every(
+      (cache) =>
+        cache.provenance === "machine-only-verified" &&
+        typeof cache.artifactHash === "string" &&
+        /^[a-f0-9]{64}$/u.test(cache.artifactHash),
+    );
+  if (
+    untrusted.importedMediaCaches.length > 0 &&
+    (!verifiedMachineOnlyCache ||
+      !["observe", "enforce"].includes(qualityMode ?? ""))
+  ) {
+    violations.push("UNVERIFIED_OR_DISALLOWED_MEDIA_CACHE_IMPORTED");
+  }
+  if (cacheArgumentPresent && !verifiedMachineOnlyCache) {
+    violations.push("ASR_CACHE_ARGUMENT_WITHOUT_VERIFIED_MANIFEST_PROVENANCE");
   }
   if (untrusted.machineMemoryInitialState.entryCount !== 0) {
     violations.push("MACHINE_MEMORY_NOT_EMPTY");
@@ -390,6 +432,17 @@ export async function auditBlindRunProvenance(input: {
       mediaSpecific: false,
     }),
   );
+  const cacheNodes = input.manifest.importedMediaCaches.map((cache, index) => ({
+    nodeId: `machine-cache-${index + 1}`,
+    artifactType: cache.artifactType,
+    origin: "machine" as const,
+    authorityType: "machine" as const,
+    relativePath: null,
+    artifactHash: cache.artifactHash,
+    parentNodeIds: ["source-video", ...modelNodes.map((node) => node.nodeId)],
+    humanDerived: false,
+    mediaSpecific: true,
+  }));
   const nodes: {
     nodeId: string;
     artifactType: string;
@@ -400,7 +453,7 @@ export async function auditBlindRunProvenance(input: {
     parentNodeIds: string[];
     humanDerived: boolean;
     mediaSpecific: boolean;
-  }[] = [sourceNode, ...modelNodes];
+  }[] = [sourceNode, ...modelNodes, ...cacheNodes];
   const genericParents = modelNodes.map((node) => node.nodeId);
   for (const [artifactType, relativeCandidate] of LINEAGE_ARTIFACTS) {
     const candidate = relativeCandidate.startsWith("audio/")
@@ -427,7 +480,13 @@ export async function auditBlindRunProvenance(input: {
       authorityType: "machine" as const,
       relativePath,
       artifactHash,
-      parentNodeIds: [sourceNode.nodeId, ...genericParents],
+      parentNodeIds: [
+        sourceNode.nodeId,
+        ...genericParents,
+        ...(artifactType === "asr"
+          ? cacheNodes.map((node) => node.nodeId)
+          : []),
+      ],
       humanDerived: false,
       mediaSpecific: true,
     });

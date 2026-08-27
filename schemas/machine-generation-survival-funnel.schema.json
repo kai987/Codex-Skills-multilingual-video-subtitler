@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-generation-survival-funnel.schema.json",
+  "title": "machine-generation-survival-funnel",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.1-machine-quality-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "profile": {
+      "type": "string",
+      "enum": ["legacy", "diagnostics", "coverage", "timing", "full"]
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "runId": { "type": "string", "minLength": 1 },
+        "repositoryCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "goldRuntimeInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "runId",
+        "repositoryCommit",
+        "sourceMediaSha256",
+        "goldRuntimeInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-generation-survival-funnel"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "inputCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outputCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "droppedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "retentionRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "lossReasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "reason": { "type": "string", "minLength": 1 },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["reason", "count"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "inputCount",
+          "outputCount",
+          "droppedCount",
+          "retentionRatio",
+          "lossReasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "whisperRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "baselineChunkCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "baselineAcceptedCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recoveryRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recoveredCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawSegmentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "finalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dominantLossStage": {
+          "anyOf": [{ "type": "string" }, { "type": "null" }]
+        },
+        "dominantLossCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "whisperRequestCount",
+        "baselineChunkCount",
+        "baselineAcceptedCueCount",
+        "recoveryRequestCount",
+        "recoveredCueCount",
+        "rawSegmentCount",
+        "finalCueCount",
+        "dominantLossStage",
+        "dominantLossCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "mode",
+    "profile",
+    "run",
+    "artifactType",
+    "stages",
+    "summary"
+  ],
+  "additionalProperties": false
+}

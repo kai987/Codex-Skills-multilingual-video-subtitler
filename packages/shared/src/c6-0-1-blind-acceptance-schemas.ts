@@ -97,7 +97,8 @@ export const blindGenerationInputManifestSchema = z
         .object({
           path: localPathSchema,
           artifactType: nonEmptyStringSchema,
-          provenance: nonEmptyStringSchema,
+          provenance: z.literal("machine-only-verified"),
+          artifactHash: c601HashSchema,
         })
         .strict(),
     ),
@@ -110,7 +111,7 @@ export const blindGenerationInputManifestSchema = z
         onlineSubtitleSearchUsed: z.literal(false),
         cloudProviderConfigured: z.literal(false),
         guidanceMode: z.literal("reference-free"),
-        mediaCacheMode: z.literal("fresh-isolated"),
+        mediaCacheMode: z.enum(["fresh-isolated", "verified-machine-only"]),
         machineMemoryMode: z.literal("fresh-empty"),
       })
       .strict(),

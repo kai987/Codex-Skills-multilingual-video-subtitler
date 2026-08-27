@@ -107,6 +107,36 @@ describe("C6.0.1 blind isolation", () => {
     );
   });
 
+  it("allows only explicitly verified machine-only caches for C6.0.1.1 development runs", () => {
+    const manifest = structuredClone(validManifest());
+    manifest.generationArguments.push(
+      "--machine-quality-recovery",
+      "observe",
+      "--asr-cache-import",
+      "/machine/cache",
+    );
+    manifest.importedMediaCaches.push({
+      path: "/machine/cache",
+      artifactType: "portable-asr-cache-v2",
+      provenance: "machine-only-verified",
+      artifactHash: hash("9"),
+    });
+    manifest.environmentSummary.mediaCacheMode = "verified-machine-only";
+    expect(() => assertGoldIsolatedGenerationInput(manifest)).not.toThrow();
+
+    const unverified = structuredClone(manifest) as unknown as {
+      importedMediaCaches: { provenance: string }[];
+    };
+    if (unverified.importedMediaCaches[0] !== undefined) {
+      unverified.importedMediaCaches[0].provenance = "unknown";
+    }
+    expect(() =>
+      assertGoldIsolatedGenerationInput(
+        unverified as unknown as typeof manifest,
+      ),
+    ).toThrow(/Gold isolation guard rejected/u);
+  });
+
   it("detects direct and transitive human provenance while allowing generic resources", () => {
     const result = validateBlindProvenanceGraph([
       {

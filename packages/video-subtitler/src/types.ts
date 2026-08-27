@@ -19,6 +19,7 @@ import type {
   LyricsValidationMode,
   TextIntegrityMode,
   CoverageRecoveryMode,
+  MachineQualityRecoveryMode,
 } from "@mvl/shared";
 import type { MediaIdentityOverrides } from "@mvl/media-identity";
 import type {
@@ -191,6 +192,8 @@ export interface VideoSubtitlerOptions {
   asrCacheMode?: "off" | "read" | "read-write";
   migrateAsrCache?: boolean;
   referenceClassificationReviewThreshold?: number;
+  /** C6.0.1.1 is opt-in; off preserves the pre-C6.0.1.1 pipeline. */
+  machineQualityRecovery?: MachineQualityRecoveryMode;
 }
 
 export interface VideoSubtitlerDependencies {

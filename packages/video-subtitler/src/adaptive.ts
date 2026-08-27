@@ -74,6 +74,10 @@ import type {
   SourceInfo,
   VideoSubtitlerOptions,
 } from "./types.js";
+import {
+  machineQualityTargetChunkSeconds,
+  recoveryPromptCuesForMachineQuality,
+} from "./machine-quality/policy.js";
 
 function benchmarkCandidates(
   capabilities: readonly WhisperModelCapability[],
@@ -550,6 +554,11 @@ export async function runAdaptiveLocalTranscription(input: {
   referenceTimeline?: ReferenceTimelineArtifact | undefined;
   asrCache?: PortableAsrCache | undefined;
 }): Promise<AdaptiveLocalTranscriptionResult | null> {
+  const machineQualityRecovery = input.options.machineQualityRecovery ?? "off";
+  const targetChunkSeconds = machineQualityTargetChunkSeconds({
+    mode: machineQualityRecovery,
+    configured: input.options.targetAudioChunkSeconds,
+  });
   const language: LanguageTag | undefined =
     input.identity.dialogueLanguages.length === 1
       ? input.identity.dialogueLanguages[0]
@@ -912,10 +921,10 @@ export async function runAdaptiveLocalTranscription(input: {
           ? {}
           : { timingConfig: input.options.timingQaConfig }),
         ...(language === undefined ? {} : { language }),
-        ...(input.options.targetAudioChunkSeconds === undefined
+        ...(targetChunkSeconds === undefined
           ? {}
           : {
-              targetChunkSeconds: input.options.targetAudioChunkSeconds,
+              targetChunkSeconds,
             }),
         promptNames: promptNames(
           input.identity,
@@ -1662,7 +1671,15 @@ export async function runAdaptiveLocalTranscription(input: {
         adapter,
         vadEnabled: index !== 2,
       })),
-      existingCues: cues,
+      // Recovery prompts are decode constraints, not harmless context. The
+      // legacy path admitted every provisional cue and could amplify a single
+      // false-positive baseline into every local recovery request. C6.0.1.1
+      // enforce therefore performs acoustic recovery without unverified text
+      // prompts. Off/observe deliberately preserve the legacy behavior.
+      existingCues: recoveryPromptCuesForMachineQuality({
+        mode: machineQualityRecovery,
+        provisionalCues: cues,
+      }),
       speechIntervals: media.speechIntervals,
       mediaDurationSeconds: input.sourceInfo.format.durationSeconds,
       runner: input.runner,
