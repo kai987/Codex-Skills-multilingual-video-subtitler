@@ -340,8 +340,19 @@ const importedCache =
               "Imported machine cache source identity mismatch.",
             );
           }
+          const portableCachePath = path.join(
+            asrCacheImportRun,
+            "isolated-asr-cache",
+          );
+          const portableCacheInfo = await stat(portableCachePath);
+          if (!portableCacheInfo.isDirectory()) {
+            throw new InputError(
+              "Imported blind run has no isolated portable ASR cache.",
+              { portableCachePath },
+            );
+          }
           return {
-            path: asrCacheImportRun,
+            path: portableCachePath,
             artifactType: "portable-asr-cache-v2",
             artifactHash: freeze.freezeSemanticHash,
           };

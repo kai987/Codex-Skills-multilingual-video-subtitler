@@ -480,6 +480,67 @@ describe("C5.15 acoustic planning and cache", () => {
     expect(cache.manifest().summary.portableHitCount).toBe(1);
   });
 
+  it("imports an exact portable V2 identity without invoking the worker", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "c6-0-1-2-import-cache-"));
+    temporaryDirectories.push(root);
+    const sourceRoot = path.join(root, "source");
+    const destinationRoot = path.join(root, "destination");
+    const identity = buildPortableAsrCacheIdentityV2({
+      audioContentSha256: HASH,
+      interval: { start: 5, end: 25 },
+      sampleRate: 16_000,
+      channels: 1,
+      codec: "pcm_s16le",
+      adapterId: "whisper-cpp",
+      model: "ggml-large-v3.bin",
+      modelHash: HASH,
+      modelFamily: "large-v3",
+      coreML: false,
+      whisperCppVersion: "1.9.1",
+      language: "ja",
+      vadMode: "no-vad",
+      timestampStrategy: "segment+token",
+      tokenTimestamps: true,
+      decodeConfiguration: { profile: "no-vad" },
+    });
+    const writer = new PortableAsrCache({ portableRoot: sourceRoot });
+    await writer.store({
+      requestId: "source-request",
+      requestType: "recovery",
+      identity,
+      result: {
+        text: "かな",
+        segments: [],
+        raw: null,
+      },
+    });
+    const imported = new PortableAsrCache({
+      portableRoot: destinationRoot,
+      importRoots: [sourceRoot],
+      mode: "read-write",
+    });
+    const lookup = await imported.lookup({
+      requestId: "destination-request",
+      requestType: "recovery",
+      identity,
+    });
+    expect(lookup).toMatchObject({
+      hit: true,
+      hitType: "portable",
+      tokenTimingTrust: "current-identity",
+      result: { text: "かな" },
+    });
+    expect(imported.manifest().summary).toMatchObject({
+      portableHitCount: 1,
+      migratedEntryCount: 1,
+      missCount: 0,
+      workerRequestsAvoided: 1,
+    });
+    expect(imported.manifest().entries[0]?.compatibilityChecks).toContain(
+      "import-root-v2-exact-match",
+    );
+  });
+
   it("never represents reviewed text or a translation as an ASR prompt", () => {
     const parsed = attempt("no-vad", [{ text: "正解", start: 1, end: 2 }]);
     expect(parsed).toMatchObject({

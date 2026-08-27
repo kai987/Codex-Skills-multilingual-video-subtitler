@@ -422,6 +422,47 @@ export class PortableAsrCache {
         };
       }
     }
+    const currentRoots = new Set(
+      [this.portableRoot, this.taskLocalRoot]
+        .filter((root): root is string => root !== null)
+        .map((root) => path.resolve(root)),
+    );
+    for (const root of this.importRoots) {
+      if (currentRoots.has(root)) continue;
+      const importedPath = cachePath(root, key);
+      const imported = await this.readV2(importedPath, identity, key);
+      if (imported === null) continue;
+      const migrated = this.migrateLegacy && this.mode === "read-write";
+      if (migrated) {
+        await this.writeEntry({
+          key,
+          identity,
+          result: imported.result,
+          requestType: input.requestType,
+          migratedFromLegacyKey: key,
+          migratedFromPath: importedPath,
+        });
+        this.migratedEntryCount += 1;
+      }
+      this.entries.push({
+        requestId: input.requestId,
+        requestType: input.requestType,
+        currentKey: key,
+        legacyKeysTried: legacyKeys,
+        selectedPath: importedPath,
+        hitType: "portable",
+        compatibilityChecks: [...imported.checks, "import-root-v2-exact-match"],
+        migrationStatus: migrated ? "migrated" : "not-needed",
+      });
+      return {
+        key,
+        hit: true,
+        hitType: "portable",
+        result: imported.result,
+        selectedPath: importedPath,
+        tokenTimingTrust: "current-identity",
+      };
+    }
     if (input.legacyV2Identity !== undefined) {
       const legacyIdentity = portableAsrCacheIdentityV2Schema.parse(
         input.legacyV2Identity,
