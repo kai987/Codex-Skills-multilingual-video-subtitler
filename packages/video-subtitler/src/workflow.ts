@@ -230,13 +230,17 @@ function runTopScoreTextPipeline(input: {
           canonicalAssembly: input.canonicalAssembly ?? "off",
           timelineTransformChain: input.timelineTransformChain ?? "off",
         });
+  const eventBoundariesEnforced =
+    associationAssembly !== null &&
+    ((input.candidateAssociation ?? "off") === "enforce" ||
+      (input.canonicalAssembly ?? "off") === "enforce");
   const winnerDeduplication = deduplicateTopScoreWinners(
     associationAssembly?.cues ?? hypothesisResolution.cues,
     "pre-normalization",
-    { requireTemporalOverlap: associationAssembly !== null },
+    { requireTemporalOverlap: eventBoundariesEnforced },
   );
   const fragmentRepair = repairTopScoreFragments(winnerDeduplication.cues, {
-    eventFirst: associationAssembly !== null,
+    eventFirst: eventBoundariesEnforced,
   });
   const winnerTimingRepair = repairTopScoreWinnerTiming({
     cues: fragmentRepair.cues,
@@ -255,7 +259,7 @@ function runTopScoreTextPipeline(input: {
   });
   const postNormalizationDeduplication = deduplicateNormalizedWinners(
     japaneseNormalization.cues,
-    { requireTemporalOverlap: associationAssembly !== null },
+    { requireTemporalOverlap: eventBoundariesEnforced },
   );
   const segmentation = buildAcousticSemanticCueSegments(
     postNormalizationDeduplication.cues,
