@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { createReadStream } from "node:fs";
-import { access, cp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -22,7 +22,6 @@ import {
   normalizeIndependentAsrDisplay,
   normalizeIndependentAsrLexical,
   normalizeJapanesePronunciation,
-  projectJapanesePronunciationBatch,
   ReazonSpeechK2Provider,
   runSudachiMorphemeAnalysis,
   type IndependentAsrFrozenRecord,

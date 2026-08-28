@@ -286,6 +286,9 @@ const outputDirectoryChecks = await Promise.all(
     }
   }),
 );
+
+const observedEquals = (actual: unknown, expected: unknown): boolean =>
+  actual === expected;
 const checks = [
   {
     id: "source-identity",
@@ -311,16 +314,16 @@ const checks = [
     passed:
       freshCandidates.summary.actualRequestCount === 48 &&
       freshCandidates.summary.failedRequestCount === 0 &&
-      freshCandidates.summary.runtimeGoldInputCount === 0,
+      observedEquals(freshCandidates.summary.runtimeGoldInputCount, 0),
     evidence: [JSON.stringify(freshCandidates.summary)],
   },
   {
     id: "pinned-model-runtime",
     passed:
       freshRuntime.modelIdentity.modelFiles.length === 4 &&
-      freshRuntime.modelIdentity.precision === "fp32" &&
-      freshRuntime.modelIdentity.device === "cpu" &&
-      freshRuntime.acceptance.networkUsed === false,
+      observedEquals(freshRuntime.modelIdentity.precision, "fp32") &&
+      observedEquals(freshRuntime.modelIdentity.device, "cpu") &&
+      observedEquals(freshRuntime.acceptance.networkUsed, false),
     evidence: [
       `snapshot:${freshRuntime.modelIdentity.modelSnapshotHash}`,
       `runtime:${freshRuntime.runtimeIdentity.runtimeId}`,
@@ -372,9 +375,11 @@ const checks = [
   {
     id: "ctc-correlation-guard",
     passed:
-      finalA.ctc.correlationPolicy ===
-        "DATA_FAMILY_CORRELATED_NOT_AN_INDEPENDENT_VOTE" &&
-      finalA.shadow.winnerSelectionPolicyImplemented === false,
+      observedEquals(
+        finalA.ctc.correlationPolicy,
+        "DATA_FAMILY_CORRELATED_NOT_AN_INDEPENDENT_VOTE",
+      ) &&
+      observedEquals(finalA.shadow.winnerSelectionPolicyImplemented, false),
     evidence: [
       finalA.ctc.correlationPolicy,
       "winnerSelectionPolicyImplemented:false",
@@ -424,10 +429,10 @@ const checks = [
   {
     id: "production-held",
     passed:
-      routeDecision.productionStatus === "needs-review" &&
-      routeDecision.finalizationMethod === "none" &&
-      !routeDecision.machineReleaseAuthorized &&
-      !routeDecision.goC602,
+      observedEquals(routeDecision.productionStatus, "needs-review") &&
+      observedEquals(routeDecision.finalizationMethod, "none") &&
+      observedEquals(routeDecision.machineReleaseAuthorized, false) &&
+      observedEquals(routeDecision.goC602, false),
     evidence: ["needs-review", "finalizationMethod:none", "goC602:false"],
   },
   {

@@ -52,9 +52,13 @@ export function buildMachineCrossModelComparison(input: {
     const core = {
       eventId: diagnostic.eventId,
       diagnosticRole: diagnostic.role,
-      whisperCandidates: whisperCandidates.map(
-        ({ eventId: _eventId, ...candidate }) => candidate,
-      ),
+      whisperCandidates: whisperCandidates.map((candidate) => ({
+        candidateId: candidate.candidateId,
+        displayText: candidate.displayText,
+        normalizedDisplayText: candidate.normalizedDisplayText,
+        pronunciationText: candidate.pronunciationText,
+        hallucinationRisk: candidate.hallucinationRisk,
+      })),
       reazonCandidate,
       exactAgreement: comparisons.some(
         (comparison) => comparison.exactAgreement,

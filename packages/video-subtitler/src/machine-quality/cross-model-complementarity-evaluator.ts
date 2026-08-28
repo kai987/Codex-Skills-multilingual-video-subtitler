@@ -65,12 +65,15 @@ export function buildGoldCrossModelComplementarityEvaluation(input: {
   const events = input.comparison.events.map((comparison) => {
     const local = localById.get(comparison.eventId);
     const ctc = ctcById.get(comparison.eventId);
-    if (local === undefined || local.goldText === null) {
+    const goldText = local?.goldText;
+    const localEvaluationStatus =
+      local?.evaluationStatus ?? "UNEVALUABLE_MISSING_MAPPING";
+    const currentWhisperText = local?.currentWhisperText ?? null;
+    if (goldText === undefined || goldText === null) {
       const core = {
         eventId: comparison.eventId,
         diagnosticRole: comparison.diagnosticRole,
-        localEvaluationStatus:
-          local?.evaluationStatus ?? "UNEVALUABLE_MISSING_MAPPING",
+        localEvaluationStatus,
         whisperCoreError: null,
         bestWhisperPoolError: null,
         reazonCoreError: null,
@@ -82,7 +85,7 @@ export function buildGoldCrossModelComplementarityEvaluation(input: {
       };
       return { ...core, semanticHash: machineQualitySemanticHash(core) };
     }
-    const gold = normalizeIndependentAsrLexical(local.goldText);
+    const gold = normalizeIndependentAsrLexical(goldText);
     const error = (value: string) =>
       independentAsrLexicalEditDistance(
         normalizeIndependentAsrLexical(value),
@@ -94,9 +97,7 @@ export function buildGoldCrossModelComplementarityEvaluation(input: {
     const bestWhisperPoolError =
       poolErrors.length === 0 ? null : Math.min(...poolErrors);
     const currentError =
-      local.currentWhisperText === null
-        ? null
-        : error(local.currentWhisperText);
+      currentWhisperText === null ? null : error(currentWhisperText);
     const whisperCoreError = currentError ?? bestWhisperPoolError;
     const reazonCoreError = error(comparison.reazonCandidate.displayText);
     const unionPoolError = Math.min(
@@ -107,7 +108,7 @@ export function buildGoldCrossModelComplementarityEvaluation(input: {
       const core = {
         eventId: comparison.eventId,
         diagnosticRole: comparison.diagnosticRole,
-        localEvaluationStatus: local.evaluationStatus,
+        localEvaluationStatus,
         whisperCoreError: null,
         bestWhisperPoolError,
         reazonCoreError,
@@ -134,7 +135,7 @@ export function buildGoldCrossModelComplementarityEvaluation(input: {
     const core = {
       eventId: comparison.eventId,
       diagnosticRole: comparison.diagnosticRole,
-      localEvaluationStatus: local.evaluationStatus,
+      localEvaluationStatus,
       whisperCoreError,
       bestWhisperPoolError,
       reazonCoreError,

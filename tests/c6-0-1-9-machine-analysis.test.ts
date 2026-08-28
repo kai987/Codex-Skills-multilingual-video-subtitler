@@ -26,7 +26,7 @@ function diagnosticSet() {
     proposedCoreEnd: index * 3 + 2,
     coreSpanStatus: "VERIFIED_WITH_CAUTION" as const,
     evidenceIds: [`target-evidence-${index}`],
-    semanticHash: `${(index % 10).toString()}`.repeat(64),
+    semanticHash: (index % 10).toString().repeat(64),
   }));
   const controls = Array.from({ length: 14 }, (_, index) => ({
     eventId: `control-${String(index + 1).padStart(2, "0")}`,
@@ -39,7 +39,7 @@ function diagnosticSet() {
     absenceOnly: false,
     recommendedAction: "KEEP",
     budgetSelected: false,
-    stableTieBreakHash: `${String(index).padStart(64, "0")}`,
+    stableTieBreakHash: String(index).padStart(64, "0"),
     semanticHash: "b".repeat(64),
   }));
   return buildMachineSecondAsrDiagnosticSet({
@@ -89,13 +89,12 @@ function independentCandidates() {
         sourceInterval: interval,
         sourceMediaSha256: HASH,
         audioPath: `/ignored/${event.eventId}-${windowType}.wav`,
-        audioSha256: `${((index + 1) % 10).toString()}`.repeat(64),
+        audioSha256: ((index + 1) % 10).toString().repeat(64),
         sampleRate: 16_000 as const,
         sampleCount: Math.round((interval.end - interval.start) * 16_000),
         extractionConfigHash: "1".repeat(64),
       };
-      const text =
-        windowType === "CORE_EXACT" ? `字幕${index}` : `字幕${index}`;
+      const text = `字幕${index}`;
       return {
         request,
         result: {

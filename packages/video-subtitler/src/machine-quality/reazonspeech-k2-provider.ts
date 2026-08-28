@@ -178,7 +178,8 @@ export class ReazonSpeechK2Provider implements IndependentAsrProvider {
           return;
         }
         if (message.type === "result") {
-          const requestId = String(message.requestId ?? "");
+          const requestId =
+            typeof message.requestId === "string" ? message.requestId : "";
           const pending = this.#pending.get(requestId);
           if (pending === undefined) return;
           this.#pending.delete(requestId);
@@ -233,9 +234,14 @@ export class ReazonSpeechK2Provider implements IndependentAsrProvider {
       results.push(await response);
     }
     return {
-      results: results.map(
-        ({ type: _type, peakRssBytes: _rss, ...result }) => result,
-      ),
+      results: results.map((result) => ({
+        requestId: result.requestId,
+        status: result.status,
+        text: result.text,
+        tokenPoints: result.tokenPoints,
+        wallClockSeconds: result.wallClockSeconds,
+        warnings: result.warnings,
+      })),
       diagnostics: {
         ...ready,
         peakRssBytes: results.reduce<number | null>(

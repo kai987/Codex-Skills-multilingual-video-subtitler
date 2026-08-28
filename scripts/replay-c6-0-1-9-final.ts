@@ -107,8 +107,10 @@ function candidatePayload(candidates: MachineIndependentAsrCandidates) {
 }
 
 function stabilityPayload(stability: MachineSecondAsrStability) {
-  return stability.events.map(
-    ({ semanticHash: _semanticHash, ...event }) => event,
+  return stability.events.map((event) =>
+    Object.fromEntries(
+      Object.entries(event).filter(([key]) => key !== "semanticHash"),
+    ),
   );
 }
 
@@ -222,11 +224,23 @@ const replayRuntime = machineIndependentAsrRuntimeSchema.parse({
 });
 
 const comparePayload = (value: typeof freshComparison) =>
-  value.events.map(({ semanticHash: _semanticHash, ...event }) => event);
+  value.events.map((event) =>
+    Object.fromEntries(
+      Object.entries(event).filter(([key]) => key !== "semanticHash"),
+    ),
+  );
 const ctcPayload = (value: typeof freshCtc) =>
-  value.events.map(({ semanticHash: _semanticHash, ...event }) => event);
+  value.events.map((event) =>
+    Object.fromEntries(
+      Object.entries(event).filter(([key]) => key !== "semanticHash"),
+    ),
+  );
 const shadowPayload = (value: typeof freshShadow) =>
-  value.events.map(({ semanticHash: _semanticHash, ...event }) => event);
+  value.events.map((event) =>
+    Object.fromEntries(
+      Object.entries(event).filter(([key]) => key !== "semanticHash"),
+    ),
+  );
 const parity = {
   diagnosticSet: true,
   candidates:
