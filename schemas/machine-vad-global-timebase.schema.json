@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-vad-global-timebase.schema.json",
+  "title": "machine-vad-global-timebase",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-vad-timebase-acoustic-text-variant-reasr-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-vad-global-timebase"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceSampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sourceTotalSamples": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sourceReadOnlyVerified": { "type": "boolean" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "sourceSampleRate",
+        "sourceTotalSamples",
+        "sourceReadOnlyVerified"
+      ],
+      "additionalProperties": false
+    },
+    "vadProviderIdentity": {
+      "type": "object",
+      "properties": {
+        "provider": { "type": "string", "const": "whisper.cpp-silero-vad" },
+        "whisperVersion": { "type": "string", "minLength": 1 },
+        "whisperBinarySha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "vadModelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "capabilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "mappedGetterUsed": { "type": "boolean" },
+        "rawVadGetterUsed": { "type": "boolean" },
+        "requestStateIsolation": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "provider",
+        "whisperVersion",
+        "whisperBinarySha256",
+        "vadModelSha256",
+        "capabilityHash",
+        "mappedGetterUsed",
+        "rawVadGetterUsed",
+        "requestStateIsolation"
+      ],
+      "additionalProperties": false
+    },
+    "vadSegments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vadSegmentId": { "type": "string", "minLength": 1 },
+          "requestId": { "type": "string", "minLength": 1 },
+          "sourceMediaSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "parentArtifactId": { "type": "string", "minLength": 1 },
+          "parentArtifactSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "parentSampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "parentTotalSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "vadStartSampleInParent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "vadEndSampleInParent": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "vadSampleCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outputSampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outputSampleCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outputLocalZeroSample": { "type": "number", "const": 0 },
+          "sourceGlobalStartSample": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sourceGlobalEndSample": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "extractionCommandIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "resamplingIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "providerSegmentIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "providerCoordinateSystem": {
+            "type": "string",
+            "const": "original-audio-local"
+          },
+          "mappingStatus": {
+            "type": "string",
+            "enum": ["VERIFIED", "QUARANTINED", "AMBIGUOUS"]
+          },
+          "mappingReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "parentTransformHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "timebaseSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "vadSegmentId",
+          "requestId",
+          "sourceMediaSha256",
+          "parentArtifactId",
+          "parentArtifactSha256",
+          "parentSampleRate",
+          "parentTotalSamples",
+          "vadStartSampleInParent",
+          "vadEndSampleInParent",
+          "vadSampleCount",
+          "outputSampleRate",
+          "outputSampleCount",
+          "outputLocalZeroSample",
+          "sourceGlobalStartSample",
+          "sourceGlobalEndSample",
+          "extractionCommandIdentity",
+          "resamplingIdentity",
+          "providerSegmentIndex",
+          "providerCoordinateSystem",
+          "mappingStatus",
+          "mappingReasons",
+          "parentTransformHash",
+          "timebaseSemanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "parentChildTransforms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "transformId": { "type": "string", "minLength": 1 },
+          "parentArtifactId": { "type": "string", "minLength": 1 },
+          "parentArtifactSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "childArtifactId": { "type": "string", "minLength": 1 },
+          "childArtifactSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "parentSampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "childSampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "parentTotalSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "childTotalSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "childStartSampleInParent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "childEndSampleInParent": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outputLocalZeroSample": { "type": "number", "const": 0 },
+          "conversionNumerator": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "conversionDenominator": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "roundingPolicy": {
+            "type": "string",
+            "enum": ["identity-integer", "floor-start-ceil-end-rational"]
+          },
+          "extractionMethod": {
+            "type": "string",
+            "enum": [
+              "direct-source-ffmpeg-sample-trim",
+              "whisper-internal-vad",
+              "nested-recovery-window",
+              "identity"
+            ]
+          },
+          "ffmpeg": {
+            "type": "object",
+            "properties": {
+              "inputSeekPlacement": {
+                "type": "string",
+                "enum": ["none", "before-input", "after-input"]
+              },
+              "inputSeekSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "outputTrimStartSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "outputDurationSamples": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "atrimUsed": { "type": "boolean" },
+              "asetptsReset": { "type": "boolean" },
+              "resampleUsed": { "type": "boolean" },
+              "paddingSamples": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "commandIdentity": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "inputSeekPlacement",
+              "inputSeekSample",
+              "outputTrimStartSample",
+              "outputDurationSamples",
+              "atrimUsed",
+              "asetptsReset",
+              "resampleUsed",
+              "paddingSamples",
+              "commandIdentity"
+            ],
+            "additionalProperties": false
+          },
+          "resamplingIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "verified": { "type": "boolean" },
+          "verificationReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "transformId",
+          "parentArtifactId",
+          "parentArtifactSha256",
+          "childArtifactId",
+          "childArtifactSha256",
+          "parentSampleRate",
+          "childSampleRate",
+          "parentTotalSamples",
+          "childTotalSamples",
+          "childStartSampleInParent",
+          "childEndSampleInParent",
+          "outputLocalZeroSample",
+          "conversionNumerator",
+          "conversionDenominator",
+          "roundingPolicy",
+          "extractionMethod",
+          "ffmpeg",
+          "resamplingIdentity",
+          "verified",
+          "verificationReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "legacyQuarantinedRequestIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "freshRecoveryRequestIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "verifiedSegmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "quarantinedSegmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ambiguousSegmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "verifiedRequestCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "quarantinedRequestCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "freshRemapRequestCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sampleMappingCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+    "guessedOffsetCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "sourceIdentity",
+    "vadProviderIdentity",
+    "vadSegments",
+    "parentChildTransforms",
+    "legacyQuarantinedRequestIds",
+    "freshRecoveryRequestIds",
+    "verifiedSegmentCount",
+    "quarantinedSegmentCount",
+    "ambiguousSegmentCount",
+    "verifiedRequestCount",
+    "quarantinedRequestCount",
+    "freshRemapRequestCount",
+    "sampleMappingCoverage",
+    "guessedOffsetCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

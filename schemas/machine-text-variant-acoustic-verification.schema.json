@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-text-variant-acoustic-verification.schema.json",
+  "title": "machine-text-variant-acoustic-verification",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-vad-timebase-acoustic-text-variant-reasr-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-text-variant-acoustic-verification"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "ctcRuntimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ctcModelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "pronunciationRuntimeIdentityHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "audioEvidenceId": { "type": "string", "minLength": 1 },
+          "audioInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "variantIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "acousticProjections": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "projectionId": { "type": "string", "minLength": 1 },
+                "displayTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "projectionText": { "type": "string" },
+                "projectionTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "kana-literal",
+                    "sudachi-reading",
+                    "display-text-fallback",
+                    "unscorable"
+                  ]
+                },
+                "projectionCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "unresolvedUnits": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "humanDerivedEntryCount": { "type": "number", "const": 0 },
+                "canonicalTextMutated": { "type": "boolean", "const": false },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "projectionId",
+                "displayTextHash",
+                "projectionText",
+                "projectionTextHash",
+                "method",
+                "projectionCoverage",
+                "unresolvedUnits",
+                "humanDerivedEntryCount",
+                "canonicalTextMutated",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "ctcEvidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variantId": { "type": "string", "minLength": 1 },
+                "projectionId": { "type": "string", "minLength": 1 },
+                "evidenceStatus": {
+                  "type": "string",
+                  "enum": [
+                    "CTC_SCORABLE",
+                    "CTC_UNSCORABLE",
+                    "CTC_NO_VALID_PATH",
+                    "CTC_WEAK"
+                  ]
+                },
+                "alignmentCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "normalizedAlignmentCost": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "unsupportedUnitRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "edgePinned": { "type": "boolean" },
+                "monotonicity": { "type": "boolean" },
+                "acousticSpanCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "unalignedPrefixRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "unalignedSuffixRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "projectionCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "durationCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "targetUnitCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "meanTokenPosterior": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "greedyNormalizedSimilarity": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "variantId",
+                "projectionId",
+                "evidenceStatus",
+                "alignmentCoverage",
+                "normalizedAlignmentCost",
+                "unsupportedUnitRatio",
+                "edgePinned",
+                "monotonicity",
+                "acousticSpanCoverage",
+                "unalignedPrefixRatio",
+                "unalignedSuffixRatio",
+                "projectionCoverage",
+                "durationCoverage",
+                "targetUnitCount",
+                "meanTokenPosterior",
+                "greedyNormalizedSimilarity",
+                "attemptIds",
+                "blockers",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "dominanceRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dominantVariantId": { "type": "string", "minLength": 1 },
+                "dominatedVariantId": { "type": "string", "minLength": 1 },
+                "relation": {
+                  "type": "string",
+                  "enum": ["STRONG_DOMINANCE", "WEAK_DOMINANCE", "INCOMPARABLE"]
+                },
+                "reasons": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "dominantVariantId",
+                "dominatedVariantId",
+                "relation",
+                "reasons"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rejectedVariants": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "ambiguousVariants": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedByAcousticEvidence": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "lengthBiasAuditPassed": { "type": "boolean" },
+          "prefixBiasAuditPassed": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "audioEvidenceId",
+          "audioInterval",
+          "audioSha256",
+          "variantIds",
+          "acousticProjections",
+          "ctcEvidence",
+          "dominanceRelations",
+          "rejectedVariants",
+          "ambiguousVariants",
+          "selectedByAcousticEvidence",
+          "lengthBiasAuditPassed",
+          "prefixBiasAuditPassed",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "workerStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidatePairComparisons": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcScorableVariantCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcUnscorableVariantCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acousticDominanceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "weakSeparationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "edgePinnedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "projectionFailureCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lengthBiasAuditPassed": { "type": "boolean" },
+        "prefixBiasAuditPassed": { "type": "boolean" },
+        "networkUsed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "eventCount",
+        "requestCount",
+        "modelLoadCount",
+        "workerStartCount",
+        "candidatePairComparisons",
+        "ctcScorableVariantCount",
+        "ctcUnscorableVariantCount",
+        "acousticDominanceCount",
+        "weakSeparationCount",
+        "edgePinnedCount",
+        "projectionFailureCount",
+        "lengthBiasAuditPassed",
+        "prefixBiasAuditPassed",
+        "networkUsed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "ctcRuntimeIdentityHash",
+    "ctcModelSnapshotHash",
+    "pronunciationRuntimeIdentityHash",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

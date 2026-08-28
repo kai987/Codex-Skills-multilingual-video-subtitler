@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-text-variant-decision.schema.json",
+  "title": "machine-text-variant-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-vad-timebase-acoustic-text-variant-reasr-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-text-variant-decision"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "inputVariants": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "hardRejected": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "ctcEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentSupport": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "tokenSupport": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "decoderEvidence": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": { "type": "string" }
+          },
+          "linguisticTieBreak": {
+            "type": "object",
+            "properties": {
+              "used": { "type": "boolean" },
+              "selectedVariantId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "reasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": ["used", "selectedVariantId", "reasons"],
+            "additionalProperties": false
+          },
+          "selectedVariant": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "runnerUp": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "decisionStatus": {
+            "type": "string",
+            "enum": [
+              "SELECT_EXISTING_VARIANT",
+              "AMBIGUOUS_VARIANT",
+              "NO_ACOUSTICALLY_SUPPORTED_VARIANT",
+              "INSUFFICIENT_EVIDENCE",
+              "MULTI_SPEAKER_UNRESOLVED",
+              "REJECT_EVENT"
+            ]
+          },
+          "decisionReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "confidenceClass": {
+            "type": "string",
+            "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"]
+          },
+          "magicWeightedScoreUsed": { "type": "boolean", "const": false },
+          "forcedWinner": { "type": "boolean", "const": false },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "inputVariants",
+          "hardRejected",
+          "ctcEvidenceIds",
+          "independentSupport",
+          "tokenSupport",
+          "decoderEvidence",
+          "linguisticTieBreak",
+          "selectedVariant",
+          "runnerUp",
+          "decisionStatus",
+          "decisionReasons",
+          "confidenceClass",
+          "magicWeightedScoreUsed",
+          "forcedWinner",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiVariantEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singleVariantEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hardRejectedVariantCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "clearWinnerCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousVariantCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "replacementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unchangedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedWinnerCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "multiVariantEventCount",
+        "singleVariantEventCount",
+        "hardRejectedVariantCount",
+        "clearWinnerCount",
+        "ambiguousVariantCount",
+        "replacementCount",
+        "unchangedCount",
+        "unresolvedCount",
+        "forcedWinnerCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "decisions",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
