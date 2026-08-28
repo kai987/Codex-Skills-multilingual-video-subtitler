@@ -479,4 +479,50 @@ describe("C6.0.1.4 fresh VAD lineage and token mapping", () => {
     expect(tokens.tokens[0]?.mappingStatus).toBe("ASSOCIATION_PENDING");
     expect(tokens.tokens[0]?.trusted).toBe(false);
   });
+
+  it("preserves an untimed lexical token as unmapped without inventing local time", () => {
+    const timeline = buildRequestTimelineV2({
+      sourceMediaSha256: SOURCE_HASH,
+      vadGlobalTimebaseSemanticHash: "8".repeat(64),
+      requests: [freshEntry()],
+      generatedAt: "2026-08-28T00:00:00.000Z",
+    });
+    const tokens = buildGlobalTokenTimelineV2({
+      requestTimeline: timeline,
+      observations: [
+        {
+          tokenId: "untimed-token",
+          requestId: "fresh-vad-request",
+          cueId: null,
+          text: "よ",
+          probability: 0.91,
+          localStartCentiseconds: null,
+          localEndCentiseconds: null,
+          coordinateSystem: "unknown",
+          associationStatus: "unassigned",
+          cacheIdentity: CACHE_HASH,
+          freshEvidence: true,
+        },
+      ],
+      generatedAt: "2026-08-28T00:00:00.000Z",
+    });
+    expect(tokens.tokens[0]).toMatchObject({
+      text: "よ",
+      decoderLocalStartCentiseconds: null,
+      decoderLocalEndCentiseconds: null,
+      decoderLocalStartSample: null,
+      decoderLocalEndSample: null,
+      sourceGlobalStartSample: null,
+      sourceGlobalEndSample: null,
+      mappingStatus: "UNMAPPED",
+      mappingReason: "token-has-no-local-time-evidence",
+      trusted: false,
+    });
+    expect(tokens.summary).toMatchObject({
+      tokenObservationCount: 1,
+      unmappedTokenCount: 1,
+      missingLocalTimeTokenCount: 1,
+      guessedOffsetCount: 0,
+    });
+  });
 });

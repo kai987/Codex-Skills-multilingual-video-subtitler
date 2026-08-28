@@ -314,10 +314,10 @@ export const globalTokenV2Schema = z
     text: z.string(),
     lexical: z.boolean(),
     probability: z.number().min(0).max(1).nullable(),
-    decoderLocalStartCentiseconds: count,
-    decoderLocalEndCentiseconds: count,
-    decoderLocalStartSample: sampleIndex,
-    decoderLocalEndSample: sampleIndex,
+    decoderLocalStartCentiseconds: count.nullable(),
+    decoderLocalEndCentiseconds: count.nullable(),
+    decoderLocalStartSample: sampleIndex.nullable(),
+    decoderLocalEndSample: sampleIndex.nullable(),
     sourceGlobalStartSample: sampleIndex.nullable(),
     sourceGlobalEndSample: sampleIndex.nullable(),
     sourceSampleRate: sampleRate,
@@ -332,7 +332,25 @@ export const globalTokenV2Schema = z
   })
   .strict()
   .superRefine((value, context) => {
-    if (value.decoderLocalEndSample < value.decoderLocalStartSample) {
+    const localValues = [
+      value.decoderLocalStartCentiseconds,
+      value.decoderLocalEndCentiseconds,
+      value.decoderLocalStartSample,
+      value.decoderLocalEndSample,
+    ];
+    const localNullCount = localValues.filter((entry) => entry === null).length;
+    if (localNullCount !== 0 && localNullCount !== localValues.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["decoderLocalStartCentiseconds"],
+        message: "Token local timing must be fully present or fully absent.",
+      });
+    }
+    if (
+      value.decoderLocalEndSample !== null &&
+      value.decoderLocalStartSample !== null &&
+      value.decoderLocalEndSample < value.decoderLocalStartSample
+    ) {
       context.addIssue({
         code: "custom",
         path: ["decoderLocalEndSample"],
@@ -370,6 +388,7 @@ export const machineGlobalTokenTimelineV2Schema = z
         untrustedTokenCount: count,
         ambiguousTimeBaseTokenCount: count,
         unmappedTokenCount: count,
+        missingLocalTimeTokenCount: count,
         freshRecoveredTokenCount: count,
         trustedCueCount: count,
         timingEligibleCueCount: count,

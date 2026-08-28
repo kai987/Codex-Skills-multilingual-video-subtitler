@@ -18,8 +18,8 @@ export interface TokenObservationV2 {
   cueId: string | null;
   text: string;
   probability: number | null;
-  localStartCentiseconds: number;
-  localEndCentiseconds: number;
+  localStartCentiseconds: number | null;
+  localEndCentiseconds: number | null;
   coordinateSystem:
     | "original-audio-local"
     | "mapped-original-audio-local"
@@ -83,40 +83,54 @@ export function buildGlobalTokenTimelineV2(input: {
     .toSorted(
       (left, right) =>
         left.requestId.localeCompare(right.requestId) ||
-        left.localStartCentiseconds - right.localStartCentiseconds ||
+        (left.localStartCentiseconds ?? Number.POSITIVE_INFINITY) -
+          (right.localStartCentiseconds ?? Number.POSITIVE_INFINITY) ||
         left.tokenId.localeCompare(right.tokenId),
     )
     .map((observation) => {
       const request = requests.get(observation.requestId);
       const lexical = normalizeCandidateText(observation.text) !== "";
+      const hasCompleteLocalTime =
+        observation.localStartCentiseconds !== null &&
+        observation.localEndCentiseconds !== null;
       const localStartSample =
-        request === undefined
-          ? 0
+        request === undefined || observation.localStartCentiseconds === null
+          ? null
           : centisecondsToSamples(
               observation.localStartCentiseconds,
               request.extractedSampleRate,
             );
       const localEndSample =
-        request === undefined
-          ? 0
+        request === undefined || observation.localEndCentiseconds === null
+          ? null
           : centisecondsToSamples(
               observation.localEndCentiseconds,
               request.extractedSampleRate,
             );
-      const localIntervalValid = localEndSample > localStartSample;
+      const localIntervalValid =
+        localStartSample !== null &&
+        localEndSample !== null &&
+        localEndSample > localStartSample;
       const contained =
         request !== undefined &&
+        localStartSample !== null &&
+        localEndSample !== null &&
         localStartSample >= 0 &&
         localEndSample <= request.extractedSampleCount &&
         localIntervalValid;
-      if (request !== undefined && !contained) containmentFailureCount += 1;
+      if (request !== undefined && hasCompleteLocalTime && !contained) {
+        containmentFailureCount += 1;
+      }
       const mappedCoordinate = [
         "original-audio-local",
         "mapped-original-audio-local",
       ].includes(observation.coordinateSystem);
       const requestVerified = request?.mappingStatus === "VERIFIED";
       const sourceStart =
-        request !== undefined && contained && mappedCoordinate
+        request !== undefined &&
+        contained &&
+        mappedCoordinate &&
+        localStartSample !== null
           ? convertLocalToSourceSample({
               localSample: localStartSample,
               extractedSampleRate: request.extractedSampleRate,
@@ -126,7 +140,10 @@ export function buildGlobalTokenTimelineV2(input: {
             })
           : null;
       const sourceEnd =
-        request !== undefined && contained && mappedCoordinate
+        request !== undefined &&
+        contained &&
+        mappedCoordinate &&
+        localEndSample !== null
           ? convertLocalToSourceSample({
               localSample: localEndSample,
               extractedSampleRate: request.extractedSampleRate,
@@ -162,13 +179,16 @@ export function buildGlobalTokenTimelineV2(input: {
           ? ("ASSOCIATION_PENDING" as const)
           : request === undefined
             ? ("UNMAPPED" as const)
-            : !mappedCoordinate && request.vadEnabled
-              ? ("AMBIGUOUS_TIME_BASE" as const)
-              : baseMappable
-                ? ("UNTRUSTED" as const)
-                : request.mappingStatus === "QUARANTINED" && request.vadEnabled
-                  ? ("AMBIGUOUS_TIME_BASE" as const)
-                  : ("UNMAPPED" as const);
+            : !hasCompleteLocalTime
+              ? ("UNMAPPED" as const)
+              : !mappedCoordinate && request.vadEnabled
+                ? ("AMBIGUOUS_TIME_BASE" as const)
+                : baseMappable
+                  ? ("UNTRUSTED" as const)
+                  : request.mappingStatus === "QUARANTINED" &&
+                      request.vadEnabled
+                    ? ("AMBIGUOUS_TIME_BASE" as const)
+                    : ("UNMAPPED" as const);
       if (baseMappable && mappingStatus !== "AMBIGUOUS_TIME_BASE") {
         lastEndByRequest.set(observation.requestId, sourceEnd);
       }
@@ -177,15 +197,17 @@ export function buildGlobalTokenTimelineV2(input: {
           ? "verified-source-global-sample-lineage-and-cue-association"
           : mappingStatus === "ASSOCIATION_PENDING"
             ? "verified-request-mapping-awaits-cue-association"
-            : mappingStatus === "AMBIGUOUS_TIME_BASE"
-              ? "vad-local-token-has-no-verified-mapped-coordinate"
-              : !contained
-                ? "token-outside-extracted-audio"
-                : !monotonic
-                  ? "non-monotonic-token-order"
-                  : !probabilityPassed
-                    ? "lexical-token-probability-below-policy"
-                    : "token-unmapped-or-unassigned";
+            : !hasCompleteLocalTime
+              ? "token-has-no-local-time-evidence"
+              : mappingStatus === "AMBIGUOUS_TIME_BASE"
+                ? "vad-local-token-has-no-verified-mapped-coordinate"
+                : !contained
+                  ? "token-outside-extracted-audio"
+                  : !monotonic
+                    ? "non-monotonic-token-order"
+                    : !probabilityPassed
+                      ? "lexical-token-probability-below-policy"
+                      : "token-unmapped-or-unassigned";
       const core = {
         tokenId: observation.tokenId,
         requestId: observation.requestId,
@@ -252,6 +274,9 @@ export function buildGlobalTokenTimelineV2(input: {
       ).length,
       unmappedTokenCount: tokens.filter(
         (token) => token.mappingStatus === "UNMAPPED",
+      ).length,
+      missingLocalTimeTokenCount: tokens.filter(
+        (token) => token.decoderLocalStartSample === null,
       ).length,
       freshRecoveredTokenCount: tokens.filter(
         (token) => token.trusted && freshTokenIds.has(token.tokenId),

@@ -75,7 +75,7 @@ interface LegacyToken {
   cueId: string | null;
   requestId: string;
   text: string;
-  localInterval: { start: number; end: number };
+  localInterval: { start: number; end: number } | null;
   coordinateSystem: "original-audio-local" | "vad-processed-local" | "unknown";
   trusted: boolean;
 }
@@ -1093,7 +1093,23 @@ async function main(): Promise<void> {
       );
       for (const [segmentIndex, segment] of response.transcription.entries()) {
         for (const [tokenIndex, token] of segment.tokens.entries()) {
-          if (token.special || token.mapped === null) continue;
+          if (token.special) continue;
+          if (token.mapped === null) {
+            freshTokenObservations.push({
+              tokenId: `${freshRequestId}:${String(segmentIndex).padStart(3, "0")}:${String(tokenIndex).padStart(4, "0")}`,
+              requestId: freshRequestId,
+              cueId: null,
+              text: token.text,
+              probability: token.probability,
+              localStartCentiseconds: null,
+              localEndCentiseconds: null,
+              coordinateSystem: "unknown",
+              associationStatus: "unassigned",
+              cacheIdentity,
+              freshEvidence: true,
+            });
+            continue;
+          }
           const globalStart =
             startSample / SOURCE_SAMPLE_RATE +
             token.mapped.startCentiseconds * 0.01;
@@ -1227,14 +1243,14 @@ async function main(): Promise<void> {
       cueId: token.cueId,
       text: token.text,
       probability: token.trusted ? 0.9 : 0,
-      localStartCentiseconds: Math.max(
-        0,
-        Math.round(token.localInterval.start * 100),
-      ),
-      localEndCentiseconds: Math.max(
-        1,
-        Math.round(token.localInterval.end * 100),
-      ),
+      localStartCentiseconds:
+        token.localInterval === null
+          ? null
+          : Math.max(0, Math.round(token.localInterval.start * 100)),
+      localEndCentiseconds:
+        token.localInterval === null
+          ? null
+          : Math.max(1, Math.round(token.localInterval.end * 100)),
       coordinateSystem:
         token.coordinateSystem === "original-audio-local"
           ? ("original-audio-local" as const)
