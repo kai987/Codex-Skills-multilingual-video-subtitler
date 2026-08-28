@@ -10,7 +10,7 @@ const policyVersion = z.literal(c6018PolicyVersion);
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/u);
 const count = z.number().int().nonnegative();
 const ratio = z.number().min(0).max(1);
-const finite = z.number().finite();
+const finite = z.number();
 const interval = z
   .object({ start: z.number().nonnegative(), end: z.number().positive() })
   .strict()

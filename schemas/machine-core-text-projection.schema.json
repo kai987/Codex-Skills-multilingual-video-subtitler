@@ -150,6 +150,10 @@
               "additionalProperties": false
             }
           },
+          "coreTokenIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
           "projectedTokenIds": {
             "type": "array",
             "items": { "type": "string", "minLength": 1 }
@@ -158,7 +162,22 @@
             "type": "array",
             "items": { "type": "string", "minLength": 1 }
           },
+          "projectionCoverage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
           "coreCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+          "boundaryAmbiguity": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "PARTIAL_BOUNDARY_TOKEN",
+              "UNPROJECTABLE_TOKEN",
+              "CROSS_EVENT_AMBIGUITY",
+              "OVERLAP_AMBIGUITY"
+            ]
+          },
           "ctcSupport": {
             "anyOf": [
               { "type": "number", "minimum": 0, "maximum": 1 },
@@ -210,9 +229,12 @@
           "preCoreText",
           "postCoreText",
           "groupedTokens",
+          "coreTokenIds",
           "projectedTokenIds",
           "unprojectableTokenIds",
+          "projectionCoverage",
           "coreCoverage",
+          "boundaryAmbiguity",
           "ctcSupport",
           "pronunciationSupport",
           "averageTokenProbability",

@@ -33,10 +33,10 @@ function validInterval(
 export function groupProjectableTokens(
   tokens: readonly ProjectableTokenInput[],
 ): GroupedProjectedToken[] {
-  const groups: Array<{
+  const groups: {
     groupId: string;
     tokens: ProjectableTokenInput[];
-  }> = [];
+  }[] = [];
   for (const [index, token] of tokens.entries()) {
     if (!token.lexical) continue;
     const groupId =

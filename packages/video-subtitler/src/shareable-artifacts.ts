@@ -56,6 +56,17 @@ import {
   c60ProtectedFinalizationReplaySummarySchema,
   c60ProtectedFinalizationValidationSchema,
   c6016ShareableSummarySchema,
+  c6018ShareableSummarySchema,
+  machineCoreAcousticSpanSchema,
+  machineCoreTextProjectionSchema,
+  machineLocalizedCandidateComparabilitySchema,
+  machineCoreAsrStabilitySchema,
+  goldLocalCoreEvaluationSchema,
+  machineCoreFreshVerificationSchema,
+  machineCoreCandidateOracleEvaluationSchema,
+  machineWhisperCoreStabilityEvaluationSchema,
+  c6018RouteDecisionSchema,
+  subtitlePackageSchema,
   whisperRuntimeCapabilityArtifactSchema,
   type ShareableArtifactManifest,
   type C516StockPatchedRuntimeAbArtifact,
@@ -82,6 +93,8 @@ const C60_PROTECTED_SHAREABLE_POLICY_VERSION =
   "c6.0-protected-shareable-artifact-policy-v1" as const;
 const C6016_SHAREABLE_POLICY_VERSION =
   "c6.0.1.6-shareable-artifact-policy-v1" as const;
+const C6018_SHAREABLE_POLICY_VERSION =
+  "c6.0.1.8-shareable-artifact-policy-v1" as const;
 
 const artifactSchemas = {
   "subtitle-finalization-report.json": subtitleFinalizationReportSchema,
@@ -160,6 +173,7 @@ const artifactSchemas = {
   "c6-0-protected-finalization-validation.json":
     c60ProtectedFinalizationValidationSchema,
   "c6-0-1-6-summary.json": c6016ShareableSummarySchema,
+  "c6-0-1-8-summary.json": c6018ShareableSummarySchema,
 } as const;
 
 type ShareableSchema = (typeof artifactSchemas)[keyof typeof artifactSchemas];
@@ -1325,6 +1339,231 @@ export async function finalizeC6016ShareableArtifacts(input: {
       policyVersion: summary.policyVersion,
       stage: summary.stage,
       finalHashes: summary.finalHashes,
+    }),
+    pathPolicy: "shareable-relative-only",
+    shareable: true,
+    items: [item],
+    summary: {
+      artifactCount: 1,
+      validationPassedCount: item.validationPassed ? 1 : 0,
+      absolutePathLeakCount: item.absolutePathLeakCount,
+      prohibitedSecretCount: item.prohibitedSecretCount,
+      pathReplacementCount: 0,
+      secretRedactionCount: 0,
+    },
+  });
+  await atomicWriteJson(
+    path.join(directory, "shareable-artifact-manifest.json"),
+    manifest,
+    { overwrite: true },
+  );
+  return {
+    manifest,
+    audit: await auditC5161ShareableArtifacts(directory),
+  };
+}
+
+export async function finalizeC6018ShareableArtifacts(input: {
+  taskRoot: string;
+  stage: "final-a" | "final-b";
+  originalFreshInferenceCount: 36;
+}): Promise<{
+  manifest: ShareableArtifactManifest;
+  audit: Awaited<ReturnType<typeof auditC5161ShareableArtifacts>>;
+}> {
+  const taskRoot = path.resolve(input.taskRoot);
+  const entries = await readdir(taskRoot, { withFileTypes: true });
+  const subtitleEntry = entries.find(
+    (entry) => entry.isDirectory() && entry.name.startsWith("subtitle-"),
+  );
+  if (subtitleEntry === undefined) {
+    throw new Error(`C6.0.1.8 task has no subtitle directory: ${taskRoot}`);
+  }
+  const subtitleDirectory = path.join(taskRoot, subtitleEntry.name);
+  const readArtifact = async <T>(
+    name: string,
+    schema: z.ZodType<T>,
+  ): Promise<T> =>
+    schema.parse(
+      JSON.parse(
+        await readFile(path.join(subtitleDirectory, name), "utf8"),
+      ) as unknown,
+    );
+  const [
+    coreSpan,
+    projection,
+    comparability,
+    stability,
+    goldLocal,
+    freshVerification,
+    oracle,
+    diagnosis,
+    route,
+    subtitlePackage,
+    machineFreezeRaw,
+  ] = await Promise.all([
+    readArtifact(
+      "machine-core-acoustic-span.json",
+      machineCoreAcousticSpanSchema,
+    ),
+    readArtifact(
+      "machine-core-text-projection.json",
+      machineCoreTextProjectionSchema,
+    ),
+    readArtifact(
+      "machine-localized-candidate-comparability.json",
+      machineLocalizedCandidateComparabilitySchema,
+    ),
+    readArtifact(
+      "machine-core-asr-stability.json",
+      machineCoreAsrStabilitySchema,
+    ),
+    readArtifact(
+      "gold-local-core-evaluation.json",
+      goldLocalCoreEvaluationSchema,
+    ),
+    readArtifact(
+      "machine-core-fresh-verification.json",
+      machineCoreFreshVerificationSchema,
+    ),
+    readArtifact(
+      "machine-core-candidate-oracle-evaluation.json",
+      machineCoreCandidateOracleEvaluationSchema,
+    ),
+    readArtifact(
+      "machine-whisper-core-stability-evaluation.json",
+      machineWhisperCoreStabilityEvaluationSchema,
+    ),
+    readArtifact("c6-0-1-8-route-decision.json", c6018RouteDecisionSchema),
+    readArtifact("subtitle-package.json", subtitlePackageSchema),
+    readFile(
+      path.join(subtitleDirectory, "c6-0-1-8-machine-freeze.json"),
+      "utf8",
+    ).then((value) => JSON.parse(value) as { machineFreezeHash?: unknown }),
+  ]);
+  if (typeof machineFreezeRaw.machineFreezeHash !== "string") {
+    throw new Error("C6.0.1.8 machine freeze is missing its hash.");
+  }
+  const subtitleFile = (
+    value: string | null | undefined,
+    label: string,
+  ): string => {
+    if (value === null || value === undefined) {
+      throw new Error(`Subtitle package is missing ${label}.`);
+    }
+    return path.resolve(subtitleDirectory, value);
+  };
+  const assPath = subtitleFile(subtitlePackage.subtitleFiles.ass, "ASS");
+  const srtPath = subtitleFile(subtitlePackage.subtitleFiles.srt, "SRT");
+  const vttPath = subtitleFile(subtitlePackage.subtitleFiles.vtt, "VTT");
+  const [assHash, srtHash, vttHash] = await Promise.all([
+    sha256File(assPath),
+    sha256File(srtPath),
+    sha256File(vttPath),
+  ]);
+  const canonicalHashes = {
+    text: c60SemanticHash({
+      cues: subtitlePackage.cues.map((cue) => ({ id: cue.id, text: cue.text })),
+    }),
+    timing: c60SemanticHash({
+      cues: subtitlePackage.cues.map((cue) => ({
+        id: cue.id,
+        start: cue.start,
+        end: cue.end,
+      })),
+    }),
+    presentation: c60SemanticHash({ assHash, srtHash, vttHash }),
+    ass: assHash,
+    srt: srtHash,
+    vtt: vttHash,
+  };
+  const artifactRelativePaths = [
+    "machine-core-acoustic-span.json",
+    "machine-core-text-projection.json",
+    "machine-localized-candidate-comparability.json",
+    "machine-core-asr-stability.json",
+    "machine-core-fresh-verification.json",
+    "gold-local-core-evaluation.json",
+    "machine-core-candidate-oracle-evaluation.json",
+    "machine-whisper-core-stability-evaluation.json",
+    "c6-0-1-8-route-decision.json",
+  ];
+  const summaryCore = {
+    schemaVersion: "1.0.0" as const,
+    policyVersion: "c6.0.1.8-core-span-asr-stability-v1" as const,
+    generatedAt: route.generatedAt,
+    artifactType: "c6-0-1-8-shareable-summary" as const,
+    stage: input.stage,
+    sourceMediaSha256: coreSpan.sourceIdentity.sourceMediaSha256,
+    machineFreezeHash: machineFreezeRaw.machineFreezeHash,
+    runtimeGoldInputCount: 0 as const,
+    networkUsed: false as const,
+    fullGoldTextIncluded: false as const,
+    privateAudioIncluded: false as const,
+    productionStatus: "needs-review" as const,
+    finalizationMethod: "none" as const,
+    reusedFreshRuntime: {
+      requestCount: 36 as const,
+      originalFreshInferenceCount: input.originalFreshInferenceCount,
+      additionalCoreInferenceCount: 0 as const,
+      runtimeBinarySha256:
+        freshVerification.inferenceRuntime.runtimeBinarySha256,
+      runtimePatchSha256: freshVerification.inferenceRuntime.runtimePatchSha256,
+      modelSha256: freshVerification.inferenceRuntime.modelSha256,
+      device: freshVerification.inferenceRuntime.device,
+    },
+    coreSpanSummary: coreSpan.summary,
+    projectionSummary: projection.summary,
+    comparabilitySummary: comparability.summary,
+    stabilitySummary: stability.summary,
+    localGoldSummary: goldLocal.summary,
+    oracleSummary: oracle.summary,
+    diagnosisSummary: diagnosis.summary,
+    route: {
+      decision: route.decision,
+      confidence: route.confidence,
+      recommendation: route.recommendation,
+      strictC602QualityGatePassed: route.strictC602QualityGatePassed,
+    },
+    artifactRelativePaths,
+    canonicalHashes,
+  };
+  const summary = c6018ShareableSummarySchema.parse({
+    ...summaryCore,
+    semanticHash: c60SemanticHash({ ...summaryCore, generatedAt: undefined }),
+  });
+  const directory = path.join(taskRoot, "shareable");
+  await mkdir(directory, { recursive: true });
+  const summaryName = "c6-0-1-8-summary.json" as const;
+  const summaryPath = path.join(directory, summaryName);
+  await atomicWriteJson(summaryPath, summary, { overwrite: true });
+  const summaryBuffer = await readFile(summaryPath);
+  const scan = scanShareableValue(summary);
+  const summaryHash = sha256(summaryBuffer);
+  const item = {
+    sourceArtifactName: summaryName,
+    sourceArtifactHash: summaryHash,
+    shareablePath: path.posix.join(path.basename(directory), summaryName),
+    shareableHash: summaryHash,
+    schemaName: "c6-0-1-8-shareable-summary.schema.json",
+    pathReplacementCount: 0,
+    secretRedactionCount: 0,
+    absolutePathLeakCount: scan.absolutePathLeakCount,
+    prohibitedSecretCount: scan.prohibitedSecretCount,
+    validationPassed:
+      scan.absolutePathLeakCount === 0 && scan.prohibitedSecretCount === 0,
+  };
+  const manifest = shareableArtifactManifestSchema.parse({
+    schemaVersion: "1.0.0",
+    artifactType: "shareable-artifact-manifest",
+    policyVersion: C6018_SHAREABLE_POLICY_VERSION,
+    generatedAt: summary.generatedAt,
+    taskIdentityHash: c60SemanticHash({
+      policyVersion: summary.policyVersion,
+      stage: summary.stage,
+      machineFreezeHash: summary.machineFreezeHash,
+      route: summary.route,
+      canonicalHashes: summary.canonicalHashes,
     }),
     pathPolicy: "shareable-relative-only",
     shareable: true,

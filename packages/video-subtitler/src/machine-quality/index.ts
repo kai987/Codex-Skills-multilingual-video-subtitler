@@ -59,3 +59,5 @@ export * from "./core-asr-stability.js";
 export * from "./local-core-gold-evaluator.js";
 export * from "./core-fresh-verification.js";
 export * from "./core-candidate-oracle.js";
+export * from "./asr-route-decision.js";
+export * from "./c6018-policy.js";

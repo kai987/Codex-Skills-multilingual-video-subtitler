@@ -30,6 +30,57 @@
         "type": "object",
         "properties": {
           "eventId": { "type": "string", "minLength": 1 },
+          "coreSpanId": { "type": "string", "minLength": 1 },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "projectedTexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "normalizedTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": ["candidateId", "text", "normalizedTextHash"],
+              "additionalProperties": false
+            }
+          },
+          "fullTexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "normalizedTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": ["candidateId", "text", "normalizedTextHash"],
+              "additionalProperties": false
+            }
+          },
+          "stabilityClass": {
+            "type": "string",
+            "enum": [
+              "CORE_TEXT_CONSISTENT",
+              "CONTEXT_ONLY_DIFFERENCE",
+              "LEXICAL_CORE_DISAGREEMENT",
+              "HALLUCINATION_DISAGREEMENT",
+              "ADJACENT_UTTERANCE_CONTAMINATION",
+              "SPEAKER_CONTENT_MIX",
+              "PARTIAL_CORE_AGREEMENT",
+              "UNLOCALIZABLE",
+              "UNEVALUABLE"
+            ]
+          },
           "class": {
             "type": "string",
             "enum": [
@@ -43,6 +94,18 @@
               "UNLOCALIZABLE",
               "UNEVALUABLE"
             ]
+          },
+          "lexicalAgreement": { "type": "number", "minimum": 0, "maximum": 1 },
+          "pronunciationAgreement": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "localizationCoverage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           },
           "comparableCandidateIds": {
             "type": "array",
@@ -74,7 +137,15 @@
         },
         "required": [
           "eventId",
+          "coreSpanId",
+          "candidateIds",
+          "projectedTexts",
+          "fullTexts",
+          "stabilityClass",
           "class",
+          "lexicalAgreement",
+          "pronunciationAgreement",
+          "localizationCoverage",
           "comparableCandidateIds",
           "distinctCoreTextHashes",
           "stableCoreTextHash",

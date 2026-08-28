@@ -40,6 +40,34 @@
             "required": ["start", "end"],
             "additionalProperties": false
           },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "comparableCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "unprojectableCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "coreTexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "normalizedTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": ["candidateId", "text", "normalizedTextHash"],
+              "additionalProperties": false
+            }
+          },
           "candidates": {
             "type": "array",
             "items": {
@@ -112,6 +140,69 @@
                 "ctcSupport",
                 "pronunciationSupport",
                 "timingCoverage"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "pairwiseRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "leftCandidateId": { "type": "string", "minLength": 1 },
+                "rightCandidateId": { "type": "string", "minLength": 1 },
+                "lexicalEditDistance": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "lexicalSimilarity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "tokenAgreement": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "pronunciationAgreement": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "ctcAgreement": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "timingAgreement": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "sameCoreText": { "type": "boolean" },
+                "fullWindowOnlyDifference": { "type": "boolean" },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "leftCandidateId",
+                "rightCandidateId",
+                "lexicalEditDistance",
+                "lexicalSimilarity",
+                "tokenAgreement",
+                "pronunciationAgreement",
+                "ctcAgreement",
+                "timingAgreement",
+                "sameCoreText",
+                "fullWindowOnlyDifference",
+                "semanticHash"
               ],
               "additionalProperties": false
             }
@@ -189,6 +280,16 @@
             "minimum": 0,
             "maximum": 9007199254740991
           },
+          "comparabilityStatus": {
+            "type": "string",
+            "enum": [
+              "CORE_COMPARABLE",
+              "PARTIALLY_COMPARABLE",
+              "CONTEXT_ONLY_COMPARABLE",
+              "UNLOCALIZABLE",
+              "OVERLAP_AMBIGUOUS"
+            ]
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -208,10 +309,16 @@
         "required": [
           "eventId",
           "coreInterval",
+          "candidateIds",
+          "comparableCandidateIds",
+          "unprojectableCandidateIds",
+          "coreTexts",
           "candidates",
+          "pairwiseRelations",
           "pairwiseComparisons",
           "comparableCandidateCount",
           "distinctCoreTextCount",
+          "comparabilityStatus",
           "status",
           "blockers",
           "semanticHash"
