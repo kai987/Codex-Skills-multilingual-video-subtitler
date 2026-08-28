@@ -21,14 +21,16 @@ import {
 import { WhisperCppWorkerPool } from "@mvl/transcription-core";
 import {
   LocalCtcWorker,
+  auditBlindRunProvenance,
   assessCandidatePoolSufficiency,
   assertTargetedReasrPromptIsolation,
   buildAcousticTextVariantVerification,
   buildGlobalTokenTimelineV2,
   buildRequestTimelineV2,
   buildTargetedEventReasrArtifact,
-  buildTextReplacementContract,
   buildVadGlobalTimebase,
+  buildTextReplacementContract,
+  createBlindGenerationInputManifest,
   createBlindOutputFreeze,
   createC6014QualityPolicy,
   createRequestTimelineV2Entry,
@@ -258,6 +260,42 @@ async function sha256File(filePath: string): Promise<string> {
     digest.update(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
   }
   return digest.digest("hex");
+}
+
+async function directoryArtifactHash(root: string): Promise<{
+  artifactHash: string;
+  fileCount: number;
+}> {
+  const files: { relativePath: string; size: number; sha256: string }[] = [];
+  const visit = async (current: string): Promise<void> => {
+    for (const entry of (
+      await readdir(current, { withFileTypes: true })
+    ).toSorted((left, right) => left.name.localeCompare(right.name))) {
+      if (entry.name === ".DS_Store") continue;
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        await visit(absolute);
+        continue;
+      }
+      if (!entry.isFile()) {
+        throw new InputError(
+          "C6.0.1.4 cache inventory contains a non-regular entry.",
+          { path: absolute },
+        );
+      }
+      const info = await stat(absolute);
+      files.push({
+        relativePath: path.relative(root, absolute).split(path.sep).join("/"),
+        size: info.size,
+        sha256: await sha256File(absolute),
+      });
+    }
+  };
+  await visit(root);
+  return {
+    artifactHash: machineQualitySemanticHash(files),
+    fileCount: files.length,
+  };
 }
 
 async function onlySubtitleDirectory(task: string): Promise<string> {
@@ -884,12 +922,12 @@ async function main(): Promise<void> {
   ).stdout.trim();
   const sourceInfoBefore = await stat(source);
   const sourceSha256 = await sha256BlindFile(source);
-  const manifest = await json<{
+  const baselineManifest = await json<{
     sourceVideo: { sha256: string; size: number };
   }>(path.join(baseline, "blind-generation-input-manifest.json"));
   if (
-    manifest.sourceVideo.sha256 !== sourceSha256 ||
-    manifest.sourceVideo.size !== sourceInfoBefore.size
+    baselineManifest.sourceVideo.sha256 !== sourceSha256 ||
+    baselineManifest.sourceVideo.size !== sourceInfoBefore.size
   ) {
     throw new InputError("Source identity differs from the frozen baseline.");
   }
@@ -898,6 +936,7 @@ async function main(): Promise<void> {
   const evidenceRoot = path.join(output, "c6-0-1-4-evidence");
   await mkdir(evidenceRoot, { recursive: true });
   await mkdir(sharedCache, { recursive: true });
+  const initialCacheInventory = await directoryArtifactHash(sharedCache);
 
   const [
     legacyRequests,
@@ -963,6 +1002,21 @@ async function main(): Promise<void> {
   const modelHash = await sha256File(whisperModel);
   const vadModelHash = await sha256File(vadModel);
   const whisperBinaryHash = await sha256File(whisperServer);
+  const ffmpegExecutable = path.isAbsolute(ffmpeg)
+    ? ffmpeg
+    : (
+        await execFileAsync("which", [ffmpeg], {
+          cwd: process.cwd(),
+        })
+      ).stdout.trim();
+  const ffmpegVersion =
+    (
+      await execFileAsync(ffmpeg, ["-version"], { cwd: process.cwd() })
+    ).stdout.split("\n")[0] ?? "ffmpeg-unknown";
+  const ffmpegRuntimeHash = machineQualitySemanticHash({
+    binarySha256: await sha256File(ffmpegExecutable),
+    version: ffmpegVersion,
+  });
   const whisperRuntime = await json<WhisperRuntimeManifest>(
     whisperRuntimeManifest,
   );
@@ -1308,6 +1362,144 @@ async function main(): Promise<void> {
   ) {
     throw new InputError("CTC runtime differs from its verified capability.");
   }
+  const runIdentitySuffix = machineQualitySemanticHash({
+    runLabel,
+    output,
+  }).slice(0, 16);
+  const generationRunId = `c6-0-1-4-${runIdentitySuffix}`;
+  const machineMemoryStoreId = `c6-0-1-4-empty-memory-${runIdentitySuffix}`;
+  const ctcSnapshotSize = ctcVerified.model.modelFiles.reduce(
+    (sum, file) => sum + file.size,
+    0,
+  );
+  const blindManifest = await createBlindGenerationInputManifest({
+    generatedAt: startedAt,
+    generationRunId,
+    sourceVideoPath: source,
+    repositoryCommit,
+    model: {
+      modelName: "whisper-large-v3",
+      modelPath: whisperModel,
+      verifiedSnapshot: {
+        sha256: modelHash,
+        size: (await stat(whisperModel)).size,
+      },
+    },
+    additionalModels: [
+      {
+        modelName: "silero-vad-v6.2.0",
+        modelPath: vadModel,
+        verifiedSnapshot: {
+          sha256: vadModelHash,
+          size: (await stat(vadModel)).size,
+        },
+      },
+      {
+        modelName: ctcVerified.model.modelRepo,
+        modelPath: path.join(
+          ctcVerified.model.snapshotDirectory,
+          "model.safetensors",
+        ),
+        verifiedSnapshot: {
+          sha256: ctcVerified.model.modelSnapshotHash,
+          size: ctcSnapshotSize,
+        },
+      },
+    ],
+    runtimes: [
+      {
+        runtimeId: whisperCapabilityHash,
+        name: "whisper.cpp-mvl",
+        version: `1.9.3+${whisperRuntime.patch.patchSha256.slice(0, 12)}`,
+        executablePath: whisperServer,
+        device: "metal",
+      },
+      {
+        runtimeId: ctcVerified.runtime.runtimeIdentityHash,
+        name: "reazon-wav2vec2-ctc",
+        version: ctcVerified.runtime.runtimeVersion,
+        executablePath: ctcVerified.runtime.pythonExecutable,
+        device: ctcCapability.deviceUsed,
+      },
+      {
+        runtimeId: pronunciation.runtimeIdentityHash,
+        name: "sudachipy-pronunciation-projection",
+        version: "0.6.11+python-3.12",
+        executablePath: sudachiPython,
+        device: "cpu",
+      },
+      {
+        runtimeId: ffmpegRuntimeHash,
+        name: "ffmpeg",
+        version: ffmpegVersion,
+        executablePath: ffmpegExecutable,
+        device: "cpu",
+      },
+    ],
+    generationArguments: [
+      "--baseline",
+      baseline,
+      "--input",
+      source,
+      "--output",
+      output,
+      "--asr-cache-dir",
+      sharedCache,
+      "--machine-quality-recovery",
+      "enforce",
+      "--vad-global-timebase",
+      vadMode,
+      "--acoustic-text-variant-verifier",
+      variantMode,
+      "--targeted-event-reasr",
+      reasrMode,
+      "--guidance-mode",
+      "reference-free",
+      "--network-policy",
+      "off",
+      "--whisper-server",
+      whisperServer,
+      "--whisper-model",
+      whisperModel,
+      "--vad-model",
+      vadModel,
+      "--ctc-runtime-manifest",
+      ctcRuntimeManifest,
+      "--ctc-model-manifest",
+      ctcModelManifest,
+      "--ctc-runtime-capability",
+      ctcCapabilityPath,
+      "--sudachi-python",
+      sudachiPython,
+      "--sudachi-helper",
+      sudachiHelper,
+    ],
+    machineMemoryStoreId,
+    importedMachineCaches:
+      initialCacheInventory.fileCount === 0
+        ? []
+        : [
+            {
+              path: sharedCache,
+              artifactType: "c6-0-1-4-machine-evidence-cache-v1",
+              artifactHash: initialCacheInventory.artifactHash,
+            },
+          ],
+  });
+  await atomicWriteJson(
+    path.join(output, "blind-generation-input-manifest.json"),
+    blindManifest,
+  );
+  await atomicWriteJson(path.join(output, "machine-memory.json"), {
+    schemaVersion: "1.0.0",
+    artifactType: "machine-only-series-memory",
+    storeId: machineMemoryStoreId,
+    createdAt: startedAt,
+    entryCount: 0,
+    humanDerived: false,
+    entries: [],
+    semanticHash: blindManifest.machineMemoryInitialState.storeHash,
+  });
   let ctcWorker: LocalCtcWorker | null = null;
   let ctcInferenceCount = 0;
   let ctcCacheHitCount = 0;
@@ -2012,6 +2204,30 @@ async function main(): Promise<void> {
     ...runAudit,
     semanticHash: machineQualitySemanticHash(runAudit),
   });
+  await atomicWriteJson(path.join(output, "blind-generation-execution.json"), {
+    schemaVersion: "1.0.0",
+    artifactType: "blind-generation-execution",
+    generationRunId,
+    generationStartedAt: startedAt,
+    generationCompletedAt: completedAt,
+    wallTimeMs: Math.max(0, Date.parse(completedAt) - Date.parse(startedAt)),
+    exitCode: 0,
+    sourceReadOnlyVerified: true,
+    sourceHashBefore: sourceSha256,
+    sourceHashAfter: sourceSha256After,
+    networkUsed: false,
+    onlineSubtitleSearchUsed: false,
+    cloudModelInferenceCount: 0,
+  });
+  const provenance = await auditBlindRunProvenance({
+    taskDirectory: output,
+    generatedAt: completedAt,
+    manifest: blindManifest,
+  });
+  await atomicWriteJson(
+    path.join(output, "blind-provenance-audit.json"),
+    provenance,
+  );
   const freeze = await createBlindOutputFreeze({
     taskDirectory: output,
     freezeTimestamp: new Date().toISOString(),

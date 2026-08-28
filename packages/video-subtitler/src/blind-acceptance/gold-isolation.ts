@@ -57,6 +57,10 @@ export interface BlindRuntimeInput {
 export interface BlindModelInput {
   modelName: string;
   modelPath: string;
+  verifiedSnapshot?: {
+    sha256: string;
+    size: number;
+  };
 }
 
 export interface CreateBlindInputManifestInput {
@@ -65,6 +69,7 @@ export interface CreateBlindInputManifestInput {
   sourceVideoPath: string;
   repositoryCommit: string;
   model: BlindModelInput;
+  additionalModels?: readonly BlindModelInput[];
   runtimes: readonly BlindRuntimeInput[];
   generationArguments: readonly string[];
   machineMemoryStoreId: string;
@@ -130,12 +135,36 @@ export async function createBlindGenerationInputManifest(
       path: input.sourceVideoPath,
     });
   }
-  const modelInfo = await stat(input.model.modelPath);
-  if (!modelInfo.isFile()) {
-    throw new InputError("Blind generation model must be a regular file.", {
-      path: input.model.modelPath,
-    });
-  }
+  const modelInputs = [input.model, ...(input.additionalModels ?? [])];
+  const modelSnapshots = await Promise.all(
+    modelInputs.map(async (model) => {
+      const modelInfo = await stat(model.modelPath);
+      if (!modelInfo.isFile()) {
+        throw new InputError("Blind generation model must be a regular file.", {
+          path: model.modelPath,
+        });
+      }
+      if (
+        model.verifiedSnapshot !== undefined &&
+        (!/^[a-f0-9]{64}$/u.test(model.verifiedSnapshot.sha256) ||
+          !Number.isSafeInteger(model.verifiedSnapshot.size) ||
+          model.verifiedSnapshot.size < 0)
+      ) {
+        throw new InputError("Verified model snapshot identity is invalid.", {
+          path: model.modelPath,
+        });
+      }
+      return {
+        modelName: model.modelName,
+        fileName: path.basename(model.modelPath),
+        snapshotSha256:
+          model.verifiedSnapshot?.sha256 ??
+          (await sha256BlindFile(model.modelPath)),
+        size: model.verifiedSnapshot?.size ?? modelInfo.size,
+        genericResource: true as const,
+      };
+    }),
+  );
   const generationRunId = input.generationRunId ?? `c601-blind-${randomUUID()}`;
   const memoryBase = {
     storeId: input.machineMemoryStoreId,
@@ -162,15 +191,7 @@ export async function createBlindGenerationInputManifest(
       "generic-dictionaries",
       "generic-language-resources",
     ],
-    genericModelSnapshots: [
-      {
-        modelName: input.model.modelName,
-        fileName: path.basename(input.model.modelPath),
-        snapshotSha256: await sha256BlindFile(input.model.modelPath),
-        size: modelInfo.size,
-        genericResource: true as const,
-      },
-    ],
+    genericModelSnapshots: modelSnapshots,
     runtimeIdentities: input.runtimes.map((runtime) => ({
       runtimeId: runtime.runtimeId,
       name: runtime.name,

@@ -11,6 +11,7 @@ import {
   assertGoldIsolatedGenerationInput,
   c60SemanticHash,
   c60StableHash,
+  createBlindGenerationInputManifest,
   createC601EvaluationPolicy,
   createMachineShadowPolicy,
   sha256BlindFile,
@@ -98,6 +99,57 @@ function validManifest() {
 }
 
 describe("C6.0.1 blind isolation", () => {
+  it("materializes every verified generic model snapshot in a blind input manifest", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "mvl-c601-models-"));
+    temporaryDirectories.push(root);
+    const source = path.join(root, "source.mkv");
+    const whisper = path.join(root, "whisper.bin");
+    const vad = path.join(root, "vad.bin");
+    await Promise.all([
+      writeFile(source, "source"),
+      writeFile(whisper, "whisper"),
+      writeFile(vad, "vad"),
+    ]);
+
+    const manifest = await createBlindGenerationInputManifest({
+      generatedAt: "2026-08-28T00:00:00.000Z",
+      generationRunId: "c6014-test",
+      sourceVideoPath: source,
+      repositoryCommit: "b".repeat(40),
+      model: { modelName: "whisper", modelPath: whisper },
+      additionalModels: [
+        {
+          modelName: "vad",
+          modelPath: vad,
+          verifiedSnapshot: { sha256: hash("9"), size: 999 },
+        },
+      ],
+      runtimes: [
+        {
+          runtimeId: "runtime",
+          name: "runtime",
+          version: "1",
+          executablePath: "/runtime/bin",
+          device: "cpu",
+        },
+      ],
+      generationArguments: [
+        "--input",
+        source,
+        "--machine-quality-recovery",
+        "enforce",
+      ],
+      machineMemoryStoreId: "empty-c6014-test",
+    });
+
+    expect(manifest.genericModelSnapshots).toHaveLength(2);
+    expect(manifest.genericModelSnapshots[1]).toMatchObject({
+      modelName: "vad",
+      snapshotSha256: hash("9"),
+      size: 999,
+    });
+  });
+
   it("rejects a forbidden Gold argument before generation", () => {
     const manifest = validManifest();
     const malicious = structuredClone(manifest);
