@@ -252,6 +252,19 @@ import {
   c6018AblationSchema,
   c6018ValidationSchema,
   c6018ShareableSummarySchema,
+  machineSecondAsrDiagnosticSetSchema,
+  machineIndependentAsrRuntimeSchema,
+  machineIndependentAsrCandidatesSchema,
+  machineSecondAsrStabilitySchema,
+  machineCrossModelComparisonSchema,
+  machineCrossModelCtcArbitrationSchema,
+  machineCrossModelShadowCandidateSchema,
+  goldCrossModelComplementarityEvaluationSchema,
+  machineCrossModelUnionOracleEvaluationSchema,
+  goldSecondAsrControlRegressionSchema,
+  c6019RouteDecisionSchema,
+  c6019QualityPolicySchema,
+  c6019ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -566,6 +579,71 @@ const schemas = [
     fileName: "c6-0-1-8-shareable-summary.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-8-shareable-summary.schema.json",
     schema: c6018ShareableSummarySchema,
+  },
+  {
+    fileName: "machine-second-asr-diagnostic-set.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-second-asr-diagnostic-set.schema.json",
+    schema: machineSecondAsrDiagnosticSetSchema,
+  },
+  {
+    fileName: "machine-independent-asr-runtime.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-independent-asr-runtime.schema.json",
+    schema: machineIndependentAsrRuntimeSchema,
+  },
+  {
+    fileName: "machine-independent-asr-candidates.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-independent-asr-candidates.schema.json",
+    schema: machineIndependentAsrCandidatesSchema,
+  },
+  {
+    fileName: "machine-second-asr-stability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-second-asr-stability.schema.json",
+    schema: machineSecondAsrStabilitySchema,
+  },
+  {
+    fileName: "machine-cross-model-comparison.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-comparison.schema.json",
+    schema: machineCrossModelComparisonSchema,
+  },
+  {
+    fileName: "machine-cross-model-ctc-arbitration.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-ctc-arbitration.schema.json",
+    schema: machineCrossModelCtcArbitrationSchema,
+  },
+  {
+    fileName: "machine-cross-model-shadow-candidate.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-shadow-candidate.schema.json",
+    schema: machineCrossModelShadowCandidateSchema,
+  },
+  {
+    fileName: "gold-cross-model-complementarity-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-cross-model-complementarity-evaluation.schema.json",
+    schema: goldCrossModelComplementarityEvaluationSchema,
+  },
+  {
+    fileName: "machine-cross-model-union-oracle-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-union-oracle-evaluation.schema.json",
+    schema: machineCrossModelUnionOracleEvaluationSchema,
+  },
+  {
+    fileName: "gold-second-asr-control-regression.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-second-asr-control-regression.schema.json",
+    schema: goldSecondAsrControlRegressionSchema,
+  },
+  {
+    fileName: "c6-0-1-9-route-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-9-route-decision.schema.json",
+    schema: c6019RouteDecisionSchema,
+  },
+  {
+    fileName: "c6-0-1-9-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-9-quality-policy.schema.json",
+    schema: c6019QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-9-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-9-validation.schema.json",
+    schema: c6019ValidationSchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",

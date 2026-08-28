@@ -61,3 +61,5 @@ export * from "./core-fresh-verification.js";
 export * from "./core-candidate-oracle.js";
 export * from "./asr-route-decision.js";
 export * from "./c6018-policy.js";
+export * from "./independent-asr-provider.js";
+export * from "./reazonspeech-k2-provider.js";

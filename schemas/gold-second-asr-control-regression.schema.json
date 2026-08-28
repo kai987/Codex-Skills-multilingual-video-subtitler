@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-second-asr-control-regression.schema.json",
+  "title": "gold-second-asr-control-regression",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.9-independent-asr-complementarity-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-second-asr-control-regression"
+    },
+    "evaluationPhase": {
+      "type": "string",
+      "const": "post-freeze-gold-isolated"
+    },
+    "complementarityEvaluationSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "evaluable": { "type": "boolean" },
+          "result": {
+            "type": "string",
+            "enum": [
+              "REAZON_BETTER",
+              "WHISPER_BETTER",
+              "EQUIVALENT",
+              "REAZON_HALLUCINATION",
+              "REAZON_EMPTY",
+              "UNEVALUABLE"
+            ]
+          },
+          "blindlySelectingReazonWouldRegress": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "evaluable",
+          "result",
+          "blindlySelectingReazonWouldRegress",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "controlEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonBetterCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperBetterCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "equivalentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonHallucinationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonEmptyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "blindReazonRegressionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "controlEvaluableCount",
+        "reazonBetterCount",
+        "whisperBetterCount",
+        "equivalentCount",
+        "reazonHallucinationCount",
+        "reazonEmptyCount",
+        "blindReazonRegressionCount"
+      ],
+      "additionalProperties": false
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evaluationPhase",
+    "complementarityEvaluationSemanticHash",
+    "events",
+    "summary",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

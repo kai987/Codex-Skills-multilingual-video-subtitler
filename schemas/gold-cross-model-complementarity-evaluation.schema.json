@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-cross-model-complementarity-evaluation.schema.json",
+  "title": "gold-cross-model-complementarity-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.9-independent-asr-complementarity-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-cross-model-complementarity-evaluation"
+    },
+    "evaluationPhase": {
+      "type": "string",
+      "const": "post-freeze-gold-isolated"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "goldTextIncluded": { "type": "boolean", "const": false },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "diagnosticRole": { "type": "string", "enum": ["TARGET", "CONTROL"] },
+          "localEvaluationStatus": { "type": "string", "minLength": 1 },
+          "whisperCoreError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "bestWhisperPoolError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "reazonCoreError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "unionPoolError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "taxonomy": {
+            "type": "string",
+            "enum": [
+              "BOTH_CORRECT_OR_EQUIVALENT",
+              "WHISPER_ONLY_BETTER",
+              "REAZON_ONLY_BETTER",
+              "WHISPER_ONLY_CORRECT",
+              "REAZON_ONLY_CORRECT",
+              "BOTH_WRONG_REAZON_BETTER",
+              "BOTH_WRONG_WHISPER_BETTER",
+              "BOTH_WRONG_SIMILAR",
+              "BOTH_WRONG_DIFFERENT",
+              "ORTHOGRAPHY_ONLY",
+              "WHISPER_HALLUCINATION_ONLY",
+              "REAZON_HALLUCINATION_ONLY",
+              "BOTH_HALLUCINATE",
+              "UNEVALUABLE"
+            ]
+          },
+          "baselineWrong": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "ctcOutcome": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CTC_FAVORS_WHISPER",
+                  "CTC_FAVORS_REAZON",
+                  "CTC_AMBIGUOUS",
+                  "CTC_UNSCORABLE"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "ctcPreferenceCorrect": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "diagnosticRole",
+          "localEvaluationStatus",
+          "whisperCoreError",
+          "bestWhisperPoolError",
+          "reazonCoreError",
+          "unionPoolError",
+          "taxonomy",
+          "baselineWrong",
+          "ctcOutcome",
+          "ctcPreferenceCorrect",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "targetEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetBaselineWrongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "controlEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "taxonomyCounts": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "BOTH_CORRECT_OR_EQUIVALENT",
+              "WHISPER_ONLY_BETTER",
+              "REAZON_ONLY_BETTER",
+              "WHISPER_ONLY_CORRECT",
+              "REAZON_ONLY_CORRECT",
+              "BOTH_WRONG_REAZON_BETTER",
+              "BOTH_WRONG_WHISPER_BETTER",
+              "BOTH_WRONG_SIMILAR",
+              "BOTH_WRONG_DIFFERENT",
+              "ORTHOGRAPHY_ONLY",
+              "WHISPER_HALLUCINATION_ONLY",
+              "REAZON_HALLUCINATION_ONLY",
+              "BOTH_HALLUCINATE",
+              "UNEVALUABLE"
+            ]
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "required": [
+            "BOTH_CORRECT_OR_EQUIVALENT",
+            "WHISPER_ONLY_BETTER",
+            "REAZON_ONLY_BETTER",
+            "WHISPER_ONLY_CORRECT",
+            "REAZON_ONLY_CORRECT",
+            "BOTH_WRONG_REAZON_BETTER",
+            "BOTH_WRONG_WHISPER_BETTER",
+            "BOTH_WRONG_SIMILAR",
+            "BOTH_WRONG_DIFFERENT",
+            "ORTHOGRAPHY_ONLY",
+            "WHISPER_HALLUCINATION_ONLY",
+            "REAZON_HALLUCINATION_ONLY",
+            "BOTH_HALLUCINATE",
+            "UNEVALUABLE"
+          ]
+        },
+        "reazonOnlyBetterCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperOnlyBetterCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bothEquivalentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bothWrongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonOnlyCorrectCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperOnlyCorrectCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "disagreementEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcCorrectPreferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcWrongPreferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcUnscorableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcArbitrationAccuracy": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "targetEvaluableCount",
+        "targetBaselineWrongCount",
+        "controlEvaluableCount",
+        "taxonomyCounts",
+        "reazonOnlyBetterCount",
+        "whisperOnlyBetterCount",
+        "bothEquivalentCount",
+        "bothWrongCount",
+        "reazonOnlyCorrectCount",
+        "whisperOnlyCorrectCount",
+        "disagreementEvaluableCount",
+        "ctcCorrectPreferenceCount",
+        "ctcWrongPreferenceCount",
+        "ctcAmbiguousCount",
+        "ctcUnscorableCount",
+        "ctcArbitrationAccuracy"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evaluationPhase",
+    "machineFreezeHash",
+    "goldIdentityHash",
+    "runtimeGoldInputCount",
+    "goldTextIncluded",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

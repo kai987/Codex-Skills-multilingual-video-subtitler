@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-independent-asr-runtime.schema.json",
+  "title": "machine-independent-asr-runtime",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.9-independent-asr-complementarity-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-independent-asr-runtime"
+    },
+    "executionKind": {
+      "type": "string",
+      "enum": ["OFFICIAL_FRESH_INFERENCE", "FROZEN_EXACT_CACHE_REPLAY"]
+    },
+    "provider": {
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string", "const": "reazonspeech-k2-v2" },
+        "adapterType": {
+          "type": "string",
+          "const": "DIRECT_SHERPA_ONNX_OFFICIAL_REAZON_FP32"
+        },
+        "adapterReason": { "type": "string", "minLength": 1 },
+        "providerInterfaceVersion": {
+          "type": "string",
+          "const": "independent-asr-provider-v1"
+        }
+      },
+      "required": [
+        "providerId",
+        "adapterType",
+        "adapterReason",
+        "providerInterfaceVersion"
+      ],
+      "additionalProperties": false
+    },
+    "modelIdentity": {
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string", "const": "reazonspeech-k2-v2" },
+        "modelId": {
+          "type": "string",
+          "const": "reazon-research/reazonspeech-k2-v2"
+        },
+        "modelRevision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "architecture": {
+          "type": "string",
+          "const": "Zipformer character RNN-T"
+        },
+        "modelFiles": {
+          "minItems": 4,
+          "maxItems": 4,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fileName": { "type": "string", "minLength": 1 },
+              "size": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": ["fileName", "size", "sha256"],
+            "additionalProperties": false
+          }
+        },
+        "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "precision": { "type": "string", "const": "fp32" },
+        "device": { "type": "string", "const": "cpu" },
+        "language": { "type": "string", "const": "ja" }
+      },
+      "required": [
+        "providerId",
+        "modelId",
+        "modelRevision",
+        "architecture",
+        "modelFiles",
+        "modelSnapshotHash",
+        "precision",
+        "device",
+        "language"
+      ],
+      "additionalProperties": false
+    },
+    "runtimeIdentity": {
+      "type": "object",
+      "properties": {
+        "runtimeId": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "os": { "type": "string", "minLength": 1 },
+        "arch": { "type": "string", "minLength": 1 },
+        "cpu": { "type": "string", "minLength": 1 },
+        "pythonVersion": { "type": "string", "minLength": 1 },
+        "sherpaOnnxVersion": { "type": "string", "minLength": 1 },
+        "adapterSourceSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "threadCount": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "runtimeId",
+        "os",
+        "arch",
+        "cpu",
+        "pythonVersion",
+        "sherpaOnnxVersion",
+        "adapterSourceSha256",
+        "threadCount"
+      ],
+      "additionalProperties": false
+    },
+    "decoding": {
+      "type": "object",
+      "properties": {
+        "method": { "type": "string", "const": "greedy_search" },
+        "sampleRate": { "type": "number", "const": 16000 },
+        "featureDim": { "type": "number", "const": 80 },
+        "maxAudioSeconds": { "type": "number", "const": 30 },
+        "padSeconds": { "type": "number", "const": 0.9 },
+        "hotwordsEnabled": { "type": "boolean", "const": false },
+        "contextualBiasingEnabled": { "type": "boolean", "const": false },
+        "externalLanguageModelEnabled": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "method",
+        "sampleRate",
+        "featureDim",
+        "maxAudioSeconds",
+        "padSeconds",
+        "hotwordsEnabled",
+        "contextualBiasingEnabled",
+        "externalLanguageModelEnabled"
+      ],
+      "additionalProperties": false
+    },
+    "bootstrap": {
+      "type": "object",
+      "properties": {
+        "performed": { "type": "boolean" },
+        "networkUsedDuringBootstrap": { "type": "boolean" },
+        "modelCompleteBeforeAcceptance": { "type": "boolean" },
+        "runtimeCompleteBeforeAcceptance": { "type": "boolean" },
+        "hashesFrozenBeforeAcceptance": { "type": "boolean" }
+      },
+      "required": [
+        "performed",
+        "networkUsedDuringBootstrap",
+        "modelCompleteBeforeAcceptance",
+        "runtimeCompleteBeforeAcceptance",
+        "hashesFrozenBeforeAcceptance"
+      ],
+      "additionalProperties": false
+    },
+    "acceptance": {
+      "type": "object",
+      "properties": {
+        "networkUsed": { "type": "boolean", "const": false },
+        "remoteApiUsed": { "type": "boolean", "const": false },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 },
+        "localOnlyVerified": { "type": "boolean", "const": true }
+      },
+      "required": [
+        "networkUsed",
+        "remoteApiUsed",
+        "runtimeGoldInputCount",
+        "localOnlyVerified"
+      ],
+      "additionalProperties": false
+    },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "requestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "successfulRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emptyOutputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "processStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "requestCount",
+        "successfulRequestCount",
+        "failedRequestCount",
+        "emptyOutputCount",
+        "cacheHitCount",
+        "inferenceCount",
+        "modelLoadCount",
+        "processStartCount"
+      ],
+      "additionalProperties": false
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "modelLoadSeconds": { "type": "number", "minimum": 0 },
+        "totalInferenceSeconds": { "type": "number", "minimum": 0 },
+        "meanRequestSeconds": { "type": "number", "minimum": 0 },
+        "p50RequestSeconds": { "type": "number", "minimum": 0 },
+        "p95RequestSeconds": { "type": "number", "minimum": 0 },
+        "realTimeFactor": { "type": "number", "minimum": 0 },
+        "peakRssBytes": {
+          "anyOf": [
+            { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "modelLoadSeconds",
+        "totalInferenceSeconds",
+        "meanRequestSeconds",
+        "p50RequestSeconds",
+        "p95RequestSeconds",
+        "realTimeFactor",
+        "peakRssBytes"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "executionKind",
+    "provider",
+    "modelIdentity",
+    "runtimeIdentity",
+    "decoding",
+    "bootstrap",
+    "acceptance",
+    "counts",
+    "performance",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

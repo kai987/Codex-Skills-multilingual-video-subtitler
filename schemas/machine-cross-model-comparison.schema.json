@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-cross-model-comparison.schema.json",
+  "title": "machine-cross-model-comparison",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.9-independent-asr-complementarity-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-cross-model-comparison"
+    },
+    "diagnosticSetSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "independentCandidatesSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "diagnosticRole": { "type": "string", "enum": ["TARGET", "CONTROL"] },
+          "whisperCandidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "displayText": { "type": "string" },
+                "normalizedDisplayText": { "type": "string" },
+                "pronunciationText": { "type": "string" },
+                "hallucinationRisk": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "candidateId",
+                "displayText",
+                "normalizedDisplayText",
+                "pronunciationText",
+                "hallucinationRisk"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "reazonCandidate": {
+            "type": "object",
+            "properties": {
+              "candidateId": { "type": "string", "minLength": 1 },
+              "displayText": { "type": "string" },
+              "normalizedDisplayText": { "type": "string" },
+              "pronunciationText": { "type": "string" },
+              "hallucinationRisk": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "candidateId",
+              "displayText",
+              "normalizedDisplayText",
+              "pronunciationText",
+              "hallucinationRisk"
+            ],
+            "additionalProperties": false
+          },
+          "exactAgreement": { "type": "boolean" },
+          "normalizedAgreement": { "type": "boolean" },
+          "pronunciationAgreement": { "type": "boolean" },
+          "bestNormalizedSimilarity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "bestPronunciationSimilarity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "disagreementClass": {
+            "type": "string",
+            "enum": [
+              "EXACT_AGREEMENT",
+              "NORMALIZED_AGREEMENT",
+              "PRONUNCIATION_AGREEMENT",
+              "ORTHOGRAPHY_ONLY_DIFFERENCE",
+              "LEXICAL_DISAGREEMENT",
+              "WHISPER_HALLUCINATION_RISK",
+              "REAZON_HALLUCINATION_RISK",
+              "BOTH_LOW_SUPPORT",
+              "REAZON_EMPTY",
+              "WHISPER_EMPTY",
+              "UNCOMPARABLE"
+            ]
+          },
+          "providerDiagnostics": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "diagnosticRole",
+          "whisperCandidates",
+          "reazonCandidate",
+          "exactAgreement",
+          "normalizedAgreement",
+          "pronunciationAgreement",
+          "bestNormalizedSimilarity",
+          "bestPronunciationSimilarity",
+          "disagreementClass",
+          "providerDiagnostics",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": { "type": "number", "const": 24 },
+        "exactAgreementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "normalizedAgreementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pronunciationAgreementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "orthographyOnlyDifferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lexicalDisagreementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperHallucinationRiskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonHallucinationRiskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bothLowSupportCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonEmptyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperEmptyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uncomparableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "exactAgreementCount",
+        "normalizedAgreementCount",
+        "pronunciationAgreementCount",
+        "orthographyOnlyDifferenceCount",
+        "lexicalDisagreementCount",
+        "whisperHallucinationRiskCount",
+        "reazonHallucinationRiskCount",
+        "bothLowSupportCount",
+        "reazonEmptyCount",
+        "whisperEmptyCount",
+        "uncomparableCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "diagnosticSetSemanticHash",
+    "independentCandidatesSemanticHash",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
