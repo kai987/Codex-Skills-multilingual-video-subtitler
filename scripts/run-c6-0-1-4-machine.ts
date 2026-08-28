@@ -329,11 +329,7 @@ async function cloneFrozenMachinePackage(input: {
   await verifyBlindOutputFreeze({ taskDirectory: input.baseline });
   await mkdir(input.output, { recursive: false });
   const rootFiles = [
-    "blind-generation-input-manifest.json",
     "blind-evaluation-policy.json",
-    "machine-memory.json",
-    "blind-generation-execution.json",
-    "blind-provenance-audit.json",
     "machine-baseline-evidence-coverage.json",
     "machine-shadow-finalization-policy.json",
     "machine-shadow-finalization.json",
