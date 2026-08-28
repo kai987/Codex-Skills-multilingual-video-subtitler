@@ -1,0 +1,572 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-8-shareable-summary.schema.json",
+  "title": "c6-0-1-8-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-8-shareable-summary" },
+    "stage": { "type": "string", "enum": ["final-a", "final-b"] },
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "networkUsed": { "type": "boolean", "const": false },
+    "fullGoldTextIncluded": { "type": "boolean", "const": false },
+    "privateAudioIncluded": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "reusedFreshRuntime": {
+      "type": "object",
+      "properties": {
+        "requestCount": { "type": "number", "const": 36 },
+        "originalFreshInferenceCount": { "type": "number", "const": 36 },
+        "additionalCoreInferenceCount": { "type": "number", "const": 0 },
+        "runtimeBinarySha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "runtimePatchSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "modelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "device": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "requestCount",
+        "originalFreshInferenceCount",
+        "additionalCoreInferenceCount",
+        "runtimeBinarySha256",
+        "runtimePatchSha256",
+        "modelSha256",
+        "device"
+      ],
+      "additionalProperties": false
+    },
+    "coreSpanSummary": {
+      "type": "object",
+      "properties": {
+        "selectedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emittedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifiedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifiedWithCautionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAmbiguityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshTokenFallbackCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "selectedEventCount",
+        "emittedEventCount",
+        "verifiedCount",
+        "verifiedWithCautionCount",
+        "ambiguousCount",
+        "unavailableCount",
+        "overlapAmbiguityCount",
+        "freshTokenFallbackCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "projectionSummary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactTokenProjectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "partialTokenProjectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextOnlyExcessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "untimeableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossEventAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "noCoreContentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "groupedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "candidateCount",
+        "exactTokenProjectedCount",
+        "partialTokenProjectedCount",
+        "contextOnlyExcessCount",
+        "untimeableCount",
+        "crossEventAmbiguousCount",
+        "overlapAmbiguousCount",
+        "noCoreContentCount",
+        "groupedTokenCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "comparabilitySummary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coreComparableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "partiallyComparableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextOnlyComparableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unlocalizableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "coreComparableCount",
+        "partiallyComparableCount",
+        "contextOnlyComparableCount",
+        "unlocalizableCount",
+        "overlapAmbiguousCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "stabilitySummary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "classCounts": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "CORE_TEXT_CONSISTENT",
+              "CONTEXT_ONLY_DIFFERENCE",
+              "LEXICAL_CORE_DISAGREEMENT",
+              "HALLUCINATION_DISAGREEMENT",
+              "ADJACENT_UTTERANCE_CONTAMINATION",
+              "SPEAKER_CONTENT_MIX",
+              "PARTIAL_CORE_AGREEMENT",
+              "UNLOCALIZABLE",
+              "UNEVALUABLE"
+            ]
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "required": [
+            "CORE_TEXT_CONSISTENT",
+            "CONTEXT_ONLY_DIFFERENCE",
+            "LEXICAL_CORE_DISAGREEMENT",
+            "HALLUCINATION_DISAGREEMENT",
+            "ADJACENT_UTTERANCE_CONTAMINATION",
+            "SPEAKER_CONTENT_MIX",
+            "PARTIAL_CORE_AGREEMENT",
+            "UNLOCALIZABLE",
+            "UNEVALUABLE"
+          ]
+        },
+        "stableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lexicalInstabilityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucinationInstabilityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "localizationBlockedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "classCounts",
+        "stableEventCount",
+        "lexicalInstabilityCount",
+        "hallucinationInstabilityCount",
+        "localizationBlockedCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "localGoldSummary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evaluableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactLocalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "monotonicLocalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unevaluableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oneMachineToManyGoldCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manyMachineToOneGoldCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetNineOfTwelvePassed": { "type": "boolean" }
+      },
+      "required": [
+        "eventCount",
+        "evaluableEventCount",
+        "exactLocalCount",
+        "monotonicLocalCount",
+        "ambiguousEvaluableCount",
+        "unevaluableEventCount",
+        "oneMachineToManyGoldCount",
+        "manyMachineToOneGoldCount",
+        "targetNineOfTwelvePassed"
+      ],
+      "additionalProperties": false
+    },
+    "oracleSummary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evaluableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "currentFinalErrorTotal": { "type": "number", "minimum": 0 },
+        "oracleErrorTotal": { "type": "number", "minimum": 0 },
+        "oracleImprovementTotal": { "type": "number", "minimum": 0 },
+        "oracleImprovedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "existingCoreOracleWinCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "c6017FreshOracleWinCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "c6018CoreVerificationOracleWinCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventCount",
+        "evaluableEventCount",
+        "currentFinalErrorTotal",
+        "oracleErrorTotal",
+        "oracleImprovementTotal",
+        "oracleImprovedEventCount",
+        "existingCoreOracleWinCount",
+        "c6017FreshOracleWinCount",
+        "c6018CoreVerificationOracleWinCount"
+      ],
+      "additionalProperties": false
+    },
+    "diagnosisSummary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evaluableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "diagnosisCounts": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "PIPELINE_CORRECT_CANDIDATE_EXISTS",
+              "CONTEXT_DIFFERENCE_ONLY",
+              "ASR_CORE_STABLE_CORRECT",
+              "ASR_CORE_STABLE_WRONG",
+              "ASR_CORE_LEXICALLY_UNSTABLE",
+              "ASR_HALLUCINATION_UNSTABLE",
+              "CANDIDATE_APPLICATION_BLOCKED",
+              "LOCALIZATION_BLOCKED",
+              "REFERENCE_ALIGNMENT_BLOCKED",
+              "UNEVALUABLE"
+            ]
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "required": [
+            "PIPELINE_CORRECT_CANDIDATE_EXISTS",
+            "CONTEXT_DIFFERENCE_ONLY",
+            "ASR_CORE_STABLE_CORRECT",
+            "ASR_CORE_STABLE_WRONG",
+            "ASR_CORE_LEXICALLY_UNSTABLE",
+            "ASR_HALLUCINATION_UNSTABLE",
+            "CANDIDATE_APPLICATION_BLOCKED",
+            "LOCALIZATION_BLOCKED",
+            "REFERENCE_ALIGNMENT_BLOCKED",
+            "UNEVALUABLE"
+          ]
+        },
+        "pipelineLimitedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "asrLimitedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "localizationBlockedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "referenceBlockedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventCount",
+        "evaluableEventCount",
+        "diagnosisCounts",
+        "pipelineLimitedCount",
+        "asrLimitedCount",
+        "localizationBlockedCount",
+        "referenceBlockedCount"
+      ],
+      "additionalProperties": false
+    },
+    "route": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": [
+            "CONTINUE_FINAL_PIPELINE_APPLICATION",
+            "RECOMMEND_SECOND_ASR_ENSEMBLE",
+            "MIXED_PIPELINE_AND_ASR",
+            "INSUFFICIENT_LOCAL_COMPARABILITY",
+            "GO_C6_0_2"
+          ]
+        },
+        "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "STOP_SINGLE_WHISPER_RULE_EXPANSION",
+            "ONE_SMALL_FINAL_PIPELINE_APPLICATION",
+            "RESOLVE_MINIMAL_LOCALIZATION_BLOCKER",
+            "ADVANCE_TO_C6_0_2"
+          ]
+        },
+        "strictC602QualityGatePassed": { "type": "boolean" }
+      },
+      "required": [
+        "decision",
+        "confidence",
+        "recommendation",
+        "strictC602QualityGatePassed"
+      ],
+      "additionalProperties": false
+    },
+    "artifactRelativePaths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+      }
+    },
+    "canonicalHashes": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "timing": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "presentation": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "ass": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "srt": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "vtt": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["text", "timing", "presentation", "ass", "srt", "vtt"],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "stage",
+    "sourceMediaSha256",
+    "machineFreezeHash",
+    "runtimeGoldInputCount",
+    "networkUsed",
+    "fullGoldTextIncluded",
+    "privateAudioIncluded",
+    "productionStatus",
+    "finalizationMethod",
+    "reusedFreshRuntime",
+    "coreSpanSummary",
+    "projectionSummary",
+    "comparabilitySummary",
+    "stabilitySummary",
+    "localGoldSummary",
+    "oracleSummary",
+    "diagnosisSummary",
+    "route",
+    "artifactRelativePaths",
+    "canonicalHashes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

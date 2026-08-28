@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-localized-candidate-comparability.schema.json",
+  "title": "machine-localized-candidate-comparability",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-localized-candidate-comparability"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe"] },
+    "coreSpanSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "projectionSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "comparisonLocus": {
+      "type": "string",
+      "const": "same-source-global-core-span"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "coreInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "origin": {
+                  "type": "string",
+                  "enum": [
+                    "ORIGINAL",
+                    "RECOVERY",
+                    "HISTORICAL_REASR",
+                    "FRESH_A",
+                    "FRESH_B",
+                    "FRESH_C",
+                    "FRESH_CORE_VERIFICATION"
+                  ]
+                },
+                "normalizedCoreTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "normalizedCoreTextLength": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "projectionStatus": {
+                  "type": "string",
+                  "enum": [
+                    "EXACT_TOKEN_PROJECTED",
+                    "PARTIAL_TOKEN_PROJECTED",
+                    "CONTEXT_ONLY_EXCESS",
+                    "UNTIMED_UNPROJECTABLE",
+                    "CROSS_EVENT_AMBIGUOUS",
+                    "OVERLAP_AMBIGUOUS",
+                    "NO_CORE_CONTENT"
+                  ]
+                },
+                "tokenCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "ctcSupport": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "pronunciationSupport": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "timingCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "candidateId",
+                "origin",
+                "normalizedCoreTextHash",
+                "normalizedCoreTextLength",
+                "projectionStatus",
+                "tokenCount",
+                "ctcSupport",
+                "pronunciationSupport",
+                "timingCoverage"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "pairwiseComparisons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "leftCandidateId": { "type": "string", "minLength": 1 },
+                "rightCandidateId": { "type": "string", "minLength": 1 },
+                "lexicalEditDistance": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "lexicalSimilarity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "tokenAgreement": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "pronunciationAgreement": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "ctcAgreement": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "timingAgreement": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "sameCoreText": { "type": "boolean" },
+                "fullWindowOnlyDifference": { "type": "boolean" },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "leftCandidateId",
+                "rightCandidateId",
+                "lexicalEditDistance",
+                "lexicalSimilarity",
+                "tokenAgreement",
+                "pronunciationAgreement",
+                "ctcAgreement",
+                "timingAgreement",
+                "sameCoreText",
+                "fullWindowOnlyDifference",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "comparableCandidateCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "distinctCoreTextCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CORE_COMPARABLE",
+              "PARTIALLY_COMPARABLE",
+              "CONTEXT_ONLY_COMPARABLE",
+              "UNLOCALIZABLE",
+              "OVERLAP_AMBIGUOUS"
+            ]
+          },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "coreInterval",
+          "candidates",
+          "pairwiseComparisons",
+          "comparableCandidateCount",
+          "distinctCoreTextCount",
+          "status",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coreComparableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "partiallyComparableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextOnlyComparableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unlocalizableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "coreComparableCount",
+        "partiallyComparableCount",
+        "contextOnlyComparableCount",
+        "unlocalizableCount",
+        "overlapAmbiguousCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "coreSpanSemanticHash",
+    "projectionSemanticHash",
+    "comparisonLocus",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

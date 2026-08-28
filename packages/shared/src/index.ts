@@ -29,6 +29,7 @@ export * from "./c6-0-1-4-vad-variant-reasr-schemas.js";
 export * from "./c6-0-1-5-evidence-application-schemas.js";
 export * from "./c6-0-1-6-acoustic-span-boundary-schemas.js";
 export * from "./c6-0-1-7-fresh-reasr-ceiling-schemas.js";
+export * from "./c6-0-1-8-core-stability-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

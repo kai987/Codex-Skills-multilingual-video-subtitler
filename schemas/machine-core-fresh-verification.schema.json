@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-core-fresh-verification.schema.json",
+  "title": "machine-core-fresh-verification",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-core-fresh-verification"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe"] },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED_EXISTING_FRESH_SUFFICIENT",
+        "EXECUTED_BOUNDED_CORE_VERIFICATION",
+        "BLOCKED_RUNTIME_UNAVAILABLE"
+      ]
+    },
+    "justification": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "reusedC6017FreshSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reusedFreshRequestCount": { "type": "number", "const": 36 },
+    "maximumRequestsPerUnresolvedEvent": { "type": "number", "const": 2 },
+    "episodeRequestBudget": { "type": "number", "const": 24 },
+    "unresolvedEventIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "executedEventIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "coreInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "promptPresent": { "type": "boolean", "const": false },
+          "runtimeGoldInputCount": { "type": "number", "const": 0 },
+          "cacheHit": { "type": "boolean", "const": false },
+          "inferenceExecuted": { "type": "boolean", "const": true },
+          "responseTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "tokenEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "requestId",
+          "eventId",
+          "coreInterval",
+          "promptPresent",
+          "runtimeGoldInputCount",
+          "cacheHit",
+          "inferenceExecuted",
+          "responseTextHash",
+          "tokenEvidenceIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "inferenceRuntime": {
+      "type": "object",
+      "properties": {
+        "runtimeType": { "type": "string", "minLength": 1 },
+        "runtimeBinarySha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "runtimePatchSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "modelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "device": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "runtimeType",
+        "runtimeBinarySha256",
+        "runtimePatchSha256",
+        "modelSha256",
+        "device"
+      ],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "requestedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshInferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHitCount": { "type": "number", "const": 0 },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "processStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "promptLeakCount": { "type": "number", "const": 0 },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 },
+        "networkUsed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "requestedEventCount",
+        "requestCount",
+        "freshInferenceCount",
+        "cacheHitCount",
+        "modelLoadCount",
+        "processStartCount",
+        "promptLeakCount",
+        "runtimeGoldInputCount",
+        "networkUsed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "decision",
+    "justification",
+    "reusedC6017FreshSemanticHash",
+    "reusedFreshRequestCount",
+    "maximumRequestsPerUnresolvedEvent",
+    "episodeRequestBudget",
+    "unresolvedEventIds",
+    "executedEventIds",
+    "requests",
+    "inferenceRuntime",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -239,6 +239,19 @@ import {
   c6017QualityPolicySchema,
   c6017AblationSchema,
   c6017ValidationSchema,
+  machineCoreAcousticSpanSchema,
+  machineCoreTextProjectionSchema,
+  machineLocalizedCandidateComparabilitySchema,
+  machineCoreAsrStabilitySchema,
+  goldLocalCoreEvaluationSchema,
+  machineCoreFreshVerificationSchema,
+  machineWhisperCoreStabilityEvaluationSchema,
+  machineCoreCandidateOracleEvaluationSchema,
+  c6018RouteDecisionSchema,
+  c6018QualityPolicySchema,
+  c6018AblationSchema,
+  c6018ValidationSchema,
+  c6018ShareableSummarySchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -488,6 +501,71 @@ const schemas = [
     fileName: "c6-0-1-7-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-7-validation.schema.json",
     schema: c6017ValidationSchema,
+  },
+  {
+    fileName: "machine-core-acoustic-span.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-core-acoustic-span.schema.json",
+    schema: machineCoreAcousticSpanSchema,
+  },
+  {
+    fileName: "machine-core-text-projection.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-core-text-projection.schema.json",
+    schema: machineCoreTextProjectionSchema,
+  },
+  {
+    fileName: "machine-localized-candidate-comparability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-localized-candidate-comparability.schema.json",
+    schema: machineLocalizedCandidateComparabilitySchema,
+  },
+  {
+    fileName: "machine-core-asr-stability.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-core-asr-stability.schema.json",
+    schema: machineCoreAsrStabilitySchema,
+  },
+  {
+    fileName: "gold-local-core-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-local-core-evaluation.schema.json",
+    schema: goldLocalCoreEvaluationSchema,
+  },
+  {
+    fileName: "machine-core-fresh-verification.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-core-fresh-verification.schema.json",
+    schema: machineCoreFreshVerificationSchema,
+  },
+  {
+    fileName: "machine-whisper-core-stability-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-whisper-core-stability-evaluation.schema.json",
+    schema: machineWhisperCoreStabilityEvaluationSchema,
+  },
+  {
+    fileName: "machine-core-candidate-oracle-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-core-candidate-oracle-evaluation.schema.json",
+    schema: machineCoreCandidateOracleEvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-8-route-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-8-route-decision.schema.json",
+    schema: c6018RouteDecisionSchema,
+  },
+  {
+    fileName: "c6-0-1-8-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-8-quality-policy.schema.json",
+    schema: c6018QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-8-ablation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-8-ablation.schema.json",
+    schema: c6018AblationSchema,
+  },
+  {
+    fileName: "c6-0-1-8-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-8-validation.schema.json",
+    schema: c6018ValidationSchema,
+  },
+  {
+    fileName: "c6-0-1-8-shareable-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-8-shareable-summary.schema.json",
+    schema: c6018ShareableSummarySchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",

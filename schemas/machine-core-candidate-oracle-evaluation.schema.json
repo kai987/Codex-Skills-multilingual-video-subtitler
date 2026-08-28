@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-core-candidate-oracle-evaluation.schema.json",
+  "title": "machine-core-candidate-oracle-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-core-candidate-oracle-evaluation"
+    },
+    "evaluationPhase": {
+      "type": "string",
+      "const": "post-freeze-gold-isolated"
+    },
+    "metricDirection": { "type": "string", "const": "LOWER_IS_BETTER" },
+    "deltaDefinition": { "type": "string", "const": "newError-minus-oldError" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldLocalEvaluationSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "evaluationStatus": {
+            "type": "string",
+            "enum": [
+              "EVALUABLE_EXACT_LOCAL",
+              "EVALUABLE_MONOTONIC_LOCAL",
+              "EVALUABLE_WITH_AMBIGUITY",
+              "UNEVALUABLE_INSUFFICIENT_REFERENCE",
+              "UNEVALUABLE_OVERLAP",
+              "UNEVALUABLE_MAPPING_CONFLICT"
+            ]
+          },
+          "currentFinalCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "currentFinalError": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "oracleCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "oracleSource": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CURRENT_FINAL",
+                  "EXISTING_CORE",
+                  "C6017_FRESH_CORE",
+                  "C6018_CORE_VERIFICATION"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "oracleError": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "delta": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "improvement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "regression": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "candidateErrors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "CURRENT_FINAL",
+                    "EXISTING_CORE",
+                    "C6017_FRESH_CORE",
+                    "C6018_CORE_VERIFICATION"
+                  ]
+                },
+                "error": { "type": "number", "minimum": 0 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": ["candidateId", "source", "error", "semanticHash"],
+              "additionalProperties": false
+            }
+          },
+          "goldTextIncluded": { "type": "boolean", "const": false },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "evaluationStatus",
+          "currentFinalCandidateId",
+          "currentFinalError",
+          "oracleCandidateId",
+          "oracleSource",
+          "oracleError",
+          "delta",
+          "improvement",
+          "regression",
+          "candidateErrors",
+          "goldTextIncluded",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evaluableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "currentFinalErrorTotal": { "type": "number", "minimum": 0 },
+        "oracleErrorTotal": { "type": "number", "minimum": 0 },
+        "oracleImprovementTotal": { "type": "number", "minimum": 0 },
+        "oracleImprovedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "existingCoreOracleWinCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "c6017FreshOracleWinCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "c6018CoreVerificationOracleWinCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventCount",
+        "evaluableEventCount",
+        "currentFinalErrorTotal",
+        "oracleErrorTotal",
+        "oracleImprovementTotal",
+        "oracleImprovedEventCount",
+        "existingCoreOracleWinCount",
+        "c6017FreshOracleWinCount",
+        "c6018CoreVerificationOracleWinCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evaluationPhase",
+    "metricDirection",
+    "deltaDefinition",
+    "machineFreezeHash",
+    "goldLocalEvaluationSemanticHash",
+    "runtimeGoldInputCount",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

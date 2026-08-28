@@ -51,3 +51,6 @@ export * from "./fresh-targeted-reasr.js";
 export * from "./c6017-quality-policy.js";
 export * from "./fresh-candidate-comparison.js";
 export * from "./c6017-evaluation.js";
+export * from "./core-acoustic-span.js";
+export * from "./grouped-word-projection.js";
+export * from "./core-text-projection.js";

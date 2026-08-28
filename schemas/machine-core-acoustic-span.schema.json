@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-core-acoustic-span.schema.json",
+  "title": "machine-core-acoustic-span",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "machine-core-acoustic-span" },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sourceReadOnlyVerified": { "type": "boolean" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sourceReadOnlyVerified"
+      ],
+      "additionalProperties": false
+    },
+    "selectionSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "corePolicy": {
+      "type": "string",
+      "const": "trusted-token-then-acoustic-vad-with-fresh-token-fallback-no-gold"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "sourceMediaIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "machineEventInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "trustedTokenInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "vadIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "ctcInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "neighboringEventIntervals": {
+            "type": "object",
+            "properties": {
+              "previous": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "number", "minimum": 0 },
+                      "end": { "type": "number", "exclusiveMinimum": 0 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "next": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "number", "minimum": 0 },
+                      "end": { "type": "number", "exclusiveMinimum": 0 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["previous", "next"],
+            "additionalProperties": false
+          },
+          "proposedCoreStart": { "type": "number", "minimum": 0 },
+          "proposedCoreEnd": { "type": "number", "exclusiveMinimum": 0 },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "coreSpanStatus": {
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "VERIFIED_WITH_CAUTION",
+              "AMBIGUOUS",
+              "UNAVAILABLE"
+            ]
+          },
+          "ambiguityReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "NO_AMBIGUITY",
+                "TRUSTED_TOKEN_SPAN_UNAVAILABLE",
+                "VAD_SPAN_UNAVAILABLE",
+                "CTC_SPAN_UNAVAILABLE",
+                "FRESH_TOKEN_FALLBACK_USED",
+                "NEIGHBORING_EVENT_OVERLAP",
+                "OVERLAP_CORE_AMBIGUITY",
+                "CROSS_EVENT_CORE_AMBIGUITY",
+                "CHANT_OR_CROWD_CORE",
+                "CORE_DURATION_TOO_SHORT",
+                "SOURCE_BOUNDARY_CLAMPED",
+                "NO_LOCALIZED_ACOUSTIC_EVIDENCE"
+              ]
+            }
+          },
+          "goldUsed": { "type": "boolean", "const": false },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "sourceMediaIdentity",
+          "machineEventInterval",
+          "trustedTokenInterval",
+          "vadIntervals",
+          "ctcInterval",
+          "neighboringEventIntervals",
+          "proposedCoreStart",
+          "proposedCoreEnd",
+          "evidenceIds",
+          "coreSpanStatus",
+          "ambiguityReasons",
+          "goldUsed",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "selectedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emittedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifiedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifiedWithCautionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAmbiguityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshTokenFallbackCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "selectedEventCount",
+        "emittedEventCount",
+        "verifiedCount",
+        "verifiedWithCautionCount",
+        "ambiguousCount",
+        "unavailableCount",
+        "overlapAmbiguityCount",
+        "freshTokenFallbackCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "sourceIdentity",
+    "selectionSemanticHash",
+    "corePolicy",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
