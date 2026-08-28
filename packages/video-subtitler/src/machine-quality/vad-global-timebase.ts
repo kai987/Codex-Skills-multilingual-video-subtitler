@@ -32,6 +32,7 @@ export interface FreshVadRequestEvidence {
   }[];
   mappedGetterUsed: boolean;
   rawVadGetterUsed: boolean;
+  emptyResponse: boolean;
   mappingVerified: boolean;
   failureReasons: readonly string[];
 }
@@ -85,6 +86,7 @@ export function buildVadGlobalTimebase(input: {
   const segments: VadSegmentSampleMapping[] = [];
   const verifiedRequestIds: string[] = [];
   const quarantinedRequestIds: string[] = [];
+  const emptyResponseVerifiedRequestIds: string[] = [];
   for (const request of [...input.requests].toSorted((left, right) =>
     left.requestId.localeCompare(right.requestId),
   )) {
@@ -103,13 +105,22 @@ export function buildVadGlobalTimebase(input: {
     transforms.push(request.sourceClipTransform);
     if (
       !request.mappingVerified ||
-      !request.mappedGetterUsed ||
-      !request.rawVadGetterUsed
+      !request.rawVadGetterUsed ||
+      (!request.mappedGetterUsed && !request.emptyResponse)
     ) {
       quarantinedRequestIds.push(request.requestId);
       continue;
     }
     verifiedRequestIds.push(request.requestId);
+    if (request.emptyResponse) {
+      if (request.providerSegments.length !== 0) {
+        throw new InputError(
+          "An empty VAD response cannot contain provider segments.",
+          { requestId: request.requestId },
+        );
+      }
+      emptyResponseVerifiedRequestIds.push(request.requestId);
+    }
     for (const providerSegment of request.providerSegments) {
       const localStartSample = centisecondsToSamples(
         providerSegment.startCentiseconds,
@@ -273,12 +284,16 @@ export function buildVadGlobalTimebase(input: {
       ...input.legacyQuarantinedRequestIds,
     ].toSorted(),
     freshRecoveryRequestIds,
+    emptyResponseVerifiedRequestIds: [
+      ...emptyResponseVerifiedRequestIds,
+    ].toSorted(),
     verifiedSegmentCount: verifiedSegments,
     quarantinedSegmentCount: quarantinedSegments,
     ambiguousSegmentCount: ambiguousSegments,
     verifiedRequestCount: verifiedRequestIds.length,
     quarantinedRequestCount: quarantinedRequestIds.length,
     freshRemapRequestCount: verifiedRequestIds.length,
+    emptyResponseVerifiedRequestCount: emptyResponseVerifiedRequestIds.length,
     boundaryNormalizationPolicyVersion:
       RAW_VAD_BOUNDARY_NORMALIZATION_POLICY_VERSION,
     boundaryNormalizedSegmentCount: segments.filter(

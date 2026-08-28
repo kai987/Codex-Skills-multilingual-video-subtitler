@@ -1055,6 +1055,10 @@ async function main(): Promise<void> {
       vadModelLoadCount += executed.modelLoadCount;
       vadWorkerStartCount += executed.workerStartCount;
       const response = executed.response;
+      const emptyResponse =
+        response.vad_segments.length === 0 &&
+        response.transcription.length === 0 &&
+        response.text.trim() === "";
       freshVadEvidence.push({
         requestId: freshRequestId,
         extractedAudioId: freshRequestId,
@@ -1066,8 +1070,10 @@ async function main(): Promise<void> {
           response.runtime.capabilities.mapped_token_getter_used,
         rawVadGetterUsed: response.runtime.capabilities.raw_vad_getter_used,
         mappingVerified:
-          response.runtime.capabilities.mapped_token_getter_used &&
-          response.runtime.capabilities.raw_vad_getter_used,
+          response.runtime.capabilities.raw_vad_getter_used &&
+          (response.runtime.capabilities.mapped_token_getter_used ||
+            emptyResponse),
+        emptyResponse,
         failureReasons: [],
       });
       freshRequestEntries.push(
@@ -1082,7 +1088,9 @@ async function main(): Promise<void> {
           extractedSampleCount: extraction.sampleCount,
           tokenTimeBase: "mapped-original-audio-local",
           mappingStatus: "VERIFIED",
-          mappingReason: "fresh-mapped-token-and-raw-vad-getter-lineage",
+          mappingReason: emptyResponse
+            ? "fresh-empty-response-source-lineage-verified-token-mapping-not-applicable"
+            : "fresh-mapped-token-and-raw-vad-getter-lineage",
           cacheIdentity,
           cacheEntrySha256: await sha256File(executed.cacheEntryPath),
           modelIdentity: modelHash,

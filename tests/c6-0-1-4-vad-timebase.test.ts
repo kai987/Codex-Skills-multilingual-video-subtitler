@@ -253,6 +253,7 @@ describe("C6.0.1.4 fresh VAD lineage and token mapping", () => {
           ],
           mappedGetterUsed: true,
           rawVadGetterUsed: true,
+          emptyResponse: false,
           mappingVerified: true,
           failureReasons: [],
         },
@@ -312,6 +313,7 @@ describe("C6.0.1.4 fresh VAD lineage and token mapping", () => {
             ],
             mappedGetterUsed: true,
             rawVadGetterUsed: true,
+            emptyResponse: false,
             mappingVerified: true,
             failureReasons: [],
           },
@@ -372,12 +374,61 @@ describe("C6.0.1.4 fresh VAD lineage and token mapping", () => {
             ],
             mappedGetterUsed: true,
             rawVadGetterUsed: true,
+            emptyResponse: false,
             mappingVerified: true,
             failureReasons: [],
           },
         ],
       }),
     ).toThrow(/escapes its extracted audio/u);
+  });
+
+  it("verifies a source-mapped empty response with token mapping not applicable", () => {
+    const artifact = buildVadGlobalTimebase({
+      mode: "enforce",
+      generatedAt: "2026-08-28T00:00:00.000Z",
+      sourceIdentity: {
+        sourceMediaSha256: SOURCE_HASH,
+        sourceSampleRate: 16_000,
+        sourceTotalSamples: 320_000,
+        sourceReadOnlyVerified: true,
+      },
+      vadProviderIdentity: {
+        provider: "whisper.cpp-silero-vad",
+        whisperVersion: "1.9.3",
+        whisperBinarySha256: BINARY_HASH,
+        vadModelSha256: VAD_HASH,
+        capabilityHash: CAPABILITY_HASH,
+        mappedGetterUsed: true,
+        rawVadGetterUsed: true,
+        requestStateIsolation: "fresh-whisper-state-per-mvl-request",
+      },
+      legacyQuarantinedRequestIds: [],
+      requests: [
+        {
+          requestId: "empty-response",
+          extractedAudioId: "fresh-clip",
+          extractedAudioSha256: CLIP_HASH,
+          sourceClipTransform: directTransform(),
+          cacheIdentity: CACHE_HASH,
+          providerSegments: [],
+          mappedGetterUsed: false,
+          rawVadGetterUsed: true,
+          emptyResponse: true,
+          mappingVerified: true,
+          failureReasons: [],
+        },
+      ],
+    });
+    expect(artifact).toMatchObject({
+      verifiedRequestCount: 1,
+      quarantinedRequestCount: 0,
+      emptyResponseVerifiedRequestCount: 1,
+      emptyResponseVerifiedRequestIds: ["empty-response"],
+      sampleMappingCoverage: 1,
+      guessedOffsetCount: 0,
+    });
+    expect(artifact.vadSegments).toEqual([]);
   });
 
   it("maps fresh mapped tokens but retains raw old VAD tokens as ambiguous", () => {
