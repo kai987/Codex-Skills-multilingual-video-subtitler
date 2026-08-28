@@ -255,7 +255,7 @@ async function json<T>(filePath: string): Promise<T> {
 async function sha256File(filePath: string): Promise<string> {
   const digest = createHash("sha256");
   for await (const chunk of createReadStream(filePath)) {
-    digest.update(chunk);
+    digest.update(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
   }
   return digest.digest("hex");
 }
