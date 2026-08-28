@@ -53,7 +53,8 @@
                 "type": "string",
                 "enum": [
                   "0001-mvl-mapped-token-raw-vad-json.patch",
-                  "0002-mvl-request-state-reset.patch"
+                  "0002-mvl-request-state-reset.patch",
+                  "0003-mvl-untimed-token-evidence-guard.patch"
                 ]
               },
               "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }

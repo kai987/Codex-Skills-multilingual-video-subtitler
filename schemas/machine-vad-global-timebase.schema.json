@@ -96,6 +96,16 @@
             "exclusiveMinimum": 0,
             "maximum": 9007199254740991
           },
+          "providerVadStartSampleInParent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "providerVadEndSampleInParent": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
           "vadStartSampleInParent": {
             "type": "integer",
             "minimum": 0,
@@ -110,6 +120,26 @@
             "type": "integer",
             "exclusiveMinimum": 0,
             "maximum": 9007199254740991
+          },
+          "boundaryNormalizationApplied": { "type": "boolean" },
+          "boundaryNormalizationDeltaStartSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "boundaryNormalizationDeltaEndSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "boundaryNormalizationToleranceSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "boundaryNormalizationReason": {
+            "type": "string",
+            "enum": ["NONE", "RAW_VAD_AUDIO_END_EXCEEDED_WITHIN_TOLERANCE"]
           },
           "outputSampleRate": {
             "type": "integer",
@@ -175,9 +205,16 @@
           "parentArtifactSha256",
           "parentSampleRate",
           "parentTotalSamples",
+          "providerVadStartSampleInParent",
+          "providerVadEndSampleInParent",
           "vadStartSampleInParent",
           "vadEndSampleInParent",
           "vadSampleCount",
+          "boundaryNormalizationApplied",
+          "boundaryNormalizationDeltaStartSamples",
+          "boundaryNormalizationDeltaEndSamples",
+          "boundaryNormalizationToleranceSamples",
+          "boundaryNormalizationReason",
           "outputSampleRate",
           "outputSampleCount",
           "outputLocalZeroSample",
@@ -389,6 +426,15 @@
       "minimum": 0,
       "maximum": 9007199254740991
     },
+    "boundaryNormalizationPolicyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-sample-domain-vad-boundary-normalization-v1"
+    },
+    "boundaryNormalizedSegmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
     "sampleMappingCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
     "guessedOffsetCount": { "type": "number", "const": 0 },
     "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
@@ -411,6 +457,8 @@
     "verifiedRequestCount",
     "quarantinedRequestCount",
     "freshRemapRequestCount",
+    "boundaryNormalizationPolicyVersion",
+    "boundaryNormalizedSegmentCount",
     "sampleMappingCoverage",
     "guessedOffsetCount",
     "semanticHash"

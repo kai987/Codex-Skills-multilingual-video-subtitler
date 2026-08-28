@@ -13,6 +13,11 @@ import {
   createSampleTransform,
 } from "./sample-transform-chain.js";
 
+const RAW_VAD_BOUNDARY_NORMALIZATION_TOLERANCE_NUMERATOR = 5n;
+const RAW_VAD_BOUNDARY_NORMALIZATION_TOLERANCE_DENOMINATOR = 100n;
+const RAW_VAD_BOUNDARY_NORMALIZATION_POLICY_VERSION =
+  "c6.0.1.4-sample-domain-vad-boundary-normalization-v1" as const;
+
 export interface FreshVadRequestEvidence {
   requestId: string;
   extractedAudioId: string;
@@ -43,6 +48,15 @@ function centisecondsToSamples(value: number, sampleRate: number): number {
     );
   }
   return Number(numerator / 100n);
+}
+
+function rawVadBoundaryToleranceSamples(sampleRate: number): number {
+  const numerator =
+    BigInt(sampleRate) * RAW_VAD_BOUNDARY_NORMALIZATION_TOLERANCE_NUMERATOR;
+  return Number(
+    (numerator + RAW_VAD_BOUNDARY_NORMALIZATION_TOLERANCE_DENOMINATOR - 1n) /
+      RAW_VAD_BOUNDARY_NORMALIZATION_TOLERANCE_DENOMINATOR,
+  );
 }
 
 export function buildVadGlobalTimebase(input: {
@@ -105,20 +119,40 @@ export function buildVadGlobalTimebase(input: {
         providerSegment.endCentiseconds,
         request.sourceClipTransform.childSampleRate,
       );
+      const boundaryNormalizationToleranceSamples =
+        rawVadBoundaryToleranceSamples(
+          request.sourceClipTransform.childSampleRate,
+        );
+      const endOverrunSamples = Math.max(
+        0,
+        localEndSample - request.sourceClipTransform.childTotalSamples,
+      );
+      const boundaryNormalizationApplied =
+        endOverrunSamples > 0 &&
+        endOverrunSamples <= boundaryNormalizationToleranceSamples;
+      const normalizedLocalEndSample = boundaryNormalizationApplied
+        ? request.sourceClipTransform.childTotalSamples
+        : localEndSample;
       if (
-        localEndSample <= localStartSample ||
-        localEndSample > request.sourceClipTransform.childTotalSamples
+        normalizedLocalEndSample <= localStartSample ||
+        normalizedLocalEndSample > request.sourceClipTransform.childTotalSamples
       ) {
         throw new InputError("Raw VAD segment escapes its extracted audio.", {
           requestId: request.requestId,
           providerSegment,
           extractedSamples: request.sourceClipTransform.childTotalSamples,
+          boundaryNormalizationToleranceSamples,
+          endOverrunSamples,
         });
       }
       const virtualSegmentIdentity = machineQualitySemanticHash({
         requestId: request.requestId,
         extractedAudioSha256: request.extractedAudioSha256,
         providerSegment,
+        normalizedLocalStartSample: localStartSample,
+        normalizedLocalEndSample,
+        boundaryNormalizationApplied,
+        endOverrunSamples,
       });
       const vadSegmentId = `fresh-vad:${request.requestId}:${String(
         providerSegment.index,
@@ -132,15 +166,15 @@ export function buildVadGlobalTimebase(input: {
         parentSampleRate: request.sourceClipTransform.childSampleRate,
         childSampleRate: request.sourceClipTransform.childSampleRate,
         parentTotalSamples: request.sourceClipTransform.childTotalSamples,
-        childTotalSamples: localEndSample - localStartSample,
+        childTotalSamples: normalizedLocalEndSample - localStartSample,
         childStartSampleInParent: localStartSample,
-        childEndSampleInParent: localEndSample,
+        childEndSampleInParent: normalizedLocalEndSample,
         extractionMethod: "whisper-internal-vad",
         ffmpeg: {
           inputSeekPlacement: "none",
           inputSeekSample: 0,
           outputTrimStartSample: localStartSample,
-          outputDurationSamples: localEndSample - localStartSample,
+          outputDurationSamples: normalizedLocalEndSample - localStartSample,
           atrimUsed: false,
           asetptsReset: false,
           resampleUsed: false,
@@ -156,6 +190,11 @@ export function buildVadGlobalTimebase(input: {
           "raw-vad-getter-used",
           "raw-vad-original-audio-local-coordinate",
           "fresh-direct-source-extraction",
+          ...(boundaryNormalizationApplied
+            ? [
+                "raw-vad-audio-end-normalized-within-50ms-sample-domain-tolerance",
+              ]
+            : []),
         ],
       });
       transforms.push(virtualTransform);
@@ -172,11 +211,20 @@ export function buildVadGlobalTimebase(input: {
         parentArtifactSha256: request.extractedAudioSha256,
         parentSampleRate: request.sourceClipTransform.childSampleRate,
         parentTotalSamples: request.sourceClipTransform.childTotalSamples,
+        providerVadStartSampleInParent: localStartSample,
+        providerVadEndSampleInParent: localEndSample,
         vadStartSampleInParent: localStartSample,
-        vadEndSampleInParent: localEndSample,
-        vadSampleCount: localEndSample - localStartSample,
+        vadEndSampleInParent: normalizedLocalEndSample,
+        vadSampleCount: normalizedLocalEndSample - localStartSample,
+        boundaryNormalizationApplied,
+        boundaryNormalizationDeltaStartSamples: 0,
+        boundaryNormalizationDeltaEndSamples: endOverrunSamples,
+        boundaryNormalizationToleranceSamples,
+        boundaryNormalizationReason: boundaryNormalizationApplied
+          ? ("RAW_VAD_AUDIO_END_EXCEEDED_WITHIN_TOLERANCE" as const)
+          : ("NONE" as const),
         outputSampleRate: request.sourceClipTransform.childSampleRate,
-        outputSampleCount: localEndSample - localStartSample,
+        outputSampleCount: normalizedLocalEndSample - localStartSample,
         outputLocalZeroSample: 0 as const,
         sourceGlobalStartSample: global.startSample,
         sourceGlobalEndSample: global.endSample,
@@ -191,6 +239,11 @@ export function buildVadGlobalTimebase(input: {
           "integer-sample-transform-composed",
           "mapped-token-getter-verified",
           "raw-vad-getter-verified",
+          ...(boundaryNormalizationApplied
+            ? [
+                "raw-vad-provider-end-preserved-and-effective-end-normalized-in-sample-domain",
+              ]
+            : []),
         ],
         parentTransformHash: request.sourceClipTransform.semanticHash,
       };
@@ -226,6 +279,11 @@ export function buildVadGlobalTimebase(input: {
     verifiedRequestCount: verifiedRequestIds.length,
     quarantinedRequestCount: quarantinedRequestIds.length,
     freshRemapRequestCount: verifiedRequestIds.length,
+    boundaryNormalizationPolicyVersion:
+      RAW_VAD_BOUNDARY_NORMALIZATION_POLICY_VERSION,
+    boundaryNormalizedSegmentCount: segments.filter(
+      (segment) => segment.boundaryNormalizationApplied,
+    ).length,
     sampleMappingCoverage:
       input.requests.length === 0
         ? 0

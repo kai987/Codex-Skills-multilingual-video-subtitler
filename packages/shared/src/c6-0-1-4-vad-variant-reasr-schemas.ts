@@ -105,9 +105,19 @@ export const vadSegmentSampleMappingSchema = z
     parentArtifactSha256: sha256,
     parentSampleRate: sampleRate,
     parentTotalSamples: positiveCount,
+    providerVadStartSampleInParent: sampleIndex,
+    providerVadEndSampleInParent: positiveCount,
     vadStartSampleInParent: sampleIndex,
     vadEndSampleInParent: positiveCount,
     vadSampleCount: positiveCount,
+    boundaryNormalizationApplied: z.boolean(),
+    boundaryNormalizationDeltaStartSamples: count,
+    boundaryNormalizationDeltaEndSamples: count,
+    boundaryNormalizationToleranceSamples: positiveCount,
+    boundaryNormalizationReason: z.enum([
+      "NONE",
+      "RAW_VAD_AUDIO_END_EXCEEDED_WITHIN_TOLERANCE",
+    ]),
     outputSampleRate: sampleRate,
     outputSampleCount: positiveCount,
     outputLocalZeroSample: z.literal(0),
@@ -124,6 +134,41 @@ export const vadSegmentSampleMappingSchema = z
   })
   .strict()
   .superRefine((value, context) => {
+    if (
+      value.boundaryNormalizationApplied !==
+      (value.boundaryNormalizationDeltaStartSamples > 0 ||
+        value.boundaryNormalizationDeltaEndSamples > 0)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["boundaryNormalizationApplied"],
+        message:
+          "VAD boundary normalization status must match its sample deltas.",
+      });
+    }
+    if (
+      value.boundaryNormalizationDeltaStartSamples >
+        value.boundaryNormalizationToleranceSamples ||
+      value.boundaryNormalizationDeltaEndSamples >
+        value.boundaryNormalizationToleranceSamples
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["boundaryNormalizationToleranceSamples"],
+        message: "VAD boundary normalization cannot exceed its tolerance.",
+      });
+    }
+    if (
+      value.boundaryNormalizationApplied !==
+      (value.boundaryNormalizationReason !== "NONE")
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["boundaryNormalizationReason"],
+        message:
+          "VAD boundary normalization reason must match its applied status.",
+      });
+    }
     if (
       value.vadEndSampleInParent - value.vadStartSampleInParent !==
       value.vadSampleCount
@@ -178,6 +223,10 @@ export const machineVadGlobalTimebaseSchema = z
     verifiedRequestCount: count,
     quarantinedRequestCount: count,
     freshRemapRequestCount: count,
+    boundaryNormalizationPolicyVersion: z.literal(
+      "c6.0.1.4-sample-domain-vad-boundary-normalization-v1",
+    ),
+    boundaryNormalizedSegmentCount: count,
     sampleMappingCoverage: ratio,
     guessedOffsetCount: z.literal(0),
     semanticHash: sha256,

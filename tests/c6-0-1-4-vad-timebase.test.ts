@@ -261,12 +261,123 @@ describe("C6.0.1.4 fresh VAD lineage and token mapping", () => {
     expect(artifact.freshRemapRequestCount).toBe(1);
     expect(artifact.guessedOffsetCount).toBe(0);
     expect(artifact.vadSegments[0]).toMatchObject({
+      providerVadStartSampleInParent: 4_000,
+      providerVadEndSampleInParent: 20_000,
       vadStartSampleInParent: 4_000,
       vadEndSampleInParent: 20_000,
+      boundaryNormalizationApplied: false,
+      boundaryNormalizationDeltaEndSamples: 0,
       sourceGlobalStartSample: 20_000,
       sourceGlobalEndSample: 36_000,
       mappingStatus: "VERIFIED",
     });
+  });
+
+  it("normalizes a provider frame-end overrun within 50ms in integer samples", () => {
+    const build = () =>
+      buildVadGlobalTimebase({
+        mode: "enforce",
+        generatedAt: "2026-08-28T00:00:00.000Z",
+        sourceIdentity: {
+          sourceMediaSha256: SOURCE_HASH,
+          sourceSampleRate: 16_000,
+          sourceTotalSamples: 320_000,
+          sourceReadOnlyVerified: true,
+        },
+        vadProviderIdentity: {
+          provider: "whisper.cpp-silero-vad" as const,
+          whisperVersion: "1.9.3",
+          whisperBinarySha256: BINARY_HASH,
+          vadModelSha256: VAD_HASH,
+          capabilityHash: CAPABILITY_HASH,
+          mappedGetterUsed: true,
+          rawVadGetterUsed: true,
+          requestStateIsolation: "fresh-whisper-state-per-mvl-request",
+        },
+        legacyQuarantinedRequestIds: [],
+        requests: [
+          {
+            requestId: "frame-overrun",
+            extractedAudioId: "fresh-clip",
+            extractedAudioSha256: CLIP_HASH,
+            sourceClipTransform: directTransform(),
+            cacheIdentity: CACHE_HASH,
+            providerSegments: [
+              {
+                index: 0,
+                startCentiseconds: 25,
+                endCentiseconds: 202,
+                coordinateSystem: "original-audio-local" as const,
+              },
+            ],
+            mappedGetterUsed: true,
+            rawVadGetterUsed: true,
+            mappingVerified: true,
+            failureReasons: [],
+          },
+        ],
+      });
+    const artifact = build();
+    expect(artifact.boundaryNormalizedSegmentCount).toBe(1);
+    expect(artifact.vadSegments[0]).toMatchObject({
+      providerVadEndSampleInParent: 32_320,
+      vadEndSampleInParent: 32_000,
+      boundaryNormalizationApplied: true,
+      boundaryNormalizationDeltaStartSamples: 0,
+      boundaryNormalizationDeltaEndSamples: 320,
+      boundaryNormalizationToleranceSamples: 800,
+      boundaryNormalizationReason:
+        "RAW_VAD_AUDIO_END_EXCEEDED_WITHIN_TOLERANCE",
+      sourceGlobalEndSample: 48_000,
+    });
+    expect(build().semanticHash).toBe(artifact.semanticHash);
+  });
+
+  it("rejects a provider VAD frame-end overrun beyond 50ms", () => {
+    expect(() =>
+      buildVadGlobalTimebase({
+        mode: "enforce",
+        generatedAt: "2026-08-28T00:00:00.000Z",
+        sourceIdentity: {
+          sourceMediaSha256: SOURCE_HASH,
+          sourceSampleRate: 16_000,
+          sourceTotalSamples: 320_000,
+          sourceReadOnlyVerified: true,
+        },
+        vadProviderIdentity: {
+          provider: "whisper.cpp-silero-vad",
+          whisperVersion: "1.9.3",
+          whisperBinarySha256: BINARY_HASH,
+          vadModelSha256: VAD_HASH,
+          capabilityHash: CAPABILITY_HASH,
+          mappedGetterUsed: true,
+          rawVadGetterUsed: true,
+          requestStateIsolation: "fresh-whisper-state-per-mvl-request",
+        },
+        legacyQuarantinedRequestIds: [],
+        requests: [
+          {
+            requestId: "outside-tolerance",
+            extractedAudioId: "fresh-clip",
+            extractedAudioSha256: CLIP_HASH,
+            sourceClipTransform: directTransform(),
+            cacheIdentity: CACHE_HASH,
+            providerSegments: [
+              {
+                index: 0,
+                startCentiseconds: 25,
+                endCentiseconds: 206,
+                coordinateSystem: "original-audio-local",
+              },
+            ],
+            mappedGetterUsed: true,
+            rawVadGetterUsed: true,
+            mappingVerified: true,
+            failureReasons: [],
+          },
+        ],
+      }),
+    ).toThrow(/escapes its extracted audio/u);
   });
 
   it("maps fresh mapped tokens but retains raw old VAD tokens as ambiguous", () => {
