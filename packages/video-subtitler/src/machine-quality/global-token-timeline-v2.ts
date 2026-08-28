@@ -127,10 +127,7 @@ export function buildGlobalTokenTimelineV2(input: {
       ].includes(observation.coordinateSystem);
       const requestVerified = request?.mappingStatus === "VERIFIED";
       const sourceStart =
-        request !== undefined &&
-        contained &&
-        mappedCoordinate &&
-        localStartSample !== null
+        request !== undefined && contained && mappedCoordinate
           ? convertLocalToSourceSample({
               localSample: localStartSample,
               extractedSampleRate: request.extractedSampleRate,
@@ -140,10 +137,7 @@ export function buildGlobalTokenTimelineV2(input: {
             })
           : null;
       const sourceEnd =
-        request !== undefined &&
-        contained &&
-        mappedCoordinate &&
-        localEndSample !== null
+        request !== undefined && contained && mappedCoordinate
           ? convertLocalToSourceSample({
               localSample: localEndSample,
               extractedSampleRate: request.extractedSampleRate,

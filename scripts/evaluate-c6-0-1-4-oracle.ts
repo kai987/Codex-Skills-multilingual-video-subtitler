@@ -327,18 +327,17 @@ const reasrAttribution = extendedOracle.eventEntries
   .filter((entry) => reasrByEvent.has(entry.eventId))
   .map((entry) => {
     const before = existingEntries.get(entry.eventId);
+    const beforeDistance = before?.oracleDistance ?? null;
     const attribution =
-      entry.oracleDistance === null ||
-      before === undefined ||
-      before.oracleDistance === null
+      entry.oracleDistance === null || beforeDistance === null
         ? "UNEVALUABLE"
-        : entry.oracleDistance < before.oracleDistance &&
+        : entry.oracleDistance < beforeDistance &&
             entry.oracleCandidateId?.startsWith("targeted-reasr:") === true
           ? "IMPROVED_POOL"
           : "NO_CHANGE";
     return {
       eventId: entry.eventId,
-      beforeOracleDistance: before?.oracleDistance ?? null,
+      beforeOracleDistance: beforeDistance,
       afterOracleDistance: entry.oracleDistance,
       oracleCandidateId: entry.oracleCandidateId,
       attribution,
