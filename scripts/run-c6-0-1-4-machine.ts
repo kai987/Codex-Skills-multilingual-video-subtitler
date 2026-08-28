@@ -1,5 +1,6 @@
 import { execFile, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
 import { copyFile, cp, mkdir, readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -252,9 +253,11 @@ async function json<T>(filePath: string): Promise<T> {
 }
 
 async function sha256File(filePath: string): Promise<string> {
-  return createHash("sha256")
-    .update(await readFile(filePath))
-    .digest("hex");
+  const digest = createHash("sha256");
+  for await (const chunk of createReadStream(filePath)) {
+    digest.update(chunk);
+  }
+  return digest.digest("hex");
 }
 
 async function onlySubtitleDirectory(task: string): Promise<string> {
