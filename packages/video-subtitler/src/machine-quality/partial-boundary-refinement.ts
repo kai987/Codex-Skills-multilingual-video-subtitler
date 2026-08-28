@@ -50,6 +50,23 @@ function overlap(
   return Math.max(0, Math.min(end, otherEnd) - Math.max(start, otherStart));
 }
 
+function overlapStats(cues: SubtitlePackage["cues"]): {
+  pairCount: number;
+  seconds: number;
+} {
+  let pairCount = 0;
+  let seconds = 0;
+  for (const [index, cue] of cues.entries()) {
+    for (const other of cues.slice(index + 1)) {
+      const amount = overlap(cue.start, cue.end, other.start, other.end);
+      if (amount <= 0) continue;
+      pairCount += 1;
+      seconds += amount;
+    }
+  }
+  return { pairCount, seconds };
+}
+
 export function buildAndApplyPartialBoundaryRefinement(input: {
   mode: C6016Mode;
   package: SubtitlePackage;
@@ -151,10 +168,12 @@ export function buildAndApplyPartialBoundaryRefinement(input: {
   });
   let current = structuredClone(baseline);
   const appliedIds = new Set<string>();
+  const applicationBlockers = new Map<string, string>();
   if (input.mode === "enforce") {
-    const tentative = structuredClone(current);
+    let tentative = structuredClone(current);
     for (const proposal of draft.filter((entry) => entry.accepted)) {
-      const cue = tentative.cues.find((entry) => entry.id === proposal.cueId);
+      const candidate = structuredClone(tentative);
+      const cue = candidate.cues.find((entry) => entry.id === proposal.cueId);
       if (cue === undefined) continue;
       if (proposal.proposedStart !== null && proposal.startEligible)
         cue.start = proposal.proposedStart;
@@ -176,6 +195,19 @@ export function buildAndApplyPartialBoundaryRefinement(input: {
         speechIntervals: [{ start: cue.start, end: cue.end }],
         speechBoundarySource: existing?.speechBoundarySource ?? "segment",
       };
+      const beforeOverlap = overlapStats(tentative.cues);
+      const afterOverlap = overlapStats(candidate.cues);
+      if (
+        afterOverlap.pairCount > beforeOverlap.pairCount ||
+        afterOverlap.seconds > beforeOverlap.seconds + 0.001
+      ) {
+        applicationBlockers.set(
+          proposal.proposalId,
+          "sequential-overlap-nondegradation-failed",
+        );
+        continue;
+      }
+      tentative = candidate;
       appliedIds.add(proposal.proposalId);
     }
     current = subtitlePackageSchema.parse(tentative);
@@ -185,7 +217,15 @@ export function buildAndApplyPartialBoundaryRefinement(input: {
   }
   const proposals: PartialBoundaryProposal[] = draft.map((proposal) => {
     const { semanticHash: _oldHash, ...rest } = proposal;
-    const core = { ...rest, applied: appliedIds.has(proposal.proposalId) };
+    const applicationBlocker = applicationBlockers.get(proposal.proposalId);
+    const core = {
+      ...rest,
+      applied: appliedIds.has(proposal.proposalId),
+      blockers:
+        applicationBlocker === undefined
+          ? rest.blockers
+          : [...rest.blockers, applicationBlocker],
+    };
     return { ...core, semanticHash: machineQualitySemanticHash(core) };
   });
   const summary = {

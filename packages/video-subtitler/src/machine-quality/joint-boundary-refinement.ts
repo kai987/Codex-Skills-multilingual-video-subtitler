@@ -24,6 +24,7 @@ export interface JointBoundaryInput {
   speechContinuous: boolean;
   acousticOverlapSupported: boolean;
   speakerOverlapSupported: boolean;
+  accidentalOverlapSupported: boolean;
   rapidTurn: boolean;
   evidenceIds: readonly string[];
 }
@@ -39,6 +40,26 @@ function sideEvidence(input: BoundarySideEvidenceInput) {
       coverage >= C6016_BOUNDARY_COVERAGE_MINIMUM &&
       input.proposedTime !== null,
   };
+}
+
+function overlapStats(cues: SubtitlePackage["cues"]): {
+  pairCount: number;
+  seconds: number;
+} {
+  let pairCount = 0;
+  let seconds = 0;
+  for (const [index, cue] of cues.entries()) {
+    for (const other of cues.slice(index + 1)) {
+      const amount = Math.max(
+        0,
+        Math.min(cue.end, other.end) - Math.max(cue.start, other.start),
+      );
+      if (amount <= 0) continue;
+      pairCount += 1;
+      seconds += amount;
+    }
+  }
+  return { pairCount, seconds };
 }
 
 export function buildAndApplyJointBoundaryRefinement(input: {
@@ -66,7 +87,9 @@ export function buildAndApplyJointBoundaryRefinement(input: {
     const overlapClass = realOverlap
       ? ("REAL_OVERLAP" as const)
       : originalOverlap > 0
-        ? ("ACCIDENTAL_OVERLAP" as const)
+        ? pair.accidentalOverlapSupported
+          ? ("ACCIDENTAL_OVERLAP" as const)
+          : ("AMBIGUOUS" as const)
         : pair.rapidTurn
           ? ("RAPID_TURN" as const)
           : pair.speechContinuous
@@ -113,7 +136,7 @@ export function buildAndApplyJointBoundaryRefinement(input: {
       }
     } else if (overlapClass === "AMBIGUOUS") {
       outcome = "AMBIGUOUS";
-      blockers.push("continuous-speech-without-resolvable-transition");
+      blockers.push("overlap-type-not-proven-by-localized-evidence");
     }
     const nextLeftEnd = proposedLeftEnd ?? left.end;
     const nextRightStart = proposedRightStart ?? right.start;
@@ -121,13 +144,18 @@ export function buildAndApplyJointBoundaryRefinement(input: {
       nextLeftEnd > left.start && right.end > nextRightStart;
     const resolvesAccidental =
       overlapClass !== "ACCIDENTAL_OVERLAP" || nextLeftEnd <= nextRightStart;
+    const proposedOverlap = Math.max(0, nextLeftEnd - nextRightStart);
+    const overlapNonIncrease =
+      realOverlap || proposedOverlap <= originalOverlap;
     const accepted =
       ["MOVE_A_END", "MOVE_B_START", "MOVE_BOTH"].includes(outcome) &&
       validIntervals &&
-      resolvesAccidental;
+      resolvesAccidental &&
+      overlapNonIncrease;
     if (!validIntervals) blockers.push("minimum-valid-interval-would-fail");
     if (!resolvesAccidental)
       blockers.push("accidental-overlap-would-remain-or-increase");
+    if (!overlapNonIncrease) blockers.push("adjacent-overlap-would-increase");
     const core = {
       pairId: `c6016-joint:${left.id}:${right.id}`,
       leftCueId: left.id,
@@ -159,15 +187,30 @@ export function buildAndApplyJointBoundaryRefinement(input: {
   });
   let current = structuredClone(baseline);
   const appliedIds = new Set<string>();
+  const applicationBlockers = new Map<string, string>();
   if (input.mode === "enforce") {
-    const tentative = structuredClone(current);
+    let tentative = structuredClone(current);
     for (const pair of draft.filter((entry) => entry.accepted)) {
-      const left = tentative.cues.find((cue) => cue.id === pair.leftCueId);
-      const right = tentative.cues.find((cue) => cue.id === pair.rightCueId);
+      const candidate = structuredClone(tentative);
+      const left = candidate.cues.find((cue) => cue.id === pair.leftCueId);
+      const right = candidate.cues.find((cue) => cue.id === pair.rightCueId);
       if (left === undefined || right === undefined) continue;
       if (pair.proposedLeftEnd !== null) left.end = pair.proposedLeftEnd;
       if (pair.proposedRightStart !== null)
         right.start = pair.proposedRightStart;
+      const beforeOverlap = overlapStats(tentative.cues);
+      const afterOverlap = overlapStats(candidate.cues);
+      if (
+        afterOverlap.pairCount > beforeOverlap.pairCount ||
+        afterOverlap.seconds > beforeOverlap.seconds + 0.001
+      ) {
+        applicationBlockers.set(
+          pair.pairId,
+          "sequential-overlap-nondegradation-failed",
+        );
+        continue;
+      }
+      tentative = candidate;
       appliedIds.add(pair.pairId);
     }
     current = subtitlePackageSchema.parse(tentative);
@@ -177,7 +220,15 @@ export function buildAndApplyJointBoundaryRefinement(input: {
   }
   const pairs: JointBoundaryPair[] = draft.map((pair) => {
     const { semanticHash: _oldHash, ...rest } = pair;
-    const core = { ...rest, applied: appliedIds.has(pair.pairId) };
+    const applicationBlocker = applicationBlockers.get(pair.pairId);
+    const core = {
+      ...rest,
+      applied: appliedIds.has(pair.pairId),
+      blockers:
+        applicationBlocker === undefined
+          ? rest.blockers
+          : [...rest.blockers, applicationBlocker],
+    };
     return { ...core, semanticHash: machineQualitySemanticHash(core) };
   });
   const summary = {

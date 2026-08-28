@@ -154,6 +154,35 @@ describe("C6.0.1.6 partial boundary refinement", () => {
       "next-overlap-would-increase",
     );
   });
+
+  it("rechecks overlap safety while applying interacting partial proposals", () => {
+    const source = packageFixture([
+      cue("left", "左", 1, 3),
+      cue("right", "右", 3.1, 5),
+    ]);
+    const result = buildAndApplyPartialBoundaryRefinement({
+      mode: "enforce",
+      package: source,
+      generatedAt: GENERATED_AT,
+      evidence: [
+        {
+          cueId: "left",
+          startEvidence: evidence(null, 0),
+          endEvidence: evidence(2.98, 0.95, "left-end"),
+        },
+        {
+          cueId: "right",
+          startEvidence: evidence(3.12, 0.95, "right-start"),
+          endEvidence: evidence(null, 0),
+        },
+      ],
+    });
+    expect(result.artifact.summary.proposalCount).toBe(2);
+    expect(result.artifact.summary.appliedCount).toBe(1);
+    expect(result.artifact.proposals[1]?.blockers).toContain(
+      "sequential-overlap-nondegradation-failed",
+    );
+  });
 });
 
 describe("C6.0.1.6 joint boundary refinement", () => {
@@ -164,6 +193,7 @@ describe("C6.0.1.6 joint boundary refinement", () => {
     speechContinuous: false,
     acousticOverlapSupported: false,
     speakerOverlapSupported: false,
+    accidentalOverlapSupported: false,
     rapidTurn: false,
     evidenceIds: ["pair:evidence"],
   };
@@ -180,6 +210,7 @@ describe("C6.0.1.6 joint boundary refinement", () => {
       pairs: [
         {
           ...pairBase,
+          accidentalOverlapSupported: true,
           leftEndEvidence: evidence(2.7, 0.95, "left-end"),
           rightStartEvidence: evidence(2.9, 0.95, "right-start"),
         },
@@ -208,6 +239,7 @@ describe("C6.0.1.6 joint boundary refinement", () => {
       pairs: [
         {
           ...pairBase,
+          accidentalOverlapSupported: true,
           acousticOverlapSupported: true,
           speakerOverlapSupported: true,
           speechContinuous: true,
@@ -238,6 +270,7 @@ describe("C6.0.1.6 joint boundary refinement", () => {
       pairs: [
         {
           ...pairBase,
+          accidentalOverlapSupported: true,
           vadPause: { start: 2.85, end: 2.95 },
           leftEndEvidence: evidence(null, 0),
           rightStartEvidence: evidence(null, 0),
