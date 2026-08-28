@@ -56,3 +56,4 @@ export * from "./grouped-word-projection.js";
 export * from "./core-text-projection.js";
 export * from "./localized-candidate-comparability.js";
 export * from "./core-asr-stability.js";
+export * from "./local-core-gold-evaluator.js";
