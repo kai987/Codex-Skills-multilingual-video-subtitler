@@ -38,3 +38,5 @@ export * from "./c6015-quality-policy.js";
 export * from "./c6015-candidate-pool.js";
 export * from "./request-edge-risk.js";
 export * from "./decoder-evidence.js";
+export * from "./acoustic-risk-vector.js";
+export * from "./reasr-priority.js";
