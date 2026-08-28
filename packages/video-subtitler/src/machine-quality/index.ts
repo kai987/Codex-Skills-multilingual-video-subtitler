@@ -42,3 +42,5 @@ export * from "./acoustic-risk-vector.js";
 export * from "./reasr-priority.js";
 export * from "./event-final-text-span-lineage.js";
 export * from "./span-text-repair.js";
+export * from "./partial-boundary-refinement.js";
+export * from "./joint-boundary-refinement.js";
