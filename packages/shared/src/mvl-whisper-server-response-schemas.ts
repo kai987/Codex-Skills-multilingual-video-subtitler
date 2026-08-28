@@ -483,9 +483,12 @@ export const mvlWhisperServerResponseSchema = z
       }
       for (const [segmentIndex, segment] of value.transcription.entries()) {
         for (const [tokenIndex, token] of segment.tokens.entries()) {
+          const untimedLexicalToken =
+            !token.special && token.raw === null && token.mapped === null;
           if (
             value.request.token_timestamps &&
             !token.special &&
+            !untimedLexicalToken &&
             (token.raw?.coordinateSystem !== "original-audio-local" ||
               token.raw.startCentiseconds !== token.mapped?.startCentiseconds ||
               token.raw.endCentiseconds !== token.mapped.endCentiseconds)
@@ -494,7 +497,7 @@ export const mvlWhisperServerResponseSchema = z
               code: "custom",
               path: ["transcription", segmentIndex, "tokens", tokenIndex],
               message:
-                "No-VAD lexical token raw and mapped timing must be identical original-audio-local evidence.",
+                "Timed No-VAD lexical token raw and mapped timing must be identical original-audio-local evidence; an untimed token must keep both values null.",
             });
           }
         }

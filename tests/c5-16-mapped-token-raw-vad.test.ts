@@ -308,6 +308,53 @@ describe("C5.16 patched response contract", () => {
     );
   });
 
+  it("preserves an untimed no-VAD lexical token without inventing timing bounds", () => {
+    const fixture = response(false);
+    const segment = fixture.transcription[0];
+    if (segment === undefined) throw new Error("Fixture segment is missing.");
+    segment.tokens.splice(1, 0, {
+      index: 1,
+      id: 101,
+      text: "い",
+      textBytesHex: utf8Hex("い"),
+      special: false,
+      probability: 0.4,
+      raw: null,
+      mapped: null,
+      dtwCentiseconds: null,
+    });
+    const special = segment.tokens[2];
+    if (special === undefined)
+      throw new Error("Fixture special token is missing.");
+    special.index = 2;
+    segment.words.push({
+      word: "い",
+      wordBytesHex: utf8Hex("い"),
+      memberTokenIndices: [1],
+      probability: 0.4,
+      rawStartCentiseconds: null,
+      rawEndCentiseconds: null,
+      mappedStartCentiseconds: null,
+      mappedEndCentiseconds: null,
+    });
+    expect(mvlWhisperServerResponseSchema.safeParse(fixture).success).toBe(
+      true,
+    );
+
+    const inconsistent = structuredClone(fixture);
+    const untimed = inconsistent.transcription[0]?.tokens[1];
+    if (untimed === undefined)
+      throw new Error("Fixture untimed lexical token is missing.");
+    untimed.raw = {
+      startCentiseconds: 10,
+      endCentiseconds: 20,
+      coordinateSystem: "original-audio-local",
+    };
+    expect(mvlWhisperServerResponseSchema.safeParse(inconsistent).success).toBe(
+      false,
+    );
+  });
+
   it("rejects a mapped token with the wrong coordinate system", () => {
     const fixture = response(true);
     const token = fixture.transcription[0]?.tokens[0];
