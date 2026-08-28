@@ -7,6 +7,7 @@ import {
   atomicWriteJson,
   blindGenerationInputManifestSchema,
   c6016PolicyVersion,
+  c6016ShareableSummarySchema,
   machineCandidatePoolC6015Schema,
   machineEventToFinalCueLineageSchema,
   machineGlobalTokenTimelineV2Schema,
@@ -16,13 +17,10 @@ import {
   machineVariantEvidenceBundleSchema,
   mvlWhisperServerResponseSchema,
   subtitlePackageSchema,
-  type AcousticRiskVectorEntry,
   type AsrRequestTimelineContractV2,
   type BlindGenerationInputManifest,
   type C6016Mode,
   type DecoderEvidenceEntry,
-  type MachineCandidatePoolC6015,
-  type MachineEventToFinalCueLineage,
   type MachineGlobalTokenTimelineV2,
   type MachineVariantEvidenceBundle,
   type MvlWhisperServerResponse,
@@ -46,6 +44,7 @@ import {
   createBlindOutputFreeze,
   createMachineShadowPolicy,
   evaluateMachineShadowFinalization,
+  finalizeC6016ShareableArtifacts,
   machineQualitySemanticHash,
   normalizeCandidateText,
   type AcousticRiskInput,
@@ -58,7 +57,6 @@ import {
 
 const GENERATED_AT = "2026-08-28T14:00:00.000Z";
 const POLICY_FROZEN_AT = "2026-08-28T13:30:00.000Z";
-const SOURCE_SAMPLE_RATE = 16_000;
 
 interface ParsedArguments {
   baseline: string;
@@ -116,7 +114,7 @@ interface OverlapClassificationArtifact {
     leftCueId: string;
     rightCueId: string;
     interval: { start: number; end: number };
-    classification: "RAPID_TURN_PADDING" | "UNKNOWN_OVERLAP" | string;
+    classification: string;
     reasons: string[];
   }[];
 }
@@ -126,6 +124,20 @@ interface WhisperCacheRecord {
   cacheIdentity: string;
   response: unknown;
   responseSemanticHash: string;
+}
+
+type GlobalToken = MachineGlobalTokenTimelineV2["tokens"][number];
+type MappedGlobalToken = Omit<GlobalToken, "sourceGlobalInterval"> & {
+  sourceGlobalInterval: NonNullable<GlobalToken["sourceGlobalInterval"]>;
+};
+
+function hasMappedGlobalInterval(
+  token: GlobalToken | undefined,
+): token is MappedGlobalToken {
+  return (
+    token?.sourceGlobalInterval !== undefined &&
+    token.sourceGlobalInterval !== null
+  );
 }
 
 function argumentValue(argumentsList: readonly string[], flag: string): string {
@@ -632,16 +644,13 @@ function boundaryEvidence(input: {
   const tokens = input.variant.trustedGlobalTokenIds
     .flatMap((tokenId) => {
       const token = input.tokenById.get(tokenId);
-      return token === undefined ||
-        !token.trusted ||
-        !token.lexical ||
-        token.sourceGlobalInterval === null
+      return !hasMappedGlobalInterval(token) || !token.trusted || !token.lexical
         ? []
         : [token];
     })
     .toSorted(
       (left, right) =>
-        left.sourceGlobalInterval!.start - right.sourceGlobalInterval!.start ||
+        left.sourceGlobalInterval.start - right.sourceGlobalInterval.start ||
         left.tokenId.localeCompare(right.tokenId),
     );
   const first = tokens[0];
@@ -659,7 +668,7 @@ function boundaryEvidence(input: {
       evidenceIds:
         first === undefined ? [] : [`token-start:${first.semanticHash}`],
       proposedTime: startMatched
-        ? (first?.sourceGlobalInterval?.start ?? null)
+        ? (first?.sourceGlobalInterval.start ?? null)
         : null,
     },
     end: {
@@ -667,7 +676,7 @@ function boundaryEvidence(input: {
       trustedTokenIds: last === undefined ? [] : [last.tokenId],
       evidenceIds: last === undefined ? [] : [`token-end:${last.semanticHash}`],
       proposedTime: endMatched
-        ? (last?.sourceGlobalInterval?.end ?? null)
+        ? (last?.sourceGlobalInterval.end ?? null)
         : null,
     },
   };
@@ -685,6 +694,7 @@ function updateManifest(input: {
     humanDerived: false as const,
   };
   const { inputSemanticHash: _oldHash, ...oldBase } = input.baseline;
+  void _oldHash;
   const base = {
     ...oldBase,
     generatedAt: GENERATED_AT,
@@ -740,7 +750,7 @@ const [
   globalTokens,
   singleAudit,
   rawRecovery,
-  _trustedTiming,
+  trustedTiming,
   targetedArtifact,
   variantTokenRefresh,
   overlapArtifact,
@@ -782,6 +792,7 @@ const [
     path.join(baselineSubtitle, "machine-overlap-event-classification.json"),
   ),
 ]);
+void trustedTiming;
 
 const candidates = candidatePool.candidates as CandidatePoolCandidate[];
 const candidateById = new Map(
@@ -858,17 +869,14 @@ for (const candidate of candidates.filter((entry) =>
     const trustedTokens = (variant?.trustedGlobalTokenIds ?? []).flatMap(
       (tokenId) => {
         const token = tokenById.get(tokenId);
-        return token === undefined || token.sourceGlobalInterval === null
-          ? []
-          : [token];
+        return hasMappedGlobalInterval(token) ? [token] : [];
       },
     );
     const tokenEdgeContact = trustedTokens.some(
       (token) =>
-        Math.abs(token.sourceGlobalInterval!.start - request.interval.start) <=
+        Math.abs(token.sourceGlobalInterval.start - request.interval.start) <=
           0.08 ||
-        Math.abs(request.interval.end - token.sourceGlobalInterval!.end) <=
-          0.08,
+        Math.abs(request.interval.end - token.sourceGlobalInterval.end) <= 0.08,
     );
     const independentContinuation = related.some(
       (other) =>
@@ -993,11 +1001,9 @@ for (const event of singleAudit.events) {
     normalizeCandidateText(candidate.text).length / sourceDuration;
   const eventLineage = lineageByEvent.get(candidate.eventId);
   const associationAmbiguity =
-    poolEventById.get(candidate.eventId)?.selectedVariantId === null
-      ? ("STRONG" as const)
-      : related.length > 1 && disagreement === "STRONG"
-        ? ("WEAK" as const)
-        : ("NONE" as const);
+    related.length > 1 && disagreement === "STRONG"
+      ? ("WEAK" as const)
+      : ("NONE" as const);
   riskInputs.push({
     eventId: candidate.eventId,
     candidateId: candidate.candidateId,
@@ -1097,7 +1103,6 @@ const spanSelections: SpanRepairSelectionInput[] = candidatePool.events.flatMap(
   (event) => {
     if (
       !event.selectionChanged ||
-      event.selectedVariantId === null ||
       event.selectedVariantId === event.currentVariantId
     ) {
       return [];
@@ -1566,15 +1571,23 @@ const shareableCore = {
   artifactSemanticHashes: runAuditCore.artifactSemanticHashes,
   finalHashes,
 };
+const shareableSummary = c6016ShareableSummarySchema.parse({
+  schemaVersion: "1.0.0",
+  generatedAt: GENERATED_AT,
+  artifactType: "c6-0-1-6-shareable-summary",
+  ...shareableCore,
+  semanticHash: machineQualitySemanticHash(shareableCore),
+});
 await atomicWriteJson(
   path.join(argumentsValue.output, "shareable", "c6-0-1-6-summary.json"),
-  {
-    schemaVersion: "1.0.0",
-    artifactType: "c6-0-1-6-shareable-summary",
-    ...shareableCore,
-    semanticHash: machineQualitySemanticHash(shareableCore),
-  },
+  shareableSummary,
 );
+const shareable = await finalizeC6016ShareableArtifacts({
+  taskRoot: argumentsValue.output,
+});
+if (!shareable.audit.validationPassed) {
+  throw new Error("C6.0.1.6 shareable audit failed before output freeze.");
+}
 const freeze = await createBlindOutputFreeze({
   taskDirectory: argumentsValue.output,
   freezeTimestamp: GENERATED_AT,

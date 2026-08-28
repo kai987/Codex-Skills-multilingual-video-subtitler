@@ -229,6 +229,7 @@ import {
   c6016QualityPolicySchema,
   c6016AblationSchema,
   c6016ValidationSchema,
+  c6016ShareableSummarySchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -428,6 +429,11 @@ const schemas = [
     fileName: "c6-0-1-6-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-6-validation.schema.json",
     schema: c6016ValidationSchema,
+  },
+  {
+    fileName: "c6-0-1-6-shareable-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-6-shareable-summary.schema.json",
+    schema: c6016ShareableSummarySchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",

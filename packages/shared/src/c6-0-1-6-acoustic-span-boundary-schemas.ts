@@ -778,6 +778,47 @@ export const c6016ValidationSchema = z
   })
   .strict();
 
+export const c6016ShareableSummarySchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-6-shareable-summary"),
+    stage: z.string().min(1),
+    runtimeGoldInputCount: z.literal(0),
+    networkUsed: z.literal(false),
+    productionStatus: z.literal("needs-review"),
+    finalizationMethod: z.literal("none"),
+    artifactRelativePaths: z.array(
+      z
+        .string()
+        .min(1)
+        .regex(/^(?!\/)(?![A-Za-z]:[\\/])(?!\\\\).+/u),
+    ),
+    artifactSemanticHashes: z
+      .object({
+        requestEdge: sha256,
+        decoderEvidence: sha256,
+        riskVector: sha256,
+        reAsrPriority: sha256,
+        spanLineage: sha256,
+        spanRepair: sha256,
+        partialBoundary: sha256,
+        jointBoundary: sha256,
+      })
+      .strict(),
+    finalHashes: z
+      .object({
+        canonicalTextHash: sha256,
+        canonicalTimingHash: sha256,
+        presentationHash: sha256,
+        assHash: sha256,
+        srtHash: sha256,
+        vttHash: sha256,
+      })
+      .strict(),
+    semanticHash: sha256,
+  })
+  .strict();
+
 export type C6016Mode = z.infer<typeof c6016ModeSchema>;
 export type RiskSeverity = z.infer<typeof riskSeveritySchema>;
 export type RiskCorrelationGroup = z.infer<typeof riskCorrelationGroupSchema>;
@@ -824,3 +865,4 @@ export type C6016QualityPolicy = z.infer<typeof c6016QualityPolicySchema>;
 export type C6016QualityMetrics = z.infer<typeof c6016QualityMetricsSchema>;
 export type C6016Ablation = z.infer<typeof c6016AblationSchema>;
 export type C6016Validation = z.infer<typeof c6016ValidationSchema>;
+export type C6016ShareableSummary = z.infer<typeof c6016ShareableSummarySchema>;

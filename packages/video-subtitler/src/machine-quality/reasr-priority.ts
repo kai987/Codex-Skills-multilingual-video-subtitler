@@ -100,6 +100,7 @@ export function buildMachineReAsrPriority(input: {
   );
   const events = unselected
     .map(({ eligible: _eligible, ...event }) => {
+      void _eligible;
       const budgetSelected = selectedIds.has(event.eventId);
       const core = {
         ...event,

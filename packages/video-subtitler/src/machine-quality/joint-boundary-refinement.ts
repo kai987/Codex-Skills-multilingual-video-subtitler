@@ -220,6 +220,7 @@ export function buildAndApplyJointBoundaryRefinement(input: {
   }
   const pairs: JointBoundaryPair[] = draft.map((pair) => {
     const { semanticHash: _oldHash, ...rest } = pair;
+    void _oldHash;
     const applicationBlocker = applicationBlockers.get(pair.pairId);
     const core = {
       ...rest,

@@ -263,6 +263,7 @@ export function buildAndApplySpanTextRepair(input: {
   const proposals: SpanTextRepairProposal[] = draftProposals.map((proposal) => {
     const core = { ...proposal, applied: appliedIds.has(proposal.proposalId) };
     const { semanticHash: _oldHash, ...hashable } = core;
+    void _oldHash;
     return { ...hashable, semanticHash: machineQualitySemanticHash(hashable) };
   });
   const summary = {

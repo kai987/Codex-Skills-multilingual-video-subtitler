@@ -217,6 +217,7 @@ export function buildAndApplyPartialBoundaryRefinement(input: {
   }
   const proposals: PartialBoundaryProposal[] = draft.map((proposal) => {
     const { semanticHash: _oldHash, ...rest } = proposal;
+    void _oldHash;
     const applicationBlocker = applicationBlockers.get(proposal.proposalId);
     const core = {
       ...rest,

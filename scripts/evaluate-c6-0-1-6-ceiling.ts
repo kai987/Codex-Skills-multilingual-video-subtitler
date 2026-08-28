@@ -60,8 +60,8 @@ function normalize(text: string): string {
 }
 
 function editDistance(left: string, right: string): number {
-  const a = [...left];
-  const b = [...right];
+  const a = Array.from(left);
+  const b = Array.from(right);
   const previous = b.map((_, index) => index + 1);
   previous.unshift(0);
   for (const [leftIndex, leftValue] of a.entries()) {

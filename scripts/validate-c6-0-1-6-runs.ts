@@ -7,7 +7,6 @@ import {
   c6016AblationSchema,
   c6016PolicyVersion,
   c6016ValidationSchema,
-  machineAcousticRiskVectorSchema,
   machineAsrCeilingEvaluationSchema,
   machineDecoderEvidenceSchema,
   machineEventFinalTextSpanLineageSchema,
@@ -16,7 +15,6 @@ import {
   machineReAsrPrioritySchema,
   machineRequestEdgeRiskSchema,
   machineSpanTextRepairSchema,
-  subtitlePackageSchema,
   type C6016Ablation,
   type C6016QualityMetrics,
 } from "@mvl/shared";
@@ -139,7 +137,6 @@ async function loadStage(stage: StageArgument): Promise<{
     runAudit,
     edge,
     decoder,
-    risk,
     priority,
     spans,
     repair,
@@ -156,9 +153,6 @@ async function loadStage(stage: StageArgument): Promise<{
     json<unknown>(path.join(subtitle, "machine-decoder-evidence.json")).then(
       (entry) => machineDecoderEvidenceSchema.parse(entry),
     ),
-    json<unknown>(
-      path.join(subtitle, "machine-acoustic-risk-vector.json"),
-    ).then((entry) => machineAcousticRiskVectorSchema.parse(entry)),
     json<unknown>(path.join(subtitle, "machine-reasr-priority.json")).then(
       (entry) => machineReAsrPrioritySchema.parse(entry),
     ),

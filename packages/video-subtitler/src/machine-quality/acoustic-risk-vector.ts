@@ -279,9 +279,10 @@ export function buildAcousticRiskVectorEntry(
   const core = {
     eventId: input.eventId,
     candidateId: input.candidateId,
-    facts: factOrder.map(
-      (name) => facts.find((entry) => entry.name === name) as AcousticRiskFact,
-    ),
+    facts: factOrder.flatMap((name) => {
+      const fact = facts.find((entry) => entry.name === name);
+      return fact === undefined ? [] : [fact];
+    }),
     strongRiskCount,
     weakRiskCount: weakFacts.length,
     independentWeakRiskCount,

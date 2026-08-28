@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-6-shareable-summary.schema.json",
+  "title": "c6-0-1-6-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-6-shareable-summary" },
+    "stage": { "type": "string", "minLength": 1 },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "networkUsed": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "artifactRelativePaths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+      }
+    },
+    "artifactSemanticHashes": {
+      "type": "object",
+      "properties": {
+        "requestEdge": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "decoderEvidence": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "riskVector": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "reAsrPriority": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "spanLineage": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "spanRepair": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "partialBoundary": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "jointBoundary": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "requestEdge",
+        "decoderEvidence",
+        "riskVector",
+        "reAsrPriority",
+        "spanLineage",
+        "spanRepair",
+        "partialBoundary",
+        "jointBoundary"
+      ],
+      "additionalProperties": false
+    },
+    "finalHashes": {
+      "type": "object",
+      "properties": {
+        "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalTimingHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "assHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "srtHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "vttHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "canonicalTextHash",
+        "canonicalTimingHash",
+        "presentationHash",
+        "assHash",
+        "srtHash",
+        "vttHash"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "stage",
+    "runtimeGoldInputCount",
+    "networkUsed",
+    "productionStatus",
+    "finalizationMethod",
+    "artifactRelativePaths",
+    "artifactSemanticHashes",
+    "finalHashes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
