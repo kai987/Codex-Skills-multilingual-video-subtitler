@@ -49,3 +49,5 @@ export * from "./c6016-quality-policy.js";
 export * from "./reasr-risk-v2.js";
 export * from "./fresh-targeted-reasr.js";
 export * from "./c6017-quality-policy.js";
+export * from "./fresh-candidate-comparison.js";
+export * from "./c6017-evaluation.js";
