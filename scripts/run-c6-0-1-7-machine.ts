@@ -627,7 +627,7 @@ async function executeFreshWhisper(input: {
             executablePath: input.arguments.whisperServer,
             modelPath: input.arguments.whisperModel,
             modelHash: input.modelSha256,
-            whisperCppVersion: input.runtime.upstream.tag,
+            whisperCppVersion: input.runtime.upstream.tag.replace(/^v/u, ""),
             coreML: false,
             threads: 8,
             language: "ja",
@@ -1377,7 +1377,7 @@ if (argumentsValue.freshMode !== "off") {
     executedRequests: whisperExecution.executions,
     ctcEvidenceByCandidateId: ctcAudit.evidenceByCandidateId,
     runtime: {
-      whisperCppVersion: whisperRuntime.upstream.tag,
+      whisperCppVersion: whisperRuntime.upstream.tag.replace(/^v/u, ""),
       runtimeBinarySha256: whisperRuntime.patched.binarySha256,
       runtimePatchSha256: whisperRuntime.patch.patchSha256,
       modelSha256: whisperModelSha256,
@@ -1632,7 +1632,7 @@ const runAuditCore = {
     asrCeilingValidation: argumentsValue.ceilingMode,
   },
   modelIdentity: {
-    whisperCppVersion: whisperRuntime?.upstream.tag ?? null,
+    whisperCppVersion: whisperRuntime?.upstream.tag.replace(/^v/u, "") ?? null,
     whisperUpstreamCommit: whisperRuntime?.upstream.commit ?? null,
     whisperRuntimeBinarySha256: whisperRuntime?.patched.binarySha256 ?? null,
     whisperRuntimePatchSha256: whisperRuntime?.patch.patchSha256 ?? null,
