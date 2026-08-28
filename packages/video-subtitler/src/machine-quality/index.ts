@@ -40,3 +40,5 @@ export * from "./request-edge-risk.js";
 export * from "./decoder-evidence.js";
 export * from "./acoustic-risk-vector.js";
 export * from "./reasr-priority.js";
+export * from "./event-final-text-span-lineage.js";
+export * from "./span-text-repair.js";
