@@ -100,6 +100,8 @@
     "run:c6-0-1-8-machine": "tsx scripts/run-c6-0-1-8-machine.ts",
     "finalize:c6-0-1-8-shareable": "tsx scripts/finalize-c6-0-1-8-shareable.ts",
     "validate:c6-0-1-8-runs": "tsx scripts/validate-c6-0-1-8-runs.ts",
+    "run:c6-0-1-9-machine": "tsx scripts/run-c6-0-1-9-machine.ts",
+    "evaluate:c6-0-1-9-complementarity": "tsx scripts/evaluate-c6-0-1-9-complementarity.ts",
     "refresh:c6-0-1-1-control": "tsx scripts/refresh-c6-0-1-1-control-artifacts.ts",
     "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
     "verify:c4-persistent-worker": "tsx scripts/verify-c4-persistent-worker.ts",
