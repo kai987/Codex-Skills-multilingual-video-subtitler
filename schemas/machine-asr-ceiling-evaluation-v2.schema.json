@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-asr-ceiling-evaluation-v2.schema.json",
+  "title": "machine-asr-ceiling-evaluation-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.7-fresh-targeted-reasr-asr-ceiling-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-asr-ceiling-evaluation-v2"
+    },
+    "zone": {
+      "type": "string",
+      "const": "evaluation-only-gold-isolated-post-freeze"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "perEventEntries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "REASR_UNTESTED_POTENTIAL",
+              "REASR_TESTED_IMPROVED_POOL",
+              "REASR_TESTED_NO_IMPROVEMENT",
+              "REASR_TESTED_WORSENED_POOL",
+              "REASR_TESTED_SAFE_REPLACEMENT",
+              "REASR_TESTED_UNSAFE_REPLACEMENT",
+              "WHISPER_MULTIWINDOW_CONSISTENT_ERROR",
+              "WHISPER_WINDOW_INSTABILITY",
+              "SELECTOR_APPLICATION_BLOCKER",
+              "SPAN_APPLICATION_BLOCKER",
+              "POOL_INSUFFICIENT",
+              "UNEVALUABLE"
+            ]
+          },
+          "freshInferenceVerified": { "type": "boolean" },
+          "audioIntervalVerified": { "type": "boolean" },
+          "promptIsolationVerified": { "type": "boolean" },
+          "decoderOutputValid": { "type": "boolean" },
+          "freshWindowAgreement": {
+            "type": "string",
+            "enum": ["CONSISTENT", "UNSTABLE", "UNKNOWN"]
+          },
+          "runtimeReplacementApplied": { "type": "boolean" },
+          "goldImproved": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "classification",
+          "freshInferenceVerified",
+          "audioIntervalVerified",
+          "promptIsolationVerified",
+          "decoderOutputValid",
+          "freshWindowAgreement",
+          "runtimeReplacementApplied",
+          "goldImproved",
+          "evidenceIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "untestedPotential": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "testedImprovedPool": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "testedNoImprovement": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "testedWorsened": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "testedSafeReplacement": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "testedUnsafeReplacement": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperMultiwindowConsistentError": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperWindowInstability": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectorApplicationBlocker": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "spanApplicationBlocker": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "poolInsufficient": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unevaluable": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pipelineVsAsrDecision": {
+          "type": "string",
+          "enum": [
+            "PIPELINE_STILL_PRIMARY",
+            "ASR_STILL_PRIMARY",
+            "MIXED",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        "recommendAsrEnsembleNext": { "type": "boolean" },
+        "ceilingValidationPassed": { "type": "boolean" }
+      },
+      "required": [
+        "untestedPotential",
+        "testedImprovedPool",
+        "testedNoImprovement",
+        "testedWorsened",
+        "testedSafeReplacement",
+        "testedUnsafeReplacement",
+        "whisperMultiwindowConsistentError",
+        "whisperWindowInstability",
+        "selectorApplicationBlocker",
+        "spanApplicationBlocker",
+        "poolInsufficient",
+        "unevaluable",
+        "pipelineVsAsrDecision",
+        "recommendAsrEnsembleNext",
+        "ceilingValidationPassed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "zone",
+    "runtimeGoldInputCount",
+    "perEventEntries",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

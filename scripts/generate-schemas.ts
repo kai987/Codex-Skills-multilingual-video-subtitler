@@ -230,6 +230,15 @@ import {
   c6016AblationSchema,
   c6016ValidationSchema,
   c6016ShareableSummarySchema,
+  machineReAsrRiskV2Schema,
+  machineFreshTargetedReAsrSchema,
+  machineFreshCandidateComparisonSchema,
+  machineReAsrCausalEvaluationSchema,
+  machineAsrCeilingEvaluationV2Schema,
+  machineAssociationErrorTaxonomySchema,
+  c6017QualityPolicySchema,
+  c6017AblationSchema,
+  c6017ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -434,6 +443,51 @@ const schemas = [
     fileName: "c6-0-1-6-shareable-summary.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-6-shareable-summary.schema.json",
     schema: c6016ShareableSummarySchema,
+  },
+  {
+    fileName: "machine-reasr-risk-v2.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-reasr-risk-v2.schema.json",
+    schema: machineReAsrRiskV2Schema,
+  },
+  {
+    fileName: "machine-fresh-targeted-reasr.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-fresh-targeted-reasr.schema.json",
+    schema: machineFreshTargetedReAsrSchema,
+  },
+  {
+    fileName: "machine-fresh-candidate-comparison.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-fresh-candidate-comparison.schema.json",
+    schema: machineFreshCandidateComparisonSchema,
+  },
+  {
+    fileName: "machine-reasr-causal-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-reasr-causal-evaluation.schema.json",
+    schema: machineReAsrCausalEvaluationSchema,
+  },
+  {
+    fileName: "machine-asr-ceiling-evaluation-v2.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-asr-ceiling-evaluation-v2.schema.json",
+    schema: machineAsrCeilingEvaluationV2Schema,
+  },
+  {
+    fileName: "machine-association-error-taxonomy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-association-error-taxonomy.schema.json",
+    schema: machineAssociationErrorTaxonomySchema,
+  },
+  {
+    fileName: "c6-0-1-7-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-7-quality-policy.schema.json",
+    schema: c6017QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-7-ablation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-7-ablation.schema.json",
+    schema: c6017AblationSchema,
+  },
+  {
+    fileName: "c6-0-1-7-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-7-validation.schema.json",
+    schema: c6017ValidationSchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",

@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-reasr-risk-v2.schema.json",
+  "title": "machine-reasr-risk-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.7-fresh-targeted-reasr-asr-ceiling-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "machine-reasr-risk-v2" },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "semantics": {
+      "type": "string",
+      "const": "positive-error-vs-evidence-absence-v2"
+    },
+    "triggerPolicy": {
+      "type": "string",
+      "const": "one-strong-positive-or-two-supporting-provider-families-or-independent-window-or-incomplete-speech"
+    },
+    "episodeRequestBudget": { "type": "number", "const": 36 },
+    "maximumRequestsPerEvent": { "type": "number", "const": 3 },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "riskFacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "factType": { "type": "string", "minLength": 1 },
+                "evidenceClass": {
+                  "type": "string",
+                  "enum": [
+                    "POSITIVE_ERROR_EVIDENCE",
+                    "SUPPORTING_ERROR_EVIDENCE",
+                    "EVIDENCE_ABSENCE",
+                    "POSITIVE_CORRECTNESS_EVIDENCE",
+                    "CONFLICTING_EVIDENCE",
+                    "UNKNOWN"
+                  ]
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": ["NONE", "WEAK", "STRONG", "UNKNOWN"]
+                },
+                "providerFamily": {
+                  "type": "string",
+                  "enum": [
+                    "TOKEN",
+                    "CTC",
+                    "DECODER",
+                    "SPEECH_VAD",
+                    "REQUEST_EDGE",
+                    "CROSS_WINDOW",
+                    "TEXT_SHAPE",
+                    "ASSOCIATION"
+                  ]
+                },
+                "positiveErrorEvidence": { "type": "boolean" },
+                "evidenceMissing": { "type": "boolean" },
+                "sourceEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "factType",
+                "evidenceClass",
+                "severity",
+                "providerFamily",
+                "positiveErrorEvidence",
+                "evidenceMissing",
+                "sourceEvidenceIds",
+                "reasons",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "positiveErrorEvidenceCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "strongPositiveErrorEvidenceCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "supportingEvidenceFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TOKEN",
+                "CTC",
+                "DECODER",
+                "SPEECH_VAD",
+                "REQUEST_EDGE",
+                "CROSS_WINDOW",
+                "TEXT_SHAPE",
+                "ASSOCIATION"
+              ]
+            }
+          },
+          "evidenceAbsenceCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "correctnessEvidenceCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "conflictingEvidence": { "type": "boolean" },
+          "absenceOnly": { "type": "boolean" },
+          "eligibility": { "type": "boolean" },
+          "recommendedAction": {
+            "type": "string",
+            "enum": ["KEEP", "VERIFY", "RE_ASR", "REVIEW"]
+          },
+          "priorityClass": {
+            "type": "string",
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NONE"]
+          },
+          "selectionReason": { "type": "string", "minLength": 1 },
+          "stableTieBreakHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "budgetSelected": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "riskFacts",
+          "positiveErrorEvidenceCount",
+          "strongPositiveErrorEvidenceCount",
+          "supportingEvidenceFamilies",
+          "evidenceAbsenceCount",
+          "correctnessEvidenceCount",
+          "conflictingEvidence",
+          "absenceOnly",
+          "eligibility",
+          "recommendedAction",
+          "priorityClass",
+          "selectionReason",
+          "stableTieBreakHash",
+          "budgetSelected",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oldEligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "eligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "positiveErrorEvidenceEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "supportingMultiFamilyEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evidenceAbsenceOnlyEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectedAbsenceOnlyEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "plannedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventCount",
+        "oldEligibleCount",
+        "eligibleCount",
+        "positiveErrorEvidenceEventCount",
+        "supportingMultiFamilyEventCount",
+        "evidenceAbsenceOnlyEventCount",
+        "selectedEventCount",
+        "selectedAbsenceOnlyEventCount",
+        "plannedRequestCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "semantics",
+    "triggerPolicy",
+    "episodeRequestBudget",
+    "maximumRequestsPerEvent",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
