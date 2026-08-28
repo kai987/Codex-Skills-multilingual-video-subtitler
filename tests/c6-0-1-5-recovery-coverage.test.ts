@@ -560,4 +560,33 @@ describe("C6.0.1.5 evidence application accounting", () => {
     expect(artifact.proposals[0]?.applyEligibility).toBe("observe-only");
     expect(artifact.summary.appliedCount).toBe(0);
   });
+
+  it("emits no local association proposals when the ablation mode is off", () => {
+    const artifact = buildLocalAssociationRepairProposals({
+      mode: "off",
+      inspectedEventCount: 180,
+      risks: [
+        {
+          candidateId: "candidate-1",
+          sourceEventId: "event-1",
+          competingEventId: "event-2",
+          currentScore: 0.4,
+          competingScore: 0.8,
+          evidenceIds: ["association:candidate-1"],
+          hardCompatible: true,
+        },
+      ],
+      generatedAt: GENERATED_AT,
+    });
+
+    expect(artifact).toMatchObject({
+      mode: "off",
+      proposals: [],
+      summary: {
+        inspectedEventCount: 0,
+        proposalCount: 0,
+        appliedCount: 0,
+      },
+    });
+  });
 });

@@ -226,6 +226,7 @@ function parseArguments(argv: readonly string[]): Map<string, string> {
     "--timing-application",
     "--single-variant-audit",
     "--raw-asr-event-recovery",
+    "--local-association-repair",
     "--ffmpeg",
     "--whisper-server",
     "--whisper-model",
@@ -1907,6 +1908,16 @@ async function main(): Promise<void> {
   );
   const auditMode = mode(args, "--single-variant-audit");
   const recoveryMode = mode(args, "--raw-asr-event-recovery");
+  const localAssociationMode = optionalMode(
+    args,
+    "--local-association-repair",
+    "observe",
+  );
+  if (localAssociationMode === "enforce") {
+    throw new InputError(
+      "--local-association-repair is observe-only and cannot be enforce.",
+    );
+  }
   const ffmpeg = path.resolve(required(args, "--ffmpeg"));
   const whisperServer = path.resolve(required(args, "--whisper-server"));
   const whisperModel = path.resolve(required(args, "--whisper-model"));
@@ -2184,6 +2195,7 @@ async function main(): Promise<void> {
     generatedAt: startedAt,
   });
   const associationRepair = buildLocalAssociationRepairProposals({
+    mode: localAssociationMode,
     inspectedEventCount: canonical.events.length,
     risks: association.records.flatMap((record) => {
       const sourceEventId = record.assignedEventId;
@@ -2539,6 +2551,8 @@ async function main(): Promise<void> {
       auditMode,
       "--raw-asr-event-recovery",
       recoveryMode,
+      "--local-association-repair",
+      localAssociationMode,
       "--asr-cache-dir",
       sharedCache,
       ...(importedCache === undefined
@@ -2598,6 +2612,7 @@ async function main(): Promise<void> {
       timingApplicationMode,
       auditMode,
       recoveryMode,
+      localAssociationMode,
     },
     source: {
       sizeBefore: sourceInfoBefore.size,

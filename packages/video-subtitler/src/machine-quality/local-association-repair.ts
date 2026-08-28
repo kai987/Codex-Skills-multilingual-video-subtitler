@@ -17,12 +17,14 @@ export interface LocalAssociationRiskInput {
 }
 
 export function buildLocalAssociationRepairProposals(input: {
+  mode?: "off" | "observe";
   inspectedEventCount: number;
   risks: readonly LocalAssociationRiskInput[];
   generatedAt?: string;
 }): MachineLocalAssociationRepairProposals {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
-  const proposals = input.risks
+  const mode = input.mode ?? "observe";
+  const proposals = (mode === "observe" ? input.risks : [])
     .filter(
       (risk) =>
         risk.hardCompatible &&
@@ -44,11 +46,11 @@ export function buildLocalAssociationRepairProposals(input: {
       return { ...core, semanticHash: machineQualitySemanticHash(core) };
     });
   const summary = {
-    inspectedEventCount: input.inspectedEventCount,
+    inspectedEventCount: mode === "observe" ? input.inspectedEventCount : 0,
     proposalCount: proposals.length,
     appliedCount: 0 as const,
   };
-  const core = { mode: "observe" as const, proposals, summary };
+  const core = { mode, proposals, summary };
   return machineLocalAssociationRepairProposalsSchema.parse({
     schemaVersion: "1.0.0",
     policyVersion: c6015PolicyVersion,

@@ -600,7 +600,7 @@ export const machineLocalAssociationRepairProposalsSchema = z
   .object({
     ...artifactHeader,
     artifactType: z.literal("machine-local-association-repair-proposals"),
-    mode: z.literal("observe"),
+    mode: z.enum(["off", "observe"]),
     proposals: z.array(
       z
         .object({
