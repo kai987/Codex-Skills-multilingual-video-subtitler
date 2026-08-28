@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-request-edge-risk.schema.json",
+  "title": "machine-request-edge-risk",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "machine-request-edge-risk" },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "indexingPolicy": {
+      "type": "string",
+      "const": "source-global-seconds-request-relative"
+    },
+    "thresholdPolicy": { "type": "string", "const": "frozen-machine-only-v1" },
+    "edgeDistanceThresholdSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "requestId": { "type": "string", "minLength": 1 },
+          "requestInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "candidateInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "leftDistance": { "type": "number", "minimum": 0 },
+          "rightDistance": { "type": "number", "minimum": 0 },
+          "nearLeftRequestEdge": { "type": "boolean" },
+          "nearRightRequestEdge": { "type": "boolean" },
+          "speechContinuationLeft": { "type": "boolean" },
+          "speechContinuationRight": { "type": "boolean" },
+          "tokenEdgeContact": { "type": "boolean" },
+          "ctcIncomplete": { "type": "boolean" },
+          "decoderSuggestsTruncation": { "type": "boolean" },
+          "independentContinuation": { "type": "boolean" },
+          "incompleteAcousticSpan": { "type": "boolean" },
+          "edgeRisk": {
+            "type": "string",
+            "enum": ["NONE", "WEAK", "STRONG", "UNKNOWN"]
+          },
+          "strongEdgeRisk": { "type": "boolean" },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "requestId",
+          "requestInterval",
+          "candidateInterval",
+          "leftDistance",
+          "rightDistance",
+          "nearLeftRequestEdge",
+          "nearRightRequestEdge",
+          "speechContinuationLeft",
+          "speechContinuationRight",
+          "tokenEdgeContact",
+          "ctcIncomplete",
+          "decoderSuggestsTruncation",
+          "independentContinuation",
+          "incompleteAcousticSpan",
+          "edgeRisk",
+          "strongEdgeRisk",
+          "evidenceIds",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "strongRiskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "weakRiskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "noRiskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownRiskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requestIntervalMissingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "legacyEventEdgeClassificationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "candidateCount",
+        "strongRiskCount",
+        "weakRiskCount",
+        "noRiskCount",
+        "unknownRiskCount",
+        "requestIntervalMissingCount",
+        "legacyEventEdgeClassificationCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "indexingPolicy",
+    "thresholdPolicy",
+    "edgeDistanceThresholdSeconds",
+    "candidates",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

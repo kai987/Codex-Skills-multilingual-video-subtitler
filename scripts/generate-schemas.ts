@@ -217,6 +217,18 @@ import {
   c6015AblationSchema,
   c6015QualityComparisonSchema,
   c6015ValidationSchema,
+  machineRequestEdgeRiskSchema,
+  machineAcousticRiskVectorSchema,
+  machineReAsrPrioritySchema,
+  machineDecoderEvidenceSchema,
+  machineEventFinalTextSpanLineageSchema,
+  machineSpanTextRepairSchema,
+  machinePartialBoundaryProposalsSchema,
+  machineJointBoundaryRefinementSchema,
+  machineAsrCeilingEvaluationSchema,
+  c6016QualityPolicySchema,
+  c6016AblationSchema,
+  c6016ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -356,6 +368,66 @@ const schemas = [
     fileName: "c6-0-1-5-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-5-validation.schema.json",
     schema: c6015ValidationSchema,
+  },
+  {
+    fileName: "machine-request-edge-risk.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-request-edge-risk.schema.json",
+    schema: machineRequestEdgeRiskSchema,
+  },
+  {
+    fileName: "machine-acoustic-risk-vector.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-acoustic-risk-vector.schema.json",
+    schema: machineAcousticRiskVectorSchema,
+  },
+  {
+    fileName: "machine-reasr-priority.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-reasr-priority.schema.json",
+    schema: machineReAsrPrioritySchema,
+  },
+  {
+    fileName: "machine-decoder-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-decoder-evidence.schema.json",
+    schema: machineDecoderEvidenceSchema,
+  },
+  {
+    fileName: "machine-event-final-text-span-lineage.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-event-final-text-span-lineage.schema.json",
+    schema: machineEventFinalTextSpanLineageSchema,
+  },
+  {
+    fileName: "machine-span-text-repair.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-span-text-repair.schema.json",
+    schema: machineSpanTextRepairSchema,
+  },
+  {
+    fileName: "machine-partial-boundary-proposals.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-partial-boundary-proposals.schema.json",
+    schema: machinePartialBoundaryProposalsSchema,
+  },
+  {
+    fileName: "machine-joint-boundary-refinement.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-joint-boundary-refinement.schema.json",
+    schema: machineJointBoundaryRefinementSchema,
+  },
+  {
+    fileName: "machine-asr-ceiling-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-asr-ceiling-evaluation.schema.json",
+    schema: machineAsrCeilingEvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-6-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-6-quality-policy.schema.json",
+    schema: c6016QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-6-ablation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-6-ablation.schema.json",
+    schema: c6016AblationSchema,
+  },
+  {
+    fileName: "c6-0-1-6-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-6-validation.schema.json",
+    schema: c6016ValidationSchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",

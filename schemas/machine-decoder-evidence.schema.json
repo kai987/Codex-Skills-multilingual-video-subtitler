@@ -1,0 +1,429 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-decoder-evidence.schema.json",
+  "title": "machine-decoder-evidence",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "machine-decoder-evidence" },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "missingFieldPolicy": {
+      "type": "string",
+      "const": "explicit-unavailable-unsupported-or-unknown-never-zero"
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "requestId": { "type": "string", "minLength": 1 },
+          "candidateFamily": {
+            "type": "string",
+            "enum": ["PRIMARY", "RECOVERY", "TARGETED_RE_ASR", "RAW_RE_ASR"]
+          },
+          "decoderProvider": { "type": "string", "minLength": 1 },
+          "availability": {
+            "type": "string",
+            "enum": ["available", "unavailable", "unsupported", "unknown"]
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "averageLogProbability": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "noSpeechProbability": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "compressionRatio": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "temperature": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "fallbackCount": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "decoderSegmentStart": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "decoderSegmentEnd": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "tokenTimestampAvailable": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "tokenCount": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "requestEdgeDistance": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              },
+              "languageProbability": {
+                "type": "object",
+                "properties": {
+                  "availability": {
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unavailable",
+                      "unsupported",
+                      "unknown"
+                    ]
+                  },
+                  "value": {
+                    "anyOf": [{ "type": "number" }, { "type": "null" }]
+                  },
+                  "reason": {
+                    "anyOf": [
+                      { "type": "string", "minLength": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["availability", "value", "reason"],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "averageLogProbability",
+              "noSpeechProbability",
+              "compressionRatio",
+              "temperature",
+              "fallbackCount",
+              "decoderSegmentStart",
+              "decoderSegmentEnd",
+              "tokenTimestampAvailable",
+              "tokenCount",
+              "requestEdgeDistance",
+              "languageProbability"
+            ],
+            "additionalProperties": false
+          },
+          "confidenceDiagnostics": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "sourceArtifact": { "type": "string", "minLength": 1 },
+              "sourceRequestId": { "type": "string", "minLength": 1 },
+              "providerResponseRetained": { "type": "boolean" },
+              "sourceGlobalVerified": { "type": "boolean" }
+            },
+            "required": [
+              "sourceArtifact",
+              "sourceRequestId",
+              "providerResponseRetained",
+              "sourceGlobalVerified"
+            ],
+            "additionalProperties": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "requestId",
+          "candidateFamily",
+          "decoderProvider",
+          "availability",
+          "fields",
+          "confidenceDiagnostics",
+          "provenance",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "availableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsupportedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "primaryCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recoveryCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reAsrCoverage": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": [
+        "candidateCount",
+        "availableCount",
+        "unavailableCount",
+        "unsupportedCount",
+        "unknownCount",
+        "primaryCoverage",
+        "recoveryCoverage",
+        "reAsrCoverage"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "missingFieldPolicy",
+    "candidates",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

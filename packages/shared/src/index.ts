@@ -27,6 +27,7 @@ export * from "./c6-0-1-2-candidate-timeline-schemas.js";
 export * from "./c6-0-1-3-association-assembly-schemas.js";
 export * from "./c6-0-1-4-vad-variant-reasr-schemas.js";
 export * from "./c6-0-1-5-evidence-application-schemas.js";
+export * from "./c6-0-1-6-acoustic-span-boundary-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

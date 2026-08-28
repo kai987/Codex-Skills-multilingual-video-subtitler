@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-6-quality-policy.schema.json",
+  "title": "c6-0-1-6-quality-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-6-quality-policy" },
+    "policyFrozenAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "goldAccessBeforeFreezeCount": { "type": "number", "const": 0 },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "requestEdgeDistanceSeconds": { "type": "number", "const": 0.35 },
+        "ctcStrongMaximum": { "type": "number", "const": 0.35 },
+        "ctcWeakMaximum": { "type": "number", "const": 0.55 },
+        "tokenWeakMaximum": { "type": "number", "const": 0.4 },
+        "speechIncompleteStrongMaximum": { "type": "number", "const": 0.7 },
+        "decoderWeakAverageLogProbability": { "type": "number", "const": -1.2 },
+        "decoderStrongAverageLogProbability": {
+          "type": "number",
+          "const": -1.5
+        },
+        "decoderWeakNoSpeechProbability": { "type": "number", "const": 0.6 },
+        "decoderStrongNoSpeechProbability": { "type": "number", "const": 0.8 },
+        "boundaryCoverageMinimum": { "type": "number", "const": 0.8 },
+        "boundaryPaddingSeconds": { "type": "number", "const": 0.08 }
+      },
+      "required": [
+        "requestEdgeDistanceSeconds",
+        "ctcStrongMaximum",
+        "ctcWeakMaximum",
+        "tokenWeakMaximum",
+        "speechIncompleteStrongMaximum",
+        "decoderWeakAverageLogProbability",
+        "decoderStrongAverageLogProbability",
+        "decoderWeakNoSpeechProbability",
+        "decoderStrongNoSpeechProbability",
+        "boundaryCoverageMinimum",
+        "boundaryPaddingSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "riskTriggerPolicy": {
+      "type": "string",
+      "const": "one-strong-or-two-independent-weak"
+    },
+    "goldRuntimeInputAllowed": { "type": "boolean", "const": false },
+    "candidateTextPromptAllowed": { "type": "boolean", "const": false },
+    "episodeReAsrRequestBudget": { "type": "number", "const": 36 },
+    "maximumRequestsPerEvent": { "type": "number", "const": 3 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineReleaseAuthorized": { "type": "boolean", "const": false },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "policyFrozenAt",
+    "goldAccessBeforeFreezeCount",
+    "thresholds",
+    "riskTriggerPolicy",
+    "goldRuntimeInputAllowed",
+    "candidateTextPromptAllowed",
+    "episodeReAsrRequestBudget",
+    "maximumRequestsPerEvent",
+    "productionStatus",
+    "finalizationMethod",
+    "machineReleaseAuthorized",
+    "policyHash",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

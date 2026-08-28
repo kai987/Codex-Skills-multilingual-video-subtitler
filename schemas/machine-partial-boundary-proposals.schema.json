@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-partial-boundary-proposals.schema.json",
+  "title": "machine-partial-boundary-proposals",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-partial-boundary-proposals"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "coveragePolicy": {
+      "type": "string",
+      "const": "independent-start-and-end-evidence"
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "cueId": { "type": "string", "minLength": 1 },
+          "originalStart": { "type": "number", "minimum": 0 },
+          "originalEnd": { "type": "number", "exclusiveMinimum": 0 },
+          "startEvidence": {
+            "type": "object",
+            "properties": {
+              "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+              "trustedTokenIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "proposedTime": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "strong": { "type": "boolean" }
+            },
+            "required": [
+              "coverage",
+              "trustedTokenIds",
+              "evidenceIds",
+              "proposedTime",
+              "strong"
+            ],
+            "additionalProperties": false
+          },
+          "endEvidence": {
+            "type": "object",
+            "properties": {
+              "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+              "trustedTokenIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "proposedTime": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "strong": { "type": "boolean" }
+            },
+            "required": [
+              "coverage",
+              "trustedTokenIds",
+              "evidenceIds",
+              "proposedTime",
+              "strong"
+            ],
+            "additionalProperties": false
+          },
+          "startEligible": { "type": "boolean" },
+          "endEligible": { "type": "boolean" },
+          "proposalType": {
+            "type": "string",
+            "enum": [
+              "START_TIME_REFINE",
+              "END_TIME_REFINE",
+              "BOTH_BOUNDARIES_REFINE",
+              "NONE"
+            ]
+          },
+          "proposedStart": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "proposedEnd": {
+            "anyOf": [
+              { "type": "number", "exclusiveMinimum": 0 },
+              { "type": "null" }
+            ]
+          },
+          "paddingSeconds": { "type": "number", "minimum": 0 },
+          "nonDegradationPassed": { "type": "boolean" },
+          "accepted": { "type": "boolean" },
+          "applied": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "cueId",
+          "originalStart",
+          "originalEnd",
+          "startEvidence",
+          "endEvidence",
+          "startEligible",
+          "endEligible",
+          "proposalType",
+          "proposedStart",
+          "proposedEnd",
+          "paddingSeconds",
+          "nonDegradationPassed",
+          "accepted",
+          "applied",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startOnlyEligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startOnlyAppliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "endOnlyEligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "endOnlyAppliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bothEligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bothAppliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "proposalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "appliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "cueCount",
+        "startOnlyEligibleCount",
+        "startOnlyAppliedCount",
+        "endOnlyEligibleCount",
+        "endOnlyAppliedCount",
+        "bothEligibleCount",
+        "bothAppliedCount",
+        "proposalCount",
+        "appliedCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "coveragePolicy",
+    "proposals",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
