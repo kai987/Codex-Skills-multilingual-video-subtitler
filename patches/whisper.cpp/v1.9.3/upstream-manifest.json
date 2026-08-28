@@ -7,7 +7,7 @@
   "commit": "371b5a7561823ab2bb32142d2751e35e7534727b",
   "sourceTree": "3d7ce4f956997cfa325c7556533aba5604278463",
   "patchId": "mvl-mapped-token-raw-vad-json-v1+request-state-isolation-v1",
-  "patchSha256": "78922c97975e76e19613d6fe2e61d7e96ae1b992df4a07ae8d77a31181f81df7",
+  "patchSha256": "9ae5969381786395c6219d360344eeff0be0ab6083c8c359e32b29b3a586fc97",
   "patchFiles": [
     {
       "path": "0001-mvl-mapped-token-raw-vad-json.patch",
@@ -16,6 +16,10 @@
     {
       "path": "0002-mvl-request-state-reset.patch",
       "sha256": "0d0df33cae2d273c856db5cfbd63e3e8732be44f1d5ffda481817ea4662eb2ae"
+    },
+    {
+      "path": "0003-mvl-untimed-token-evidence-guard.patch",
+      "sha256": "da0d61c90357f7d8f56634a132d146380a0c03dda34215f326f80e916161d154"
     }
   ],
   "responseSchema": "mvl-whisper-server-response/1.0.0",

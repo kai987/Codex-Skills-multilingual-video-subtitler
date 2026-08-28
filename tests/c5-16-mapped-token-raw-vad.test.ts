@@ -28,7 +28,7 @@ const COMMIT = "371b5a7561823ab2bb32142d2751e35e7534727b";
 const PATCH_SHA =
   "bba39640e7005a1fdeb62c549d04ba76b6fc0d8aedae43daf9c9de1ab10a735d";
 const PATCH_SERIES_SHA =
-  "78922c97975e76e19613d6fe2e61d7e96ae1b992df4a07ae8d77a31181f81df7";
+  "9ae5969381786395c6219d360344eeff0be0ab6083c8c359e32b29b3a586fc97";
 const HASH_A = "a".repeat(64);
 const HASH_B = "b".repeat(64);
 
@@ -264,6 +264,48 @@ describe("C5.16 patched response contract", () => {
         startCentiseconds: 20,
       },
     });
+  });
+
+  it("preserves an untimed VAD lexical token without inventing timing bounds", () => {
+    const fixture = response(true);
+    const segment = fixture.transcription[0];
+    if (segment === undefined) throw new Error("Fixture segment is missing.");
+    segment.tokens.splice(1, 0, {
+      index: 1,
+      id: 101,
+      text: "い",
+      textBytesHex: utf8Hex("い"),
+      special: false,
+      probability: 0.4,
+      raw: null,
+      mapped: null,
+      dtwCentiseconds: null,
+    });
+    const special = segment.tokens[2];
+    if (special === undefined)
+      throw new Error("Fixture special token is missing.");
+    special.index = 2;
+    segment.words.push({
+      word: "い",
+      wordBytesHex: utf8Hex("い"),
+      memberTokenIndices: [1],
+      probability: 0.4,
+      rawStartCentiseconds: null,
+      rawEndCentiseconds: null,
+      mappedStartCentiseconds: null,
+      mappedEndCentiseconds: null,
+    });
+    expect(mvlWhisperServerResponseSchema.safeParse(fixture).success).toBe(
+      true,
+    );
+    segment.words[1] = {
+      ...segment.words[1],
+      rawStartCentiseconds: 10,
+      rawEndCentiseconds: 11,
+    };
+    expect(mvlWhisperServerResponseSchema.safeParse(fixture).success).toBe(
+      false,
+    );
   });
 
   it("rejects a mapped token with the wrong coordinate system", () => {
@@ -756,6 +798,7 @@ describe("C5.16 patch, cache, and A/B artifact identity", () => {
       [
         "0001-mvl-mapped-token-raw-vad-json.patch",
         "0002-mvl-request-state-reset.patch",
+        "0003-mvl-untimed-token-evidence-guard.patch",
       ],
     );
     expect(

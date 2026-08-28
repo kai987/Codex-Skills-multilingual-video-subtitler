@@ -284,7 +284,22 @@ export const mvlWhisperTranscriptionSegmentSchema = z
           member.mapped !== null &&
           member.raw !== null,
       );
-      if (timed.length === 0) continue;
+      if (timed.length === 0) {
+        if (
+          word.rawStartCentiseconds !== null ||
+          word.rawEndCentiseconds !== null ||
+          word.mappedStartCentiseconds !== null ||
+          word.mappedEndCentiseconds !== null
+        ) {
+          context.addIssue({
+            code: "custom",
+            path: ["words", wordIndex],
+            message:
+              "An untimed grouped word must not carry raw or mapped bounds.",
+          });
+        }
+        continue;
+      }
       const first = timed[0];
       const last = timed.at(-1);
       if (
@@ -436,7 +451,8 @@ export const mvlWhisperServerResponseSchema = z
           if (
             value.request.token_timestamps &&
             !token.special &&
-            token.raw?.coordinateSystem !== "vad-processed-local"
+            token.raw !== null &&
+            token.raw.coordinateSystem !== "vad-processed-local"
           ) {
             context.addIssue({
               code: "custom",
@@ -546,6 +562,7 @@ export const whisperUpstreamPatchManifestSchema = z
             path: z.enum([
               "0001-mvl-mapped-token-raw-vad-json.patch",
               "0002-mvl-request-state-reset.patch",
+              "0003-mvl-untimed-token-evidence-guard.patch",
             ]),
             sha256: hashSchema,
           })
