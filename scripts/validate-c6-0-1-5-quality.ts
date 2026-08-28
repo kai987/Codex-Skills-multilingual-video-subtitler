@@ -793,7 +793,7 @@ const shareableAudit = {
   ).length,
   goldTextLeakCount: (
     serializedShareable.match(
-      /(?:goldExcerpt|machineExcerpt|alignments|candidateText)/gu,
+      /"(?:goldExcerpt|machineExcerpt|alignments|candidateText)"\s*:/gu,
     ) ?? []
   ).length,
   rawPrivateAudioCount: 0,
