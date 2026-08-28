@@ -54,3 +54,5 @@ export * from "./c6017-evaluation.js";
 export * from "./core-acoustic-span.js";
 export * from "./grouped-word-projection.js";
 export * from "./core-text-projection.js";
+export * from "./localized-candidate-comparability.js";
+export * from "./core-asr-stability.js";
