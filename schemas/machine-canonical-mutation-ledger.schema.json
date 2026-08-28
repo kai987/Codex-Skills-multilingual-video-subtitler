@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-canonical-mutation-ledger.schema.json",
+  "title": "machine-canonical-mutation-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-canonical-mutation-ledger"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "finalCueIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "applyStatus": {
+            "type": "string",
+            "enum": [
+              "PROPOSED",
+              "ACCEPTED",
+              "REJECTED",
+              "APPLIED",
+              "ROLLED_BACK",
+              "NO_OP"
+            ]
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "canonicalHashBefore": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "canonicalHashAfter": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "packageHashBefore": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "packageHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "renderedSrtHashBefore": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "renderedSrtHashAfter": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "renderedVttHashBefore": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "renderedVttHashAfter": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "renderedAssHashBefore": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "renderedAssHashAfter": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "lineageStillValid": { "type": "boolean" },
+          "strictPackageValidationPassed": { "type": "boolean" },
+          "renderedOutputChanged": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "finalCueIds",
+          "applyStatus",
+          "reasons",
+          "canonicalHashBefore",
+          "canonicalHashAfter",
+          "packageHashBefore",
+          "packageHashAfter",
+          "renderedSrtHashBefore",
+          "renderedSrtHashAfter",
+          "renderedVttHashBefore",
+          "renderedVttHashAfter",
+          "renderedAssHashBefore",
+          "renderedAssHashAfter",
+          "lineageStillValid",
+          "strictPackageValidationPassed",
+          "renderedOutputChanged",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "proposedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acceptedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "appliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rolledBackCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "textMutationAppliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingMutationAppliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "textChangedFinalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingChangedFinalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsupportedMutationCount": { "type": "number", "const": 0 },
+        "finalArtifactMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "proposedCount",
+        "acceptedCount",
+        "rejectedCount",
+        "appliedCount",
+        "rolledBackCount",
+        "textMutationAppliedCount",
+        "timingMutationAppliedCount",
+        "textChangedFinalCueCount",
+        "timingChangedFinalCueCount",
+        "unsupportedMutationCount",
+        "finalArtifactMutationCount"
+      ],
+      "additionalProperties": false
+    },
+    "finalHashes": {
+      "type": "object",
+      "properties": {
+        "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalTimingHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "packageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "srtHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "vttHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "assHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "canonicalTextHash",
+        "canonicalTimingHash",
+        "packageHash",
+        "srtHash",
+        "vttHash",
+        "assHash",
+        "presentationHash"
+      ],
+      "additionalProperties": false
+    },
+    "noOpReason": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "records",
+    "summary",
+    "finalHashes",
+    "noOpReason",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

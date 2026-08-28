@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-evidence-application-coverage.schema.json",
+  "title": "machine-evidence-application-coverage",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-evidence-application-coverage"
+    },
+    "trustedTokenCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "trustedTokenConsumedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "timingEligibleCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "timingProposalCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "timingAppliedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ctcEvidenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ctcEvidenceConsumedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reAsrCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reAsrCandidateEvaluatedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reAsrCandidateSelectedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "variantEvidenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "variantDecisionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "replacementProposalCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "replacementAppliedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eventFinalLineageCoverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "finalArtifactMutationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "stages": {
+      "type": "object",
+      "properties": {
+        "produced": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "eligible": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "consumed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "proposalGenerated": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "applied": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "affectedFinalOutput": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "produced",
+        "eligible",
+        "consumed",
+        "proposalGenerated",
+        "applied",
+        "affectedFinalOutput"
+      ],
+      "additionalProperties": false
+    },
+    "blockerReasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "engineeringGatePassed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "trustedTokenCount",
+    "trustedTokenConsumedCount",
+    "timingEligibleCueCount",
+    "timingProposalCount",
+    "timingAppliedCount",
+    "ctcEvidenceCount",
+    "ctcEvidenceConsumedCount",
+    "reAsrCandidateCount",
+    "reAsrCandidateEvaluatedCount",
+    "reAsrCandidateSelectedCount",
+    "variantEvidenceCount",
+    "variantDecisionCount",
+    "replacementProposalCount",
+    "replacementAppliedCount",
+    "eventFinalLineageCoverage",
+    "finalArtifactMutationCount",
+    "stages",
+    "blockerReasons",
+    "engineeringGatePassed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

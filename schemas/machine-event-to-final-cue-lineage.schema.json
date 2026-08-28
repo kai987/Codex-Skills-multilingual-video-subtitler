@@ -1,0 +1,535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-event-to-final-cue-lineage.schema.json",
+  "title": "machine-event-to-final-cue-lineage",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-event-to-final-cue-lineage"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "identityPolicy": {
+      "type": "string",
+      "const": "operation-history-only-no-time-nearest"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "sourceCandidateIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "canonicalCueIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "lineageOperations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationId": { "type": "string", "minLength": 1 },
+                "relationType": {
+                  "type": "string",
+                  "enum": [
+                    "CANONICAL_ASSEMBLY",
+                    "SPLIT",
+                    "MERGE",
+                    "DEDUPE",
+                    "DROP",
+                    "TIMING_PROJECTION",
+                    "TEXT_PROJECTION",
+                    "FINAL_SURVIVAL",
+                    "IDENTITY"
+                  ]
+                },
+                "sourceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "operationArtifact": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "relationId",
+                "relationType",
+                "sourceIds",
+                "targetIds",
+                "operationArtifact",
+                "reason",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "splitRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationId": { "type": "string", "minLength": 1 },
+                "relationType": {
+                  "type": "string",
+                  "enum": [
+                    "CANONICAL_ASSEMBLY",
+                    "SPLIT",
+                    "MERGE",
+                    "DEDUPE",
+                    "DROP",
+                    "TIMING_PROJECTION",
+                    "TEXT_PROJECTION",
+                    "FINAL_SURVIVAL",
+                    "IDENTITY"
+                  ]
+                },
+                "sourceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "operationArtifact": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "relationId",
+                "relationType",
+                "sourceIds",
+                "targetIds",
+                "operationArtifact",
+                "reason",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "mergeRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationId": { "type": "string", "minLength": 1 },
+                "relationType": {
+                  "type": "string",
+                  "enum": [
+                    "CANONICAL_ASSEMBLY",
+                    "SPLIT",
+                    "MERGE",
+                    "DEDUPE",
+                    "DROP",
+                    "TIMING_PROJECTION",
+                    "TEXT_PROJECTION",
+                    "FINAL_SURVIVAL",
+                    "IDENTITY"
+                  ]
+                },
+                "sourceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "operationArtifact": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "relationId",
+                "relationType",
+                "sourceIds",
+                "targetIds",
+                "operationArtifact",
+                "reason",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "dedupeRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationId": { "type": "string", "minLength": 1 },
+                "relationType": {
+                  "type": "string",
+                  "enum": [
+                    "CANONICAL_ASSEMBLY",
+                    "SPLIT",
+                    "MERGE",
+                    "DEDUPE",
+                    "DROP",
+                    "TIMING_PROJECTION",
+                    "TEXT_PROJECTION",
+                    "FINAL_SURVIVAL",
+                    "IDENTITY"
+                  ]
+                },
+                "sourceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "operationArtifact": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "relationId",
+                "relationType",
+                "sourceIds",
+                "targetIds",
+                "operationArtifact",
+                "reason",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "droppedRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationId": { "type": "string", "minLength": 1 },
+                "relationType": {
+                  "type": "string",
+                  "enum": [
+                    "CANONICAL_ASSEMBLY",
+                    "SPLIT",
+                    "MERGE",
+                    "DEDUPE",
+                    "DROP",
+                    "TIMING_PROJECTION",
+                    "TEXT_PROJECTION",
+                    "FINAL_SURVIVAL",
+                    "IDENTITY"
+                  ]
+                },
+                "sourceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "operationArtifact": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "relationId",
+                "relationType",
+                "sourceIds",
+                "targetIds",
+                "operationArtifact",
+                "reason",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "timingProjectionRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationId": { "type": "string", "minLength": 1 },
+                "relationType": {
+                  "type": "string",
+                  "enum": [
+                    "CANONICAL_ASSEMBLY",
+                    "SPLIT",
+                    "MERGE",
+                    "DEDUPE",
+                    "DROP",
+                    "TIMING_PROJECTION",
+                    "TEXT_PROJECTION",
+                    "FINAL_SURVIVAL",
+                    "IDENTITY"
+                  ]
+                },
+                "sourceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "operationArtifact": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "relationId",
+                "relationType",
+                "sourceIds",
+                "targetIds",
+                "operationArtifact",
+                "reason",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "textProjectionRelations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relationId": { "type": "string", "minLength": 1 },
+                "relationType": {
+                  "type": "string",
+                  "enum": [
+                    "CANONICAL_ASSEMBLY",
+                    "SPLIT",
+                    "MERGE",
+                    "DEDUPE",
+                    "DROP",
+                    "TIMING_PROJECTION",
+                    "TEXT_PROJECTION",
+                    "FINAL_SURVIVAL",
+                    "IDENTITY"
+                  ]
+                },
+                "sourceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "operationArtifact": { "type": "string", "minLength": 1 },
+                "reason": { "type": "string", "minLength": 1 },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "relationId",
+                "relationType",
+                "sourceIds",
+                "targetIds",
+                "operationArtifact",
+                "reason",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "lineageStatus": {
+            "type": "string",
+            "enum": [
+              "EXACT_ONE_TO_ONE",
+              "ONE_TO_MANY",
+              "MANY_TO_ONE",
+              "SUPERSEDED",
+              "DROPPED",
+              "AMBIGUOUS",
+              "UNRESOLVED"
+            ]
+          },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "modifiable": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "sourceCandidateIds",
+          "canonicalCueIds",
+          "finalCueIds",
+          "lineageOperations",
+          "splitRelations",
+          "mergeRelations",
+          "dedupeRelations",
+          "droppedRelations",
+          "timingProjectionRelations",
+          "textProjectionRelations",
+          "lineageStatus",
+          "blockers",
+          "modifiable",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "finalCueCoverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "finalCueId": { "type": "string", "minLength": 1 },
+          "eventIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["finalCueId", "eventIds", "semanticHash"],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "finalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactOneToOneCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oneToManyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manyToOneCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "supersededCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "droppedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "explicitEventLineageCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coveredFinalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lineageCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "timeNearestIdentityCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "finalCueCount",
+        "exactOneToOneCount",
+        "oneToManyCount",
+        "manyToOneCount",
+        "supersededCount",
+        "droppedCount",
+        "ambiguousCount",
+        "unresolvedCount",
+        "explicitEventLineageCount",
+        "coveredFinalCueCount",
+        "lineageCoverageRatio",
+        "timeNearestIdentityCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "identityPolicy",
+    "events",
+    "finalCueCoverage",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

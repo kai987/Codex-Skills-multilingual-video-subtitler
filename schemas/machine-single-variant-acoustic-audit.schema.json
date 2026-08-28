@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-single-variant-acoustic-audit.schema.json",
+  "title": "machine-single-variant-acoustic-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-single-variant-acoustic-audit"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "auditStatus": {
+            "type": "string",
+            "enum": [
+              "VERIFIED_STRONG",
+              "ACCEPTABLE",
+              "ACOUSTICALLY_WEAK",
+              "INCOMPLETE_SPEECH_SPAN",
+              "EDGE_TRUNCATED",
+              "TOKEN_CONFLICT",
+              "LOW_CTC_SUPPORT",
+              "DECODER_LOW_CONFIDENCE",
+              "UNKNOWN"
+            ]
+          },
+          "acousticEvidence": {
+            "type": "object",
+            "properties": {
+              "ctcEvidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "ctcScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "pronunciationCoverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "acousticCompleteness": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "ctcEvidenceIds",
+              "ctcScore",
+              "pronunciationCoverage",
+              "acousticCompleteness"
+            ],
+            "additionalProperties": false
+          },
+          "tokenCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+          "decoderEvidence": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "available",
+                  "unavailable",
+                  "unknown",
+                  "not-applicable"
+                ]
+              },
+              "averageLogProbability": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "noSpeechProbability": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "compressionRatio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "repetitionRatio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "tokenTimingQuality": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "textDensity": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "edgePosition": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": ["inside", "left-edge", "right-edge", "both-edges"]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "fallbackLevel": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "temperature": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "requestDurationSeconds": {
+                "anyOf": [
+                  { "type": "number", "exclusiveMinimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "decoderEvidenceHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "unavailableReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "status",
+              "averageLogProbability",
+              "noSpeechProbability",
+              "compressionRatio",
+              "repetitionRatio",
+              "tokenTimingQuality",
+              "textDensity",
+              "edgePosition",
+              "fallbackLevel",
+              "temperature",
+              "requestDurationSeconds",
+              "decoderEvidenceHash",
+              "unavailableReasons"
+            ],
+            "additionalProperties": false
+          },
+          "speechCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+          "edgeRisk": { "type": "boolean" },
+          "repetitionRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+          "independentWindowSupportCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "reAsrEligibility": { "type": "boolean" },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "auditStatus",
+          "acousticEvidence",
+          "tokenCoverage",
+          "decoderEvidence",
+          "speechCoverage",
+          "edgeRisk",
+          "repetitionRisk",
+          "independentWindowSupportCount",
+          "reAsrEligibility",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "singleVariantEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "auditedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifiedStrongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acceptableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "suspiciousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reAsrEligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "singleVariantEventCount",
+        "auditedCount",
+        "verifiedStrongCount",
+        "acceptableCount",
+        "suspiciousCount",
+        "reAsrEligibleCount",
+        "unknownCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

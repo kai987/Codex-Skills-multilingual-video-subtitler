@@ -203,6 +203,20 @@ import {
   c6014AblationSchema,
   c6014QualityComparisonSchema,
   c6014ValidationSchema,
+  machineEventToFinalCueLineageSchema,
+  machineCanonicalMutationProposalsSchema,
+  machineCanonicalMutationLedgerSchema,
+  machineVariantEvidenceBundleSchema,
+  machineCandidatePoolC6015Schema,
+  machineTrustedTokenTimingProposalsSchema,
+  machineSingleVariantAcousticAuditSchema,
+  machineRawAsrEventRecoverySchema,
+  machineLocalAssociationRepairProposalsSchema,
+  machineEvidenceApplicationCoverageSchema,
+  c6015QualityPolicySchema,
+  c6015AblationSchema,
+  c6015QualityComparisonSchema,
+  c6015ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -272,6 +286,76 @@ const schemas = [
     fileName: "c6-0-1-4-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-4-validation.schema.json",
     schema: c6014ValidationSchema,
+  },
+  {
+    fileName: "machine-event-to-final-cue-lineage.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-event-to-final-cue-lineage.schema.json",
+    schema: machineEventToFinalCueLineageSchema,
+  },
+  {
+    fileName: "machine-canonical-mutation-proposals.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-canonical-mutation-proposals.schema.json",
+    schema: machineCanonicalMutationProposalsSchema,
+  },
+  {
+    fileName: "machine-canonical-mutation-ledger.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-canonical-mutation-ledger.schema.json",
+    schema: machineCanonicalMutationLedgerSchema,
+  },
+  {
+    fileName: "machine-variant-evidence-bundle.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-variant-evidence-bundle.schema.json",
+    schema: machineVariantEvidenceBundleSchema,
+  },
+  {
+    fileName: "machine-candidate-pool-c6-0-1-5.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-candidate-pool-c6-0-1-5.schema.json",
+    schema: machineCandidatePoolC6015Schema,
+  },
+  {
+    fileName: "machine-trusted-token-timing-proposals.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-trusted-token-timing-proposals.schema.json",
+    schema: machineTrustedTokenTimingProposalsSchema,
+  },
+  {
+    fileName: "machine-single-variant-acoustic-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-single-variant-acoustic-audit.schema.json",
+    schema: machineSingleVariantAcousticAuditSchema,
+  },
+  {
+    fileName: "machine-raw-asr-event-recovery.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-raw-asr-event-recovery.schema.json",
+    schema: machineRawAsrEventRecoverySchema,
+  },
+  {
+    fileName: "machine-local-association-repair-proposals.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-local-association-repair-proposals.schema.json",
+    schema: machineLocalAssociationRepairProposalsSchema,
+  },
+  {
+    fileName: "machine-evidence-application-coverage.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-evidence-application-coverage.schema.json",
+    schema: machineEvidenceApplicationCoverageSchema,
+  },
+  {
+    fileName: "c6-0-1-5-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-5-quality-policy.schema.json",
+    schema: c6015QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-5-ablation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-5-ablation.schema.json",
+    schema: c6015AblationSchema,
+  },
+  {
+    fileName: "c6-0-1-5-quality-comparison.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-5-quality-comparison.schema.json",
+    schema: c6015QualityComparisonSchema,
+  },
+  {
+    fileName: "c6-0-1-5-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-5-validation.schema.json",
+    schema: c6015ValidationSchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",
