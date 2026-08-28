@@ -58,6 +58,8 @@ function clonePackage(value: SubtitlePackage): SubtitlePackage {
 
 export function applyCanonicalMutations(input: {
   mode: C6015Mode;
+  textMode?: C6015Mode;
+  timingMode?: C6015Mode;
   package: SubtitlePackage;
   proposals: MachineCanonicalMutationProposals;
   lineage: MachineEventToFinalCueLineage;
@@ -80,7 +82,19 @@ export function applyCanonicalMutations(input: {
     const beforeSerialized = render(beforePackage);
     const beforeHashes = hashes(beforePackage, beforeSerialized);
     const lineage = lineageByEvent.get(proposal.eventId);
-    const enforce = input.mode === "enforce";
+    const isTextProposal = [
+      "TEXT_VARIANT_REPLACE",
+      "REASR_TEXT_REPLACE",
+    ].includes(proposal.proposalType);
+    const isTimingProposal =
+      proposal.proposalType.includes("TIME") ||
+      proposal.proposalType.includes("BOUNDARIES");
+    const proposalMode = isTextProposal
+      ? (input.textMode ?? input.mode)
+      : isTimingProposal
+        ? (input.timingMode ?? input.mode)
+        : input.mode;
+    const enforce = proposalMode === "enforce";
     const eligible =
       proposal.applyStatus === "ACCEPTED" &&
       proposal.lineageVerified &&
@@ -92,7 +106,9 @@ export function applyCanonicalMutations(input: {
       );
     const reasons = [
       ...proposal.rejectionReasons,
-      ...(!enforce ? ["observe-or-off-mode-does-not-apply"] : []),
+      ...(!enforce
+        ? [`${proposalMode}-mode-does-not-apply-${proposal.proposalType}`]
+        : []),
       ...(!proposal.lineageVerified ? ["lineage-validation-failed"] : []),
       ...(!proposal.nonDegradationPassed ? ["non-degradation-failed"] : []),
       ...(!proposal.safetyPassed ? ["safety-policy-failed"] : []),
@@ -296,7 +312,9 @@ export function applyCanonicalMutations(input: {
     summary.appliedCount > 0
       ? []
       : [
-          ...(input.mode !== "enforce"
+          ...(input.mode !== "enforce" ||
+          (input.textMode ?? input.mode) !== "enforce" ||
+          (input.timingMode ?? input.mode) !== "enforce"
             ? ["mode-does-not-authorize-application"]
             : []),
           ...(input.proposals.summary.acceptedCount === 0

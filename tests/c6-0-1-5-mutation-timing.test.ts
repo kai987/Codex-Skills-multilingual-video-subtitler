@@ -612,4 +612,72 @@ describe("C6.0.1.5 canonical mutation application", () => {
       renderedOutputChanged: false,
     });
   });
+
+  it("supports a text-only ablation without applying timing proposals", () => {
+    const text = acceptedTextProposal();
+    const timingBase = buildTrustedTokenTimingProposals({
+      mode: "enforce",
+      generatedAt: GENERATED_AT,
+      cues: text.cues,
+      lineage: text.lineage,
+      variantEvidence: text.variants,
+      selectedVariantByEvent: new Map([["event-1", "selected"]]),
+      tokens: [
+        {
+          tokenId: "trusted-1",
+          variantId: "selected",
+          trusted: true,
+          lexical: true,
+          sourceGlobalInterval: { start: 10.2, end: 11.7 },
+        },
+      ],
+      timingEligibleCueIds: new Set(["cue-1"]),
+    });
+    const proposals = buildCanonicalMutationProposals({
+      mode: "enforce",
+      generatedAt: GENERATED_AT,
+      cues: text.cues,
+      lineage: text.lineage,
+      variantEvidence: text.variants,
+      selections: [
+        {
+          eventId: "event-1",
+          currentVariantId: "current",
+          selectedVariantId: "selected",
+        },
+      ],
+      candidateTexts: [
+        { variantId: "current", text: "おはよ", hallucinationRisk: 0.2 },
+        { variantId: "selected", text: "おはよう", hallucinationRisk: 0.1 },
+      ],
+      timing: timingBase,
+    });
+    const original = packageFixture(text.cues);
+    const result = applyCanonicalMutations({
+      mode: "enforce",
+      textMode: "enforce",
+      timingMode: "off",
+      generatedAt: GENERATED_AT,
+      package: original,
+      proposals,
+      lineage: text.lineage,
+    });
+
+    expect(result.package.cues[0]).toMatchObject({
+      text: "おはよう",
+      start: original.cues[0]?.start,
+      end: original.cues[0]?.end,
+    });
+    expect(result.ledger.summary).toMatchObject({
+      textMutationAppliedCount: 1,
+      timingMutationAppliedCount: 0,
+    });
+    expect(
+      result.ledger.records.find((record) =>
+        record.reasons.some((reason) =>
+          reason.startsWith("off-mode-does-not-apply"),
+        ),
+      )?.applyStatus,
+    ).toBe("REJECTED");
+  });
 });

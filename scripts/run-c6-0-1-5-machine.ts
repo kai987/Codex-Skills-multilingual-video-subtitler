@@ -222,6 +222,8 @@ function parseArguments(argv: readonly string[]): Map<string, string> {
     "--imported-cache",
     "--run-label",
     "--evidence-to-canonical",
+    "--text-application",
+    "--timing-application",
     "--single-variant-audit",
     "--raw-asr-event-recovery",
     "--ffmpeg",
@@ -260,6 +262,19 @@ function required(args: ReadonlyMap<string, string>, flag: string): string {
 
 function mode(args: ReadonlyMap<string, string>, flag: string): C6015Mode {
   const value = required(args, flag);
+  if (!(value === "off" || value === "observe" || value === "enforce")) {
+    throw new InputError(`${flag} must be off, observe, or enforce.`);
+  }
+  return value;
+}
+
+function optionalMode(
+  args: ReadonlyMap<string, string>,
+  flag: string,
+  fallback: C6015Mode,
+): C6015Mode {
+  const value = args.get(flag);
+  if (value === undefined) return fallback;
   if (!(value === "off" || value === "observe" || value === "enforce")) {
     throw new InputError(`${flag} must be off, observe, or enforce.`);
   }
@@ -1880,6 +1895,16 @@ async function main(): Promise<void> {
       : path.resolve(importedCacheValue);
   const runLabel = required(args, "--run-label");
   const evidenceMode = mode(args, "--evidence-to-canonical");
+  const textApplicationMode = optionalMode(
+    args,
+    "--text-application",
+    evidenceMode,
+  );
+  const timingApplicationMode = optionalMode(
+    args,
+    "--timing-application",
+    evidenceMode,
+  );
   const auditMode = mode(args, "--single-variant-audit");
   const recoveryMode = mode(args, "--raw-asr-event-recovery");
   const ffmpeg = path.resolve(required(args, "--ffmpeg"));
@@ -2268,6 +2293,8 @@ async function main(): Promise<void> {
   });
   const applied = applyCanonicalMutations({
     mode: evidenceMode,
+    textMode: textApplicationMode,
+    timingMode: timingApplicationMode,
     package: subtitlePackage,
     proposals,
     lineage,
@@ -2504,6 +2531,10 @@ async function main(): Promise<void> {
       "enforce",
       "--evidence-to-canonical",
       evidenceMode,
+      "--text-application",
+      textApplicationMode,
+      "--timing-application",
+      timingApplicationMode,
       "--single-variant-audit",
       auditMode,
       "--raw-asr-event-recovery",
@@ -2561,7 +2592,13 @@ async function main(): Promise<void> {
     repositoryCommit,
     startedAt,
     completedAt,
-    modes: { evidenceMode, auditMode, recoveryMode },
+    modes: {
+      evidenceMode,
+      textApplicationMode,
+      timingApplicationMode,
+      auditMode,
+      recoveryMode,
+    },
     source: {
       sizeBefore: sourceInfoBefore.size,
       sizeAfter: sourceInfoAfter.size,
