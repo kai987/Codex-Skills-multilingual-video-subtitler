@@ -90,3 +90,6 @@ export * from "./whisper-core-stability-v2.js";
 export * from "./paired-whisper-evidence.js";
 export * from "./independent-ctc-projection.js";
 export * from "./independent-acoustic-discriminator.js";
+export * from "./cross-model-discriminator-features.js";
+export * from "./calibration-fold-builder.js";
+export * from "./cross-model-calibration-labels.js";
