@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-10-quality-policy.schema.json",
+  "title": "c6-0-1-10-quality-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.10-cross-model-arbitration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-10-quality-policy" },
+    "arbitrationMode": {
+      "type": "string",
+      "enum": ["enforce", "observe-disabled"]
+    },
+    "selectedProductionProfile": {
+      "type": "string",
+      "enum": ["CONSERVATIVE", "BALANCED", "DISABLED"]
+    },
+    "defaultDecision": { "type": "string", "const": "KEEP_CURRENT_WHISPER" },
+    "textMutationMode": {
+      "type": "string",
+      "enum": ["safe-text-only", "disabled"]
+    },
+    "timingMutationAllowed": { "type": "boolean", "const": false },
+    "aggressiveProfileProductionAllowed": { "type": "boolean", "const": false },
+    "rawCrossModelConfidenceComparisonAllowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "ctcWinnerSelectionAllowed": { "type": "boolean", "const": false },
+    "ctcIndependentVoteAllowed": { "type": "boolean", "const": false },
+    "goldRuntimeSelectionAllowed": { "type": "boolean", "const": false },
+    "thirdAsrAllowed": { "type": "boolean", "const": false },
+    "llmWinnerAllowed": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "arbitrationMode",
+    "selectedProductionProfile",
+    "defaultDecision",
+    "textMutationMode",
+    "timingMutationAllowed",
+    "aggressiveProfileProductionAllowed",
+    "rawCrossModelConfidenceComparisonAllowed",
+    "ctcWinnerSelectionAllowed",
+    "ctcIndependentVoteAllowed",
+    "goldRuntimeSelectionAllowed",
+    "thirdAsrAllowed",
+    "llmWinnerAllowed",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

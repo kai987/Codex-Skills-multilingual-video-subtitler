@@ -1,0 +1,361 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-cross-model-arbitration-ledger.schema.json",
+  "title": "machine-cross-model-arbitration-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.10-cross-model-arbitration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-cross-model-arbitration-ledger"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["DEV24", "EPISODE_HOLDOUT", "FULL_EPISODE"]
+    },
+    "evidenceSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policyProfile": {
+      "type": "string",
+      "enum": ["CONSERVATIVE", "BALANCED", "AGGRESSIVE_SHADOW"]
+    },
+    "arbitrationPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "productionEnforcementEnabled": { "type": "boolean" },
+    "decisionsFrozenBeforeGold": { "type": "boolean", "const": true },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "arbitrationDecisionId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "whisperCandidateId": { "type": "string", "minLength": 1 },
+          "reazonCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "evidenceBundleId": { "type": "string", "minLength": 1 },
+          "policyProfile": {
+            "type": "string",
+            "enum": ["CONSERVATIVE", "BALANCED", "AGGRESSIVE_SHADOW"]
+          },
+          "hardBlockers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CROSS_MODEL_EXACT_AGREEMENT",
+                "CROSS_MODEL_NORMALIZED_AGREEMENT",
+                "CROSS_MODEL_PRONUNCIATION_SUPPORT",
+                "ORTHOGRAPHY_ONLY_REVIEW",
+                "REAZON_STABLE",
+                "REAZON_CONTEXT_EXTENSION_ONLY",
+                "REAZON_LEXICALLY_UNSTABLE",
+                "REAZON_HALLUCINATION_RISK",
+                "REAZON_EMPTY",
+                "REAZON_UNCOMPARABLE",
+                "REAZON_RUNTIME_PROVENANCE_INCOMPLETE",
+                "REAZON_DURATION_TEXT_ANOMALY",
+                "WHISPER_LEXICALLY_UNSTABLE",
+                "WHISPER_HALLUCINATION_RISK",
+                "WHISPER_DECODER_INSTABILITY",
+                "WHISPER_INCOMPLETE_SPEECH_SUPPORT",
+                "WHISPER_ALTERNATE_CORROBORATES_REAZON",
+                "WHISPER_STRONG_SUPPORT",
+                "EVIDENCE_ABSENCE_ONLY",
+                "CTC_SUPPORTS_REAZON",
+                "CTC_SUPPORTS_WHISPER",
+                "CTC_AMBIGUOUS",
+                "CTC_UNSCORABLE",
+                "CORE_LOCALIZATION_AMBIGUOUS",
+                "SPAN_LINEAGE_UNSAFE",
+                "CROSS_EVENT_AMBIGUITY",
+                "MUTATION_NONDEGRADATION_BLOCKED",
+                "CONFLICTING_EVIDENCE",
+                "PRODUCTION_ENFORCEMENT_DISABLED",
+                "AGGRESSIVE_PROFILE_SHADOW_ONLY"
+              ]
+            }
+          },
+          "strongSupports": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CROSS_MODEL_EXACT_AGREEMENT",
+                "CROSS_MODEL_NORMALIZED_AGREEMENT",
+                "CROSS_MODEL_PRONUNCIATION_SUPPORT",
+                "ORTHOGRAPHY_ONLY_REVIEW",
+                "REAZON_STABLE",
+                "REAZON_CONTEXT_EXTENSION_ONLY",
+                "REAZON_LEXICALLY_UNSTABLE",
+                "REAZON_HALLUCINATION_RISK",
+                "REAZON_EMPTY",
+                "REAZON_UNCOMPARABLE",
+                "REAZON_RUNTIME_PROVENANCE_INCOMPLETE",
+                "REAZON_DURATION_TEXT_ANOMALY",
+                "WHISPER_LEXICALLY_UNSTABLE",
+                "WHISPER_HALLUCINATION_RISK",
+                "WHISPER_DECODER_INSTABILITY",
+                "WHISPER_INCOMPLETE_SPEECH_SUPPORT",
+                "WHISPER_ALTERNATE_CORROBORATES_REAZON",
+                "WHISPER_STRONG_SUPPORT",
+                "EVIDENCE_ABSENCE_ONLY",
+                "CTC_SUPPORTS_REAZON",
+                "CTC_SUPPORTS_WHISPER",
+                "CTC_AMBIGUOUS",
+                "CTC_UNSCORABLE",
+                "CORE_LOCALIZATION_AMBIGUOUS",
+                "SPAN_LINEAGE_UNSAFE",
+                "CROSS_EVENT_AMBIGUITY",
+                "MUTATION_NONDEGRADATION_BLOCKED",
+                "CONFLICTING_EVIDENCE",
+                "PRODUCTION_ENFORCEMENT_DISABLED",
+                "AGGRESSIVE_PROFILE_SHADOW_ONLY"
+              ]
+            }
+          },
+          "supports": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CROSS_MODEL_EXACT_AGREEMENT",
+                "CROSS_MODEL_NORMALIZED_AGREEMENT",
+                "CROSS_MODEL_PRONUNCIATION_SUPPORT",
+                "ORTHOGRAPHY_ONLY_REVIEW",
+                "REAZON_STABLE",
+                "REAZON_CONTEXT_EXTENSION_ONLY",
+                "REAZON_LEXICALLY_UNSTABLE",
+                "REAZON_HALLUCINATION_RISK",
+                "REAZON_EMPTY",
+                "REAZON_UNCOMPARABLE",
+                "REAZON_RUNTIME_PROVENANCE_INCOMPLETE",
+                "REAZON_DURATION_TEXT_ANOMALY",
+                "WHISPER_LEXICALLY_UNSTABLE",
+                "WHISPER_HALLUCINATION_RISK",
+                "WHISPER_DECODER_INSTABILITY",
+                "WHISPER_INCOMPLETE_SPEECH_SUPPORT",
+                "WHISPER_ALTERNATE_CORROBORATES_REAZON",
+                "WHISPER_STRONG_SUPPORT",
+                "EVIDENCE_ABSENCE_ONLY",
+                "CTC_SUPPORTS_REAZON",
+                "CTC_SUPPORTS_WHISPER",
+                "CTC_AMBIGUOUS",
+                "CTC_UNSCORABLE",
+                "CORE_LOCALIZATION_AMBIGUOUS",
+                "SPAN_LINEAGE_UNSAFE",
+                "CROSS_EVENT_AMBIGUITY",
+                "MUTATION_NONDEGRADATION_BLOCKED",
+                "CONFLICTING_EVIDENCE",
+                "PRODUCTION_ENFORCEMENT_DISABLED",
+                "AGGRESSIVE_PROFILE_SHADOW_ONLY"
+              ]
+            }
+          },
+          "contradictions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CROSS_MODEL_EXACT_AGREEMENT",
+                "CROSS_MODEL_NORMALIZED_AGREEMENT",
+                "CROSS_MODEL_PRONUNCIATION_SUPPORT",
+                "ORTHOGRAPHY_ONLY_REVIEW",
+                "REAZON_STABLE",
+                "REAZON_CONTEXT_EXTENSION_ONLY",
+                "REAZON_LEXICALLY_UNSTABLE",
+                "REAZON_HALLUCINATION_RISK",
+                "REAZON_EMPTY",
+                "REAZON_UNCOMPARABLE",
+                "REAZON_RUNTIME_PROVENANCE_INCOMPLETE",
+                "REAZON_DURATION_TEXT_ANOMALY",
+                "WHISPER_LEXICALLY_UNSTABLE",
+                "WHISPER_HALLUCINATION_RISK",
+                "WHISPER_DECODER_INSTABILITY",
+                "WHISPER_INCOMPLETE_SPEECH_SUPPORT",
+                "WHISPER_ALTERNATE_CORROBORATES_REAZON",
+                "WHISPER_STRONG_SUPPORT",
+                "EVIDENCE_ABSENCE_ONLY",
+                "CTC_SUPPORTS_REAZON",
+                "CTC_SUPPORTS_WHISPER",
+                "CTC_AMBIGUOUS",
+                "CTC_UNSCORABLE",
+                "CORE_LOCALIZATION_AMBIGUOUS",
+                "SPAN_LINEAGE_UNSAFE",
+                "CROSS_EVENT_AMBIGUITY",
+                "MUTATION_NONDEGRADATION_BLOCKED",
+                "CONFLICTING_EVIDENCE",
+                "PRODUCTION_ENFORCEMENT_DISABLED",
+                "AGGRESSIVE_PROFILE_SHADOW_ONLY"
+              ]
+            }
+          },
+          "ctcStatus": {
+            "type": "string",
+            "enum": [
+              "SUPPORT_REAZON",
+              "SUPPORT_WHISPER",
+              "AMBIGUOUS",
+              "UNSCORABLE",
+              "NOT_RUN"
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "AGREEMENT_NO_CHANGE",
+              "KEEP_CURRENT_WHISPER",
+              "SELECT_REAZON",
+              "ABSTAIN_REVIEW",
+              "BLOCKED_NOT_LOCALIZABLE",
+              "BLOCKED_NO_SAFE_SPAN",
+              "BLOCKED_REAZON_UNSTABLE",
+              "BLOCKED_CONFLICTING_EVIDENCE"
+            ]
+          },
+          "confidenceClass": {
+            "type": "string",
+            "enum": ["HIGH", "MEDIUM", "LOW"]
+          },
+          "decisionReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CROSS_MODEL_EXACT_AGREEMENT",
+                "CROSS_MODEL_NORMALIZED_AGREEMENT",
+                "CROSS_MODEL_PRONUNCIATION_SUPPORT",
+                "ORTHOGRAPHY_ONLY_REVIEW",
+                "REAZON_STABLE",
+                "REAZON_CONTEXT_EXTENSION_ONLY",
+                "REAZON_LEXICALLY_UNSTABLE",
+                "REAZON_HALLUCINATION_RISK",
+                "REAZON_EMPTY",
+                "REAZON_UNCOMPARABLE",
+                "REAZON_RUNTIME_PROVENANCE_INCOMPLETE",
+                "REAZON_DURATION_TEXT_ANOMALY",
+                "WHISPER_LEXICALLY_UNSTABLE",
+                "WHISPER_HALLUCINATION_RISK",
+                "WHISPER_DECODER_INSTABILITY",
+                "WHISPER_INCOMPLETE_SPEECH_SUPPORT",
+                "WHISPER_ALTERNATE_CORROBORATES_REAZON",
+                "WHISPER_STRONG_SUPPORT",
+                "EVIDENCE_ABSENCE_ONLY",
+                "CTC_SUPPORTS_REAZON",
+                "CTC_SUPPORTS_WHISPER",
+                "CTC_AMBIGUOUS",
+                "CTC_UNSCORABLE",
+                "CORE_LOCALIZATION_AMBIGUOUS",
+                "SPAN_LINEAGE_UNSAFE",
+                "CROSS_EVENT_AMBIGUITY",
+                "MUTATION_NONDEGRADATION_BLOCKED",
+                "CONFLICTING_EVIDENCE",
+                "PRODUCTION_ENFORCEMENT_DISABLED",
+                "AGGRESSIVE_PROFILE_SHADOW_ONLY"
+              ]
+            }
+          },
+          "mutationEligible": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "arbitrationDecisionId",
+          "eventId",
+          "whisperCandidateId",
+          "reazonCandidateId",
+          "evidenceBundleId",
+          "policyProfile",
+          "hardBlockers",
+          "strongSupports",
+          "supports",
+          "contradictions",
+          "ctcStatus",
+          "decision",
+          "confidenceClass",
+          "decisionReasons",
+          "mutationEligible",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "agreementNoChangeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectReazonCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "keepWhisperCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "abstainCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "blockedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mutationEligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "agreementNoChangeCount",
+        "selectReazonCount",
+        "keepWhisperCount",
+        "abstainCount",
+        "blockedCount",
+        "mutationEligibleCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "scope",
+    "evidenceSemanticHash",
+    "policyProfile",
+    "arbitrationPolicyHash",
+    "productionEnforcementEnabled",
+    "decisionsFrozenBeforeGold",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

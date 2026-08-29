@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-10-holdout-selection.schema.json",
+  "title": "c6-0-1-10-holdout-selection",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.10-cross-model-arbitration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-10-holdout-selection"
+    },
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policyFreezeSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "selectionPolicy": {
+      "type": "string",
+      "const": "episode-machine-localizable-canonical-events-excluding-frozen-dev24-v1"
+    },
+    "totalCanonicalEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "dev24ExcludedEventIds": {
+      "minItems": 24,
+      "maxItems": 24,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "coreInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "currentCandidateId": { "type": "string", "minLength": 1 },
+          "machineLocalizable": { "type": "boolean" },
+          "coreExactPlanned": { "type": "boolean" },
+          "exclusionReasons": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "sourceEvidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "coreInterval",
+          "finalCueIds",
+          "currentCandidateId",
+          "machineLocalizable",
+          "coreExactPlanned",
+          "exclusionReasons",
+          "sourceEvidenceIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "candidateHoldoutEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "machineLocalizableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "excludedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coreExactPlannedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "candidateHoldoutEventCount",
+        "machineLocalizableCount",
+        "excludedCount",
+        "coreExactPlannedCount"
+      ],
+      "additionalProperties": false
+    },
+    "machineOnlySelection": { "type": "boolean", "const": true },
+    "selectedBeforeHoldoutGold": { "type": "boolean", "const": true },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "sourceMediaSha256",
+    "policyFreezeSemanticHash",
+    "selectionPolicy",
+    "totalCanonicalEventCount",
+    "dev24ExcludedEventIds",
+    "events",
+    "summary",
+    "machineOnlySelection",
+    "selectedBeforeHoldoutGold",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

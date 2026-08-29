@@ -265,6 +265,19 @@ import {
   c6019RouteDecisionSchema,
   c6019QualityPolicySchema,
   c6019ValidationSchema,
+  machineCrossModelArbitrationEvidenceSchema,
+  c60110PolicyProfilesSchema,
+  machineCrossModelArbitrationLedgerSchema,
+  machineCrossModelTextMutationProposalsSchema,
+  c60110PolicyFreezeSchema,
+  c60110Dev24EvaluationSchema,
+  c60110HoldoutSelectionSchema,
+  c60110HoldoutReazonRuntimeSchema,
+  c60110HoldoutArbitrationSchema,
+  c60110OracleCaptureEvaluationSchema,
+  c60110ControlRegressionEvaluationSchema,
+  c60110QualityPolicySchema,
+  c60110ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -644,6 +657,71 @@ const schemas = [
     fileName: "c6-0-1-9-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-9-validation.schema.json",
     schema: c6019ValidationSchema,
+  },
+  {
+    fileName: "machine-cross-model-arbitration-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-arbitration-evidence.schema.json",
+    schema: machineCrossModelArbitrationEvidenceSchema,
+  },
+  {
+    fileName: "c6-0-1-10-policy-profiles.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-policy-profiles.schema.json",
+    schema: c60110PolicyProfilesSchema,
+  },
+  {
+    fileName: "machine-cross-model-arbitration-ledger.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-arbitration-ledger.schema.json",
+    schema: machineCrossModelArbitrationLedgerSchema,
+  },
+  {
+    fileName: "machine-cross-model-text-mutation-proposals.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-text-mutation-proposals.schema.json",
+    schema: machineCrossModelTextMutationProposalsSchema,
+  },
+  {
+    fileName: "c6-0-1-10-policy-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-policy-freeze.schema.json",
+    schema: c60110PolicyFreezeSchema,
+  },
+  {
+    fileName: "c6-0-1-10-dev24-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-dev24-evaluation.schema.json",
+    schema: c60110Dev24EvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-10-holdout-selection.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-holdout-selection.schema.json",
+    schema: c60110HoldoutSelectionSchema,
+  },
+  {
+    fileName: "c6-0-1-10-holdout-reazon-runtime.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-holdout-reazon-runtime.schema.json",
+    schema: c60110HoldoutReazonRuntimeSchema,
+  },
+  {
+    fileName: "c6-0-1-10-holdout-arbitration.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-holdout-arbitration.schema.json",
+    schema: c60110HoldoutArbitrationSchema,
+  },
+  {
+    fileName: "c6-0-1-10-oracle-capture-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-oracle-capture-evaluation.schema.json",
+    schema: c60110OracleCaptureEvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-10-control-regression-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-control-regression-evaluation.schema.json",
+    schema: c60110ControlRegressionEvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-10-quality-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-quality-policy.schema.json",
+    schema: c60110QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-10-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-validation.schema.json",
+    schema: c60110ValidationSchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",
