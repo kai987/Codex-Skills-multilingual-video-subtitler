@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-human-correction-record.schema.json",
+  "title": "c6-0-1-12-human-correction-record",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "recordId": { "type": "string", "minLength": 1 },
+    "decisionId": { "type": "string", "minLength": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "reviewItemId": { "type": "string", "minLength": 1 },
+    "regionId": { "type": "string", "minLength": 1 },
+    "eventIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "sourceInterval": {
+      "type": "object",
+      "properties": {
+        "start": { "type": "number", "minimum": 0 },
+        "end": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["start", "end"],
+      "additionalProperties": false
+    },
+    "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evidenceSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "candidateSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decisionType": {
+      "type": "string",
+      "enum": [
+        "KEEP_CURRENT",
+        "USE_REAZON",
+        "USE_WHISPER_ALTERNATE",
+        "MANUAL_EDIT",
+        "TIMING_EDIT",
+        "ADD_NEW_CUE",
+        "MARK_FALSE_POSITIVE",
+        "UNRESOLVED",
+        "WAIVE_REVIEW"
+      ]
+    },
+    "selectedCandidateId": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "beforeText": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "afterText": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "beforeStart": {
+      "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+    },
+    "beforeEnd": {
+      "anyOf": [{ "type": "number", "exclusiveMinimum": 0 }, { "type": "null" }]
+    },
+    "afterStart": {
+      "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+    },
+    "afterEnd": {
+      "anyOf": [{ "type": "number", "exclusiveMinimum": 0 }, { "type": "null" }]
+    },
+    "itemTypes": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "TEXT_CROSS_MODEL_DISAGREEMENT",
+          "TEXT_WHISPER_INSTABILITY",
+          "TEXT_REAZON_INSTABILITY",
+          "TEXT_HALLUCINATION_RISK",
+          "TEXT_LOW_ACOUSTIC_SUPPORT",
+          "TEXT_PARTIAL_AGREEMENT",
+          "MISSING_SPEECH_RISK",
+          "TIMING_BOUNDARY_RISK",
+          "TIMING_SEVERE_RISK",
+          "OVERLAP_RISK",
+          "MULTI_SPEAKER_RISK",
+          "LOCALIZATION_RISK",
+          "SPAN_LINEAGE_BLOCKED",
+          "EVIDENCE_CONFLICT",
+          "GENERAL_UNCERTAINTY"
+        ]
+      }
+    },
+    "priorityAtDecision": {
+      "type": "object",
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+        },
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "requiredLevel": {
+          "type": "string",
+          "enum": ["REQUIRED", "RECOMMENDED", "INFORMATIONAL"]
+        }
+      },
+      "required": ["tier", "score", "requiredLevel"],
+      "additionalProperties": false
+    },
+    "reviewerNote": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "recordId",
+    "decisionId",
+    "sessionId",
+    "reviewItemId",
+    "regionId",
+    "eventIds",
+    "cueIds",
+    "sourceInterval",
+    "machineDraftHash",
+    "evidenceSnapshotHash",
+    "candidateSetHash",
+    "decisionType",
+    "selectedCandidateId",
+    "beforeText",
+    "afterText",
+    "beforeStart",
+    "beforeEnd",
+    "afterStart",
+    "afterEnd",
+    "itemTypes",
+    "priorityAtDecision",
+    "reviewerNote",
+    "createdAt"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-package-freeze.schema.json",
+  "title": "c6-0-1-12-review-package-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-multi-asr-review-assistance-v2"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-12-review-package-freeze"
+    },
+    "frozenAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "itemHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "priorityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "regionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "candidateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "audioManifestHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "workspaceDataHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "aggregateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "goldAccessBeforeFreezeCount": { "type": "number", "const": 0 },
+    "frozenBeforeGoldEvaluation": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "frozenAt",
+    "sourceMediaSha256",
+    "machineDraftHash",
+    "itemHash",
+    "priorityHash",
+    "regionHash",
+    "candidateHash",
+    "audioManifestHash",
+    "workspaceDataHash",
+    "policyHash",
+    "aggregateHash",
+    "runtimeGoldInputCount",
+    "goldAccessBeforeFreezeCount",
+    "frozenBeforeGoldEvaluation",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

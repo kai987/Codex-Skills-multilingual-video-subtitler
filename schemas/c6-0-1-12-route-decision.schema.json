@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-route-decision.schema.json",
+  "title": "c6-0-1-12-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-multi-asr-review-assistance-v2"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-12-route-decision" },
+    "route": { "type": "string", "const": "HUMAN_ON_EXCEPTION" },
+    "nextStage": {
+      "type": "string",
+      "enum": [
+        "REAL_HUMAN_TRIAL_ON_UNSEEN_EPISODE",
+        "IMPROVE_REVIEW_RANKING",
+        "REPAIR_DATA_GAPS"
+      ]
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "REVIEW_ASSISTANCE_PRODUCT_READY_FOR_REAL_HUMAN_TRIAL",
+        "REVIEW_ASSISTANCE_ENGINEERING_READY_RANKING_WEAK",
+        "REVIEW_ASSISTANCE_DATA_GAPS",
+        "REVIEW_ASSISTANCE_NOT_READY"
+      ]
+    },
+    "engineeringComplete": { "type": "boolean" },
+    "rankingEffective": { "type": "boolean" },
+    "realHumanTrialAuthorized": { "type": "boolean" },
+    "workloadReductionClaimAllowed": { "type": "boolean" },
+    "automaticProviderSwitching": { "type": "boolean", "const": false },
+    "carnationHumanSessionCreated": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "reasons": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "route",
+    "nextStage",
+    "result",
+    "engineeringComplete",
+    "rankingEffective",
+    "realHumanTrialAuthorized",
+    "workloadReductionClaimAllowed",
+    "automaticProviderSwitching",
+    "carnationHumanSessionCreated",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status",
+    "reasons",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

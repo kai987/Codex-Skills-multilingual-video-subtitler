@@ -300,6 +300,23 @@ import {
   c60111SelectiveDiscriminatorFreezeSchema,
   c60111RouteDecisionSchema,
   c60111ValidationSchema,
+  machineReviewItemsSchema,
+  machineReviewPrioritySchema,
+  machineReviewRegionsSchema,
+  machineReviewCandidateBundlesSchema,
+  machineReviewAudioManifestSchema,
+  c60112ReviewPackageFreezeSchema,
+  reviewDecisionSchema,
+  reviewSessionSchema,
+  reviewAuditRecordSchema,
+  humanCorrectionRecordSchema,
+  humanReviewManifestSchema,
+  correctionDatasetSummarySchema,
+  c60112ReviewQualityEvaluationSchema,
+  c60112IdealReviewUpperBoundSchema,
+  c60112RouteDecisionSchema,
+  c60112ReviewAssistanceValidationSchema,
+  c60112ShareableSummarySchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -1799,6 +1816,91 @@ const schemas = [
     fileName: "c5-19-run-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c5-19-run-validation.schema.json",
     schema: c519RunValidationSchema,
+  },
+  {
+    fileName: "c6-0-1-12-machine-review-items.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-machine-review-items.schema.json",
+    schema: machineReviewItemsSchema,
+  },
+  {
+    fileName: "c6-0-1-12-machine-review-priority.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-machine-review-priority.schema.json",
+    schema: machineReviewPrioritySchema,
+  },
+  {
+    fileName: "c6-0-1-12-machine-review-regions.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-machine-review-regions.schema.json",
+    schema: machineReviewRegionsSchema,
+  },
+  {
+    fileName: "c6-0-1-12-machine-review-candidate-bundles.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-machine-review-candidate-bundles.schema.json",
+    schema: machineReviewCandidateBundlesSchema,
+  },
+  {
+    fileName: "c6-0-1-12-machine-review-audio-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-machine-review-audio-manifest.schema.json",
+    schema: machineReviewAudioManifestSchema,
+  },
+  {
+    fileName: "c6-0-1-12-review-package-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-package-freeze.schema.json",
+    schema: c60112ReviewPackageFreezeSchema,
+  },
+  {
+    fileName: "c6-0-1-12-review-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-decision.schema.json",
+    schema: reviewDecisionSchema,
+  },
+  {
+    fileName: "c6-0-1-12-review-session.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-session.schema.json",
+    schema: reviewSessionSchema,
+  },
+  {
+    fileName: "c6-0-1-12-review-audit-record.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-audit-record.schema.json",
+    schema: reviewAuditRecordSchema,
+  },
+  {
+    fileName: "c6-0-1-12-human-correction-record.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-human-correction-record.schema.json",
+    schema: humanCorrectionRecordSchema,
+  },
+  {
+    fileName: "c6-0-1-12-human-review-manifest.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-human-review-manifest.schema.json",
+    schema: humanReviewManifestSchema,
+  },
+  {
+    fileName: "c6-0-1-12-correction-dataset-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-correction-dataset-summary.schema.json",
+    schema: correctionDatasetSummarySchema,
+  },
+  {
+    fileName: "c6-0-1-12-review-quality-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-quality-evaluation.schema.json",
+    schema: c60112ReviewQualityEvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-12-ideal-review-upper-bound.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-ideal-review-upper-bound.schema.json",
+    schema: c60112IdealReviewUpperBoundSchema,
+  },
+  {
+    fileName: "c6-0-1-12-route-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-route-decision.schema.json",
+    schema: c60112RouteDecisionSchema,
+  },
+  {
+    fileName: "c6-0-1-12-review-assistance-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-assistance-validation.schema.json",
+    schema: c60112ReviewAssistanceValidationSchema,
+  },
+  {
+    fileName: "c6-0-1-12-shareable-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-shareable-summary.schema.json",
+    schema: c60112ShareableSummarySchema,
   },
 ] as const;
 

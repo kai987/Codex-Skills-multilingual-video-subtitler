@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-correction-dataset-summary.schema.json",
+  "title": "c6-0-1-12-correction-dataset-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-multi-asr-review-assistance-v2"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "correction-dataset-summary" },
+    "locality": { "type": "string", "const": "LOCAL_ONLY" },
+    "shareable": { "type": "boolean", "const": false },
+    "sourceCorrectionLogHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "datasetJsonlHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "recordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "uniqueSessionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "uniqueReviewItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "decisionCounts": {
+      "type": "object",
+      "properties": {
+        "KEEP_CURRENT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "USE_REAZON": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "USE_WHISPER_ALTERNATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "MANUAL_EDIT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIMING_EDIT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ADD_NEW_CUE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "MARK_FALSE_POSITIVE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "UNRESOLVED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "WAIVE_REVIEW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "KEEP_CURRENT",
+        "USE_REAZON",
+        "USE_WHISPER_ALTERNATE",
+        "MANUAL_EDIT",
+        "TIMING_EDIT",
+        "ADD_NEW_CUE",
+        "MARK_FALSE_POSITIVE",
+        "UNRESOLVED",
+        "WAIVE_REVIEW"
+      ],
+      "additionalProperties": false
+    },
+    "containsFullDialogueText": { "type": "boolean", "const": true },
+    "trainingPerformed": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "locality",
+    "shareable",
+    "sourceCorrectionLogHash",
+    "datasetJsonlHash",
+    "recordCount",
+    "uniqueSessionCount",
+    "uniqueReviewItemCount",
+    "decisionCounts",
+    "containsFullDialogueText",
+    "trainingPerformed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

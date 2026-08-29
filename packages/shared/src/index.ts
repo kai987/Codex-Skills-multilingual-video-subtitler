@@ -33,6 +33,7 @@ export * from "./c6-0-1-8-core-stability-schemas.js";
 export * from "./c6-0-1-9-independent-asr-schemas.js";
 export * from "./c6-0-1-10-cross-model-arbitration-schemas.js";
 export * from "./c6-0-1-11-discriminator-schemas.js";
+export * from "./c6-0-1-12-review-assistance-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

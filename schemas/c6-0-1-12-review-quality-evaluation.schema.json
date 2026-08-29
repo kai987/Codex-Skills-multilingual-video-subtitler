@@ -1,0 +1,947 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-quality-evaluation.schema.json",
+  "title": "c6-0-1-12-review-quality-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-multi-asr-review-assistance-v2"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-12-review-quality-evaluation"
+    },
+    "reviewPackageFreezeHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewPackageFreezeVerifiedBeforeGoldRead": {
+      "type": "boolean",
+      "const": true
+    },
+    "reviewPackageFrozenBeforeGoldRead": { "type": "boolean", "const": true },
+    "machineReviewBuildGoldInputCount": { "type": "number", "const": 0 },
+    "evaluatorGoldInputCount": { "type": "number", "const": 1 },
+    "goldReadAfterFreeze": { "type": "boolean", "const": true },
+    "sourceSha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceSha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldSha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldSha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldEvaluationArtifactSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineFinalMutated": { "type": "boolean", "const": false },
+    "idealSimulationMethod": {
+      "type": "string",
+      "const": "GLOBAL_TEXT_RECOMPUTATION_WITH_SELECTED_GOLD_ALIGNMENTS"
+    },
+    "rankingInputHashes": {
+      "type": "object",
+      "properties": {
+        "oldSingleAsrRiskArtifactSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": ["oldSingleAsrRiskArtifactSha256"],
+      "additionalProperties": false
+    },
+    "overlapEvaluation": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "const": "UNEVALUABLE_GLOBAL_ONLY" },
+        "machineOverlapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "goldOverlapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "status",
+        "machineOverlapCount",
+        "goldOverlapCount",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "uniqueErrorCounts": {
+      "type": "object",
+      "properties": {
+        "materialText": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTiming": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucination": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "missingDialogue": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "materialText",
+        "severeTiming",
+        "hallucination",
+        "missingDialogue",
+        "overlap"
+      ],
+      "additionalProperties": false
+    },
+    "errorComponents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorComponentId": { "type": "string", "minLength": 1 },
+          "labels": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MATERIAL_TEXT_ERROR",
+                "HALLUCINATION",
+                "MISSING_DIALOGUE",
+                "SEVERE_TIMING_ERROR",
+                "OVERLAP_ERROR"
+              ]
+            }
+          },
+          "coveredReviewItemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "coveredRegionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "errorComponentId",
+          "labels",
+          "coveredReviewItemIds",
+          "coveredRegionIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "itemLabels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewItemId": { "type": "string", "minLength": 1 },
+          "labels": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MATERIAL_TEXT_ERROR",
+                "HALLUCINATION",
+                "MISSING_DIALOGUE",
+                "SEVERE_TIMING_ERROR",
+                "OVERLAP_ERROR",
+                "CLEAN_OR_MINOR"
+              ]
+            }
+          },
+          "errorComponentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["reviewItemId", "labels", "errorComponentIds"],
+        "additionalProperties": false
+      }
+    },
+    "budgetMetrics": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "budget": {
+            "type": "string",
+            "enum": [
+              "TOP_10_PERCENT",
+              "TOP_20_PERCENT",
+              "TOP_30_PERCENT",
+              "TOP_40_PERCENT",
+              "TOP_50_PERCENT",
+              "ALL_REQUIRED"
+            ]
+          },
+          "selectedReviewItemCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedRegionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedAudioSeconds": { "type": "number", "minimum": 0 },
+          "coveredUniqueErrors": {
+            "type": "object",
+            "properties": {
+              "materialText": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "severeTiming": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "hallucination": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "missingDialogue": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "overlap": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "materialText",
+              "severeTiming",
+              "hallucination",
+              "missingDialogue",
+              "overlap"
+            ],
+            "additionalProperties": false
+          },
+          "materialRecall": { "type": "number", "minimum": 0, "maximum": 1 },
+          "severeTimingRecall": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "hallucinationRecall": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "missingDialogueRecall": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reviewItemPrecision": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "regionErrorRecall": { "type": "number", "minimum": 0, "maximum": 1 },
+          "unreviewedResidualErrorRate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "residualExactCer": { "type": "number", "minimum": 0 },
+          "residualNormalizedCer": { "type": "number", "minimum": 0 },
+          "residualMaterialErrors": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "residualSevereTiming": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "residualMissing": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "residualHallucination": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "budget",
+          "selectedReviewItemCount",
+          "selectedRegionCount",
+          "selectedAudioSeconds",
+          "coveredUniqueErrors",
+          "materialRecall",
+          "severeTimingRecall",
+          "hallucinationRecall",
+          "missingDialogueRecall",
+          "reviewItemPrecision",
+          "regionErrorRecall",
+          "unreviewedResidualErrorRate",
+          "residualExactCer",
+          "residualNormalizedCer",
+          "residualMaterialErrors",
+          "residualSevereTiming",
+          "residualMissing",
+          "residualHallucination"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rankingBaselines": {
+      "minItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "baseline": {
+            "type": "string",
+            "enum": [
+              "R0_CHRONOLOGICAL",
+              "R1_OLD_SINGLE_ASR_RISK",
+              "R2_CROSS_MODEL_DISAGREEMENT_ONLY",
+              "R3_FULL_EVIDENCE_RANK"
+            ]
+          },
+          "budgetMetrics": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budget": {
+                  "type": "string",
+                  "enum": [
+                    "TOP_10_PERCENT",
+                    "TOP_20_PERCENT",
+                    "TOP_30_PERCENT",
+                    "TOP_40_PERCENT",
+                    "TOP_50_PERCENT",
+                    "ALL_REQUIRED"
+                  ]
+                },
+                "selectedReviewItemCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "selectedRegionCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "selectedAudioSeconds": { "type": "number", "minimum": 0 },
+                "coveredUniqueErrors": {
+                  "type": "object",
+                  "properties": {
+                    "materialText": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "severeTiming": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "hallucination": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "missingDialogue": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "overlap": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "materialText",
+                    "severeTiming",
+                    "hallucination",
+                    "missingDialogue",
+                    "overlap"
+                  ],
+                  "additionalProperties": false
+                },
+                "materialRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "severeTimingRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "hallucinationRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "missingDialogueRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "reviewItemPrecision": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "regionErrorRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "unreviewedResidualErrorRate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "residualExactCer": { "type": "number", "minimum": 0 },
+                "residualNormalizedCer": { "type": "number", "minimum": 0 },
+                "residualMaterialErrors": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "residualSevereTiming": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "residualMissing": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "residualHallucination": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "budget",
+                "selectedReviewItemCount",
+                "selectedRegionCount",
+                "selectedAudioSeconds",
+                "coveredUniqueErrors",
+                "materialRecall",
+                "severeTimingRecall",
+                "hallucinationRecall",
+                "missingDialogueRecall",
+                "reviewItemPrecision",
+                "regionErrorRecall",
+                "unreviewedResidualErrorRate",
+                "residualExactCer",
+                "residualNormalizedCer",
+                "residualMaterialErrors",
+                "residualSevereTiming",
+                "residualMissing",
+                "residualHallucination"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "audioMatchedBudgetMetrics": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budget": {
+                  "type": "string",
+                  "enum": [
+                    "TOP_10_PERCENT",
+                    "TOP_20_PERCENT",
+                    "TOP_30_PERCENT",
+                    "TOP_40_PERCENT",
+                    "TOP_50_PERCENT",
+                    "ALL_REQUIRED"
+                  ]
+                },
+                "selectedReviewItemCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "selectedRegionCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "selectedAudioSeconds": { "type": "number", "minimum": 0 },
+                "coveredUniqueErrors": {
+                  "type": "object",
+                  "properties": {
+                    "materialText": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "severeTiming": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "hallucination": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "missingDialogue": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "overlap": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "materialText",
+                    "severeTiming",
+                    "hallucination",
+                    "missingDialogue",
+                    "overlap"
+                  ],
+                  "additionalProperties": false
+                },
+                "materialRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "severeTimingRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "hallucinationRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "missingDialogueRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "reviewItemPrecision": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "regionErrorRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "unreviewedResidualErrorRate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "residualExactCer": { "type": "number", "minimum": 0 },
+                "residualNormalizedCer": { "type": "number", "minimum": 0 },
+                "residualMaterialErrors": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "residualSevereTiming": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "residualMissing": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "residualHallucination": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "budget",
+                "selectedReviewItemCount",
+                "selectedRegionCount",
+                "selectedAudioSeconds",
+                "coveredUniqueErrors",
+                "materialRecall",
+                "severeTimingRecall",
+                "hallucinationRecall",
+                "missingDialogueRecall",
+                "reviewItemPrecision",
+                "regionErrorRecall",
+                "unreviewedResidualErrorRate",
+                "residualExactCer",
+                "residualNormalizedCer",
+                "residualMaterialErrors",
+                "residualSevereTiming",
+                "residualMissing",
+                "residualHallucination"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "utilityScore": { "type": "number" }
+        },
+        "required": [
+          "baseline",
+          "budgetMetrics",
+          "audioMatchedBudgetMetrics",
+          "utilityScore"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rankingResult": {
+      "type": "string",
+      "enum": [
+        "REVIEW_PRIORITY_EFFECTIVE",
+        "REVIEW_PRIORITY_WEAK",
+        "REVIEW_PRIORITY_NOT_EFFECTIVE"
+      ]
+    },
+    "candidateFixability": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewItemId": { "type": "string", "minLength": 1 },
+          "errorComponentIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "CURRENT_ALREADY_CORRECT",
+              "WHISPER_ALT_FIXABLE",
+              "REAZON_FIXABLE",
+              "BOTH_CANDIDATE_FIXABLE",
+              "CANDIDATE_PARTIAL_FIX",
+              "MANUAL_EDIT_REQUIRED",
+              "UNEVALUABLE"
+            ]
+          },
+          "fullFixCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "partialFixCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "reviewItemId",
+          "errorComponentIds",
+          "classification",
+          "fullFixCandidateIds",
+          "partialFixCandidateIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "materialErrorFixability": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorComponentId": { "type": "string", "minLength": 1 },
+          "reviewItemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "CURRENT_ALREADY_CORRECT",
+              "WHISPER_ALT_FIXABLE",
+              "REAZON_FIXABLE",
+              "BOTH_CANDIDATE_FIXABLE",
+              "CANDIDATE_PARTIAL_FIX",
+              "MANUAL_EDIT_REQUIRED",
+              "UNEVALUABLE"
+            ]
+          },
+          "fullFixCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "partialFixCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "errorComponentId",
+          "reviewItemIds",
+          "classification",
+          "fullFixCandidateIds",
+          "partialFixCandidateIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "candidateFixabilitySummary": {
+      "type": "object",
+      "properties": {
+        "materialErrorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateFixableMaterialErrorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateFixRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "whisperAlternateFixableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonFixableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bothCandidateFixableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "partialFixCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manualEditRequiredCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manualEditRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "unevaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "materialErrorCount",
+        "candidateFixableMaterialErrorCount",
+        "candidateFixRate",
+        "whisperAlternateFixableCount",
+        "reazonFixableCount",
+        "bothCandidateFixableCount",
+        "partialFixCount",
+        "manualEditRequiredCount",
+        "manualEditRate",
+        "unevaluableCount"
+      ],
+      "additionalProperties": false
+    },
+    "specialErrorRanks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorComponentId": { "type": "string", "minLength": 1 },
+          "label": {
+            "type": "string",
+            "enum": ["HALLUCINATION", "MISSING_DIALOGUE"]
+          },
+          "queueCaptured": { "type": "boolean" },
+          "rankPositions": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "enum": [
+                "R0_CHRONOLOGICAL",
+                "R1_OLD_SINGLE_ASR_RISK",
+                "R2_CROSS_MODEL_DISAGREEMENT_ONLY",
+                "R3_FULL_EVIDENCE_RANK"
+              ]
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "required": [
+              "R0_CHRONOLOGICAL",
+              "R1_OLD_SINGLE_ASR_RISK",
+              "R2_CROSS_MODEL_DISAGREEMENT_ONLY",
+              "R3_FULL_EVIDENCE_RANK"
+            ]
+          }
+        },
+        "required": [
+          "errorComponentId",
+          "label",
+          "queueCaptured",
+          "rankPositions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "burden": {
+      "type": "object",
+      "properties": {
+        "totalReviewItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "totalReviewRegions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredRegions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "totalReviewAudioSeconds": { "type": "number", "minimum": 0 },
+        "requiredReviewAudioSeconds": { "type": "number", "minimum": 0 },
+        "reviewAudioEpisodeRatio": { "type": "number", "minimum": 0 },
+        "candidateActionableItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manualEditLikelyItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "humanReviewTimeStatus": {
+          "type": "string",
+          "const": "NOT_MEASURED_IN_C6_0_1_12"
+        }
+      },
+      "required": [
+        "totalReviewItems",
+        "requiredItems",
+        "totalReviewRegions",
+        "requiredRegions",
+        "totalReviewAudioSeconds",
+        "requiredReviewAudioSeconds",
+        "reviewAudioEpisodeRatio",
+        "candidateActionableItems",
+        "manualEditLikelyItems",
+        "humanReviewTimeStatus"
+      ],
+      "additionalProperties": false
+    },
+    "containsFullGoldText": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "reviewPackageFreezeHash",
+    "reviewPackageFreezeVerifiedBeforeGoldRead",
+    "reviewPackageFrozenBeforeGoldRead",
+    "machineReviewBuildGoldInputCount",
+    "evaluatorGoldInputCount",
+    "goldReadAfterFreeze",
+    "sourceSha256Before",
+    "sourceSha256After",
+    "goldSha256Before",
+    "goldSha256After",
+    "goldEvaluationArtifactSha256",
+    "machineDraftHash",
+    "machineFinalMutated",
+    "idealSimulationMethod",
+    "rankingInputHashes",
+    "overlapEvaluation",
+    "uniqueErrorCounts",
+    "errorComponents",
+    "itemLabels",
+    "budgetMetrics",
+    "rankingBaselines",
+    "rankingResult",
+    "candidateFixability",
+    "materialErrorFixability",
+    "candidateFixabilitySummary",
+    "specialErrorRanks",
+    "burden",
+    "containsFullGoldText",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
