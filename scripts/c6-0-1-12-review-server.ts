@@ -1,21 +1,14 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { parseArgs } from "node:util";
 
-interface ReviewWorkspaceServerModule {
-  startC60112ReviewWorkspaceServer(input: {
-    workspaceDirectory: string;
-    host: "127.0.0.1";
-    port: number;
-  }): Promise<{
-    host: "127.0.0.1";
-    port: number;
-    url: string;
-    close: () => Promise<void>;
-  }>;
-}
+import { c60112ReviewPackageFreezeSchema } from "@mvl/shared";
+import { startC60112FrozenReviewWorkspaceServer } from "@mvl/video-subtitler";
 
 const { values } = parseArgs({
   options: {
     workspace: { type: "string" },
+    freeze: { type: "string" },
     host: { type: "string", default: "127.0.0.1" },
     port: { type: "string", default: "0" },
   },
@@ -23,8 +16,11 @@ const { values } = parseArgs({
 
 if (values.workspace === undefined || values.workspace.trim().length === 0) {
   throw new Error(
-    "Usage: tsx scripts/c6-0-1-12-review-server.ts --workspace <review-workspace> [--port 0]",
+    "Usage: tsx scripts/c6-0-1-12-review-server.ts --workspace <review-workspace> --freeze <review-package-freeze.json> [--port 0]",
   );
+}
+if (values.freeze === undefined || values.freeze.trim().length === 0) {
+  throw new Error("REVIEW_PACKAGE_FREEZE_REQUIRED");
 }
 if (values.host !== "127.0.0.1") {
   throw new Error(
@@ -36,15 +32,13 @@ if (!Number.isInteger(port) || port < 0 || port > 65_535) {
   throw new Error("--port must be an integer between 0 and 65535.");
 }
 
-const moduleUrl = new URL(
-  "../packages/video-subtitler/src/review/c60112-review-workspace.ts",
-  import.meta.url,
-).href;
-const workspaceModule = (await import(
-  moduleUrl
-)) as ReviewWorkspaceServerModule;
-const running = await workspaceModule.startC60112ReviewWorkspaceServer({
-  workspaceDirectory: values.workspace,
+const freezePath = path.resolve(values.freeze);
+const freeze = c60112ReviewPackageFreezeSchema.parse(
+  JSON.parse(await readFile(freezePath, "utf8")) as unknown,
+);
+const running = await startC60112FrozenReviewWorkspaceServer({
+  workspaceDirectory: path.resolve(values.workspace),
+  freeze,
   host: "127.0.0.1",
   port,
 });
@@ -56,7 +50,10 @@ process.stdout.write(
       host: running.host,
       port: running.port,
       url: running.url,
-      workspace: values.workspace,
+      workspace: path.resolve(values.workspace),
+      freeze: freezePath,
+      freezeSemanticHash: running.freezeSemanticHash,
+      workspaceDataHash: running.workspaceDataHash,
       network: false,
     },
     null,

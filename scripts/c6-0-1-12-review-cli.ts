@@ -7,6 +7,7 @@ import { parseArgs } from "node:util";
 import {
   atomicWriteFile,
   atomicWriteJson,
+  c60112ReviewPackageFreezeSchema,
   correctionDatasetSummarySchema,
   humanCorrectionRecordSchema,
   humanReviewManifestSchema,
@@ -15,6 +16,7 @@ import {
   reviewSessionSchema,
   subtitlePackageSchema,
   type HumanCorrectionRecord,
+  type C60112ReviewPackageFreeze,
   type ReviewAuditRecord,
   type ReviewDecisionType,
   type ReviewSession,
@@ -22,6 +24,7 @@ import {
 import {
   C60112_DECISION_TYPES,
   applyC60112ReviewDecisions,
+  assertC60112FrozenWorkspaceData,
   assertC60112ReviewWorkspaceData,
   assertC60112SafeRelativePath,
   c60112CueHash,
@@ -117,6 +120,24 @@ async function reviewData(
     "review-data reviewPackageSemanticHash",
   );
   return data;
+}
+
+async function frozenReviewData(input: {
+  reviewDataPath: string;
+  freezePath: string;
+}): Promise<{
+  data: C60112ReviewWorkspaceData;
+  freeze: C60112ReviewPackageFreeze;
+  reviewDataFileHash: string;
+}> {
+  const [data, freezeValue, reviewDataFileHash] = await Promise.all([
+    reviewData(input.reviewDataPath),
+    json(input.freezePath),
+    fileHash(input.reviewDataPath),
+  ]);
+  const freeze = c60112ReviewPackageFreezeSchema.parse(freezeValue);
+  assertC60112FrozenWorkspaceData({ freeze, workspaceData: data });
+  return { data, freeze, reviewDataFileHash };
 }
 
 async function reviewSession(filePath: string): Promise<ReviewSession> {
@@ -276,7 +297,46 @@ function validateSessionIntegrity(input: {
   ) {
     throw new Error("REVIEW_SESSION_BASE_MISMATCH");
   }
-  if (input.requireComplete && !input.session.reviewComplete) {
+  const requiredItems = input.data.items.filter(
+    (item) => item.requiredLevel === "REQUIRED",
+  );
+  const isCompleted = (reviewItemId: string): boolean => {
+    const state = input.session.itemStates[reviewItemId];
+    return state !== undefined && state.decisionType !== "UNRESOLVED";
+  };
+  const completedRequiredCount = requiredItems.filter((item) =>
+    isCompleted(item.reviewItemId),
+  ).length;
+  const unresolvedRequiredCount = requiredItems.length - completedRequiredCount;
+  const regionStates = Object.fromEntries(
+    input.data.regions.map((region) => {
+      const regionRequired = requiredItems.filter((item) =>
+        region.reviewItemIds.includes(item.reviewItemId),
+      );
+      const regionCompleted = regionRequired.filter((item) =>
+        isCompleted(item.reviewItemId),
+      ).length;
+      return [
+        region.regionId,
+        {
+          requiredItemCount: regionRequired.length,
+          completedRequiredCount: regionCompleted,
+          unresolvedRequiredCount: regionRequired.length - regionCompleted,
+          complete: regionCompleted === regionRequired.length,
+        },
+      ];
+    }),
+  );
+  if (
+    input.session.completedRequiredCount !== completedRequiredCount ||
+    input.session.unresolvedRequiredCount !== unresolvedRequiredCount ||
+    input.session.reviewComplete !== (unresolvedRequiredCount === 0) ||
+    machineQualitySemanticHash(input.session.regionStates) !==
+      machineQualitySemanticHash(regionStates)
+  ) {
+    throw new Error("REVIEW_SESSION_COMPLETION_SUMMARY_MISMATCH");
+  }
+  if (input.requireComplete && unresolvedRequiredCount !== 0) {
     throw new Error("REVIEW_SESSION_INCOMPLETE");
   }
   const itemById = new Map(
@@ -291,6 +351,43 @@ function validateSessionIntegrity(input: {
       throw new Error(
         `Correction references an unknown review item: ${record.recordId}`,
       );
+    }
+    if (!item.suggestedActions.includes(record.decisionType)) {
+      throw new Error(
+        `ACTION_NOT_AVAILABLE_FOR_REVIEW_ITEM:${record.recordId}`,
+      );
+    }
+    switch (record.decisionType) {
+      case "KEEP_CURRENT":
+        if (item.finalCueIds.length === 0) {
+          throw new Error(
+            `ACTION_NOT_AVAILABLE_FOR_REVIEW_ITEM:${record.recordId}`,
+          );
+        }
+        break;
+      case "MARK_FALSE_POSITIVE":
+      case "ADD_NEW_CUE":
+        if (item.finalCueIds.length !== 0) {
+          throw new Error(
+            `ACTION_NOT_AVAILABLE_FOR_REVIEW_ITEM:${record.recordId}`,
+          );
+        }
+        break;
+      case "USE_REAZON":
+      case "USE_WHISPER_ALTERNATE":
+      case "MANUAL_EDIT":
+      case "TIMING_EDIT":
+        if (item.finalCueIds.length !== 1) {
+          throw new Error(`SINGLE_CUE_ACTION_REQUIRED:${record.recordId}`);
+        }
+        break;
+      case "WAIVE_REVIEW":
+        if ((record.reviewerNote?.trim() ?? "") === "") {
+          throw new Error(`WAIVER_NOTE_REQUIRED:${record.recordId}`);
+        }
+        break;
+      case "UNRESOLVED":
+        break;
     }
     const bundle = input.data.candidateBundles.find(
       (candidate) => candidate.reviewItemId === record.reviewItemId,
@@ -363,6 +460,150 @@ function validateSessionIntegrity(input: {
   );
 }
 
+type CorrectionLifecycleStatus = "ACTIVE" | "UNDONE" | "SUPERSEDED" | "ORPHAN";
+
+interface CorrectionLifecycleRecord {
+  recordId: string;
+  decisionId: string;
+  sessionId: string;
+  reviewItemId: string;
+  status: CorrectionLifecycleStatus;
+  decisionAuditId: string | null;
+  terminalAuditId: string | null;
+}
+
+function classifyCorrectionLifecycle(input: {
+  session: ReviewSession;
+  corrections: readonly HumanCorrectionRecord[];
+  audit: readonly ReviewAuditRecord[];
+}): CorrectionLifecycleRecord[] {
+  const activeRecordIds = new Set(
+    Object.values(input.session.itemStates).map((state) => state.recordId),
+  );
+  const decisionAuditByRecordId = new Map<string, string>();
+  const undoAuditByRecordId = new Map<string, string>();
+  for (const auditRecord of input.audit) {
+    if (auditRecord.operation === "DECISION") {
+      const correctionRecordId = auditRecord.newDecision;
+      if (correctionRecordId === null) {
+        throw new Error(`MALFORMED_DECISION_AUDIT:${auditRecord.auditId}`);
+      }
+      if (decisionAuditByRecordId.has(correctionRecordId)) {
+        throw new Error(
+          `DUPLICATE_CORRECTION_DECISION_AUDIT:${correctionRecordId}`,
+        );
+      }
+      decisionAuditByRecordId.set(correctionRecordId, auditRecord.auditId);
+    } else {
+      const undoneRecordId = auditRecord.undoneRecordId;
+      if (undoneRecordId === null) {
+        throw new Error(`MALFORMED_UNDO_AUDIT:${auditRecord.auditId}`);
+      }
+      if (undoAuditByRecordId.has(undoneRecordId)) {
+        throw new Error(`DUPLICATE_CORRECTION_UNDO:${undoneRecordId}`);
+      }
+      undoAuditByRecordId.set(undoneRecordId, auditRecord.auditId);
+    }
+  }
+  return input.corrections.map((record) => {
+    const decisionAuditId =
+      decisionAuditByRecordId.get(record.recordId) ?? null;
+    const terminalAuditId = undoAuditByRecordId.get(record.recordId) ?? null;
+    const status: CorrectionLifecycleStatus = activeRecordIds.has(
+      record.recordId,
+    )
+      ? "ACTIVE"
+      : decisionAuditId === null
+        ? "ORPHAN"
+        : terminalAuditId !== null
+          ? "UNDONE"
+          : "SUPERSEDED";
+    return {
+      recordId: record.recordId,
+      decisionId: record.decisionId,
+      sessionId: record.sessionId,
+      reviewItemId: record.reviewItemId,
+      status,
+      decisionAuditId,
+      terminalAuditId,
+    };
+  });
+}
+
+function lifecycleCounts(
+  records: readonly CorrectionLifecycleRecord[],
+): Record<CorrectionLifecycleStatus, number> {
+  return {
+    ACTIVE: records.filter((record) => record.status === "ACTIVE").length,
+    UNDONE: records.filter((record) => record.status === "UNDONE").length,
+    SUPERSEDED: records.filter((record) => record.status === "SUPERSEDED")
+      .length,
+    ORPHAN: records.filter((record) => record.status === "ORPHAN").length,
+  };
+}
+
+async function verifiedCorrectionState(input: {
+  reviewDataPath: string;
+  freezePath: string;
+  sessionPath: string;
+  correctionsPath: string;
+  auditPath: string;
+  requireComplete: boolean;
+}): Promise<{
+  data: C60112ReviewWorkspaceData;
+  freeze: C60112ReviewPackageFreeze;
+  session: ReviewSession;
+  corrections: HumanCorrectionRecord[];
+  activeCorrections: HumanCorrectionRecord[];
+  audit: ReviewAuditRecord[];
+  lifecycle: CorrectionLifecycleRecord[];
+  reviewDataFileHash: string;
+}> {
+  const [{ data, freeze, reviewDataFileHash }, session, corrections, audit] =
+    await Promise.all([
+      frozenReviewData({
+        reviewDataPath: input.reviewDataPath,
+        freezePath: input.freezePath,
+      }),
+      reviewSession(input.sessionPath),
+      correctionRecords(input.correctionsPath),
+      auditRecords(input.auditPath),
+    ]);
+  const activeCorrections = validateSessionIntegrity({
+    data,
+    session,
+    corrections,
+    audit,
+    requireComplete: input.requireComplete,
+  });
+  const lifecycle = classifyCorrectionLifecycle({
+    session,
+    corrections,
+    audit,
+  });
+  const activeLifecycleIds = new Set(
+    lifecycle
+      .filter((record) => record.status === "ACTIVE")
+      .map((record) => record.recordId),
+  );
+  if (
+    activeLifecycleIds.size !== activeCorrections.length ||
+    activeCorrections.some((record) => !activeLifecycleIds.has(record.recordId))
+  ) {
+    throw new Error("CORRECTION_LIFECYCLE_ACTIVE_STATE_MISMATCH");
+  }
+  return {
+    data,
+    freeze,
+    session,
+    corrections,
+    activeCorrections,
+    audit,
+    lifecycle,
+    reviewDataFileHash,
+  };
+}
+
 function candidateProviders(
   candidate: C60112WorkspaceCandidate,
 ): readonly ("CURRENT_FINAL" | "WHISPER" | "REAZON" | "INDEPENDENT")[] {
@@ -421,6 +662,7 @@ function commandArguments(list: readonly string[]): {
     args: list.slice(1),
     options: {
       workspace: { type: "string" },
+      freeze: { type: "string" },
       "base-package": { type: "string" },
       session: { type: "string" },
       corrections: { type: "string" },
@@ -437,7 +679,11 @@ const parsed = commandArguments(process.argv.slice(2));
 
 if (parsed.command === "validate") {
   const workspace = option(parsed.values, "workspace");
-  const data = await reviewData(path.join(workspace, "review-data.json"));
+  const freezePath = option(parsed.values, "freeze");
+  const { data, freeze } = await frozenReviewData({
+    reviewDataPath: path.join(workspace, "review-data.json"),
+    freezePath,
+  });
   const requiredFiles = [
     "index.html",
     "assets/review.js",
@@ -514,10 +760,11 @@ if (parsed.command === "validate") {
     sessionStatus = session.reviewComplete ? "complete" : "active";
   }
   process.stdout.write(
-    `${JSON.stringify({ ok: true, workspace, machineDraftHash: data.machineDraftHash, fileCount: requiredFiles.length, audioPlayableCount: manifest.clips.length, sessionStatus }, null, 2)}\n`,
+    `${JSON.stringify({ ok: true, workspace, freezeSemanticHash: freeze.semanticHash, workspaceDataHash: freeze.workspaceDataHash, machineDraftHash: data.machineDraftHash, fileCount: requiredFiles.length, audioPlayableCount: manifest.clips.length, sessionStatus }, null, 2)}\n`,
   );
 } else if (parsed.command === "apply") {
   const basePackagePath = option(parsed.values, "base-package");
+  const freezePath = option(parsed.values, "freeze");
   const sessionPath = option(parsed.values, "session");
   const correctionsPath = option(parsed.values, "corrections");
   const reviewDataPath = option(parsed.values, "review-data");
@@ -527,8 +774,15 @@ if (parsed.command === "validate") {
     path.join(path.dirname(correctionsPath), "review-audit.jsonl");
   if (!(await exists(auditPath))) throw new Error("REVIEW_AUDIT_LOG_REQUIRED");
   const basePackage = subtitlePackageSchema.parse(await json(basePackagePath));
-  const session = await reviewSession(sessionPath);
-  const data = await reviewData(reviewDataPath);
+  const state = await verifiedCorrectionState({
+    reviewDataPath,
+    freezePath,
+    sessionPath,
+    correctionsPath,
+    auditPath,
+    requireComplete: true,
+  });
+  const { data, session, activeCorrections } = state;
   const baseFileHash = await fileHash(basePackagePath);
   if (
     session.machineDraftHash !== baseFileHash ||
@@ -536,15 +790,6 @@ if (parsed.command === "validate") {
   ) {
     throw new Error("STALE_BASE_MACHINE_DRAFT_HASH");
   }
-  const allCorrections = await correctionRecords(correctionsPath);
-  const audit = await auditRecords(auditPath);
-  const activeCorrections = validateSessionIntegrity({
-    data,
-    session,
-    corrections: allCorrections,
-    audit,
-    requireComplete: true,
-  });
   const decisions: C60112ReviewDecision[] = activeCorrections
     .flatMap((record) =>
       materializeC60112ActiveCorrectionSnapshot({ record, basePackage }),
@@ -618,9 +863,21 @@ if (parsed.command === "validate") {
     `${JSON.stringify({ ok: true, output, summary: result.summary }, null, 2)}\n`,
   );
 } else if (parsed.command === "export-corrections") {
+  const freezePath = option(parsed.values, "freeze");
+  const reviewDataPath = option(parsed.values, "review-data");
+  const sessionPath = option(parsed.values, "session");
   const correctionsPath = option(parsed.values, "corrections");
+  const auditPath = option(parsed.values, "audit");
   const requestedOutput = option(parsed.values, "output");
-  const records = await correctionRecords(correctionsPath);
+  const state = await verifiedCorrectionState({
+    reviewDataPath,
+    freezePath,
+    sessionPath,
+    correctionsPath,
+    auditPath,
+    requireComplete: false,
+  });
+  const records = state.activeCorrections;
   const outputIsJsonl =
     path.extname(requestedOutput).toLowerCase() === ".jsonl";
   const datasetPath = outputIsJsonl
@@ -630,6 +887,10 @@ if (parsed.command === "validate") {
     outputIsJsonl ? path.dirname(requestedOutput) : requestedOutput,
     "correction-dataset-summary.json",
   );
+  const lifecyclePath = path.join(
+    outputIsJsonl ? path.dirname(requestedOutput) : requestedOutput,
+    "correction-dataset-lifecycle.json",
+  );
   await mkdir(path.dirname(datasetPath), { recursive: true });
   await atomicWriteFile(
     datasetPath,
@@ -637,15 +898,62 @@ if (parsed.command === "validate") {
       ? ""
       : `${records.map((record) => JSON.stringify(record)).join("\n")}\n`,
   );
+  const generatedAt = new Date().toISOString();
+  const [sourceCorrectionLogHash, sourceReviewSessionHash, sourceAuditLogHash] =
+    await Promise.all([
+      fileHash(correctionsPath),
+      fileHash(sessionPath),
+      fileHash(auditPath),
+    ]);
+  const datasetJsonlHash = await fileHash(datasetPath);
+  const counts = lifecycleCounts(state.lifecycle);
+  const lifecycleCore = {
+    schemaVersion: "1.0.0" as const,
+    artifactType: "correction-dataset-lifecycle" as const,
+    generatedAt,
+    reviewPackageFreezeHash: state.freeze.semanticHash,
+    frozenWorkspaceDataHash: state.freeze.workspaceDataHash,
+    sourceCorrectionLogHash,
+    sourceReviewSessionHash,
+    sourceAuditLogHash,
+    sourceReviewDataHash: state.reviewDataFileHash,
+    datasetJsonlHash,
+    sourceRecordCount: state.corrections.length,
+    activeRecordCount: counts.ACTIVE,
+    undoneRecordCount: counts.UNDONE,
+    supersededRecordCount: counts.SUPERSEDED,
+    orphanRecordCount: counts.ORPHAN,
+    exportedStatuses: ["ACTIVE"] as const,
+    records: state.lifecycle,
+  };
+  const lifecycleAudit = {
+    ...lifecycleCore,
+    semanticHash: machineQualitySemanticHash({
+      ...lifecycleCore,
+      generatedAt: undefined,
+    }),
+  };
+  await atomicWriteJson(lifecyclePath, lifecycleAudit);
+  const lifecycleAuditHash = await fileHash(lifecyclePath);
   const summaryCore = {
     schemaVersion: "1.0.0" as const,
     policyVersion: "c6.0.1.12-multi-asr-review-assistance-v2" as const,
     artifactType: "correction-dataset-summary" as const,
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     locality: "LOCAL_ONLY" as const,
     shareable: false as const,
-    sourceCorrectionLogHash: await fileHash(correctionsPath),
-    datasetJsonlHash: await fileHash(datasetPath),
+    sourceCorrectionLogHash,
+    sourceReviewSessionHash,
+    sourceAuditLogHash,
+    sourceReviewDataHash: state.reviewDataFileHash,
+    reviewPackageFreezeHash: state.freeze.semanticHash,
+    lifecycleAuditHash,
+    datasetJsonlHash,
+    sourceRecordCount: state.corrections.length,
+    activeRecordCount: counts.ACTIVE,
+    undoneRecordCount: counts.UNDONE,
+    supersededRecordCount: counts.SUPERSEDED,
+    orphanRecordCount: counts.ORPHAN,
     recordCount: records.length,
     uniqueSessionCount: new Set(records.map((record) => record.sessionId)).size,
     uniqueReviewItemCount: new Set(records.map((record) => record.reviewItemId))
@@ -663,13 +971,26 @@ if (parsed.command === "validate") {
   });
   await atomicWriteJson(summaryPath, summary);
   process.stdout.write(
-    `${JSON.stringify({ ok: true, output: datasetPath, summaryPath, recordCount: records.length, sha256: summary.datasetJsonlHash }, null, 2)}\n`,
+    `${JSON.stringify({ ok: true, output: datasetPath, summaryPath, lifecyclePath, recordCount: records.length, lifecycleCounts: counts, sha256: summary.datasetJsonlHash }, null, 2)}\n`,
   );
 } else if (parsed.command === "stats") {
+  const freezePath = option(parsed.values, "freeze");
+  const reviewDataPath = option(parsed.values, "review-data");
+  const sessionPath = option(parsed.values, "session");
   const correctionsPath = option(parsed.values, "corrections");
-  const records = await correctionRecords(correctionsPath);
+  const auditPath = option(parsed.values, "audit");
+  const state = await verifiedCorrectionState({
+    reviewDataPath,
+    freezePath,
+    sessionPath,
+    correctionsPath,
+    auditPath,
+    requireComplete: false,
+  });
+  const records = state.activeCorrections;
+  const counts = lifecycleCounts(state.lifecycle);
   process.stdout.write(
-    `${JSON.stringify({ recordCount: records.length, uniqueSessionCount: new Set(records.map((record) => record.sessionId)).size, uniqueReviewItemCount: new Set(records.map((record) => record.reviewItemId)).size, decisionCounts: decisionCounts(records), sourceCorrectionLogHash: await fileHash(correctionsPath) }, null, 2)}\n`,
+    `${JSON.stringify({ recordCount: records.length, sourceRecordCount: state.corrections.length, activeRecordCount: counts.ACTIVE, undoneRecordCount: counts.UNDONE, supersededRecordCount: counts.SUPERSEDED, orphanRecordCount: counts.ORPHAN, uniqueSessionCount: new Set(records.map((record) => record.sessionId)).size, uniqueReviewItemCount: new Set(records.map((record) => record.reviewItemId)).size, decisionCounts: decisionCounts(records), sourceCorrectionLogHash: await fileHash(correctionsPath), sourceReviewSessionHash: await fileHash(sessionPath), sourceAuditLogHash: await fileHash(auditPath), sourceReviewDataHash: state.reviewDataFileHash, reviewPackageFreezeHash: state.freeze.semanticHash }, null, 2)}\n`,
   );
 } else {
   throw new Error(`Unknown review command: ${parsed.command}`);

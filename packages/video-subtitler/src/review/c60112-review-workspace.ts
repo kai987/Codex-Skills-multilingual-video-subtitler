@@ -16,6 +16,7 @@ import {
   type ServerResponse,
 } from "node:http";
 import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
 import {
   humanCorrectionRecordSchema,
@@ -124,6 +125,12 @@ export interface C60112ReviewDecisionRequest {
   expectedMachineDraftHash: string;
 }
 
+interface C60112UndoRequest {
+  undoId: string;
+  expectedReviewPackageSemanticHash: string;
+  expectedMachineDraftHash: string;
+}
+
 export interface C60112ReviewItemState {
   recordId: string;
   decisionId: string;
@@ -213,6 +220,17 @@ interface WorkspacePaths {
   session: string;
   correctionLog: string;
   auditLog: string;
+  pendingTransaction: string;
+  mutationLock: string;
+}
+
+interface C60112PendingWorkspaceTransaction {
+  schemaVersion: "1.0.0";
+  transactionId: string;
+  operation: "DECISION" | "UNDO";
+  correction: C60112CorrectionRecord | null;
+  audit: C60112AuditRecord;
+  session: C60112ReviewSession;
 }
 
 class WorkspaceHttpError extends Error {
@@ -338,14 +356,20 @@ async function atomicWriteText(
 }
 
 async function appendJsonLine(filePath: string, value: unknown): Promise<void> {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  const handle = await open(filePath, "a", 0o600);
+  let content = "";
   try {
-    await handle.writeFile(`${JSON.stringify(value)}\n`, "utf8");
-    await handle.sync();
-  } finally {
-    await handle.close();
+    content = await readFile(filePath, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
+  if (content.length > 0 && !content.endsWith("\n")) {
+    throw new WorkspaceHttpError(
+      500,
+      "PERSISTENCE_LOG_TRUNCATED",
+      `${path.basename(filePath)} ends with a partial JSON line.`,
+    );
+  }
+  await atomicWriteText(filePath, `${content}${JSON.stringify(value)}\n`);
 }
 
 async function readJsonLines<T>(filePath: string): Promise<T[]> {
@@ -374,6 +398,24 @@ function validateInterval(
   ) {
     throw new Error(`${label} must have finite non-negative start < end.`);
   }
+}
+
+function workspaceSourceDurationMs(data: C60112ReviewWorkspaceData): number {
+  const explicitDurationMs = data.sourceMediaIdentity.sourceDurationMs;
+  const durationSeconds = data.sourceMediaIdentity.durationSeconds;
+  const durationMs =
+    typeof explicitDurationMs === "number" &&
+    Number.isFinite(explicitDurationMs)
+      ? explicitDurationMs
+      : typeof durationSeconds === "number" && Number.isFinite(durationSeconds)
+        ? durationSeconds * 1_000
+        : Number.NaN;
+  if (!Number.isFinite(durationMs) || durationMs <= 0) {
+    throw new Error(
+      "Review workspace source media identity requires a positive sourceDurationMs or durationSeconds.",
+    );
+  }
+  return durationMs;
 }
 
 export function assertC60112ReviewWorkspaceData(
@@ -590,29 +632,29 @@ function reviewWorkspaceJavascript(): string {
 const byId=id=>document.getElementById(id);
 const text=(tag,value,className)=>{const node=document.createElement(tag);node.textContent=String(value??'');if(className)node.className=className;return node};
 const button=(label,onClick,className)=>{const node=text('button',label,className);node.type='button';node.addEventListener('click',onClick);return node};
-const priorityRank={CRITICAL:4,HIGH:3,MEDIUM:2,LOW:1};
 const sessionState=id=>state.session?.itemStates?.[id]??null;
 function showStatus(message,error=false){const node=byId('status');node.textContent=message;node.className=error?'error':''}
 function bundleFor(id){return state.data.candidateBundles.find(bundle=>bundle.reviewItemId===id)??{reviewItemId:id,candidates:[]}}
 function regionFor(id){return state.data.regions.find(region=>region.regionId===id)??null}
 function typeMatches(item,filter){if(filter==='ALL')return true;if(filter==='UNRESOLVED')return sessionState(item.reviewItemId)?.decisionType==='UNRESOLVED'||sessionState(item.reviewItemId)===null;return item.itemTypes.some(type=>type.includes(filter))}
-function refreshFiltered(){const priority=byId('priority-filter').value;const type=byId('type-filter').value;const activeId=state.filtered[state.index]?.reviewItemId;state.filtered=[...state.data.items].filter(item=>(priority==='ALL'||item.priorityTier===priority)&&typeMatches(item,type)).sort((left,right)=>priorityRank[right.priorityTier]-priorityRank[left.priorityTier]||left.sourceInterval.start-right.sourceInterval.start||left.reviewItemId.localeCompare(right.reviewItemId));state.index=Math.max(0,state.filtered.findIndex(item=>item.reviewItemId===activeId));if(state.index<0)state.index=0;render()}
+function refreshFiltered(){const priority=byId('priority-filter').value;const type=byId('type-filter').value;const activeId=state.filtered[state.index]?.reviewItemId;state.filtered=[...state.data.items].filter(item=>(priority==='ALL'||item.priorityTier===priority)&&typeMatches(item,type)).sort((left,right)=>right.priorityScore-left.priorityScore||left.sourceInterval.start-right.sourceInterval.start||left.reviewItemId.localeCompare(right.reviewItemId));state.index=Math.max(0,state.filtered.findIndex(item=>item.reviewItemId===activeId));if(state.index<0)state.index=0;render()}
 function renderProgress(){const required=state.data.items.filter(item=>item.requiredLevel==='REQUIRED').length;const completed=state.session?.completedRequiredCount??0;const unresolved=state.session?.unresolvedRequiredCount??required;byId('progress').textContent='Required '+completed+' / '+required+' · unresolved '+unresolved}
 function renderQueue(){const queue=byId('queue');queue.replaceChildren();state.filtered.forEach((item,index)=>{const itemState=sessionState(item.reviewItemId);const node=button('',()=>{state.index=index;render()},'queue-item'+(index===state.index?' active':'')+(itemState?(itemState.decisionType==='UNRESOLVED'?' unresolved':' resolved'):''));node.append(text('span',item.priorityTier,'priority '+item.priorityTier),text('div',item.currentText||'[missing speech]'),text('small',item.sourceInterval.start.toFixed(3)+' → '+item.sourceInterval.end.toFixed(3)));queue.append(node)});if(!state.filtered.length)queue.append(text('div','No items match the filters.','empty'))}
 function addLabeled(container,label,node){const wrapper=document.createElement('label');wrapper.append(text('span',label,'label'),node);container.append(wrapper)}
 function candidateView(item){const container=document.createElement('section');container.append(text('div','Alternative candidates','label'));const selected=state.selectedCandidate.get(item.reviewItemId)??sessionState(item.reviewItemId)?.selectedCandidateId??null;for(const candidate of bundleFor(item.reviewItemId).candidates){const card=document.createElement('div');card.className='candidate'+(candidate.candidateId===selected?' selected':'');card.append(text('strong',candidate.labels.join(' / ')),text('div',candidate.text,'subtitle'));const badges=document.createElement('div');badges.className='badges';candidate.evidenceBadges.forEach(value=>badges.append(text('span',value,'badge')));card.append(badges,button('Select candidate',()=>{state.selectedCandidate.set(item.reviewItemId,candidate.candidateId);render()}));container.append(card)}return container}
 function audioView(item){const region=regionFor(item.regionId);const card=document.createElement('section');card.className='card';card.append(text('div','Review audio','label'));if(!region){card.append(text('p','Region audio metadata is unavailable.','empty'));return card}const audio=document.createElement('audio');audio.id='review-audio';audio.controls=true;audio.preload='metadata';if(/^audio\/[A-Za-z0-9._/-]+$/u.test(region.audioPath)&&!region.audioPath.includes('..'))audio.src=region.audioPath;else showStatus('Unsafe audio path rejected.',true);const core=item.coreInterval;const jump=()=>{audio.currentTime=Math.max(0,core.start-region.contextStart);audio.play().catch(error=>showStatus('Audio playback failed: '+error.message,true))};const replay=()=>{audio.currentTime=0;audio.play().catch(error=>showStatus('Audio playback failed: '+error.message,true))};const controls=document.createElement('div');controls.className='audio-actions';controls.append(button('Replay region',replay),button('Jump to core',jump));for(const speed of [.75,1,1.25])controls.append(button(speed.toFixed(2).replace(/0$/u,'')+'×',()=>{audio.playbackRate=speed}));card.append(audio,controls,text('p','Core '+core.start.toFixed(3)+' → '+core.end.toFixed(3)+' · region '+region.contextStart.toFixed(3)+' → '+region.contextEnd.toFixed(3),'note'));return card}
-function currentDecisionPayload(item,decisionType,fields={}){return{decisionId:'decision-'+(globalThis.crypto?.randomUUID?.()??Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)),reviewItemId:item.reviewItemId,decisionType,selectedCandidateId:fields.selectedCandidateId??null,afterText:fields.afterText??null,afterStart:fields.afterStart??null,afterEnd:fields.afterEnd??null,reviewerNote:fields.reviewerNote??null,expectedReviewPackageSemanticHash:state.data.reviewPackageSemanticHash,expectedMachineDraftHash:state.data.machineDraftHash}}
+function operationId(prefix){return prefix+'-'+(globalThis.crypto?.randomUUID?.()??Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
+function currentDecisionPayload(item,decisionType,fields={}){return{decisionId:operationId('decision'),reviewItemId:item.reviewItemId,decisionType,selectedCandidateId:fields.selectedCandidateId??null,afterText:fields.afterText??null,afterStart:fields.afterStart??null,afterEnd:fields.afterEnd??null,reviewerNote:(fields.reviewerNote??byId('reviewer-note')?.value)||null,expectedReviewPackageSemanticHash:state.data.reviewPackageSemanticHash,expectedMachineDraftHash:state.data.machineDraftHash}}
 async function postJson(url,body){const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json','x-mvl-review-request':'c6-0-1-12'},body:JSON.stringify(body)});const result=await response.json();if(!response.ok)throw new Error((result.code??'REQUEST_FAILED')+': '+(result.message??response.statusText));return result}
 async function decide(item,decisionType,fields={}){try{const result=await postJson('/api/decision',currentDecisionPayload(item,decisionType,fields));state.session=result.session;showStatus('Autosaved '+decisionType+'.');render()}catch(error){showStatus(error.message,true)}}
-function actionView(item,textArea,startInput,endInput,noteInput){const card=document.createElement('section');card.className='card';card.append(text('div','Human exception decision','label'));const actions=document.createElement('div');actions.className='actions';const available=type=>item.suggestedActions.includes(type);const add=(type,label,onClick,className)=>{if(available(type))actions.append(button(label,onClick,className))};const bundle=bundleFor(item.reviewItemId);const candidateFor=label=>{const selected=bundle.candidates.find(candidate=>candidate.candidateId===state.selectedCandidate.get(item.reviewItemId));return selected?.labels.includes(label)?selected:bundle.candidates.find(candidate=>candidate.labels.includes(label))};add('KEEP_CURRENT','1 Keep current',()=>decide(item,'KEEP_CURRENT'),'primary');add('USE_REAZON','2 Use Reazon',()=>{const candidate=candidateFor('REAZON');decide(item,'USE_REAZON',{selectedCandidateId:candidate?.candidateId??null})});add('USE_WHISPER_ALTERNATE','3 Use Whisper alternate',()=>{const candidate=candidateFor('WHISPER_ALT');decide(item,'USE_WHISPER_ALTERNATE',{selectedCandidateId:candidate?.candidateId??null})});add('MANUAL_EDIT','Manual text edit',()=>decide(item,'MANUAL_EDIT',{afterText:textArea.value}));add('TIMING_EDIT','Timing edit',()=>decide(item,'TIMING_EDIT',{afterStart:Number(startInput.value),afterEnd:Number(endInput.value)}));add('ADD_NEW_CUE','Add new cue',()=>decide(item,'ADD_NEW_CUE',{afterText:textArea.value,afterStart:Number(startInput.value),afterEnd:Number(endInput.value)}));add('MARK_FALSE_POSITIVE','Mark false positive',()=>decide(item,'MARK_FALSE_POSITIVE'));add('UNRESOLVED','U Unresolved',()=>decide(item,'UNRESOLVED',{reviewerNote:noteInput.value||null}));add('WAIVE_REVIEW','Waive review',()=>decide(item,'WAIVE_REVIEW',{reviewerNote:noteInput.value||null}));actions.append(button('Undo last decision',async()=>{try{const result=await postJson('/api/undo',{expectedReviewPackageSemanticHash:state.data.reviewPackageSemanticHash,expectedMachineDraftHash:state.data.machineDraftHash});state.session=result.session;showStatus('Last decision undone.');render()}catch(error){showStatus(error.message,true)}}));card.append(actions);return card}
+function actionView(item,textArea,startInput,endInput,noteInput){const card=document.createElement('section');card.className='card';card.append(text('div','Human exception decision','label'));const actions=document.createElement('div');actions.className='actions';const available=type=>item.suggestedActions.includes(type);const add=(type,label,onClick,className)=>{if(available(type))actions.append(button(label,onClick,className))};const bundle=bundleFor(item.reviewItemId);const candidateFor=label=>{const selected=bundle.candidates.find(candidate=>candidate.candidateId===state.selectedCandidate.get(item.reviewItemId));return selected?.labels.includes(label)?selected:bundle.candidates.find(candidate=>candidate.labels.includes(label))};add('KEEP_CURRENT','1 Keep current',()=>decide(item,'KEEP_CURRENT'),'primary');add('USE_REAZON','2 Use Reazon',()=>{const candidate=candidateFor('REAZON');decide(item,'USE_REAZON',{selectedCandidateId:candidate?.candidateId??null})});add('USE_WHISPER_ALTERNATE','3 Use Whisper alternate',()=>{const candidate=candidateFor('WHISPER_ALT');decide(item,'USE_WHISPER_ALTERNATE',{selectedCandidateId:candidate?.candidateId??null})});add('MANUAL_EDIT','Manual text edit',()=>decide(item,'MANUAL_EDIT',{afterText:textArea.value}));add('TIMING_EDIT','Timing edit',()=>decide(item,'TIMING_EDIT',{afterStart:Number(startInput.value),afterEnd:Number(endInput.value)}));add('ADD_NEW_CUE','Add new cue',()=>decide(item,'ADD_NEW_CUE',{afterText:textArea.value,afterStart:Number(startInput.value),afterEnd:Number(endInput.value)}));add('MARK_FALSE_POSITIVE','Mark false positive',()=>decide(item,'MARK_FALSE_POSITIVE'));add('UNRESOLVED','U Unresolved',()=>decide(item,'UNRESOLVED',{reviewerNote:noteInput.value||null}));add('WAIVE_REVIEW','Waive review',()=>decide(item,'WAIVE_REVIEW',{reviewerNote:noteInput.value||null}));actions.append(button('Undo last decision',async()=>{try{const result=await postJson('/api/undo',{undoId:operationId('undo'),expectedReviewPackageSemanticHash:state.data.reviewPackageSemanticHash,expectedMachineDraftHash:state.data.machineDraftHash});state.session=result.session;showStatus('Last decision undone.');render()}catch(error){showStatus(error.message,true)}}));card.append(actions);return card}
 function renderWorkspace(){const workspace=byId('workspace');workspace.replaceChildren();const item=state.filtered[state.index];if(!item){workspace.append(text('p','No review item selected.','empty'));return}const heading=document.createElement('section');heading.className='card';heading.append(text('div',item.priorityTier+' · '+item.requiredLevel,'priority '+item.priorityTier),text('h1',item.currentText||'Missing speech review'),text('p',item.reviewReasons.join(' · '),'context'));const badgeRow=document.createElement('div');badgeRow.className='badges';item.itemTypes.forEach(value=>badgeRow.append(text('span',value,'badge')));heading.append(badgeRow);const context=document.createElement('div');context.className='grid';const previous=document.createElement('div');previous.append(text('div','Previous cue','label'),text('div',item.previousCue?.text??'—','context'));const next=document.createElement('div');next.append(text('div','Next cue','label'),text('div',item.nextCue?.text??'—','context'));context.append(previous,next);heading.append(context);const edit=document.createElement('section');edit.className='card';const textArea=document.createElement('textarea');textArea.id='manual-text';textArea.value=item.currentText;addLabeled(edit,'Manual text / new cue text',textArea);const timing=document.createElement('div');timing.className='timing';const startInput=document.createElement('input');startInput.id='timing-start';startInput.type='number';startInput.step='.001';startInput.value=String(item.currentStart??item.coreInterval.start);const endInput=document.createElement('input');endInput.id='timing-end';endInput.type='number';endInput.step='.001';endInput.value=String(item.currentEnd??item.coreInterval.end);addLabeled(timing,'Start',startInput);addLabeled(timing,'End',endInput);const noteInput=document.createElement('input');noteInput.id='reviewer-note';noteInput.type='text';noteInput.placeholder='Required when waiving review';edit.append(timing);addLabeled(edit,'Reviewer note',noteInput);const navigation=document.createElement('div');navigation.className='navigation';navigation.append(button('K Previous',()=>move(-1)),button('J Next',()=>move(1)));workspace.append(heading,audioView(item),candidateView(item),edit,actionView(item,textArea,startInput,endInput,noteInput),navigation);const itemState=sessionState(item.reviewItemId);if(itemState)workspace.prepend(text('p','Saved decision: '+itemState.decisionType,'note'))}
 function move(delta){if(!state.filtered.length)return;state.index=(state.index+delta+state.filtered.length)%state.filtered.length;render()}
 function restoreSavedInputs(){const item=state.filtered[state.index];if(!item)return;const saved=sessionState(item.reviewItemId);const textArea=byId('manual-text');const startInput=byId('timing-start');const endInput=byId('timing-end');const noteInput=byId('reviewer-note');if(!saved){const selectedId=state.selectedCandidate.get(item.reviewItemId);const selected=bundleFor(item.reviewItemId).candidates.find(candidate=>candidate.candidateId===selectedId);if(textArea&&item.finalCueIds.length===0&&selected)textArea.value=selected.text;return}if(textArea)textArea.value=saved.afterText??'';if(startInput)startInput.value=saved.afterStart===null?'':String(saved.afterStart);if(endInput)endInput.value=saved.afterEnd===null?'':String(saved.afterEnd);if(noteInput)noteInput.value=saved.reviewerNote??''}
 function render(){renderProgress();renderQueue();renderWorkspace();restoreSavedInputs()}
 byId('priority-filter').addEventListener('change',refreshFiltered);byId('type-filter').addEventListener('change',refreshFiltered);
 document.addEventListener('keydown',event=>{const editing=event.target instanceof HTMLInputElement||event.target instanceof HTMLTextAreaElement||event.target instanceof HTMLSelectElement||event.target instanceof HTMLButtonElement;if(editing)return;const item=state.filtered[state.index];if(!item)return;const available=type=>item.suggestedActions.includes(type);if(event.key===' '){event.preventDefault();const audio=byId('review-audio');if(audio){if(audio.paused)audio.play().catch(error=>showStatus(error.message,true));else audio.pause()}}if(event.key.toLowerCase()==='j')move(1);if(event.key.toLowerCase()==='k')move(-1);if(event.key==='1'&&available('KEEP_CURRENT'))decide(item,'KEEP_CURRENT');if(event.key==='2'&&available('USE_REAZON')){const candidate=bundleFor(item.reviewItemId).candidates.find(value=>value.labels.includes('REAZON'));decide(item,'USE_REAZON',{selectedCandidateId:candidate?.candidateId??null})}if(event.key==='3'&&available('USE_WHISPER_ALTERNATE')){const candidate=bundleFor(item.reviewItemId).candidates.find(value=>value.labels.includes('WHISPER_ALT'));decide(item,'USE_WHISPER_ALTERNATE',{selectedCandidateId:candidate?.candidateId??null})}if(event.key.toLowerCase()==='e')byId('manual-text')?.focus();if(event.key.toLowerCase()==='t')byId('timing-start')?.focus();if(event.key.toLowerCase()==='u'&&available('UNRESOLVED'))decide(item,'UNRESOLVED')});
-Promise.all([fetch('review-data.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('review-data.json unavailable');return response.json()}),fetch('/api/session',{cache:'no-store'}).then(response=>response.json())]).then(([data,sessionResult])=>{state.data=data;state.session=sessionResult.session??null;byId('identity').textContent=data.policyVersion+' · '+data.reviewPackageSemanticHash.slice(0,12);state.filtered=[...data.items];refreshFiltered();showStatus(state.session?'Review session resumed.':'No review session exists; the first explicit decision will create it.')}).catch(error=>showStatus(error.message,true));`;
+Promise.all([fetch('review-data.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('review-data.json unavailable');return response.json()}),fetch('/api/session',{cache:'no-store'}).then(response=>response.json())]).then(([data,sessionResult])=>{state.data=data;state.session=sessionResult.session??null;byId('identity').textContent=data.policyVersion+' · '+data.reviewPackageSemanticHash.slice(0,12);refreshFiltered();showStatus(state.session?'Review session resumed.':'No review session exists; the first explicit decision will create it.')}).catch(error=>showStatus(error.message,true));`;
 }
 
 function workspacePaths(workspaceDirectory: string): WorkspacePaths {
@@ -625,6 +667,11 @@ function workspacePaths(workspaceDirectory: string): WorkspacePaths {
     session: path.join(sessionDirectory, "review-session.json"),
     correctionLog: path.join(sessionDirectory, "human-correction-log.jsonl"),
     auditLog: path.join(sessionDirectory, "review-audit.jsonl"),
+    pendingTransaction: path.join(
+      sessionDirectory,
+      "pending-workspace-transaction.json",
+    ),
+    mutationLock: path.join(sessionDirectory, "workspace-mutation.sqlite"),
   };
 }
 
@@ -673,7 +720,7 @@ async function loadWorkspaceData(
   return data;
 }
 
-async function loadSession(
+async function loadSessionSnapshot(
   paths: WorkspacePaths,
 ): Promise<C60112ReviewSession | null> {
   try {
@@ -827,6 +874,31 @@ function parseDecisionRequest(value: unknown): C60112ReviewDecisionRequest {
   return value as unknown as C60112ReviewDecisionRequest;
 }
 
+function parseUndoRequest(value: unknown): C60112UndoRequest {
+  if (
+    !isRecord(value) ||
+    Object.keys(value).some(
+      (key) =>
+        ![
+          "undoId",
+          "expectedReviewPackageSemanticHash",
+          "expectedMachineDraftHash",
+        ].includes(key),
+    ) ||
+    typeof value.undoId !== "string" ||
+    value.undoId.length === 0 ||
+    typeof value.expectedReviewPackageSemanticHash !== "string" ||
+    typeof value.expectedMachineDraftHash !== "string"
+  ) {
+    throw new WorkspaceHttpError(
+      400,
+      "INVALID_UNDO",
+      "Undo requires an idempotency ID and valid workspace identity.",
+    );
+  }
+  return value as unknown as C60112UndoRequest;
+}
+
 function correctionForDecision(input: {
   data: C60112ReviewWorkspaceData;
   session: C60112ReviewSession;
@@ -930,12 +1002,13 @@ function correctionForDecision(input: {
         input.request.afterStart === null ||
         input.request.afterEnd === null ||
         input.request.afterStart < 0 ||
-        input.request.afterEnd <= input.request.afterStart
+        input.request.afterEnd <= input.request.afterStart ||
+        input.request.afterEnd * 1_000 > workspaceSourceDurationMs(input.data)
       ) {
         throw new WorkspaceHttpError(
           400,
           "INVALID_TIMING_EDIT",
-          "Timing edit requires non-negative start < end.",
+          "Timing edit requires non-negative start < end within sourceDurationMs.",
         );
       }
       afterStart = input.request.afterStart;
@@ -955,12 +1028,13 @@ function correctionForDecision(input: {
         input.request.afterStart === null ||
         input.request.afterEnd === null ||
         input.request.afterStart < 0 ||
-        input.request.afterEnd <= input.request.afterStart
+        input.request.afterEnd <= input.request.afterStart ||
+        input.request.afterEnd * 1_000 > workspaceSourceDurationMs(input.data)
       ) {
         throw new WorkspaceHttpError(
           400,
           "INVALID_NEW_CUE",
-          "ADD_NEW_CUE requires text and valid timestamps.",
+          "ADD_NEW_CUE requires text and timestamps within sourceDurationMs.",
         );
       }
       afterText = input.request.afterText;
@@ -1045,50 +1119,673 @@ function stateFromCorrection(
   };
 }
 
+function decisionAuditId(sessionId: string, recordId: string): string {
+  return `audit-decision-${sha256Value({ sessionId, recordId }).slice(0, 24)}`;
+}
+
+function undoAuditId(sessionId: string, undoId: string): string {
+  return `audit-undo-${sha256Value({ sessionId, undoId }).slice(0, 24)}`;
+}
+
+function cloneSession(session: C60112ReviewSession): C60112ReviewSession {
+  return reviewSessionSchema.parse(JSON.parse(JSON.stringify(session)));
+}
+
+function historyFailure(message: string): WorkspaceHttpError {
+  return new WorkspaceHttpError(500, "AUDIT_CHAIN_BROKEN", message);
+}
+
+function assertRecoveredIntervalWithinSourceDuration(input: {
+  data: C60112ReviewWorkspaceData;
+  start: number | null;
+  end: number | null;
+  label: string;
+}): void {
+  if (input.start === null && input.end === null) return;
+  if (
+    input.start === null ||
+    input.end === null ||
+    !Number.isFinite(input.start) ||
+    !Number.isFinite(input.end) ||
+    input.start < 0 ||
+    input.end <= input.start ||
+    input.end * 1_000 > workspaceSourceDurationMs(input.data)
+  ) {
+    throw historyFailure(`${input.label} has timing outside sourceDurationMs.`);
+  }
+}
+
+function assertRecoveredCorrectionTiming(
+  data: C60112ReviewWorkspaceData,
+  correction: C60112CorrectionRecord,
+): void {
+  assertRecoveredIntervalWithinSourceDuration({
+    data,
+    start: correction.beforeStart,
+    end: correction.beforeEnd,
+    label: `Correction ${correction.recordId} before state`,
+  });
+  assertRecoveredIntervalWithinSourceDuration({
+    data,
+    start: correction.afterStart,
+    end: correction.afterEnd,
+    label: `Correction ${correction.recordId} after state`,
+  });
+}
+
+function assertRecoveredSessionTiming(
+  data: C60112ReviewWorkspaceData,
+  session: C60112ReviewSession,
+): void {
+  for (const [reviewItemId, state] of Object.entries(session.itemStates)) {
+    assertRecoveredIntervalWithinSourceDuration({
+      data,
+      start: state.afterStart,
+      end: state.afterEnd,
+      label: `Session item ${reviewItemId}`,
+    });
+  }
+}
+
+async function acquireWorkspaceMutationLock(paths: WorkspacePaths): Promise<{
+  release: () => Promise<void>;
+}> {
+  await mkdir(paths.sessionDirectory, { recursive: true });
+  const deadline = Date.now() + 10_000;
+  // SQLite owns the cross-process lock in the OS, so SIGKILL releases it. A
+  // persistent PID file cannot provide this property without unsafe stale-lock
+  // deletion races. No review data is stored in this mutex database.
+  const file = await open(paths.mutationLock, "a", 0o600);
+  await file.close();
+  const database = new DatabaseSync(paths.mutationLock);
+  try {
+    for (;;) {
+      try {
+        database.exec("BEGIN EXCLUSIVE");
+        return {
+          release: () => {
+            try {
+              database.exec("ROLLBACK");
+            } finally {
+              database.close();
+            }
+            return Promise.resolve();
+          },
+        };
+      } catch (error) {
+        const sqliteError = error as { errcode?: number };
+        if (sqliteError.errcode !== 5 && sqliteError.errcode !== 6) throw error;
+        if (Date.now() >= deadline) {
+          throw new WorkspaceHttpError(
+            503,
+            "WORKSPACE_MUTATION_LOCK_TIMEOUT",
+            "Another process is updating this review workspace.",
+          );
+        }
+        await new Promise<void>((resolve) => setTimeout(resolve, 10));
+      }
+    }
+  } catch (error) {
+    database.close();
+    throw error;
+  }
+}
+
+async function withWorkspaceMutationLock<T>(
+  paths: WorkspacePaths,
+  operation: () => Promise<T>,
+): Promise<T> {
+  const lock = await acquireWorkspaceMutationLock(paths);
+  try {
+    return await operation();
+  } finally {
+    await lock.release();
+  }
+}
+
+function uniqueHistoryRecords<T>(input: {
+  records: T[];
+  identity: (record: T) => string;
+  label: string;
+}): T[] {
+  const unique = new Map<string, T>();
+  for (const record of input.records) {
+    const identity = input.identity(record);
+    const existing = unique.get(identity);
+    if (
+      existing !== undefined &&
+      sha256Value(existing) !== sha256Value(record)
+    ) {
+      throw historyFailure(
+        `${input.label} ${identity} has conflicting append-only records.`,
+      );
+    }
+    unique.set(identity, existing ?? record);
+  }
+  return [...unique.values()];
+}
+
+async function readWorkspaceHistory(
+  paths: WorkspacePaths,
+  data: C60112ReviewWorkspaceData,
+): Promise<{
+  corrections: C60112CorrectionRecord[];
+  audits: C60112AuditRecord[];
+}> {
+  const [rawCorrections, rawAudits] = await Promise.all([
+    readJsonLines<unknown>(paths.correctionLog),
+    readJsonLines<unknown>(paths.auditLog),
+  ]);
+  const corrections = uniqueHistoryRecords({
+    records: rawCorrections.map((record) =>
+      humanCorrectionRecordSchema.parse(record),
+    ),
+    identity: (record) => record.recordId,
+    label: "Correction",
+  });
+  corrections.forEach((correction) =>
+    assertRecoveredCorrectionTiming(data, correction),
+  );
+  return {
+    corrections,
+    audits: uniqueHistoryRecords({
+      records: rawAudits.map((record) => reviewAuditRecordSchema.parse(record)),
+      identity: (record) => record.auditId,
+      label: "Audit",
+    }),
+  };
+}
+
+function parsePendingTransaction(
+  value: unknown,
+): C60112PendingWorkspaceTransaction {
+  if (
+    !isRecord(value) ||
+    value.schemaVersion !== "1.0.0" ||
+    typeof value.transactionId !== "string" ||
+    value.transactionId.length === 0 ||
+    (value.operation !== "DECISION" && value.operation !== "UNDO")
+  ) {
+    throw historyFailure("Pending workspace transaction is malformed.");
+  }
+  const audit = reviewAuditRecordSchema.parse(value.audit);
+  const correction =
+    value.correction === null
+      ? null
+      : humanCorrectionRecordSchema.parse(value.correction);
+  const session = reviewSessionSchema.parse(value.session);
+  const transaction: C60112PendingWorkspaceTransaction = {
+    schemaVersion: "1.0.0",
+    transactionId: value.transactionId,
+    operation: value.operation,
+    correction,
+    audit,
+    session,
+  };
+  if (
+    transaction.transactionId !== transaction.audit.auditId ||
+    transaction.operation !== transaction.audit.operation ||
+    transaction.session.sessionId !== transaction.audit.sessionId ||
+    (transaction.operation === "DECISION" &&
+      transaction.audit.newDecision !== transaction.correction?.recordId) ||
+    (transaction.operation === "UNDO" && transaction.correction !== null)
+  ) {
+    throw historyFailure("Pending workspace transaction identity is invalid.");
+  }
+  return transaction;
+}
+
+async function loadPendingTransaction(
+  paths: WorkspacePaths,
+): Promise<C60112PendingWorkspaceTransaction | null> {
+  try {
+    return parsePendingTransaction(
+      JSON.parse(await readFile(paths.pendingTransaction, "utf8")) as unknown,
+    );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+async function ensureCorrectionLogged(
+  paths: WorkspacePaths,
+  correction: C60112CorrectionRecord,
+): Promise<void> {
+  const existing = (await readJsonLines<unknown>(paths.correctionLog))
+    .map(
+      (record) =>
+        humanCorrectionRecordSchema.parse(record) as C60112CorrectionRecord,
+    )
+    .find((record) => record.recordId === correction.recordId);
+  if (existing !== undefined) {
+    if (sha256Value(existing) !== sha256Value(correction)) {
+      throw historyFailure(
+        `Correction ${correction.recordId} conflicts with its transaction.`,
+      );
+    }
+    return;
+  }
+  await appendJsonLine(paths.correctionLog, correction);
+}
+
+async function ensureAuditLogged(
+  paths: WorkspacePaths,
+  audit: C60112AuditRecord,
+): Promise<void> {
+  const existing = (await readJsonLines<unknown>(paths.auditLog))
+    .map((record) => reviewAuditRecordSchema.parse(record))
+    .find((record) => record.auditId === audit.auditId);
+  if (existing !== undefined) {
+    if (sha256Value(existing) !== sha256Value(audit)) {
+      throw historyFailure(
+        `Audit ${audit.auditId} conflicts with its transaction.`,
+      );
+    }
+    return;
+  }
+  await appendJsonLine(paths.auditLog, audit);
+}
+
+async function applyPendingTransaction(
+  paths: WorkspacePaths,
+  transaction: C60112PendingWorkspaceTransaction,
+  data: C60112ReviewWorkspaceData,
+): Promise<void> {
+  if (transaction.correction !== null) {
+    assertRecoveredCorrectionTiming(data, transaction.correction);
+  }
+  assertRecoveredSessionTiming(data, transaction.session);
+  if (transaction.correction !== null) {
+    await ensureCorrectionLogged(paths, transaction.correction);
+  }
+  await ensureAuditLogged(paths, transaction.audit);
+  await atomicWriteText(
+    paths.session,
+    `${JSON.stringify(transaction.session, null, 2)}\n`,
+  );
+  await rm(paths.pendingTransaction, { force: true });
+}
+
+async function persistTransaction(
+  paths: WorkspacePaths,
+  transaction: C60112PendingWorkspaceTransaction,
+  data: C60112ReviewWorkspaceData,
+): Promise<void> {
+  if (transaction.correction !== null) {
+    assertRecoveredCorrectionTiming(data, transaction.correction);
+  }
+  assertRecoveredSessionTiming(data, transaction.session);
+  await atomicWriteText(
+    paths.pendingTransaction,
+    `${JSON.stringify(transaction, null, 2)}\n`,
+  );
+  await applyPendingTransaction(paths, transaction, data);
+}
+
+async function recoverPendingTransaction(
+  paths: WorkspacePaths,
+  data: C60112ReviewWorkspaceData,
+): Promise<void> {
+  const pending = await loadPendingTransaction(paths);
+  if (pending !== null) await applyPendingTransaction(paths, pending, data);
+}
+
+function itemBeforeState(
+  data: C60112ReviewWorkspaceData,
+  session: C60112ReviewSession,
+  reviewItemId: string,
+): {
+  text: string | null;
+  start: number | null;
+  end: number | null;
+  state: C60112ReviewItemState | null;
+} {
+  const item = data.items.find(
+    (candidate) => candidate.reviewItemId === reviewItemId,
+  );
+  if (item === undefined) {
+    throw historyFailure(`History references unknown item ${reviewItemId}.`);
+  }
+  const state = session.itemStates[reviewItemId] ?? null;
+  return {
+    text:
+      state?.afterText ??
+      (state === null && item.finalCueIds.length > 0 ? item.currentText : null),
+    start: state?.afterStart ?? (state === null ? item.currentStart : null),
+    end: state?.afterEnd ?? (state === null ? item.currentEnd : null),
+    state,
+  };
+}
+
+function assertCorrectionStartsAtSessionState(
+  data: C60112ReviewWorkspaceData,
+  session: C60112ReviewSession,
+  correction: C60112CorrectionRecord,
+): void {
+  const before = itemBeforeState(data, session, correction.reviewItemId);
+  if (
+    correction.sessionId !== session.sessionId ||
+    correction.machineDraftHash !== data.machineDraftHash ||
+    correction.beforeText !== before.text ||
+    correction.beforeStart !== before.start ||
+    correction.beforeEnd !== before.end
+  ) {
+    throw historyFailure(
+      `Correction ${correction.recordId} does not continue the saved item state.`,
+    );
+  }
+}
+
+function initialSessionForHistory(input: {
+  data: C60112ReviewWorkspaceData;
+  snapshot: C60112ReviewSession | null;
+  corrections: C60112CorrectionRecord[];
+  audits: C60112AuditRecord[];
+}): C60112ReviewSession | null {
+  const firstAudit = input.audits[0];
+  const sessionId = input.snapshot?.sessionId ?? firstAudit?.sessionId;
+  if (sessionId === undefined) return null;
+  const createdAt =
+    input.snapshot?.createdAt ??
+    firstAudit?.timestamp ??
+    new Date().toISOString();
+  const session = initialSession(input.data, createdAt);
+  session.sessionId = sessionId;
+  return session;
+}
+
+function applyAuditHistory(input: {
+  data: C60112ReviewWorkspaceData;
+  session: C60112ReviewSession;
+  corrections: C60112CorrectionRecord[];
+  audits: C60112AuditRecord[];
+}): C60112ReviewSession {
+  const session = input.session;
+  const correctionsById = new Map(
+    input.corrections.map((record) => [record.recordId, record]),
+  );
+  for (const audit of input.audits) {
+    if (audit.sessionId !== session.sessionId) {
+      throw historyFailure(
+        `Audit ${audit.auditId} belongs to another session.`,
+      );
+    }
+    const beforeState = session.itemStates[audit.reviewItemId] ?? null;
+    if (audit.beforeHash !== sha256Value(beforeState)) {
+      throw historyFailure(`Audit ${audit.auditId} has an invalid beforeHash.`);
+    }
+    let afterState: C60112ReviewItemState | null;
+    if (audit.operation === "DECISION") {
+      if (
+        audit.newDecision === null ||
+        audit.undoneRecordId !== null ||
+        audit.previousDecision !== (beforeState?.recordId ?? null)
+      ) {
+        throw historyFailure(
+          `Decision audit ${audit.auditId} is discontinuous.`,
+        );
+      }
+      const correction = correctionsById.get(audit.newDecision);
+      if (correction?.reviewItemId !== audit.reviewItemId) {
+        throw historyFailure(
+          `Decision audit ${audit.auditId} has no matching correction.`,
+        );
+      }
+      assertCorrectionStartsAtSessionState(input.data, session, correction);
+      afterState = stateFromCorrection(correction);
+    } else {
+      if (
+        audit.undoneRecordId === null ||
+        audit.previousDecision !== audit.undoneRecordId ||
+        beforeState?.recordId !== audit.undoneRecordId
+      ) {
+        throw historyFailure(`Undo audit ${audit.auditId} is discontinuous.`);
+      }
+      const previousCorrection =
+        audit.newDecision === null
+          ? undefined
+          : correctionsById.get(audit.newDecision);
+      if (
+        (audit.newDecision !== null && previousCorrection === undefined) ||
+        (previousCorrection !== undefined &&
+          previousCorrection.reviewItemId !== audit.reviewItemId)
+      ) {
+        throw historyFailure(
+          `Undo audit ${audit.auditId} restores a missing or unrelated correction.`,
+        );
+      }
+      afterState =
+        previousCorrection === undefined
+          ? null
+          : stateFromCorrection(previousCorrection);
+    }
+    if (audit.afterHash !== sha256Value(afterState)) {
+      throw historyFailure(`Audit ${audit.auditId} has an invalid afterHash.`);
+    }
+    if (afterState === null) {
+      Reflect.deleteProperty(session.itemStates, audit.reviewItemId);
+    } else {
+      session.itemStates[audit.reviewItemId] = afterState;
+    }
+    session.updatedAt = audit.timestamp;
+  }
+  refreshSessionSummary(input.data, session);
+  return reviewSessionSchema.parse(session);
+}
+
+async function loadConsistentWorkspaceState(
+  paths: WorkspacePaths,
+  data: C60112ReviewWorkspaceData,
+): Promise<{
+  session: C60112ReviewSession | null;
+  corrections: C60112CorrectionRecord[];
+  audits: C60112AuditRecord[];
+}> {
+  await recoverPendingTransaction(paths, data);
+  const [snapshot, history] = await Promise.all([
+    loadSessionSnapshot(paths),
+    readWorkspaceHistory(paths, data),
+  ]);
+  if (snapshot !== null) assertRecoveredSessionTiming(data, snapshot);
+  assertSessionIdentity(
+    data,
+    snapshot,
+    data.reviewPackageSemanticHash,
+    data.machineDraftHash,
+  );
+  let session = initialSessionForHistory({
+    data,
+    snapshot,
+    corrections: history.corrections,
+    audits: history.audits,
+  });
+  if (session !== null) {
+    session = applyAuditHistory({
+      data,
+      session,
+      corrections: history.corrections,
+      audits: history.audits,
+    });
+  }
+
+  if (
+    session !== null &&
+    (snapshot === null || sha256Value(snapshot) !== sha256Value(session))
+  ) {
+    await atomicWriteText(
+      paths.session,
+      `${JSON.stringify(session, null, 2)}\n`,
+    );
+  }
+  return { session, ...history };
+}
+
+function assertDecisionRetryMatchesCorrection(
+  request: C60112ReviewDecisionRequest,
+  correction: C60112CorrectionRecord,
+): void {
+  let matches =
+    request.reviewItemId === correction.reviewItemId &&
+    request.decisionType === correction.decisionType &&
+    request.reviewerNote === correction.reviewerNote;
+  switch (request.decisionType) {
+    case "USE_REAZON":
+    case "USE_WHISPER_ALTERNATE":
+      matches &&=
+        request.selectedCandidateId === correction.selectedCandidateId &&
+        request.afterText === null &&
+        request.afterStart === null &&
+        request.afterEnd === null;
+      break;
+    case "MANUAL_EDIT":
+      matches &&=
+        request.selectedCandidateId === null &&
+        request.afterText === correction.afterText &&
+        request.afterStart === null &&
+        request.afterEnd === null;
+      break;
+    case "TIMING_EDIT":
+      matches &&=
+        request.selectedCandidateId === null &&
+        request.afterText === null &&
+        request.afterStart === correction.afterStart &&
+        request.afterEnd === correction.afterEnd;
+      break;
+    case "ADD_NEW_CUE":
+      matches &&=
+        request.selectedCandidateId === null &&
+        request.afterText === correction.afterText &&
+        request.afterStart === correction.afterStart &&
+        request.afterEnd === correction.afterEnd;
+      break;
+    default:
+      matches &&=
+        request.selectedCandidateId === null &&
+        request.afterText === null &&
+        request.afterStart === null &&
+        request.afterEnd === null;
+      break;
+  }
+  if (!matches) {
+    throw new WorkspaceHttpError(
+      409,
+      "DECISION_ID_REUSE_MISMATCH",
+      "The decision ID was already used with different content.",
+    );
+  }
+}
+
+function pendingOrphanCorrection(input: {
+  corrections: C60112CorrectionRecord[];
+  audits: C60112AuditRecord[];
+}): C60112CorrectionRecord | undefined {
+  const committedCorrectionIds = new Set(
+    input.audits
+      .filter((audit) => audit.operation === "DECISION")
+      .flatMap((audit) =>
+        audit.newDecision === null ? [] : [audit.newDecision],
+      ),
+  );
+  return input.corrections.find(
+    (record) => !committedCorrectionIds.has(record.recordId),
+  );
+}
+
+function rejectPendingOrphanCorrection(workspace: {
+  corrections: C60112CorrectionRecord[];
+  audits: C60112AuditRecord[];
+}): void {
+  const orphan = pendingOrphanCorrection(workspace);
+  if (orphan !== undefined) {
+    throw new WorkspaceHttpError(
+      409,
+      "PENDING_DECISION_RECOVERY_REQUIRED",
+      `Pending correction ${orphan.decisionId} must be retried with the same decision ID.`,
+    );
+  }
+}
+
 async function saveDecision(
   paths: WorkspacePaths,
   data: C60112ReviewWorkspaceData,
   request: C60112ReviewDecisionRequest,
 ): Promise<C60112ReviewSession> {
-  let session = await loadSession(paths);
+  const workspace = await loadConsistentWorkspaceState(paths, data);
+  let session = workspace.session;
   assertSessionIdentity(
     data,
     session,
     request.expectedReviewPackageSemanticHash,
     request.expectedMachineDraftHash,
   );
+  const duplicate = workspace.corrections.find(
+    (record) => record.decisionId === request.decisionId,
+  );
+  if (duplicate !== undefined) {
+    assertDecisionRetryMatchesCorrection(request, duplicate);
+    const committedAudit = workspace.audits.find(
+      (audit) =>
+        audit.operation === "DECISION" &&
+        audit.newDecision === duplicate.recordId,
+    );
+    if (committedAudit !== undefined) {
+      if (session === null) {
+        throw historyFailure(
+          `Decision ${request.decisionId} has no recoverable session.`,
+        );
+      }
+      return session;
+    }
+    if (session === null) {
+      session = initialSession(data, duplicate.createdAt);
+      session.sessionId = duplicate.sessionId;
+    }
+    assertCorrectionStartsAtSessionState(data, session, duplicate);
+    const previousState = session.itemStates[duplicate.reviewItemId] ?? null;
+    const nextState = stateFromCorrection(duplicate);
+    const recoveredAudit: C60112AuditRecord = {
+      schemaVersion: "1.0.0",
+      auditId: decisionAuditId(session.sessionId, duplicate.recordId),
+      operation: "DECISION",
+      timestamp: duplicate.createdAt,
+      sessionId: session.sessionId,
+      reviewItemId: duplicate.reviewItemId,
+      previousDecision: previousState?.recordId ?? null,
+      newDecision: duplicate.recordId,
+      undoneRecordId: null,
+      beforeHash: sha256Value(previousState),
+      afterHash: sha256Value(nextState),
+    };
+    reviewAuditRecordSchema.parse(recoveredAudit);
+    const recoveredSession = cloneSession(session);
+    recoveredSession.itemStates[duplicate.reviewItemId] = nextState;
+    recoveredSession.updatedAt = duplicate.createdAt;
+    refreshSessionSummary(data, recoveredSession);
+    reviewSessionSchema.parse(recoveredSession);
+    await persistTransaction(
+      paths,
+      {
+        schemaVersion: "1.0.0",
+        transactionId: recoveredAudit.auditId,
+        operation: "DECISION",
+        correction: duplicate,
+        audit: recoveredAudit,
+        session: recoveredSession,
+      },
+      data,
+    );
+    return recoveredSession;
+  }
+  rejectPendingOrphanCorrection(workspace);
   const now = new Date().toISOString();
   session ??= initialSession(data, now);
   const correction = correctionForDecision({ data, session, request, now });
-  const corrections = (await readJsonLines<unknown>(paths.correctionLog)).map(
-    (record) =>
-      humanCorrectionRecordSchema.parse(record) as C60112CorrectionRecord,
-  );
-  const duplicate = corrections.find(
-    (record) => record.recordId === correction.recordId,
-  );
-  if (duplicate !== undefined) {
-    if (
-      duplicate.reviewItemId !== correction.reviewItemId ||
-      duplicate.decisionType !== correction.decisionType ||
-      duplicate.selectedCandidateId !== correction.selectedCandidateId ||
-      duplicate.afterText !== correction.afterText ||
-      duplicate.afterStart !== correction.afterStart ||
-      duplicate.afterEnd !== correction.afterEnd
-    ) {
-      throw new WorkspaceHttpError(
-        409,
-        "DECISION_ID_REUSE_MISMATCH",
-        "The decision ID was already used with different content.",
-      );
-    }
-    return session;
-  }
   const previousState = session.itemStates[request.reviewItemId] ?? null;
   const nextState = stateFromCorrection(correction);
   const audit: C60112AuditRecord = {
     schemaVersion: "1.0.0",
-    auditId: `audit-${randomUUID()}`,
+    auditId: decisionAuditId(session.sessionId, correction.recordId),
     operation: "DECISION",
     timestamp: now,
     sessionId: session.sessionId,
@@ -1100,14 +1797,24 @@ async function saveDecision(
     afterHash: sha256Value(nextState),
   };
   reviewAuditRecordSchema.parse(audit);
-  session.itemStates[request.reviewItemId] = nextState;
-  session.updatedAt = now;
-  refreshSessionSummary(data, session);
-  reviewSessionSchema.parse(session);
-  await appendJsonLine(paths.correctionLog, correction);
-  await appendJsonLine(paths.auditLog, audit);
-  await atomicWriteText(paths.session, `${JSON.stringify(session, null, 2)}\n`);
-  return session;
+  const nextSession = cloneSession(session);
+  nextSession.itemStates[request.reviewItemId] = nextState;
+  nextSession.updatedAt = now;
+  refreshSessionSummary(data, nextSession);
+  reviewSessionSchema.parse(nextSession);
+  await persistTransaction(
+    paths,
+    {
+      schemaVersion: "1.0.0",
+      transactionId: audit.auditId,
+      operation: "DECISION",
+      correction,
+      audit,
+      session: nextSession,
+    },
+    data,
+  );
+  return nextSession;
 }
 
 function activeDecisionStack(audit: C60112AuditRecord[]): string[] {
@@ -1126,12 +1833,10 @@ function activeDecisionStack(audit: C60112AuditRecord[]): string[] {
 async function undoLastDecision(
   paths: WorkspacePaths,
   data: C60112ReviewWorkspaceData,
-  identity: {
-    expectedReviewPackageSemanticHash: string;
-    expectedMachineDraftHash: string;
-  },
+  request: C60112UndoRequest,
 ): Promise<C60112ReviewSession> {
-  const session = await loadSession(paths);
+  const workspace = await loadConsistentWorkspaceState(paths, data);
+  const session = workspace.session;
   if (session === null) {
     throw new WorkspaceHttpError(
       409,
@@ -1142,21 +1847,28 @@ async function undoLastDecision(
   assertSessionIdentity(
     data,
     session,
-    identity.expectedReviewPackageSemanticHash,
-    identity.expectedMachineDraftHash,
+    request.expectedReviewPackageSemanticHash,
+    request.expectedMachineDraftHash,
   );
-  const [audit, corrections] = await Promise.all([
-    readJsonLines<unknown>(paths.auditLog).then((records) =>
-      records.map((record) => reviewAuditRecordSchema.parse(record)),
-    ),
-    readJsonLines<unknown>(paths.correctionLog).then((records) =>
-      records.map(
-        (record) =>
-          humanCorrectionRecordSchema.parse(record) as C60112CorrectionRecord,
-      ),
-    ),
-  ]);
-  const stack = activeDecisionStack(audit);
+  rejectPendingOrphanCorrection(workspace);
+  const auditId = undoAuditId(session.sessionId, request.undoId);
+  const duplicateUndo = workspace.audits.find(
+    (record) => record.auditId === auditId,
+  );
+  if (duplicateUndo !== undefined) {
+    if (
+      duplicateUndo.operation !== "UNDO" ||
+      duplicateUndo.sessionId !== session.sessionId
+    ) {
+      throw new WorkspaceHttpError(
+        409,
+        "UNDO_ID_REUSE_MISMATCH",
+        "The undo ID was already used with different content.",
+      );
+    }
+    return session;
+  }
+  const stack = activeDecisionStack(workspace.audits);
   const recordId = stack.at(-1);
   if (recordId === undefined) {
     throw new WorkspaceHttpError(
@@ -1165,10 +1877,10 @@ async function undoLastDecision(
       "No decision can be undone.",
     );
   }
-  const currentCorrection = corrections.find(
+  const currentCorrection = workspace.corrections.find(
     (record) => record.recordId === recordId,
   );
-  const decisionAudit = [...audit]
+  const decisionAudit = [...workspace.audits]
     .reverse()
     .find(
       (record) =>
@@ -1184,22 +1896,32 @@ async function undoLastDecision(
   const previousCorrection =
     decisionAudit.previousDecision === null
       ? undefined
-      : corrections.find(
+      : workspace.corrections.find(
           (record) => record.recordId === decisionAudit.previousDecision,
         );
   const beforeState =
     session.itemStates[currentCorrection.reviewItemId] ?? null;
+  if (beforeState?.recordId !== recordId) {
+    throw historyFailure(
+      `Undo target ${recordId} is not the active item decision.`,
+    );
+  }
+  const nextSession = cloneSession(session);
   if (previousCorrection === undefined) {
-    Reflect.deleteProperty(session.itemStates, currentCorrection.reviewItemId);
+    Reflect.deleteProperty(
+      nextSession.itemStates,
+      currentCorrection.reviewItemId,
+    );
   } else {
-    session.itemStates[currentCorrection.reviewItemId] =
+    nextSession.itemStates[currentCorrection.reviewItemId] =
       stateFromCorrection(previousCorrection);
   }
-  const afterState = session.itemStates[currentCorrection.reviewItemId] ?? null;
+  const afterState =
+    nextSession.itemStates[currentCorrection.reviewItemId] ?? null;
   const now = new Date().toISOString();
   const undoAudit: C60112AuditRecord = {
     schemaVersion: "1.0.0",
-    auditId: `audit-${randomUUID()}`,
+    auditId,
     operation: "UNDO",
     timestamp: now,
     sessionId: session.sessionId,
@@ -1211,12 +1933,22 @@ async function undoLastDecision(
     afterHash: sha256Value(afterState),
   };
   reviewAuditRecordSchema.parse(undoAudit);
-  session.updatedAt = now;
-  refreshSessionSummary(data, session);
-  reviewSessionSchema.parse(session);
-  await appendJsonLine(paths.auditLog, undoAudit);
-  await atomicWriteText(paths.session, `${JSON.stringify(session, null, 2)}\n`);
-  return session;
+  nextSession.updatedAt = now;
+  refreshSessionSummary(data, nextSession);
+  reviewSessionSchema.parse(nextSession);
+  await persistTransaction(
+    paths,
+    {
+      schemaVersion: "1.0.0",
+      transactionId: undoAudit.auditId,
+      operation: "UNDO",
+      correction: null,
+      audit: undoAudit,
+      session: nextSession,
+    },
+    data,
+  );
+  return nextSession;
 }
 
 function securityHeaders(response: ServerResponse): void {
@@ -1452,6 +2184,7 @@ export async function startC60112ReviewWorkspaceServer(input: {
   workspaceDirectory: string;
   host?: string;
   port?: number;
+  expectedWorkspaceDataHash?: string;
 }): Promise<{
   host: "127.0.0.1";
   port: number;
@@ -1465,6 +2198,19 @@ export async function startC60112ReviewWorkspaceServer(input: {
   const paths = workspacePaths(input.workspaceDirectory);
   const rootReal = await realpath(paths.root);
   const data = await loadWorkspaceData(paths);
+  if (
+    input.expectedWorkspaceDataHash !== undefined &&
+    sha256Value(data) !== input.expectedWorkspaceDataHash
+  ) {
+    throw new Error("REVIEW_WORKSPACE_DATA_FREEZE_HASH_MISMATCH");
+  }
+  // Serve the startup-validated snapshot instead of rereading review-data.json
+  // on each request. This keeps the UI and mutation API on the same frozen
+  // object even if the workspace file is edited while the server is running.
+  const frozenReviewDataPayload = Buffer.from(
+    `${JSON.stringify(data, null, 2)}\n`,
+    "utf8",
+  );
   let allowedHost = "";
   let mutationQueue: Promise<unknown> = Promise.resolve();
   const serializeMutation = <T>(operation: () => Promise<T>): Promise<T> => {
@@ -1487,6 +2233,22 @@ export async function startC60112ReviewWorkspaceServer(input: {
       }
       const rawPath = rawRequestPath(request);
       const decodedPath = decodePathRepeatedly(rawPath);
+      if (
+        decodedPath === "/review-data.json" &&
+        (request.method === "GET" || request.method === "HEAD")
+      ) {
+        securityHeaders(response);
+        response.statusCode = 200;
+        response.setHeader("Content-Type", "application/json; charset=utf-8");
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader(
+          "Content-Length",
+          String(frozenReviewDataPayload.length),
+        );
+        if (request.method === "HEAD") response.end();
+        else response.end(frozenReviewDataPayload);
+        return;
+      }
       if (decodedPath === "/api/health" && request.method === "GET") {
         sendJson(response, 200, {
           ok: true,
@@ -1496,7 +2258,11 @@ export async function startC60112ReviewWorkspaceServer(input: {
         return;
       }
       if (decodedPath === "/api/session" && request.method === "GET") {
-        const session = await loadSession(paths);
+        const { session } = await serializeMutation(() =>
+          withWorkspaceMutationLock(paths, () =>
+            loadConsistentWorkspaceState(paths, data),
+          ),
+        );
         if (
           session !== null &&
           (session.reviewPackageSemanticHash !==
@@ -1538,28 +2304,18 @@ export async function startC60112ReviewWorkspaceServer(input: {
         if (decodedPath === "/api/decision") {
           const decision = parseDecisionRequest(body);
           const session = await serializeMutation(() =>
-            saveDecision(paths, data, decision),
+            withWorkspaceMutationLock(paths, () =>
+              saveDecision(paths, data, decision),
+            ),
           );
           sendJson(response, 200, { ok: true, session });
           return;
         }
-        if (
-          !isRecord(body) ||
-          typeof body.expectedReviewPackageSemanticHash !== "string" ||
-          typeof body.expectedMachineDraftHash !== "string"
-        ) {
-          throw new WorkspaceHttpError(
-            400,
-            "INVALID_UNDO",
-            "Undo identity is invalid.",
-          );
-        }
+        const undo = parseUndoRequest(body);
         const session = await serializeMutation(() =>
-          undoLastDecision(paths, data, {
-            expectedReviewPackageSemanticHash:
-              body.expectedReviewPackageSemanticHash as string,
-            expectedMachineDraftHash: body.expectedMachineDraftHash as string,
-          }),
+          withWorkspaceMutationLock(paths, () =>
+            undoLastDecision(paths, data, undo),
+          ),
         );
         sendJson(response, 200, { ok: true, session });
         return;

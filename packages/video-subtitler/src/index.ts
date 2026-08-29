@@ -35,6 +35,39 @@ export * from "./review-audio.js";
 export * from "./review-evidence.js";
 export * from "./review-delivery.js";
 export * from "./review-action-validation.js";
+export * from "./review/c60112-policy.js";
+export * from "./review/review-item-builder.js";
+export * from "./review/review-priority.js";
+export * from "./review/review-region-clustering.js";
+export * from "./review/review-candidate-bundle.js";
+export * from "./review/review-package-freeze.js";
+export * from "./review/c60112-artifact-adapter.js";
+export * from "./review/c60112-review-audio.js";
+export {
+  C60112_REVIEW_DECISION_TYPES,
+  C60112_REVIEW_WORKSPACE_VERSION,
+  assertC60112ReviewWorkspaceData,
+  assertC60112SafeRelativePath,
+  escapeC60112ReviewHtml,
+  writeC60112ReviewWorkspace,
+} from "./review/c60112-review-workspace.js";
+export type {
+  C60112ReviewDecisionRequest,
+  C60112ReviewDecisionType,
+  C60112ReviewItemState,
+  C60112ReviewPriorityTier,
+  C60112ReviewRequiredLevel,
+  C60112ReviewSession,
+  C60112ReviewWorkspaceData,
+  C60112WorkspaceCandidate,
+  C60112WorkspaceCandidateBundle,
+  C60112WorkspaceCueContext,
+  C60112WorkspaceRegion,
+  C60112WorkspaceReviewItem,
+} from "./review/c60112-review-workspace.js";
+export * from "./review/c60112-correction-workflow.js";
+export * from "./review/c60112-review-quality-evaluator.js";
+export * from "./review/c60112-route-decision.js";
 export * from "./speaker-runtime.js";
 export * from "./speaker-evidence.js";
 export * from "./speaker-cache.js";

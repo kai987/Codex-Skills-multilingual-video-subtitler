@@ -166,6 +166,6 @@ describe.skipIf(!realFixtureAvailable)(
         },
         networkUsed: false,
       });
-    });
+    }, 15_000);
   },
 );

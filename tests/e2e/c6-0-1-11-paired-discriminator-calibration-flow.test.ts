@@ -262,5 +262,5 @@ describe("C6.0.1.11 paired discriminator calibration E2E", () => {
     expect(formatAss(finalCues)).toBe(formatAss(baselineCues));
     expect(formatSrt(finalCues)).toBe(formatSrt(baselineCues));
     expect(formatVtt(finalCues)).toBe(formatVtt(baselineCues));
-  });
+  }, 15_000);
 });

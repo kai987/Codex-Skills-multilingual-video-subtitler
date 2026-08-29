@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { execFile } from "node:child_process";
+import { execFile, spawn, type ChildProcess } from "node:child_process";
 import { request as httpRequest } from "node:http";
 import {
   mkdtemp,
@@ -11,7 +11,9 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { promisify } from "node:util";
+import { runInNewContext } from "node:vm";
 
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -32,16 +34,32 @@ import {
   type C60112ReviewDecisionRequest,
   type C60112ReviewWorkspaceData,
 } from "../packages/video-subtitler/src/review/c60112-review-workspace.js";
+import { machineQualitySemanticHash } from "../packages/video-subtitler/src/machine-quality/evidence-correlation.js";
+import type { C60112ReviewPackageFreeze } from "../packages/video-subtitler/src/review/review-package-freeze.js";
 
 const HASH_A = "a".repeat(64);
 const HASH_B = "b".repeat(64);
 const HASH_C = "c".repeat(64);
 const temporaryDirectories: string[] = [];
 const runningServers: { close: () => Promise<void> }[] = [];
+const runningChildProcesses: ChildProcess[] = [];
 const execFileAsync = promisify(execFile);
 
 afterEach(async () => {
   await Promise.all(runningServers.splice(0).map((server) => server.close()));
+  await Promise.all(
+    runningChildProcesses.splice(0).map(
+      (child) =>
+        new Promise<void>((resolve) => {
+          if (child.exitCode !== null || child.signalCode !== null) {
+            resolve();
+            return;
+          }
+          child.once("exit", () => resolve());
+          child.kill("SIGTERM");
+        }),
+    ),
+  );
   await Promise.all(
     temporaryDirectories
       .splice(0)
@@ -60,6 +78,7 @@ function reviewData(): C60112ReviewWorkspaceData {
     sourceMediaIdentity: {
       fileName: "synthetic-review-fixture.mkv",
       sha256: HASH_A,
+      sourceDurationMs: 30_000,
       durationSeconds: 30,
     },
     machineDraftIdentity: {
@@ -182,6 +201,44 @@ function reviewData(): C60112ReviewWorkspaceData {
   };
 }
 
+function reviewFreeze(
+  data: C60112ReviewWorkspaceData,
+): C60112ReviewPackageFreeze {
+  const componentHash = "f".repeat(64);
+  const workspaceDataHash = machineQualitySemanticHash(data);
+  const aggregateHash = machineQualitySemanticHash({
+    sourceMediaSha256: data.sourceMediaIdentity.sha256,
+    machineDraftHash: data.machineDraftHash,
+    itemHash: componentHash,
+    priorityHash: componentHash,
+    regionHash: componentHash,
+    candidateHash: componentHash,
+    audioManifestHash: componentHash,
+    workspaceDataHash,
+    policyHash: data.policyHash,
+  });
+  const core = {
+    schemaVersion: "1.0.0" as const,
+    policyVersion: data.policyVersion,
+    artifactType: "c6-0-1-12-review-package-freeze" as const,
+    frozenAt: "2026-08-29T00:00:00.000Z",
+    sourceMediaSha256: data.sourceMediaIdentity.sha256 ?? "",
+    machineDraftHash: data.machineDraftHash,
+    itemHash: componentHash,
+    priorityHash: componentHash,
+    regionHash: componentHash,
+    candidateHash: componentHash,
+    audioManifestHash: componentHash,
+    workspaceDataHash,
+    policyHash: data.policyHash,
+    aggregateHash,
+    runtimeGoldInputCount: 0 as const,
+    goldAccessBeforeFreezeCount: 0 as const,
+    frozenBeforeGoldEvaluation: true as const,
+  };
+  return { ...core, semanticHash: machineQualitySemanticHash(core) };
+}
+
 async function workspace(): Promise<{
   root: string;
   running: Awaited<ReturnType<typeof startC60112ReviewWorkspaceServer>>;
@@ -203,6 +260,60 @@ async function workspace(): Promise<{
   });
   runningServers.push(running);
   return { root, running };
+}
+
+async function startReviewServerProcess(input: {
+  workspaceRoot: string;
+  freezePath: string;
+}): Promise<{ url: string }> {
+  const child = spawn(
+    path.join(process.cwd(), "node_modules", ".bin", "tsx"),
+    [
+      "scripts/c6-0-1-12-review-server.ts",
+      "--workspace",
+      input.workspaceRoot,
+      "--freeze",
+      input.freezePath,
+      "--port",
+      "0",
+    ],
+    {
+      cwd: process.cwd(),
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  runningChildProcesses.push(child);
+  return new Promise((resolve, reject) => {
+    let stdout = "";
+    let stderr = "";
+    const rejectOnExit = (code: number | null, signal: NodeJS.Signals | null) =>
+      reject(
+        new Error(
+          `Review server exited before readiness (${String(code ?? signal)}): ${stderr}`,
+        ),
+      );
+    child.once("exit", rejectOnExit);
+    child.stderr.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString("utf8");
+    });
+    child.stdout.on("data", (chunk: Buffer) => {
+      stdout += chunk.toString("utf8");
+      try {
+        const ready = JSON.parse(stdout) as unknown;
+        if (
+          ready !== null &&
+          typeof ready === "object" &&
+          "url" in ready &&
+          typeof ready.url === "string"
+        ) {
+          child.off("exit", rejectOnExit);
+          resolve({ url: ready.url });
+        }
+      } catch {
+        // The CLI emits one pretty-printed JSON document; keep buffering.
+      }
+    });
+  });
 }
 
 function decision(
@@ -317,6 +428,129 @@ describe("C6.0.1.12 offline review workspace", () => {
     expect(escapeC60112ReviewHtml("<script>'&\"")).toBe(
       "&lt;script&gt;&#39;&amp;&quot;",
     );
+  });
+
+  it("executes the generated queue sorter with frozen scores, stable ties, and filters", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "mvl-c60112-ui-sort-"));
+    temporaryDirectories.push(root);
+    const data = reviewData();
+    const output = await writeC60112ReviewWorkspace({
+      workspaceDirectory: root,
+      reviewData: data,
+    });
+    const javascript = await readFile(output.javascriptPath, "utf8");
+    const sorter = javascript
+      .split("\n")
+      .find((line) => line.startsWith("function refreshFiltered()"));
+    expect(sorter).toBeDefined();
+    const base = data.items[0];
+    if (!base) throw new Error("Expected a synthetic review item");
+    const earlierLower = {
+      ...base,
+      reviewItemId: "earlier-lower",
+      priorityScore: 71,
+      sourceInterval: { start: 1, end: 2 },
+    };
+    const items = [
+      { ...base, reviewItemId: "later-higher", priorityScore: 89 },
+      earlierLower,
+      { ...base, reviewItemId: "tie-b", priorityScore: 89 },
+      { ...base, reviewItemId: "tie-a", priorityScore: 89 },
+      { ...base, reviewItemId: "low", priorityScore: 20, priorityTier: "LOW" },
+    ];
+    const state = { data: { items }, filtered: [earlierLower], index: 0 };
+    const priorityFilter = { value: "ALL" };
+    const filters: Record<string, { value: string }> = {
+      "priority-filter": priorityFilter,
+      "type-filter": { value: "ALL" },
+    };
+    let renderCount = 0;
+    const context = {
+      state,
+      byId: (id: string) => filters[id],
+      typeMatches: () => true,
+      render: () => {
+        renderCount += 1;
+      },
+    };
+    runInNewContext(`${sorter}\nrefreshFiltered();`, context);
+    expect(state.filtered.map((item) => item.reviewItemId)).toEqual([
+      "later-higher",
+      "tie-a",
+      "tie-b",
+      "earlier-lower",
+      "low",
+    ]);
+    expect(state.index).toBe(3);
+    priorityFilter.value = "LOW";
+    runInNewContext(`${sorter}\nrefreshFiltered();`, context);
+    expect(state.filtered.map((item) => item.reviewItemId)).toEqual(["low"]);
+    expect(state.index).toBe(0);
+    expect(renderCount).toBe(2);
+    const initialize = javascript
+      .split("\n")
+      .find((line) => line.startsWith("Promise.all([fetch("));
+    expect(initialize).toBeDefined();
+    state.filtered = [];
+    priorityFilter.value = "ALL";
+    await runInNewContext(`${sorter}\n${initialize}`, {
+      ...context,
+      byId: (id: string) =>
+        id === "identity" ? { textContent: "" } : filters[id],
+      fetch: (url: string) =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve(
+              url === "/api/session" ? { session: null } : { ...data, items },
+            ),
+        }),
+      showStatus: () => undefined,
+    });
+    expect(state.index).toBe(0);
+    expect(state.filtered[0]?.reviewItemId).toBe("later-higher");
+    expect(renderCount).toBe(3);
+  });
+
+  it("captures reviewer notes from the generated UI for ordinary edits and explicit overrides", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "mvl-c60112-ui-notes-"));
+    temporaryDirectories.push(root);
+    const data = reviewData();
+    const output = await writeC60112ReviewWorkspace({
+      workspaceDirectory: root,
+      reviewData: data,
+    });
+    const javascript = await readFile(output.javascriptPath, "utf8");
+    const payloadFunction = javascript
+      .split("\n")
+      .find((line) => line.startsWith("function currentDecisionPayload("));
+    expect(payloadFunction).toBeDefined();
+    const input = { value: "synthetic local reviewer note" };
+    const context = {
+      state: { data },
+      item: data.items[0],
+      byId: () => input,
+      operationId: () => "synthetic-note-decision",
+    };
+    expect(
+      runInNewContext(
+        `${payloadFunction}\ncurrentDecisionPayload(item, 'MANUAL_EDIT', { afterText: '合成編集' });`,
+        context,
+      ),
+    ).toMatchObject({ reviewerNote: input.value });
+    expect(
+      runInNewContext(
+        `${payloadFunction}\ncurrentDecisionPayload(item, 'WAIVE_REVIEW', { reviewerNote: 'explicit reason' });`,
+        context,
+      ),
+    ).toMatchObject({ reviewerNote: "explicit reason" });
+    input.value = "";
+    expect(
+      runInNewContext(
+        `${payloadFunction}\ncurrentDecisionPayload(item, 'KEEP_CURRENT');`,
+        context,
+      ),
+    ).toMatchObject({ reviewerNote: null });
   });
 
   it("rejects unsafe workspace audio paths before writing any asset", async () => {
@@ -471,6 +705,7 @@ describe("C6.0.1.12 offline review workspace", () => {
     ).toBe("MANUAL_EDIT");
 
     const undoResponse = await post(running.url, "/api/undo", {
+      undoId: "undo-edit",
       expectedReviewPackageSemanticHash: HASH_B,
       expectedMachineDraftHash: HASH_C,
     });
@@ -518,6 +753,557 @@ describe("C6.0.1.12 offline review workspace", () => {
       afterText: "<script>safe as subtitle text</script>",
     });
     expect(auditLines.at(-1)).toContain('"operation":"UNDO"');
+  });
+
+  it("recovers correction/audit/session crash windows and makes a decision retry idempotent", async () => {
+    const { root, running } = await workspace();
+    const request = decision({
+      decisionId: "decision-crash-retry",
+      decisionType: "MANUAL_EDIT",
+      afterText: "中断後も一度だけ反映",
+    });
+    expect((await post(running.url, "/api/decision", request)).status).toBe(
+      200,
+    );
+
+    const sessionPath = path.join(root, "session", "review-session.json");
+    const auditPath = path.join(root, "session", "review-audit.jsonl");
+    const correctionPath = path.join(
+      root,
+      "session",
+      "human-correction-log.jsonl",
+    );
+
+    // Simulate a process crash after the durable correction but before audit/session.
+    await Promise.all([rm(sessionPath), rm(auditPath)]);
+    const orphanSession: unknown = await fetch(
+      new URL("/api/session", running.url),
+    ).then((response) => response.json());
+    expect(orphanSession).toEqual({ status: "not-started", session: null });
+    await expect(readFile(auditPath, "utf8")).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+    const unrelatedRequest = await post(
+      running.url,
+      "/api/decision",
+      decision({ decisionId: "different-decision-during-recovery" }),
+    );
+    expect(unrelatedRequest.status).toBe(409);
+    await expect(unrelatedRequest.json()).resolves.toMatchObject({
+      code: "PENDING_DECISION_RECOVERY_REQUIRED",
+    });
+    const correctionOnlyRetry = await post(
+      running.url,
+      "/api/decision",
+      request,
+    );
+    expect(correctionOnlyRetry.status).toBe(200);
+    await expect(correctionOnlyRetry.json()).resolves.toMatchObject({
+      session: {
+        itemStates: {
+          "review-item-a": {
+            decisionType: "MANUAL_EDIT",
+            afterText: "中断後も一度だけ反映",
+          },
+        },
+      },
+    });
+
+    // Simulate the later crash window: audit is durable but session rename did not land.
+    await rm(sessionPath);
+    const auditOnlyRetry = await post(running.url, "/api/decision", request);
+    expect(auditOnlyRetry.status).toBe(200);
+    const [corrections, audits] = await Promise.all([
+      readFile(correctionPath, "utf8"),
+      readFile(auditPath, "utf8"),
+    ]);
+    expect(corrections.trim().split("\n")).toHaveLength(1);
+    expect(audits.trim().split("\n")).toHaveLength(1);
+    await expect(
+      readFile(
+        path.join(root, "session", "pending-workspace-transaction.json"),
+        "utf8",
+      ),
+    ).rejects.toMatchObject({ code: "ENOENT" });
+
+    const mismatchedRetry = await post(
+      running.url,
+      "/api/decision",
+      decision({
+        decisionId: request.decisionId,
+        decisionType: "MANUAL_EDIT",
+        afterText: "同じIDの別内容",
+      }),
+    );
+    expect(mismatchedRetry.status).toBe(409);
+    await expect(mismatchedRetry.json()).resolves.toMatchObject({
+      code: "DECISION_ID_REUSE_MISMATCH",
+    });
+  });
+
+  it("finishes a durable pending transaction after interruption before any log commit", async () => {
+    const { root, running } = await workspace();
+    const request = decision({ decisionId: "decision-pending-journal" });
+    expect((await post(running.url, "/api/decision", request)).status).toBe(
+      200,
+    );
+    const sessionDirectory = path.join(root, "session");
+    const sessionPath = path.join(sessionDirectory, "review-session.json");
+    const correctionPath = path.join(
+      sessionDirectory,
+      "human-correction-log.jsonl",
+    );
+    const auditPath = path.join(sessionDirectory, "review-audit.jsonl");
+    const correction = humanCorrectionRecordSchema.parse(
+      JSON.parse((await readFile(correctionPath, "utf8")).trim()) as unknown,
+    );
+    const audit = reviewAuditRecordSchema.parse(
+      JSON.parse((await readFile(auditPath, "utf8")).trim()) as unknown,
+    );
+    const session = reviewSessionSchema.parse(
+      JSON.parse(await readFile(sessionPath, "utf8")) as unknown,
+    );
+    await writeFile(
+      path.join(sessionDirectory, "pending-workspace-transaction.json"),
+      `${JSON.stringify({
+        schemaVersion: "1.0.0",
+        transactionId: audit.auditId,
+        operation: "DECISION",
+        correction,
+        audit,
+        session,
+      })}\n`,
+      "utf8",
+    );
+    await Promise.all([rm(sessionPath), rm(correctionPath), rm(auditPath)]);
+
+    const recovered: unknown = await fetch(
+      new URL("/api/session", running.url),
+    ).then((response) => response.json());
+    expect(recovered).toMatchObject({
+      status: "active",
+      session: {
+        itemStates: {
+          "review-item-a": { decisionType: "KEEP_CURRENT" },
+        },
+      },
+    });
+    expect(
+      (await readFile(correctionPath, "utf8")).trim().split("\n"),
+    ).toHaveLength(1);
+    expect((await readFile(auditPath, "utf8")).trim().split("\n")).toHaveLength(
+      1,
+    );
+    await expect(
+      readFile(
+        path.join(sessionDirectory, "pending-workspace-transaction.json"),
+        "utf8",
+      ),
+    ).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("recovers an interrupted undo without undoing the preceding decision twice", async () => {
+    const { root, running } = await workspace();
+    expect((await post(running.url, "/api/decision", decision())).status).toBe(
+      200,
+    );
+    expect(
+      (
+        await post(
+          running.url,
+          "/api/decision",
+          decision({
+            decisionId: "decision-before-undo-crash",
+            decisionType: "MANUAL_EDIT",
+            afterText: "取り消す編集",
+          }),
+        )
+      ).status,
+    ).toBe(200);
+    const undoRequest = {
+      undoId: "undo-crash-retry",
+      expectedReviewPackageSemanticHash: HASH_B,
+      expectedMachineDraftHash: HASH_C,
+    };
+    expect((await post(running.url, "/api/undo", undoRequest)).status).toBe(
+      200,
+    );
+
+    await rm(path.join(root, "session", "review-session.json"));
+    const retry = await post(running.url, "/api/undo", undoRequest);
+    expect(retry.status).toBe(200);
+    await expect(retry.json()).resolves.toMatchObject({
+      session: {
+        itemStates: {
+          "review-item-a": { decisionType: "KEEP_CURRENT" },
+        },
+      },
+    });
+    const auditLines = (
+      await readFile(path.join(root, "session", "review-audit.jsonl"), "utf8")
+    )
+      .trim()
+      .split("\n");
+    expect(auditLines).toHaveLength(3);
+    expect(
+      auditLines.filter((line) => line.includes('"operation":"UNDO"')),
+    ).toHaveLength(1);
+  });
+
+  it("rejects undo while an orphan correction still requires exact decision recovery", async () => {
+    const { root, running } = await workspace();
+    expect((await post(running.url, "/api/decision", decision())).status).toBe(
+      200,
+    );
+    const sessionDirectory = path.join(root, "session");
+    const sessionPath = path.join(sessionDirectory, "review-session.json");
+    const auditPath = path.join(sessionDirectory, "review-audit.jsonl");
+    const committedSession = await readFile(sessionPath, "utf8");
+    const committedAudit = await readFile(auditPath, "utf8");
+
+    expect(
+      (
+        await post(
+          running.url,
+          "/api/decision",
+          decision({
+            decisionId: "decision-orphan-before-undo",
+            decisionType: "MANUAL_EDIT",
+            afterText: "まだ監査されていない修正",
+          }),
+        )
+      ).status,
+    ).toBe(200);
+
+    // Recreate the crash window where the correction is durable but its audit
+    // and session snapshot have not landed.
+    await Promise.all([
+      writeFile(sessionPath, committedSession, "utf8"),
+      writeFile(auditPath, committedAudit, "utf8"),
+    ]);
+    const undo = await post(running.url, "/api/undo", {
+      undoId: "undo-must-not-skip-orphan",
+      expectedReviewPackageSemanticHash: HASH_B,
+      expectedMachineDraftHash: HASH_C,
+    });
+    expect(undo.status).toBe(409);
+    await expect(undo.json()).resolves.toMatchObject({
+      code: "PENDING_DECISION_RECOVERY_REQUIRED",
+    });
+    expect(await readFile(auditPath, "utf8")).toBe(committedAudit);
+    const session = reviewSessionSchema.parse(
+      JSON.parse(await readFile(sessionPath, "utf8")) as unknown,
+    );
+    expect(session.itemStates["review-item-a"]?.decisionType).toBe(
+      "KEEP_CURRENT",
+    );
+  });
+
+  it("revalidates sourceDurationMs before recovering an orphan timing correction", async () => {
+    const { root, running } = await workspace();
+    const timingRequest = decision({
+      decisionId: "decision-orphan-invalid-duration",
+      decisionType: "TIMING_EDIT",
+      afterStart: 5.2,
+      afterEnd: 7.2,
+    });
+    expect(
+      (await post(running.url, "/api/decision", timingRequest)).status,
+    ).toBe(200);
+    const sessionDirectory = path.join(root, "session");
+    const correctionPath = path.join(
+      sessionDirectory,
+      "human-correction-log.jsonl",
+    );
+    const correction = humanCorrectionRecordSchema.parse(
+      JSON.parse((await readFile(correctionPath, "utf8")).trim()) as unknown,
+    );
+    const outOfDurationCorrection = {
+      ...correction,
+      afterStart: 29.5,
+      afterEnd: 30.001,
+    };
+    await Promise.all([
+      writeFile(
+        correctionPath,
+        `${JSON.stringify(outOfDurationCorrection)}\n`,
+        "utf8",
+      ),
+      rm(path.join(sessionDirectory, "review-session.json")),
+      rm(path.join(sessionDirectory, "review-audit.jsonl")),
+    ]);
+
+    const retry = await post(running.url, "/api/decision", timingRequest);
+    expect(retry.status).toBe(500);
+    const retryBody = (await retry.json()) as {
+      code?: unknown;
+      message?: unknown;
+    };
+    expect(retryBody.code).toBe("AUDIT_CHAIN_BROKEN");
+    expect(typeof retryBody.message).toBe("string");
+    expect(retryBody.message).toContain("sourceDurationMs");
+    await expect(
+      readFile(path.join(sessionDirectory, "review-audit.jsonl"), "utf8"),
+    ).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("serializes mutations from two servers sharing one workspace without losing either decision", async () => {
+    const { root, running } = await workspace();
+    const secondServer = await startC60112ReviewWorkspaceServer({
+      workspaceDirectory: root,
+      host: "127.0.0.1",
+      port: 0,
+    });
+    runningServers.push(secondServer);
+
+    const [first, second] = await Promise.all([
+      post(
+        running.url,
+        "/api/decision",
+        decision({ decisionId: "decision-from-first-server" }),
+      ),
+      post(
+        secondServer.url,
+        "/api/decision",
+        decision({
+          decisionId: "decision-from-second-server",
+          reviewItemId: "review-item-missing",
+          decisionType: "MARK_FALSE_POSITIVE",
+        }),
+      ),
+    ]);
+    expect([first.status, second.status]).toEqual([200, 200]);
+
+    const recovered = (await fetch(new URL("/api/session", running.url)).then(
+      (response) => response.json(),
+    )) as {
+      session: {
+        sessionId: string;
+        itemStates: Record<string, { decisionType: string }>;
+      };
+    };
+    expect(recovered.session.itemStates).toMatchObject({
+      "review-item-a": { decisionType: "KEEP_CURRENT" },
+      "review-item-missing": { decisionType: "MARK_FALSE_POSITIVE" },
+    });
+    const [corrections, audits] = await Promise.all([
+      readFile(
+        path.join(root, "session", "human-correction-log.jsonl"),
+        "utf8",
+      ),
+      readFile(path.join(root, "session", "review-audit.jsonl"), "utf8"),
+    ]);
+    const correctionRecords = corrections
+      .trim()
+      .split("\n")
+      .map((line) =>
+        humanCorrectionRecordSchema.parse(JSON.parse(line) as unknown),
+      );
+    expect(correctionRecords).toHaveLength(2);
+    expect(
+      new Set(correctionRecords.map((record) => record.sessionId)),
+    ).toEqual(new Set([recovered.session.sessionId]));
+    expect(audits.trim().split("\n")).toHaveLength(2);
+    const lockProbe = new DatabaseSync(
+      path.join(root, "session", "workspace-mutation.sqlite"),
+    );
+    lockProbe.exec("BEGIN EXCLUSIVE");
+    lockProbe.exec("ROLLBACK");
+    lockProbe.close();
+  });
+
+  it("releases a cross-process mutation lock after its owner is killed", async () => {
+    const { root, running } = await workspace();
+    const lockPath = path.join(root, "session", "workspace-mutation.sqlite");
+    const child = spawn(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        'import { DatabaseSync } from "node:sqlite"; const db = new DatabaseSync(process.argv[1]); db.exec("BEGIN EXCLUSIVE"); process.stdout.write("LOCKED\\n"); setInterval(() => {}, 1000);',
+        lockPath,
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    );
+    runningChildProcesses.push(child);
+    await new Promise<void>((resolve, reject) => {
+      child.once("error", reject);
+      child.once("exit", (code) =>
+        reject(
+          new Error(`Lock holder exited before readiness: ${String(code)}`),
+        ),
+      );
+      child.stdout.once("data", (chunk: Buffer) => {
+        if (chunk.toString("utf8").includes("LOCKED")) resolve();
+        else reject(new Error("Lock holder did not acquire its transaction."));
+      });
+    });
+    const exited = new Promise<void>((resolve) => {
+      child.once("exit", () => resolve());
+    });
+    child.kill("SIGKILL");
+    await exited;
+
+    const saved = await post(
+      running.url,
+      "/api/decision",
+      decision({ decisionId: "decision-after-lock-owner-crash" }),
+    );
+    expect(saved.status).toBe(200);
+    const session = await fetch(new URL("/api/session", running.url));
+    expect(session.status).toBe(200);
+    await expect(session.json()).resolves.toMatchObject({
+      session: {
+        itemStates: {
+          "review-item-a": {
+            decisionId: "decision-after-lock-owner-crash",
+          },
+        },
+      },
+    });
+  }, 15_000);
+
+  it("serializes concurrent writes from two server processes against one workspace", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "mvl-c60112-processes-"));
+    temporaryDirectories.push(root);
+    const data = reviewData();
+    await writeC60112ReviewWorkspace({
+      workspaceDirectory: root,
+      reviewData: data,
+    });
+    await writeFile(
+      path.join(root, "audio", "region-a.wav"),
+      Buffer.alloc(128, 7),
+    );
+    const freezePath = path.join(root, "review-package-freeze.json");
+    await writeFile(
+      freezePath,
+      `${JSON.stringify(reviewFreeze(data), null, 2)}\n`,
+      "utf8",
+    );
+    const [firstServer, secondServer] = await Promise.all([
+      startReviewServerProcess({ workspaceRoot: root, freezePath }),
+      startReviewServerProcess({ workspaceRoot: root, freezePath }),
+    ]);
+
+    const [first, second] = await Promise.all([
+      post(
+        firstServer.url,
+        "/api/decision",
+        decision({ decisionId: "decision-from-first-process" }),
+      ),
+      post(
+        secondServer.url,
+        "/api/decision",
+        decision({
+          decisionId: "decision-from-second-process",
+          reviewItemId: "review-item-missing",
+          decisionType: "MARK_FALSE_POSITIVE",
+        }),
+      ),
+    ]);
+    expect([first.status, second.status]).toEqual([200, 200]);
+
+    const session = reviewSessionSchema.parse(
+      JSON.parse(
+        await readFile(
+          path.join(root, "session", "review-session.json"),
+          "utf8",
+        ),
+      ) as unknown,
+    );
+    expect(session.itemStates).toMatchObject({
+      "review-item-a": { decisionType: "KEEP_CURRENT" },
+      "review-item-missing": { decisionType: "MARK_FALSE_POSITIVE" },
+    });
+    const [corrections, audits] = await Promise.all([
+      readFile(
+        path.join(root, "session", "human-correction-log.jsonl"),
+        "utf8",
+      ),
+      readFile(path.join(root, "session", "review-audit.jsonl"), "utf8"),
+    ]);
+    const correctionRecords = corrections
+      .trim()
+      .split("\n")
+      .map((line) =>
+        humanCorrectionRecordSchema.parse(JSON.parse(line) as unknown),
+      );
+    expect(correctionRecords).toHaveLength(2);
+    expect(
+      new Set(correctionRecords.map((record) => record.sessionId)),
+    ).toEqual(new Set([session.sessionId]));
+    expect(audits.trim().split("\n")).toHaveLength(2);
+  });
+
+  it("rejects timing and new-cue decisions beyond sourceDurationMs before review can complete", async () => {
+    const { running } = await workspace();
+    expect(
+      (
+        await post(
+          running.url,
+          "/api/decision",
+          decision({
+            decisionId: "decision-resolve-missing",
+            reviewItemId: "review-item-missing",
+            decisionType: "MARK_FALSE_POSITIVE",
+          }),
+        )
+      ).status,
+    ).toBe(200);
+    const invalidTiming = await post(
+      running.url,
+      "/api/decision",
+      decision({
+        decisionId: "decision-out-of-bounds-timing",
+        decisionType: "TIMING_EDIT",
+        afterStart: 29.5,
+        afterEnd: 30.001,
+      }),
+    );
+    expect(invalidTiming.status).toBe(400);
+    await expect(invalidTiming.json()).resolves.toMatchObject({
+      code: "INVALID_TIMING_EDIT",
+    });
+    const sessionAfterTiming = (await fetch(
+      new URL("/api/session", running.url),
+    ).then((response) => response.json())) as {
+      session: { reviewComplete: boolean; unresolvedRequiredCount: number };
+    };
+    expect(sessionAfterTiming.session).toMatchObject({
+      reviewComplete: false,
+      unresolvedRequiredCount: 1,
+    });
+
+    const second = await workspace();
+    expect(
+      (await post(second.running.url, "/api/decision", decision())).status,
+    ).toBe(200);
+    const invalidNewCue = await post(
+      second.running.url,
+      "/api/decision",
+      decision({
+        decisionId: "decision-out-of-bounds-new-cue",
+        reviewItemId: "review-item-missing",
+        decisionType: "ADD_NEW_CUE",
+        afterText: "範囲外の追加字幕",
+        afterStart: 29.5,
+        afterEnd: 30.001,
+      }),
+    );
+    expect(invalidNewCue.status).toBe(400);
+    await expect(invalidNewCue.json()).resolves.toMatchObject({
+      code: "INVALID_NEW_CUE",
+    });
+    const sessionAfterNewCue = (await fetch(
+      new URL("/api/session", second.running.url),
+    ).then((response) => response.json())) as {
+      session: { reviewComplete: boolean; unresolvedRequiredCount: number };
+    };
+    expect(sessionAfterNewCue.session).toMatchObject({
+      reviewComplete: false,
+      unresolvedRequiredCount: 1,
+    });
   });
 
   it("fails closed on stale bases, invalid candidates, missing mutation headers, and malformed new cues", async () => {
@@ -671,6 +1457,12 @@ describe("C6.0.1.12 offline review workspace", () => {
       workspaceDirectory: workspaceRoot,
       reviewData: data,
     });
+    const freezePath = path.join(root, "review-package-freeze.json");
+    await writeFile(
+      freezePath,
+      `${JSON.stringify(reviewFreeze(data), null, 2)}\n`,
+      "utf8",
+    );
     await writeFile(
       path.join(workspaceRoot, "audio", "region-a.wav"),
       Buffer.alloc(128, 7),
@@ -721,6 +1513,8 @@ describe("C6.0.1.12 offline review workspace", () => {
       [
         "scripts/c6-0-1-12-review-cli.ts",
         "apply",
+        "--freeze",
+        freezePath,
         "--base-package",
         basePackagePath,
         "--session",

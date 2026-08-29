@@ -11,6 +11,7 @@ import {
 } from "../packages/video-subtitler/src/review/review-item-builder.js";
 import {
   buildC60112ReviewPackageFreeze,
+  assertC60112FrozenWorkspaceData,
   verifyC60112ReviewPackageFreeze,
 } from "../packages/video-subtitler/src/review/review-package-freeze.js";
 import { buildC60112ReviewPriority } from "../packages/video-subtitler/src/review/review-priority.js";
@@ -375,5 +376,54 @@ describe("C6.0.1.12 machine-only review builders", () => {
 
     expect(first.workspaceDataHash).not.toBe(second.workspaceDataHash);
     expect(first.aggregateHash).not.toBe(second.aggregateHash);
+  });
+
+  it("rejects post-freeze review-data tampering even when embedded hashes stay unchanged", () => {
+    const items = buildC60112ReviewItems({ signals: [signal()], policy });
+    const priority = buildC60112ReviewPriority({ items: items.items, policy });
+    const regions = clusterC60112ReviewRegions({ items: items.items, policy });
+    const candidateBundles = buildC60112ReviewCandidateBundles({
+      items: items.items,
+      candidates: candidates(),
+      policy,
+    });
+    const workspaceData = {
+      schemaVersion: "1.0.0",
+      workspaceVersion: "c6.0.1.12-review-workspace-v1",
+      policyVersion: policy.policyVersion,
+      policyHash: policy.semanticHash,
+      reviewPackageSemanticHash: SHA,
+      machineDraftHash: MACHINE_DRAFT_HASH,
+      sourceMediaIdentity: { sourceMediaSha256: SHA, sourceDurationMs: 3_000 },
+      machineDraftIdentity: { cueCount: 1 },
+      items: [],
+      regions: [],
+      candidateBundles: [],
+    };
+    const freeze = buildC60112ReviewPackageFreeze({
+      frozenAt: FROZEN_AT,
+      sourceMediaSha256: SHA,
+      machineDraftHash: MACHINE_DRAFT_HASH,
+      policy,
+      items,
+      priority,
+      regions,
+      candidates: candidateBundles,
+      audioManifest: { clips: [] },
+      workspaceData,
+    });
+
+    expect(() =>
+      assertC60112FrozenWorkspaceData({ freeze, workspaceData }),
+    ).not.toThrow();
+    expect(() =>
+      assertC60112FrozenWorkspaceData({
+        freeze,
+        workspaceData: {
+          ...workspaceData,
+          machineDraftIdentity: { cueCount: 2 },
+        },
+      }),
+    ).toThrow(/REVIEW_WORKSPACE_DATA_FREEZE_HASH_MISMATCH/u);
   });
 });

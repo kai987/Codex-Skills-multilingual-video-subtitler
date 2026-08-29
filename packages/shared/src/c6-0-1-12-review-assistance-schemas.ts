@@ -801,7 +801,17 @@ export const correctionDatasetSummarySchema = z
     locality: z.literal("LOCAL_ONLY"),
     shareable: z.literal(false),
     sourceCorrectionLogHash: sha256,
+    sourceReviewSessionHash: sha256,
+    sourceAuditLogHash: sha256,
+    sourceReviewDataHash: sha256,
+    reviewPackageFreezeHash: sha256,
+    lifecycleAuditHash: sha256,
     datasetJsonlHash: sha256,
+    sourceRecordCount: count,
+    activeRecordCount: count,
+    undoneRecordCount: count,
+    supersededRecordCount: count,
+    orphanRecordCount: count,
     recordCount: count,
     uniqueSessionCount: count,
     uniqueReviewItemCount: count,
@@ -810,7 +820,30 @@ export const correctionDatasetSummarySchema = z
     trainingPerformed: z.literal(false),
     semanticHash: sha256,
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    if (
+      value.sourceRecordCount !==
+      value.activeRecordCount +
+        value.undoneRecordCount +
+        value.supersededRecordCount +
+        value.orphanRecordCount
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["sourceRecordCount"],
+        message: "Lifecycle counts must partition the correction log.",
+      });
+    }
+    if (value.recordCount !== value.activeRecordCount) {
+      context.addIssue({
+        code: "custom",
+        path: ["recordCount"],
+        message:
+          "The exported correction dataset must contain active records only.",
+      });
+    }
+  });
 
 const reviewErrorComponentLabelSchema = z.enum([
   "MATERIAL_TEXT_ERROR",

@@ -21,7 +21,43 @@
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
     },
+    "sourceReviewSessionHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceAuditLogHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceReviewDataHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewPackageFreezeHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "lifecycleAuditHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "datasetJsonlHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceRecordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "activeRecordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "undoneRecordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "supersededRecordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "orphanRecordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
     "recordCount": {
       "type": "integer",
       "minimum": 0,
@@ -111,7 +147,17 @@
     "locality",
     "shareable",
     "sourceCorrectionLogHash",
+    "sourceReviewSessionHash",
+    "sourceAuditLogHash",
+    "sourceReviewDataHash",
+    "reviewPackageFreezeHash",
+    "lifecycleAuditHash",
     "datasetJsonlHash",
+    "sourceRecordCount",
+    "activeRecordCount",
+    "undoneRecordCount",
+    "supersededRecordCount",
+    "orphanRecordCount",
     "recordCount",
     "uniqueSessionCount",
     "uniqueReviewItemCount",
