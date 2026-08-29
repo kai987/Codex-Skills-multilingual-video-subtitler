@@ -93,7 +93,10 @@ export function buildCrossModelDiscriminatorFeatures(input: {
     input.pairedWhisper.events.map((event) => [event.eventId, event]),
   );
   const independentByEvent = new Map(
-    input.independentDiscriminator.events.map((event) => [event.eventId, event]),
+    input.independentDiscriminator.events.map((event) => [
+      event.eventId,
+      event,
+    ]),
   );
   const featureNames = [
     ...new Set(Object.values(C60111_FEATURE_GROUPS).flat()),
@@ -103,9 +106,12 @@ export function buildCrossModelDiscriminatorFeatures(input: {
     const paired = pairedByEvent.get(corpusEvent.eventId);
     const independent = independentByEvent.get(corpusEvent.eventId);
     if (baseline === undefined || paired === undefined) {
-      throw new Error(`Missing machine feature source for ${corpusEvent.eventId}.`);
+      throw new Error(
+        `Missing machine feature source for ${corpusEvent.eventId}.`,
+      );
     }
-    const duration = corpusEvent.coreInterval.end - corpusEvent.coreInterval.start;
+    const duration =
+      corpusEvent.coreInterval.end - corpusEvent.coreInterval.start;
     const whisperTextLength = Array.from(
       normalizeIndependentAsrLexical(
         baseline.currentWhisperCandidate.displayText,
@@ -125,11 +131,15 @@ export function buildCrossModelDiscriminatorFeatures(input: {
         baseline.crossModelRelation === "LEXICAL_DISAGREEMENT" ? 1 : 0,
       relationWhisperHallucinationRisk:
         baseline.crossModelRelation === "WHISPER_HALLUCINATION_RISK" ? 1 : 0,
-      whisperNegativeEvidence: baseline.whisperStability.negativeEvidence ? 1 : 0,
+      whisperNegativeEvidence: baseline.whisperStability.negativeEvidence
+        ? 1
+        : 0,
       whisperDecoderStrongError: evidenceStrongError(
         baseline.whisperDecoderEvidence,
       ),
-      whisperTokenStrongError: evidenceStrongError(baseline.whisperTokenEvidence),
+      whisperTokenStrongError: evidenceStrongError(
+        baseline.whisperTokenEvidence,
+      ),
       requestEdgeStrongError: evidenceStrongError(baseline.requestEdgeEvidence),
       speechCompletenessStrongError: evidenceStrongError(
         baseline.speechCompletenessEvidence,
@@ -165,8 +175,7 @@ export function buildCrossModelDiscriminatorFeatures(input: {
         stability === "WHISPER_LEXICALLY_UNSTABLE" ? 1 : 0,
       whisperHallucinationUnstable:
         stability === "WHISPER_HALLUCINATION_UNSTABLE" ? 1 : 0,
-      whisperEmptyUnstable:
-        stability === "WHISPER_EMPTY_UNSTABLE" ? 1 : 0,
+      whisperEmptyUnstable: stability === "WHISPER_EMPTY_UNSTABLE" ? 1 : 0,
       whisperPartialAgreement:
         stability === "WHISPER_PARTIAL_AGREEMENT" ? 1 : 0,
       whisperPairedMissing: stability === "WHISPER_UNCOMPARABLE" ? 1 : 0,
@@ -233,7 +242,9 @@ export function buildCrossModelDiscriminatorFeatures(input: {
   };
   return machineCrossModelDiscriminatorFeaturesSchema.parse({
     ...core,
-    semanticHash: machineQualitySemanticHash({ ...core, generatedAt: undefined }),
+    semanticHash: machineQualitySemanticHash({
+      ...core,
+      generatedAt: undefined,
+    }),
   });
 }
-

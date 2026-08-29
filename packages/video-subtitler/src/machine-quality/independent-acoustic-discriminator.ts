@@ -2,9 +2,9 @@ import { createHash, randomUUID } from "node:crypto";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
 
-import {
+import type {
   independentAcousticOutcomeSchema,
-  type MachineIndependentAcousticDiscriminator,
+  MachineIndependentAcousticDiscriminator,
 } from "@mvl/shared";
 import type { z } from "zod";
 
@@ -70,6 +70,17 @@ interface Pending {
   reject: (error: Error) => void;
 }
 
+function workerErrorMessage(
+  value: Record<string, unknown>,
+  fallback: string,
+): string {
+  if (typeof value.message === "string") return value.message;
+  if (typeof value.code === "string" || typeof value.code === "number") {
+    return String(value.code);
+  }
+  return fallback;
+}
+
 export function independentCtcCacheKey(input: {
   audioSha256: string;
   whisperRepresentations: readonly IndependentCtcRepresentation[];
@@ -106,9 +117,7 @@ export function classifyIndependentAcousticMargin(input: {
   return {
     margin,
     outcome:
-      margin > 0
-        ? "INDEPENDENT_FAVORS_REAZON"
-        : "INDEPENDENT_FAVORS_WHISPER",
+      margin > 0 ? "INDEPENDENT_FAVORS_REAZON" : "INDEPENDENT_FAVORS_WHISPER",
   };
 }
 
@@ -208,7 +217,11 @@ export class IndependentCtcDiscriminatorWorker {
     try {
       value = JSON.parse(line) as Record<string, unknown>;
     } catch (error) {
-      this.#failAll(new Error(`Independent CTC worker emitted invalid JSON: ${String(error)}`));
+      this.#failAll(
+        new Error(
+          `Independent CTC worker emitted invalid JSON: ${String(error)}`,
+        ),
+      );
       return;
     }
     if (value.type === "ready") {
@@ -216,15 +229,16 @@ export class IndependentCtcDiscriminatorWorker {
       return;
     }
     if (value.type === "fatal") {
-      this.#failAll(new Error(String(value.message ?? value.code ?? "Worker fatal")));
+      this.#failAll(new Error(workerErrorMessage(value, "Worker fatal")));
       return;
     }
-    const requestId = typeof value.requestId === "string" ? value.requestId : "";
+    const requestId =
+      typeof value.requestId === "string" ? value.requestId : "";
     const pending = this.#pending.get(requestId);
     if (pending === undefined) return;
     this.#pending.delete(requestId);
     if (value.type === "error") {
-      pending.reject(new Error(String(value.message ?? value.code ?? "Score failed")));
+      pending.reject(new Error(workerErrorMessage(value, "Score failed")));
     } else {
       pending.resolve(value as unknown as ScoreResult);
     }

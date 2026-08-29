@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-11-feature-ablation-report.schema.json",
+  "title": "c6-0-1-11-feature-ablation-report",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.11-paired-evidence-independent-discriminator-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-11-feature-ablation-report"
+    },
+    "variants": {
+      "minItems": 6,
+      "maxItems": 6,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "modelId": {
+            "type": "string",
+            "enum": ["M0", "M1", "M2", "M3", "M4", "M5"]
+          },
+          "description": { "type": "string", "minLength": 1 },
+          "featureSet": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "selectedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "correctCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "wrongCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "neutralCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "precision": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "harmRate": { "type": "number", "minimum": 0, "maximum": 1 },
+              "selectiveCoverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "realizedGain": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "availableOracleGain": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "oracleCaptureRate": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              }
+            },
+            "required": [
+              "selectedCount",
+              "correctCount",
+              "wrongCount",
+              "neutralCount",
+              "precision",
+              "harmRate",
+              "selectiveCoverage",
+              "realizedGain",
+              "availableOracleGain",
+              "oracleCaptureRate"
+            ],
+            "additionalProperties": false
+          },
+          "negativeGainFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "zeroHarmFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "modelId",
+          "description",
+          "featureSet",
+          "metrics",
+          "negativeGainFoldCount",
+          "zeroHarmFoldCount",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "bestModelId": {
+      "type": "string",
+      "enum": ["M0", "M1", "M2", "M3", "M4", "M5"]
+    },
+    "selectionPerformedWithoutOuterTestRetuning": {
+      "type": "boolean",
+      "const": true
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "variants",
+    "bestModelId",
+    "selectionPerformedWithoutOuterTestRetuning",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

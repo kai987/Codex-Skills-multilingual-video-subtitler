@@ -15,7 +15,6 @@ import {
 import { describe, expect, it } from "vitest";
 
 const GENERATED_AT = "2026-08-29T12:00:00.000Z";
-const HASH = "a".repeat(64);
 
 function syntheticInputs(): {
   corpus: MachineCrossModelCalibrationCorpus;

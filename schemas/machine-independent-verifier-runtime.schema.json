@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-independent-verifier-runtime.schema.json",
+  "title": "machine-independent-verifier-runtime",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.11-paired-evidence-independent-discriminator-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-independent-verifier-runtime"
+    },
+    "modelIdentity": {
+      "type": "object",
+      "properties": {
+        "modelId": {
+          "type": "string",
+          "const": "jonatasgrosman/wav2vec2-large-xlsr-53-japanese"
+        },
+        "requestedRevision": { "type": "string", "minLength": 7 },
+        "resolvedRevision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "configSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "preprocessorSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "vocabularySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "modelWeightSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "processorSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "modelId",
+        "requestedRevision",
+        "resolvedRevision",
+        "modelSnapshotHash",
+        "configSha256",
+        "preprocessorSha256",
+        "vocabularySha256",
+        "modelWeightSha256",
+        "processorSha256"
+      ],
+      "additionalProperties": false
+    },
+    "runtimeIdentity": {
+      "type": "object",
+      "properties": {
+        "runtimeId": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "pythonVersion": { "type": "string", "minLength": 1 },
+        "torchVersion": { "type": "string", "minLength": 1 },
+        "transformersVersion": { "type": "string", "minLength": 1 },
+        "scikitLearnVersion": { "type": "string", "minLength": 1 },
+        "numpyVersion": { "type": "string", "minLength": 1 },
+        "scipyVersion": { "type": "string", "minLength": 1 },
+        "device": { "type": "string", "const": "cpu" },
+        "precision": { "type": "string", "const": "fp32" },
+        "sampleRate": { "type": "number", "const": 16000 },
+        "workerSourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "runtimeId",
+        "pythonVersion",
+        "torchVersion",
+        "transformersVersion",
+        "scikitLearnVersion",
+        "numpyVersion",
+        "scipyVersion",
+        "device",
+        "precision",
+        "sampleRate",
+        "workerSourceSha256"
+      ],
+      "additionalProperties": false
+    },
+    "requests": {
+      "type": "object",
+      "properties": {
+        "plannedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "actualCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshInferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "processStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wallClockSeconds": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "plannedCount",
+        "actualCount",
+        "freshInferenceCount",
+        "cacheHitCount",
+        "failedCount",
+        "modelLoadCount",
+        "processStartCount",
+        "wallClockSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "bootstrapNetworkUsed": { "type": "boolean" },
+    "inferenceNetworkUsed": { "type": "boolean", "const": false },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "modelIdentity",
+    "runtimeIdentity",
+    "requests",
+    "bootstrapNetworkUsed",
+    "inferenceNetworkUsed",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

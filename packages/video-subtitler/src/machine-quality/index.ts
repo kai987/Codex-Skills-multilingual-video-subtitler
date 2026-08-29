@@ -97,3 +97,6 @@ export * from "./selective-provider-classifier.js";
 export * from "./selective-threshold-calibration.js";
 export * from "./calibration-data-quality.js";
 export * from "./selective-cv-evaluator.js";
+export * from "./discriminator-feature-ablation.js";
+export * from "./c60111-route-decision.js";
+export * from "./selective-discriminator-freeze.js";

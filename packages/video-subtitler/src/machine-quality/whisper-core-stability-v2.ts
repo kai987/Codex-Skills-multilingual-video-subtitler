@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { whisperCoreStabilityV2Schema } from "@mvl/shared";
+import type { whisperCoreStabilityV2Schema } from "@mvl/shared";
 
 import {
   genericHallucinationRisk,
@@ -24,9 +24,7 @@ export function classifyWhisperCoreStabilityV2(input: {
   const exact = normalizeIndependentAsrLexical(input.exactText);
   const context = normalizeIndependentAsrLexical(input.contextText);
   if (exact === "" || context === "") {
-    return exact === context
-      ? "WHISPER_CORE_STABLE"
-      : "WHISPER_EMPTY_UNSTABLE";
+    return exact === context ? "WHISPER_CORE_STABLE" : "WHISPER_EMPTY_UNSTABLE";
   }
   if (exact === context) return "WHISPER_CORE_STABLE";
   const exactRisk = genericHallucinationRisk({
@@ -47,4 +45,3 @@ export function classifyWhisperCoreStabilityV2(input: {
   if (similarity >= 0.72) return "WHISPER_PARTIAL_AGREEMENT";
   return "WHISPER_LEXICALLY_UNSTABLE";
 }
-

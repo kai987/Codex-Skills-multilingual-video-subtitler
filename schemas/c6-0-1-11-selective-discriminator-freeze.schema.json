@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-11-selective-discriminator-freeze.schema.json",
+  "title": "c6-0-1-11-selective-discriminator-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.11-paired-evidence-independent-discriminator-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-11-selective-discriminator-freeze"
+    },
+    "created": { "type": "boolean" },
+    "modelType": {
+      "anyOf": [
+        { "type": "string", "const": "L2_LOGISTIC_REGRESSION" },
+        { "type": "null" }
+      ]
+    },
+    "modelId": {
+      "anyOf": [
+        { "type": "string", "enum": ["M0", "M1", "M2", "M3", "M4", "M5"] },
+        { "type": "null" }
+      ]
+    },
+    "featureSchemaHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "coefficients": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "number" }
+    },
+    "intercept": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+    "threshold": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+    "preprocessing": {
+      "type": "object",
+      "properties": {
+        "medians": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1 },
+          "additionalProperties": { "type": "number" }
+        },
+        "means": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1 },
+          "additionalProperties": { "type": "number" }
+        },
+        "scales": {
+          "type": "object",
+          "propertyNames": { "type": "string", "minLength": 1 },
+          "additionalProperties": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      },
+      "required": ["medians", "means", "scales"],
+      "additionalProperties": false
+    },
+    "productionEnforcementEnabled": { "type": "boolean", "const": false },
+    "trainedOnEpisode1CalibrationOnly": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "created",
+    "modelType",
+    "modelId",
+    "featureSchemaHash",
+    "coefficients",
+    "intercept",
+    "threshold",
+    "preprocessing",
+    "productionEnforcementEnabled",
+    "trainedOnEpisode1CalibrationOnly",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

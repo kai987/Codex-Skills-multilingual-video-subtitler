@@ -10,6 +10,10 @@ import {
 import { overlappingAudioAcrossFolds } from "./calibration-fold-builder.js";
 import { machineQualitySemanticHash } from "./evidence-correlation.js";
 
+function numericAuditValue(value: unknown): number {
+  return typeof value === "number" ? value : Number.NaN;
+}
+
 export function auditC60111CalibrationData(input: {
   generatedAt: string;
   corpus: MachineCrossModelCalibrationCorpus;
@@ -22,18 +26,23 @@ export function auditC60111CalibrationData(input: {
   const overlappingAudioAcrossTrainTestCount = overlappingAudioAcrossFolds(
     input.folds,
   );
+  const rawTextFeatureCount = numericAuditValue(
+    input.features.audit.rawTextFeatureCount,
+  );
+  const datasetSpecificFeatureCount = numericAuditValue(
+    input.features.audit.datasetSpecificFeatureCount,
+  );
+  const goldFeatureCount = numericAuditValue(
+    input.features.audit.goldFeatureCount,
+  );
   const failures = [
     ...(duplicateEventCount === 0 ? [] : ["duplicate-events"]),
     ...(overlappingAudioAcrossTrainTestCount === 0
       ? []
       : ["overlapping-audio-across-folds"]),
-    ...(input.features.audit.rawTextFeatureCount === 0
-      ? []
-      : ["raw-text-feature"]),
-    ...(input.features.audit.datasetSpecificFeatureCount === 0
-      ? []
-      : ["dataset-specific-feature"]),
-    ...(input.features.audit.goldFeatureCount === 0 ? [] : ["gold-feature"]),
+    ...(rawTextFeatureCount === 0 ? [] : ["raw-text-feature"]),
+    ...(datasetSpecificFeatureCount === 0 ? [] : ["dataset-specific-feature"]),
+    ...(goldFeatureCount === 0 ? [] : ["gold-feature"]),
   ];
   const core = {
     schemaVersion: "1.0.0" as const,
@@ -45,9 +54,9 @@ export function auditC60111CalibrationData(input: {
     foldSemanticHash: input.folds.semanticHash,
     duplicateEventCount,
     overlappingAudioAcrossTrainTestCount,
-    rawTextFeatureCount: 0 as const,
-    datasetSpecificFeatureCount: 0 as const,
-    goldFeatureCount: 0 as const,
+    rawTextFeatureCount,
+    datasetSpecificFeatureCount,
+    goldFeatureCount,
     fullDataPreprocessingLeakCount: 0 as const,
     foldConstructionLabelInputCount: 0 as const,
     passed: failures.length === 0,

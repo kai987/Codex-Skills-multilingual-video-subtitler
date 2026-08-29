@@ -48,7 +48,8 @@ export interface C60111CurrentWhisperView {
 function materializeCandidate(execution: C60111WhisperExecution) {
   const displayText = normalizeIndependentAsrDisplay(execution.text);
   const normalizedText = normalizeIndependentAsrLexical(displayText);
-  const duration = execution.sourceInterval.end - execution.sourceInterval.start;
+  const duration =
+    execution.sourceInterval.end - execution.sourceInterval.start;
   const core = {
     candidateId: execution.requestId,
     displayText,
@@ -93,7 +94,9 @@ export function buildMachinePairedWhisperEvidence(input: {
   const events = input.corpus.events.map((event) => {
     const current = currentByEvent.get(event.eventId);
     if (current === undefined) {
-      throw new Error(`Missing current Whisper candidate for ${event.eventId}.`);
+      throw new Error(
+        `Missing current Whisper candidate for ${event.eventId}.`,
+      );
     }
     const eventExecutions = executionsByEvent.get(event.eventId) ?? [];
     const exactExecution = eventExecutions.find(
@@ -103,7 +106,9 @@ export function buildMachinePairedWhisperEvidence(input: {
       (execution) => execution.windowType === "CORE_CONTEXT",
     );
     const exact =
-      exactExecution === undefined ? null : materializeCandidate(exactExecution);
+      exactExecution === undefined
+        ? null
+        : materializeCandidate(exactExecution);
     const context =
       contextExecution === undefined
         ? null
@@ -125,7 +130,9 @@ export function buildMachinePairedWhisperEvidence(input: {
         exactText: exact?.displayText ?? null,
         contextText: context?.displayText ?? null,
         exactDurationSeconds:
-          exact === null ? 0 : exact.sourceInterval.end - exact.sourceInterval.start,
+          exact === null
+            ? 0
+            : exact.sourceInterval.end - exact.sourceInterval.start,
         contextDurationSeconds:
           context === null
             ? 0

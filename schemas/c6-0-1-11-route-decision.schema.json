@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-11-route-decision.schema.json",
+  "title": "c6-0-1-11-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.11-paired-evidence-independent-discriminator-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-11-route-decision" },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_12_PROSPECTIVE_DISCRIMINATOR_ARBITRATION",
+        "SELECTIVE_CALIBRATION_PROMISING_BUT_NOT_PROVEN",
+        "HOLD_FOR_INDEPENDENT_VERIFIER_REDESIGN",
+        "INDEPENDENT_VERIFIER_NOT_USEFUL",
+        "AUTOMATIC_PROVIDER_SELECTION_NOT_SUPPORTED"
+      ]
+    },
+    "automaticProviderSelectionSupported": { "type": "boolean" },
+    "strongCalibrationPass": { "type": "boolean" },
+    "promisingCalibration": { "type": "boolean" },
+    "stopAutomaticProviderSwitchExpansion": { "type": "boolean" },
+    "nextStage": {
+      "type": "string",
+      "enum": [
+        "PROSPECTIVE_FROZEN_OBSERVE_ONLY",
+        "ADD_INDEPENDENT_EPISODE_CALIBRATION_DATA",
+        "REDESIGN_INDEPENDENT_VERIFIER",
+        "MULTI_ASR_REVIEW_ASSISTANCE"
+      ]
+    },
+    "reasons": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "productionProfile": { "type": "string", "const": "DISABLED" },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "decision",
+    "automaticProviderSelectionSupported",
+    "strongCalibrationPass",
+    "promisingCalibration",
+    "stopAutomaticProviderSwitchExpansion",
+    "nextStage",
+    "reasons",
+    "productionProfile",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -73,7 +73,8 @@ export function buildC60111CalibrationFolds(input: {
     generatedAt: input.generatedAt,
     artifactType: "c6-0-1-11-calibration-folds" as const,
     corpusSemanticHash: input.corpus.semanticHash,
-    groupingPolicy: "overlap-components-then-contiguous-time-blocks-v1" as const,
+    groupingPolicy:
+      "overlap-components-then-contiguous-time-blocks-v1" as const,
     foldCount: 5 as const,
     constructedBeforeLabels: true as const,
     randomSplitUsed: false as const,
@@ -81,7 +82,10 @@ export function buildC60111CalibrationFolds(input: {
   };
   return c60111CalibrationFoldsSchema.parse({
     ...core,
-    semanticHash: machineQualitySemanticHash({ ...core, generatedAt: undefined }),
+    semanticHash: machineQualitySemanticHash({
+      ...core,
+      generatedAt: undefined,
+    }),
   });
 }
 
@@ -89,7 +93,11 @@ export function overlappingAudioAcrossFolds(
   folds: C60111CalibrationFolds,
 ): number {
   let overlaps = 0;
-  for (let leftIndex = 0; leftIndex < folds.assignments.length; leftIndex += 1) {
+  for (
+    let leftIndex = 0;
+    leftIndex < folds.assignments.length;
+    leftIndex += 1
+  ) {
     const left = folds.assignments[leftIndex];
     if (left === undefined) continue;
     for (
@@ -109,4 +117,3 @@ export function overlappingAudioAcrossFolds(
   }
   return overlaps;
 }
-

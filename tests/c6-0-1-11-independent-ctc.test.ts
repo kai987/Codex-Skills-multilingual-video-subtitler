@@ -15,8 +15,7 @@ function projected(nllPerTargetToken: number | null) {
     encodedTokenCount: 4,
     unknownTokenCount: 0,
     coverageRatio: 1,
-    rawNll:
-      nllPerTargetToken === null ? null : nllPerTargetToken * 4,
+    rawNll: nllPerTargetToken === null ? null : nllPerTargetToken * 4,
     nllPerTargetToken,
     acousticFrameCount: 100,
     targetCoverage: 1,
@@ -71,9 +70,7 @@ describe("C6.0.1.11 independent candidate-conditioned CTC", () => {
       runtimeId: "d".repeat(64),
     };
     expect(independentCtcCacheKey(input)).toBe(independentCtcCacheKey(input));
-    expect(
-      independentCtcCacheKey(input),
-    ).not.toBe(
+    expect(independentCtcCacheKey(input)).not.toBe(
       independentCtcCacheKey({
         ...input,
         audioSha256: "e".repeat(64),

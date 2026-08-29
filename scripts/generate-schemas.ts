@@ -286,6 +286,20 @@ import {
   c60110FinalReplayAuditSchema,
   c60110GlobalGoldEvaluationReplaySchema,
   c60110ValidationSchema,
+  machineCrossModelCalibrationCorpusSchema,
+  machinePairedWhisperEvidenceSchema,
+  machineIndependentVerifierRuntimeSchema,
+  machineIndependentAcousticDiscriminatorSchema,
+  machineCrossModelDiscriminatorFeaturesSchema,
+  goldCrossModelCalibrationLabelsSchema,
+  c60111CalibrationFoldsSchema,
+  c60111DataQualityAuditSchema,
+  c60111CvResultsSchema,
+  c60111OutOfFoldPredictionsSchema,
+  c60111FeatureAblationReportSchema,
+  c60111SelectiveDiscriminatorFreezeSchema,
+  c60111RouteDecisionSchema,
+  c60111ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
 import { z } from "zod";
@@ -770,6 +784,76 @@ const schemas = [
     fileName: "c6-0-1-10-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-validation.schema.json",
     schema: c60110ValidationSchema,
+  },
+  {
+    fileName: "machine-cross-model-calibration-corpus.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-calibration-corpus.schema.json",
+    schema: machineCrossModelCalibrationCorpusSchema,
+  },
+  {
+    fileName: "machine-paired-whisper-evidence.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-paired-whisper-evidence.schema.json",
+    schema: machinePairedWhisperEvidenceSchema,
+  },
+  {
+    fileName: "machine-independent-verifier-runtime.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-independent-verifier-runtime.schema.json",
+    schema: machineIndependentVerifierRuntimeSchema,
+  },
+  {
+    fileName: "machine-independent-acoustic-discriminator.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-independent-acoustic-discriminator.schema.json",
+    schema: machineIndependentAcousticDiscriminatorSchema,
+  },
+  {
+    fileName: "machine-cross-model-discriminator-features.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-cross-model-discriminator-features.schema.json",
+    schema: machineCrossModelDiscriminatorFeaturesSchema,
+  },
+  {
+    fileName: "gold-cross-model-calibration-labels.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-cross-model-calibration-labels.schema.json",
+    schema: goldCrossModelCalibrationLabelsSchema,
+  },
+  {
+    fileName: "c6-0-1-11-calibration-folds.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-calibration-folds.schema.json",
+    schema: c60111CalibrationFoldsSchema,
+  },
+  {
+    fileName: "c6-0-1-11-data-quality-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-data-quality-audit.schema.json",
+    schema: c60111DataQualityAuditSchema,
+  },
+  {
+    fileName: "c6-0-1-11-cv-results.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-cv-results.schema.json",
+    schema: c60111CvResultsSchema,
+  },
+  {
+    fileName: "c6-0-1-11-out-of-fold-predictions.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-out-of-fold-predictions.schema.json",
+    schema: c60111OutOfFoldPredictionsSchema,
+  },
+  {
+    fileName: "c6-0-1-11-feature-ablation-report.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-feature-ablation-report.schema.json",
+    schema: c60111FeatureAblationReportSchema,
+  },
+  {
+    fileName: "c6-0-1-11-selective-discriminator-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-selective-discriminator-freeze.schema.json",
+    schema: c60111SelectiveDiscriminatorFreezeSchema,
+  },
+  {
+    fileName: "c6-0-1-11-route-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-route-decision.schema.json",
+    schema: c60111RouteDecisionSchema,
+  },
+  {
+    fileName: "c6-0-1-11-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-11-validation.schema.json",
+    schema: c60111ValidationSchema,
   },
   {
     fileName: "machine-candidate-association-ledger.schema.json",

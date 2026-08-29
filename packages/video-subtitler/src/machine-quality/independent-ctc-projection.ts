@@ -26,4 +26,3 @@ export function independentCtcRepresentations(input: {
       values.findIndex((candidate) => candidate.text === value.text) === index,
   );
 }
-

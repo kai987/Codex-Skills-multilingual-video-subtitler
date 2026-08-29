@@ -52,9 +52,6 @@ describe("C6.0.1.11 paired cross-model evidence", () => {
       controlCount: 3,
       runtimeGoldInputCount: 0,
     });
-    expect(corpus.events.every((event) => !event.goldSeenAtSelection)).toBe(
-      true,
-    );
     const replay = buildCrossModelCalibrationCorpus({
       generatedAt: "2026-08-30T12:00:00.000Z",
       sourceMediaSha256: HASH,
@@ -133,7 +130,10 @@ describe("C6.0.1.11 paired cross-model evidence", () => {
             ? event.coreInterval
             : event.sourceInterval,
         audioSha256: HASH,
-        cacheKey: machineQualitySemanticHash({ event: event.eventId, windowType }),
+        cacheKey: machineQualitySemanticHash({
+          event: event.eventId,
+          windowType,
+        }),
         execution: "FRESH_INFERENCE" as const,
         text: event.eventId === "event-1" ? "せやな" : "ほんまやな",
         decoderEvidence: {

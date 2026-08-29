@@ -159,8 +159,8 @@ describe("C6.0.1.11 Gold-isolated calibration data", () => {
       fullDataStandardizationCount: 0,
     });
     expect(features.events[0]?.featureValues.independentMargin).toBe(0.7);
-    expect(Object.values(c60111FeatureSets()).every((set) => set.length > 0)).toBe(
-      true,
-    );
+    expect(
+      Object.values(c60111FeatureSets()).every((set) => set.length > 0),
+    ).toBe(true);
   });
 });

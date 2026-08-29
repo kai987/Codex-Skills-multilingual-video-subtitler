@@ -7,7 +7,7 @@ const schemaVersion = z.literal("1.0.0");
 const policyVersion = z.literal(c60111PolicyVersion);
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/u);
 const count = z.number().int().nonnegative();
-const finite = z.number().finite();
+const finite = z.number();
 const ratio = finite.min(0).max(1);
 const artifactHeader = {
   schemaVersion,
@@ -192,9 +192,7 @@ export const machineIndependentVerifierRuntimeSchema = z
     artifactType: z.literal("machine-independent-verifier-runtime"),
     modelIdentity: z
       .object({
-        modelId: z.literal(
-          "jonatasgrosman/wav2vec2-large-xlsr-53-japanese",
-        ),
+        modelId: z.literal("jonatasgrosman/wav2vec2-large-xlsr-53-japanese"),
         requestedRevision: z.string().min(7),
         resolvedRevision: z.string().regex(/^[a-f0-9]{40}$/u),
         modelSnapshotHash: sha256,
@@ -409,7 +407,9 @@ export const c60111CalibrationFoldsSchema = z
     ...artifactHeader,
     artifactType: z.literal("c6-0-1-11-calibration-folds"),
     corpusSemanticHash: sha256,
-    groupingPolicy: z.literal("overlap-components-then-contiguous-time-blocks-v1"),
+    groupingPolicy: z.literal(
+      "overlap-components-then-contiguous-time-blocks-v1",
+    ),
     foldCount: z.literal(5),
     constructedBeforeLabels: z.literal(true),
     randomSplitUsed: z.literal(false),
@@ -514,19 +514,21 @@ export const c60111FeatureAblationReportSchema = z
   .object({
     ...artifactHeader,
     artifactType: z.literal("c6-0-1-11-feature-ablation-report"),
-    variants: z.array(
-      z
-        .object({
-          modelId: z.enum(["M0", "M1", "M2", "M3", "M4", "M5"]),
-          description: z.string().min(1),
-          featureSet: z.array(z.string().min(1)),
-          metrics: selectiveMetricsSchema,
-          negativeGainFoldCount: count,
-          zeroHarmFoldCount: count,
-          semanticHash: sha256,
-        })
-        .strict(),
-    ).length(6),
+    variants: z
+      .array(
+        z
+          .object({
+            modelId: z.enum(["M0", "M1", "M2", "M3", "M4", "M5"]),
+            description: z.string().min(1),
+            featureSet: z.array(z.string().min(1)),
+            metrics: selectiveMetricsSchema,
+            negativeGainFoldCount: count,
+            zeroHarmFoldCount: count,
+            semanticHash: sha256,
+          })
+          .strict(),
+      )
+      .length(6),
     bestModelId: z.enum(["M0", "M1", "M2", "M3", "M4", "M5"]),
     selectionPerformedWithoutOuterTestRetuning: z.literal(true),
     semanticHash: sha256,

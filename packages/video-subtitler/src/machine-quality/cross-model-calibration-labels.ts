@@ -9,6 +9,10 @@ import {
 
 import { machineQualitySemanticHash } from "./evidence-correlation.js";
 
+function explicitlyTrue(value: unknown): boolean {
+  return value === true;
+}
+
 export interface C60111GoldEvaluationView {
   goldIdentityHash: string;
   events: readonly {
@@ -27,7 +31,10 @@ export function buildGoldCrossModelCalibrationLabels(input: {
   folds: C60111CalibrationFolds;
   goldEvaluation: C60111GoldEvaluationView;
 }): GoldCrossModelCalibrationLabels {
-  if (!input.features.featuresFrozenBeforeGold || !input.folds.constructedBeforeLabels) {
+  if (
+    !explicitlyTrue(input.features.featuresFrozenBeforeGold) ||
+    !explicitlyTrue(input.folds.constructedBeforeLabels)
+  ) {
     throw new Error("Features and folds must be frozen before Gold labels.");
   }
   const goldByEvent = new Map(
@@ -75,8 +82,9 @@ export function buildGoldCrossModelCalibrationLabels(input: {
     fullGoldTextIncluded: false as const,
     events,
     summary: {
-      reazonBetterCount: events.filter((event) => event.label === "REAZON_BETTER")
-        .length,
+      reazonBetterCount: events.filter(
+        (event) => event.label === "REAZON_BETTER",
+      ).length,
       whisperBetterCount: events.filter(
         (event) => event.label === "WHISPER_BETTER",
       ).length,
@@ -92,7 +100,9 @@ export function buildGoldCrossModelCalibrationLabels(input: {
   };
   return goldCrossModelCalibrationLabelsSchema.parse({
     ...core,
-    semanticHash: machineQualitySemanticHash({ ...core, generatedAt: undefined }),
+    semanticHash: machineQualitySemanticHash({
+      ...core,
+      generatedAt: undefined,
+    }),
   });
 }
-
