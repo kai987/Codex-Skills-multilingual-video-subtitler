@@ -85,3 +85,6 @@ export * from "./cross-model-arbitration-evaluator.js";
 export * from "./cross-model-control-guard.js";
 export * from "./c60110-quality-policy.js";
 export * from "./cross-model-oracle-capture.js";
+export * from "./cross-model-calibration-corpus.js";
+export * from "./whisper-core-stability-v2.js";
+export * from "./paired-whisper-evidence.js";
