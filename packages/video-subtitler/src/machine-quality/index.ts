@@ -93,3 +93,7 @@ export * from "./independent-acoustic-discriminator.js";
 export * from "./cross-model-discriminator-features.js";
 export * from "./calibration-fold-builder.js";
 export * from "./cross-model-calibration-labels.js";
+export * from "./selective-provider-classifier.js";
+export * from "./selective-threshold-calibration.js";
+export * from "./calibration-data-quality.js";
+export * from "./selective-cv-evaluator.js";
