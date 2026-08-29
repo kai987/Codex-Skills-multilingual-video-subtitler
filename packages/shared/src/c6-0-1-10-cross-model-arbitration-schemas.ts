@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ctcAlignmentAttemptSchema } from "./c5-18-1-schemas.js";
+
 export const c60110PolicyVersion =
   "c6.0.1.10-cross-model-arbitration-v1" as const;
 
@@ -816,6 +818,191 @@ export const c60110ControlRegressionEvaluationSchema = z
   })
   .strict();
 
+export const c60110Dev24InputFreezeSchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-dev24-input-freeze"),
+    sourceMediaSha256: sha256,
+    eventIds: z.array(z.string().min(1)).length(24),
+    machineArtifactFileHashes: z.record(z.string().min(1), sha256),
+    machineArtifactSemanticHashes: z.record(z.string().min(1), sha256),
+    byteReusedFromC6019: z.literal(true),
+    semanticReusedFromC6019: z.literal(true),
+    frozenBeforeDevGold: z.literal(true),
+    runtimeGoldInputCount: z.literal(0),
+    semanticHash: sha256,
+  })
+  .strict();
+
+const c60110CtcOutcomeSchema = z.enum([
+  "CTC_FAVORS_WHISPER",
+  "CTC_FAVORS_REAZON",
+  "CTC_AMBIGUOUS",
+  "CTC_UNSCORABLE",
+]);
+
+export const c60110HoldoutCtcAuditSchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-holdout-ctc-audit"),
+    role: z.literal("SUPPORT_OR_VETO_NEVER_WINNER"),
+    correlationPolicy: z.literal(
+      "DATA_FAMILY_CORRELATED_NOT_AN_INDEPENDENT_VOTE",
+    ),
+    eligibleEventCount: count,
+    events: z.array(
+      z
+        .object({
+          eventId: z.string().min(1),
+          whisperSupport: finite.nullable(),
+          reazonSupport: finite.nullable(),
+          outcome: c60110CtcOutcomeSchema,
+          evidenceIds: z.array(z.string().min(1)),
+        })
+        .strict(),
+    ),
+    attempts: z.array(ctcAlignmentAttemptSchema),
+    inferenceCount: count,
+    modelLoadCount: count,
+    runtimeGoldInputCount: z.literal(0),
+    semanticHash: sha256,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.events.length !== value.eligibleEventCount) {
+      context.addIssue({
+        code: "custom",
+        path: ["events"],
+        message: "CTC event count must match the eligible event count.",
+      });
+    }
+  });
+
+export const c60110MachineFreezeSchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-machine-freeze"),
+    policyFreezeSemanticHash: sha256,
+    holdoutSelectionSemanticHash: sha256,
+    holdoutRuntimeSemanticHash: sha256,
+    evidenceSemanticHash: sha256,
+    holdoutLedgerSemanticHash: sha256,
+    productionDevLedgerSemanticHash: sha256,
+    mutationProposalsSemanticHash: sha256,
+    finalTextHash: sha256,
+    finalTimingHash: sha256,
+    finalFrozenBeforeGold: z.literal(true),
+    runtimeGoldInputCount: z.literal(0),
+    machineFreezeHash: sha256,
+  })
+  .strict();
+
+export const c60110RouteDecisionSchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-route-decision"),
+    decision: z.enum([
+      "HOLD_ARBITRATION_NOT_SAFE",
+      "CROSS_MODEL_ARBITRATION_SAFE_GAIN_CONFIRMED",
+    ]),
+    selectedProductionProfile: c60110ProductionProfileSchema,
+    productionEnforcementEnabled: z.boolean(),
+    canonicalTextMutationCount: count,
+    canonicalTimingMutationCount: z.literal(0),
+    productionStatus: z.literal("needs-review"),
+    finalizationMethod: z.literal("none"),
+    machineOnlyReleaseAuthorized: z.literal(false),
+    runtimeGoldInputCount: z.literal(0),
+    semanticHash: sha256,
+  })
+  .strict();
+
+export const c60110HoldoutGoldEvaluationSchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-holdout-gold-evaluation"),
+    evaluationPhase: z.literal("post-final-freeze-gold-isolated"),
+    machineFreezeHash: sha256,
+    goldIdentityHash: sha256,
+    goldTextIncluded: z.literal(false),
+    events: z.array(
+      z
+        .object({
+          eventId: z.string().min(1),
+          evaluationStatus: z.enum([
+            "EVALUABLE_LOCAL",
+            "UNEVALUABLE_NO_GOLD_OVERLAP",
+          ]),
+          matchedGoldCueCount: count,
+          matchedGoldTextHash: sha256.nullable(),
+          baselineWhisperPoolError: count.nullable(),
+          reazonCoreExactError: count.nullable(),
+          finalArbitrationError: count.nullable(),
+          arbitrationDecision: c60110DecisionSchema,
+          switchOutcome: z.enum([
+            "NO_SWITCH",
+            "CORRECT_SWITCH",
+            "WRONG_SWITCH",
+            "NEUTRAL_SWITCH",
+          ]),
+          oracleGain: count.nullable(),
+          realizedGain: finite.nullable(),
+          avoidedRegression: z.boolean(),
+          abstentionAvoidedWrongMutation: z.boolean(),
+          semanticHash: sha256,
+        })
+        .strict(),
+    ),
+    summary: z
+      .object({
+        holdoutEventCount: count,
+        evaluableEventCount: count,
+        evaluableSwitchCount: count,
+        correctSwitchCount: count,
+        wrongSwitchCount: count,
+        neutralSwitchCount: count,
+        avoidedRegressionCount: count,
+        abstentionUtilityCount: count,
+        availableOracleGain: count,
+        realizedArbitrationGain: finite,
+      })
+      .strict(),
+    runtimeGoldInputCount: z.literal(0),
+    semanticHash: sha256,
+  })
+  .strict();
+
+export const c60110CtcUtilityEvaluationSchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-ctc-utility-evaluation"),
+    evaluationPhase: z.literal("post-final-freeze-gold-isolated"),
+    events: z.array(
+      z
+        .object({
+          eventId: z.string().min(1),
+          outcome: c60110CtcOutcomeSchema,
+          preferenceCorrect: z.boolean().nullable(),
+          usefulContradiction: z.boolean(),
+          harmfulContradiction: z.boolean(),
+          semanticHash: sha256,
+        })
+        .strict(),
+    ),
+    summary: z
+      .object({
+        correctSupportCount: count,
+        wrongSupportCount: count,
+        usefulContradictionCount: count,
+        harmfulContradictionCount: count,
+        ambiguousOrUnscorableCount: count,
+      })
+      .strict(),
+    runtimeGoldInputCount: z.literal(0),
+    semanticHash: sha256,
+  })
+  .strict();
+
 export const c60110QualityPolicySchema = z
   .object({
     ...artifactHeader,
@@ -922,6 +1109,26 @@ const globalQualityMetricsSchema = z
     p95TimingErrorSeconds: finite.nonnegative(),
     medianIou: ratio,
     overlapCount: count,
+  })
+  .strict();
+
+export const c60110GlobalGoldEvaluationReplaySchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-global-gold-evaluation-replay"),
+    evaluationMode: z.literal("HASH_ANCHORED_DETERMINISTIC_REPLAY"),
+    sourceEvaluationSemanticHash: sha256,
+    evaluatedSourcePackageHash: sha256,
+    finalAPackageHash: sha256,
+    finalBPackageHash: sha256,
+    finalPackageParity: z.literal(true),
+    goldIdentityHash: sha256,
+    goldReadOnlyVerified: z.literal(true),
+    baselineQuality: globalQualityMetricsSchema,
+    finalQuality: globalQualityMetricsSchema,
+    modelInferenceCount: z.literal(0),
+    deterministic: z.literal(true),
+    semanticHash: sha256,
   })
   .strict();
 
@@ -1046,8 +1253,23 @@ export type C60110OracleCaptureEvaluation = z.infer<
 export type C60110ControlRegressionEvaluation = z.infer<
   typeof c60110ControlRegressionEvaluationSchema
 >;
+export type C60110Dev24InputFreeze = z.infer<
+  typeof c60110Dev24InputFreezeSchema
+>;
+export type C60110HoldoutCtcAudit = z.infer<typeof c60110HoldoutCtcAuditSchema>;
+export type C60110MachineFreeze = z.infer<typeof c60110MachineFreezeSchema>;
+export type C60110RouteDecision = z.infer<typeof c60110RouteDecisionSchema>;
+export type C60110HoldoutGoldEvaluation = z.infer<
+  typeof c60110HoldoutGoldEvaluationSchema
+>;
+export type C60110CtcUtilityEvaluation = z.infer<
+  typeof c60110CtcUtilityEvaluationSchema
+>;
 export type C60110QualityPolicy = z.infer<typeof c60110QualityPolicySchema>;
 export type C60110FinalReplayAudit = z.infer<
   typeof c60110FinalReplayAuditSchema
+>;
+export type C60110GlobalGoldEvaluationReplay = z.infer<
+  typeof c60110GlobalGoldEvaluationReplaySchema
 >;
 export type C60110Validation = z.infer<typeof c60110ValidationSchema>;

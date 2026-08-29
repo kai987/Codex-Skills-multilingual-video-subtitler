@@ -276,8 +276,15 @@ import {
   c60110HoldoutArbitrationSchema,
   c60110OracleCaptureEvaluationSchema,
   c60110ControlRegressionEvaluationSchema,
+  c60110Dev24InputFreezeSchema,
+  c60110HoldoutCtcAuditSchema,
+  c60110MachineFreezeSchema,
+  c60110RouteDecisionSchema,
+  c60110HoldoutGoldEvaluationSchema,
+  c60110CtcUtilityEvaluationSchema,
   c60110QualityPolicySchema,
   c60110FinalReplayAuditSchema,
+  c60110GlobalGoldEvaluationReplaySchema,
   c60110ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
@@ -715,6 +722,36 @@ const schemas = [
     schema: c60110ControlRegressionEvaluationSchema,
   },
   {
+    fileName: "c6-0-1-10-dev24-input-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-dev24-input-freeze.schema.json",
+    schema: c60110Dev24InputFreezeSchema,
+  },
+  {
+    fileName: "c6-0-1-10-holdout-ctc-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-holdout-ctc-audit.schema.json",
+    schema: c60110HoldoutCtcAuditSchema,
+  },
+  {
+    fileName: "c6-0-1-10-machine-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-machine-freeze.schema.json",
+    schema: c60110MachineFreezeSchema,
+  },
+  {
+    fileName: "c6-0-1-10-route-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-route-decision.schema.json",
+    schema: c60110RouteDecisionSchema,
+  },
+  {
+    fileName: "c6-0-1-10-holdout-gold-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-holdout-gold-evaluation.schema.json",
+    schema: c60110HoldoutGoldEvaluationSchema,
+  },
+  {
+    fileName: "c6-0-1-10-ctc-utility-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-ctc-utility-evaluation.schema.json",
+    schema: c60110CtcUtilityEvaluationSchema,
+  },
+  {
     fileName: "c6-0-1-10-quality-policy.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-quality-policy.schema.json",
     schema: c60110QualityPolicySchema,
@@ -723,6 +760,11 @@ const schemas = [
     fileName: "c6-0-1-10-final-replay-audit.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-final-replay-audit.schema.json",
     schema: c60110FinalReplayAuditSchema,
+  },
+  {
+    fileName: "c6-0-1-10-global-gold-evaluation-replay.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-global-gold-evaluation-replay.schema.json",
+    schema: c60110GlobalGoldEvaluationReplaySchema,
   },
   {
     fileName: "c6-0-1-10-validation.schema.json",
