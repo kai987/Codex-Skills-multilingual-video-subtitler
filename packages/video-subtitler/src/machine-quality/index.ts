@@ -84,3 +84,4 @@ export * from "./cross-model-holdout-selection.js";
 export * from "./cross-model-arbitration-evaluator.js";
 export * from "./cross-model-control-guard.js";
 export * from "./c60110-quality-policy.js";
+export * from "./cross-model-oracle-capture.js";

@@ -25,6 +25,7 @@ function machineEvidence(
   status:
     | "POSITIVE_CORRECTNESS_EVIDENCE"
     | "POSITIVE_ERROR_EVIDENCE"
+    | "SUPPORTING_ERROR_EVIDENCE"
     | "CONFLICTING_EVIDENCE"
     | "EVIDENCE_ABSENCE"
     | "UNKNOWN",
@@ -195,6 +196,25 @@ describe("C6.0.1.10 abstention-first cross-model arbitration", () => {
     expect(bundle.whisperStability.negativeEvidence).toBe(false);
     expect(decision.decision).not.toBe("SELECT_REAZON");
     expect(decision.decisionReasons).toContain("EVIDENCE_ABSENCE_ONLY");
+  });
+
+  it("preserves weak supporting error evidence without promoting it to a Whisper-negative vote", () => {
+    const bundle = buildCrossModelArbitrationEvidenceBundle(
+      eventInput({
+        alternateWhisperCandidates: [],
+        whisperStability: { class: "NOT_RUN", sourceEvidenceIds: [] },
+        whisperDecoderEvidence: machineEvidence("SUPPORTING_ERROR_EVIDENCE"),
+        whisperTokenEvidence: machineEvidence("EVIDENCE_ABSENCE"),
+        requestEdgeEvidence: machineEvidence("EVIDENCE_ABSENCE"),
+        speechCompletenessEvidence: machineEvidence("EVIDENCE_ABSENCE"),
+      }),
+    );
+    expect(bundle.whisperStability.negativeEvidence).toBe(false);
+    expect(bundle.evidenceAtoms).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ reasonCode: "WHISPER_DECODER_INSTABILITY" }),
+      ]),
+    );
   });
 
   it("counts Reazon stability and CTC support as one correlated family", () => {

@@ -31,6 +31,7 @@ export interface C60110MachineEvidenceInput {
   status:
     | "POSITIVE_CORRECTNESS_EVIDENCE"
     | "POSITIVE_ERROR_EVIDENCE"
+    | "SUPPORTING_ERROR_EVIDENCE"
     | "CONFLICTING_EVIDENCE"
     | "EVIDENCE_ABSENCE"
     | "UNKNOWN";
