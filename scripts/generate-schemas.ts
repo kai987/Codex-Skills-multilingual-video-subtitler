@@ -277,6 +277,7 @@ import {
   c60110OracleCaptureEvaluationSchema,
   c60110ControlRegressionEvaluationSchema,
   c60110QualityPolicySchema,
+  c60110FinalReplayAuditSchema,
   c60110ValidationSchema,
 } from "@mvl/shared";
 import { format } from "prettier";
@@ -717,6 +718,11 @@ const schemas = [
     fileName: "c6-0-1-10-quality-policy.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-quality-policy.schema.json",
     schema: c60110QualityPolicySchema,
+  },
+  {
+    fileName: "c6-0-1-10-final-replay-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-10-final-replay-audit.schema.json",
+    schema: c60110FinalReplayAuditSchema,
   },
   {
     fileName: "c6-0-1-10-validation.schema.json",

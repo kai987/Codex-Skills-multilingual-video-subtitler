@@ -839,6 +839,74 @@ export const c60110QualityPolicySchema = z
   })
   .strict();
 
+export const c60110FinalReplayAuditSchema = z
+  .object({
+    ...artifactHeader,
+    artifactType: z.literal("c6-0-1-10-final-replay-audit"),
+    runLabel: z.literal("final-b"),
+    repositoryCommit: z.string().regex(/^[a-f0-9]{40}$/u),
+    sourceMediaSha256: sha256,
+    executionKind: z.literal("FROZEN_EXACT_CACHE_REPLAY"),
+    resultCache: z
+      .object({
+        plannedRequestCount: count,
+        actualRequestCount: count,
+        cacheHitCount: count,
+        inferenceCount: z.literal(0),
+        modelLoadCount: z.literal(0),
+        processStartCount: z.literal(0),
+        networkUsed: z.literal(false),
+        runtimeGoldInputCount: z.literal(0),
+      })
+      .strict(),
+    parity: z
+      .object({
+        evidenceBundles: z.literal(true),
+        decisions: z.literal(true),
+        mutationProposals: z.literal(true),
+        appliedMutations: z.literal(true),
+        finalText: z.literal(true),
+        finalTiming: z.literal(true),
+        ass: z.literal(true),
+        srt: z.literal(true),
+        vtt: z.literal(true),
+        productionStatus: z.literal(true),
+        routeDecision: z.literal(true),
+      })
+      .strict(),
+    machineSemanticPayloadHash: sha256,
+    productionHashes: z
+      .object({
+        canonicalText: sha256,
+        canonicalTiming: sha256,
+        presentation: sha256,
+        ass: sha256,
+        srt: sha256,
+        vtt: sha256,
+      })
+      .strict(),
+    canonicalTextMutationCount: count,
+    canonicalTimingMutationCount: z.literal(0),
+    productionStatus: z.literal("needs-review"),
+    finalizationMethod: z.literal("none"),
+    machineReleaseAuthorized: z.literal(false),
+    semanticHash: sha256,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (
+      value.resultCache.plannedRequestCount !==
+        value.resultCache.actualRequestCount ||
+      value.resultCache.actualRequestCount !== value.resultCache.cacheHitCount
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["resultCache"],
+        message: "Final B must replay every planned request from exact cache.",
+      });
+    }
+  });
+
 const globalQualityMetricsSchema = z
   .object({
     finalCueCount: count,
@@ -979,4 +1047,7 @@ export type C60110ControlRegressionEvaluation = z.infer<
   typeof c60110ControlRegressionEvaluationSchema
 >;
 export type C60110QualityPolicy = z.infer<typeof c60110QualityPolicySchema>;
+export type C60110FinalReplayAudit = z.infer<
+  typeof c60110FinalReplayAuditSchema
+>;
 export type C60110Validation = z.infer<typeof c60110ValidationSchema>;
