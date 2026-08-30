@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-multi-asr-text-representations.schema.json",
+  "title": "machine-multi-asr-text-representations",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-multi-asr-text-representations"
+    },
+    "representations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidate": {
+            "type": "object",
+            "properties": {
+              "candidateId": { "type": "string", "minLength": 1 },
+              "eventId": { "type": "string", "minLength": 1 },
+              "providerFamily": {
+                "type": "string",
+                "enum": ["WHISPER", "REAZON", "CURRENT"]
+              },
+              "displayText": { "type": "string" },
+              "normalizedText": { "type": "string" },
+              "pronunciationText": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "correlationGroupId": { "type": "string", "minLength": 1 },
+              "provenanceHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sourceInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "minimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              "pronunciationUnits": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "unitIndex": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "reading": { "type": "string", "minLength": 1 },
+                    "evidenceId": { "type": "string", "minLength": 1 }
+                  },
+                  "required": ["unitIndex", "reading", "evidenceId"],
+                  "additionalProperties": false
+                }
+              },
+              "rawVoteCandidateIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "candidateId",
+              "eventId",
+              "providerFamily",
+              "displayText",
+              "normalizedText",
+              "pronunciationText",
+              "correlationGroupId",
+              "provenanceHash",
+              "sourceInterval"
+            ],
+            "additionalProperties": false
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "unitIndex": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "displaySurface": { "type": "string", "minLength": 1 },
+                "normalizedForm": { "type": "string", "minLength": 1 },
+                "pronunciationForm": {
+                  "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "pronunciationEvidenceId": {
+                  "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": ["LEXICAL", "PUNCTUATION", "WHITESPACE"]
+                }
+              },
+              "required": [
+                "unitIndex",
+                "displaySurface",
+                "normalizedForm",
+                "pronunciationForm",
+                "pronunciationEvidenceId",
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "normalizedText": { "type": "string" },
+          "pronunciationText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "normalizationVersion": {
+            "type": "string",
+            "const": "c6.1-japanese-nfkc-grapheme-v1"
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "candidate",
+          "units",
+          "normalizedText",
+          "pronunciationText",
+          "normalizationVersion",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "representations"
+  ],
+  "additionalProperties": false
+}

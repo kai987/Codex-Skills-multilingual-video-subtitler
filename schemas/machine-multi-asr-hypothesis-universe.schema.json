@@ -1,0 +1,389 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-multi-asr-hypothesis-universe.schema.json",
+  "title": "machine-multi-asr-hypothesis-universe",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-multi-asr-hypothesis-universe"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-hypothesis-universe-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "humanMemoryInputCount": { "type": "number", "const": 0 },
+    "sourceArtifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "sourceCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "currentText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "finalSpan": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "finalCueId": { "type": "string", "minLength": 1 },
+                  "spanStart": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "spanEnd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "spanText": { "type": "string" },
+                  "lineageStatus": { "type": "string", "minLength": 1 },
+                  "modifiable": { "type": "boolean" },
+                  "evidenceHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "finalCueId",
+                  "spanStart",
+                  "spanEnd",
+                  "spanText",
+                  "lineageStatus",
+                  "modifiable",
+                  "evidenceHash"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "sourceInterval",
+          "sourceCandidateIds",
+          "finalCueIds",
+          "currentText",
+          "finalSpan",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "inputRecordId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "sourceCandidateId": { "type": "string", "minLength": 1 },
+          "eventId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "providerFamily": {
+            "type": "string",
+            "enum": ["WHISPER", "REAZON", "CURRENT"]
+          },
+          "modelIdentity": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "requestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "windowType": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "displayText": { "type": "string" },
+          "normalizedText": { "type": "string" },
+          "pronunciationText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "pronunciationEvidenceId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "candidateRole": { "type": "string", "minLength": 1 },
+          "inclusionStatus": {
+            "type": "string",
+            "enum": [
+              "INCLUDED",
+              "NORMALIZED_DUPLICATE",
+              "PRONUNCIATION_EQUIVALENT",
+              "HARD_REJECTED",
+              "UNLOCALIZABLE",
+              "UNSUPPORTED_PROVENANCE"
+            ]
+          },
+          "inclusionReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "representativeCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "correlationGroupId": { "type": "string", "minLength": 1 },
+          "independentVoteEligible": { "type": "boolean" },
+          "provenanceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "inputRecordId",
+          "candidateId",
+          "sourceCandidateId",
+          "eventId",
+          "providerFamily",
+          "modelIdentity",
+          "requestId",
+          "windowType",
+          "sourceInterval",
+          "displayText",
+          "normalizedText",
+          "pronunciationText",
+          "pronunciationEvidenceId",
+          "candidateRole",
+          "inclusionStatus",
+          "inclusionReasons",
+          "representativeCandidateId",
+          "correlationGroupId",
+          "independentVoteEligible",
+          "provenanceHash",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "eventScopes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "WHISPER_ONLY_MULTI_HYPOTHESIS",
+              "WHISPER_REAZON_MULTI_PROVIDER",
+              "SINGLE_HYPOTHESIS_CONTROL",
+              "UNLOCALIZABLE"
+            ]
+          },
+          "includedCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentCandidateCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "normalizedDistinctCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "providerFamilies": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["WHISPER", "REAZON"] }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "scope",
+          "includedCandidateIds",
+          "independentCandidateCount",
+          "normalizedDistinctCount",
+          "providerFamilies",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "inputCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "includedCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "normalizedDuplicateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pronunciationEquivalentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hardRejectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unlocalizableCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsupportedProvenanceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unaccountedCandidateCount": { "type": "number", "const": 0 },
+        "canonicalEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiHypothesisEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiProviderEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperOnlyMultiHypothesisEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singleHypothesisControlCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unlocalizableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "whisperInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "currentInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "includedWhisperCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "includedReazonCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "correlationGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trustedPronunciationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "inputCandidateCount",
+        "includedCandidateCount",
+        "normalizedDuplicateCount",
+        "pronunciationEquivalentCount",
+        "hardRejectedCount",
+        "unlocalizableCandidateCount",
+        "unsupportedProvenanceCount",
+        "unaccountedCandidateCount",
+        "canonicalEventCount",
+        "multiHypothesisEventCount",
+        "multiProviderEventCount",
+        "whisperOnlyMultiHypothesisEventCount",
+        "singleHypothesisControlCount",
+        "unlocalizableEventCount",
+        "whisperInputCount",
+        "reazonInputCount",
+        "currentInputCount",
+        "includedWhisperCount",
+        "includedReazonCount",
+        "correlationGroupCount",
+        "trustedPronunciationCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "runtimeGoldInputCount",
+    "humanMemoryInputCount",
+    "sourceArtifactHashes",
+    "events",
+    "candidates",
+    "eventScopes",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
