@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-multi-asr-token-lattice.schema.json",
+  "title": "machine-multi-asr-token-lattice",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-multi-asr-token-lattice"
+    },
+    "lattices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "minimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "alignmentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nodeId": { "type": "string", "minLength": 1 },
+                "eventId": { "type": "string", "minLength": 1 },
+                "slotIndex": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": ["TOKEN", "EPSILON", "START", "END"]
+                },
+                "displaySurfaces": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "normalizedForm": {
+                  "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "pronunciationForm": {
+                  "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "candidateProvenance": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "candidateId": { "type": "string", "minLength": 1 },
+                      "unitIndex": {
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          { "type": "null" }
+                        ]
+                      },
+                      "displaySurface": {
+                        "anyOf": [{ "type": "string" }, { "type": "null" }]
+                      },
+                      "providerFamily": {
+                        "type": "string",
+                        "enum": ["WHISPER", "REAZON", "CURRENT"]
+                      },
+                      "correlationGroupId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "provenanceHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "candidateId",
+                      "unitIndex",
+                      "displaySurface",
+                      "providerFamily",
+                      "correlationGroupId",
+                      "provenanceHash"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "providerFamilies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["WHISPER", "REAZON", "CURRENT"]
+                  }
+                },
+                "correlationGroups": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "epsilonAllowed": { "type": "boolean" },
+                "switchAllowed": { "type": "boolean" },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "nodeId",
+                "eventId",
+                "slotIndex",
+                "kind",
+                "displaySurfaces",
+                "normalizedForm",
+                "pronunciationForm",
+                "candidateProvenance",
+                "providerFamilies",
+                "correlationGroups",
+                "epsilonAllowed",
+                "switchAllowed",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "edgeId": { "type": "string", "minLength": 1 },
+                "fromNode": { "type": "string", "minLength": 1 },
+                "toNode": { "type": "string", "minLength": 1 },
+                "supportingCandidateIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "providerFamilies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["WHISPER", "REAZON", "CURRENT"]
+                  }
+                },
+                "correlationGroups": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "observedAdjacency": { "type": "boolean", "const": true },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "edgeId",
+                "fromNode",
+                "toNode",
+                "supportingCandidateIds",
+                "providerFamilies",
+                "correlationGroups",
+                "observedAdjacency",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "candidatePaths": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "nodeIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": ["candidateId", "nodeIds"],
+              "additionalProperties": false
+            }
+          },
+          "startNodeId": { "type": "string", "minLength": 1 },
+          "endNodeId": { "type": "string", "minLength": 1 },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "sourceInterval",
+          "alignmentHash",
+          "nodes",
+          "edges",
+          "candidatePaths",
+          "startNodeId",
+          "endNodeId",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "lattices"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-multi-asr-span-consensus.schema.json",
+  "title": "machine-multi-asr-span-consensus",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-multi-asr-span-consensus"
+    },
+    "spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "spanId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "slotStart": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "slotEnd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currentSurface": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "displaySurface": { "type": "string" },
+                "nodeIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "supportingCandidates": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "providerFamilies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["WHISPER", "REAZON", "CURRENT"]
+                  }
+                }
+              },
+              "required": [
+                "displaySurface",
+                "nodeIds",
+                "supportingCandidates",
+                "providerFamilies"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "supportingCandidates": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "providerFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["WHISPER", "REAZON", "CURRENT"]
+            }
+          },
+          "pronunciationRelations": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "legalEntryNodes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "legalExitNodes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "ambiguity": {
+            "type": "string",
+            "const": "CONTIGUOUS_CANDIDATE_SPAN_ONLY"
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "spanId",
+          "eventId",
+          "slotStart",
+          "slotEnd",
+          "currentSurface",
+          "alternatives",
+          "supportingCandidates",
+          "providerFamilies",
+          "pronunciationRelations",
+          "legalEntryNodes",
+          "legalExitNodes",
+          "ambiguity",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "spans"
+  ],
+  "additionalProperties": false
+}

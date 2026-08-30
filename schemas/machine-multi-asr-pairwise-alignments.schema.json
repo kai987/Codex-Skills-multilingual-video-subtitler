@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-multi-asr-pairwise-alignments.schema.json",
+  "title": "machine-multi-asr-pairwise-alignments",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-multi-asr-pairwise-alignments"
+    },
+    "alignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "leftCandidateId": { "type": "string", "minLength": 1 },
+          "rightCandidateId": { "type": "string", "minLength": 1 },
+          "alignedUnits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "leftIndex": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "rightIndex": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "leftSurface": {
+                  "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "rightSurface": {
+                  "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "EXACT",
+                    "NORMALIZED_EQUIVALENT",
+                    "PRONUNCIATION_EQUIVALENT",
+                    "SUBSTITUTION",
+                    "INSERTION",
+                    "DELETION"
+                  ]
+                },
+                "cost": { "type": "number", "minimum": 0 }
+              },
+              "required": [
+                "leftIndex",
+                "rightIndex",
+                "leftSurface",
+                "rightSurface",
+                "operation",
+                "cost"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "editOperations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "EXACT",
+                "NORMALIZED_EQUIVALENT",
+                "PRONUNCIATION_EQUIVALENT",
+                "SUBSTITUTION",
+                "INSERTION",
+                "DELETION"
+              ]
+            }
+          },
+          "displayDistance": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "normalizedDistance": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pronunciationDistance": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "weightedCost": { "type": "number", "minimum": 0 },
+          "monotonic": { "type": "boolean", "const": true },
+          "alignmentStatus": { "type": "string", "const": "ALIGNED" },
+          "costPolicyVersion": {
+            "type": "string",
+            "const": "c6.1-alignment-cost-v1"
+          },
+          "pronunciationAware": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "leftCandidateId",
+          "rightCandidateId",
+          "alignedUnits",
+          "editOperations",
+          "displayDistance",
+          "normalizedDistance",
+          "pronunciationDistance",
+          "weightedCost",
+          "monotonic",
+          "alignmentStatus",
+          "costPolicyVersion",
+          "pronunciationAware",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "alignments"
+  ],
+  "additionalProperties": false
+}
