@@ -138,6 +138,12 @@ Gold is evaluation-only. The machine builder, review workspace, synthetic workfl
 
 Run `npm run review:synthetic-workflow` for workflow coverage only; label its session, corrections, and dataset as synthetic and never substitute them for real human evidence. The UI must order the frozen `priorityScore` descending, then source time and stable item ID, select the first ranked item on initial load, and persist reviewer notes for ordinary edits as well as waivers. Validate delivered HTML/CSS/JavaScript against the current runtime templates without rewriting frozen review evidence. Parse every C6.0.1.12 artifact with its strict schema, verify Gold isolation and freeze ordering, confirm source/Gold immutability, confirm Final A/B parity with C6.0.1.11, and validate the shareable package for secrets, absolute paths, broken relative references, and full Gold leakage before reporting acceptance.
 
+### Calibrate C6.0.1.13 region-first review burden
+
+Use the C6.0.1.13 review-calibration mode to replay existing machine evidence, separate observed speech gaps from independently supported missing dialogue, deduplicate evidence families, and select source-global Regions under unique-audio budgets. Read [references/region-review-calibration.md](references/region-review-calibration.md) before building, calibrating, serving, or preparing a prospective trial. This mode extends the existing frozen C6.0.1.12 review/correction subsystem; it does not rerun recognition, choose an ASR provider, change machine subtitle text/timing, or authorize a machine-only release. Its explanatory ranking score is not an error probability, and REQUIRED status must come from explicit positive safety evidence rather than a score threshold.
+
+Freeze machine features and contiguous audio-isolated folds before opening Gold labels. Keep post-freeze calibration and its training provenance outside the machine workspace and trial package. Report independent-audio union, incremental playback cost, remaining critical misses, and negative fold gains even when a ranking fails its target. Treat Episode 1 as a previously exposed calibration dataset, never as a prospective human trial; synthetic timer/workflow tests are not measured human efficiency. A future trial requires an unseen episode, a frozen deployment ranker, explicit no-Gold/no-prior-review declarations, and the versioned protocol.
+
 ## Apply the source priority
 
 Use evidence in this order:

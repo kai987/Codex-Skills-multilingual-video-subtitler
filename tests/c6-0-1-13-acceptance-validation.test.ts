@@ -10,6 +10,7 @@ import {
   type C60113RegionRankingEvaluation,
 } from "@mvl/shared";
 import { buildC60113ReviewPolicy } from "../packages/video-subtitler/src/review/c60113-policy.js";
+import { machineQualitySemanticHash } from "../packages/video-subtitler/src/machine-quality/evidence-correlation.js";
 import { buildC60113MissingSpeechEvidence } from "../packages/video-subtitler/src/review/missing-speech-evidence-v2.js";
 import {
   buildC60113EvidenceFamilyGraph,
@@ -18,6 +19,7 @@ import {
 import {
   c60113AcceptanceRoute,
   c60113AudioBurdenAccounting,
+  c60113LegacyAudioFreezeProvenance,
   c60113MissingMandatoryValid,
   c60113ShareableLeakCounts,
   validateC60113Runs,
@@ -224,6 +226,36 @@ describe("C6.0.1.13 acceptance route truthfulness", () => {
 });
 
 describe("C6.0.1.13 strict aggregate privacy and evidence acceptance", () => {
+  it("verifies legacy freeze hashes against complete artifacts rather than their nested semantic hashes", () => {
+    const regions = { semanticHash: hash, regions: [{ regionId: "fixture" }] };
+    const audioManifest = { semanticHash: nonmatchingGoldHash, clips: [] };
+    const freeze = {
+      semanticHash: hash,
+      regionHash: machineQualitySemanticHash(regions),
+      audioManifestHash: machineQualitySemanticHash(audioManifest),
+    };
+    const input = { expectedFreezeHash: hash, freeze, regions, audioManifest };
+    expect(c60113LegacyAudioFreezeProvenance(input)).toBe(true);
+    expect(
+      c60113LegacyAudioFreezeProvenance({
+        ...input,
+        freeze: { ...freeze, regionHash: regions.semanticHash },
+      }),
+    ).toBe(false);
+    expect(
+      c60113LegacyAudioFreezeProvenance({
+        ...input,
+        freeze: { ...freeze, audioManifestHash: audioManifest.semanticHash },
+      }),
+    ).toBe(false);
+    expect(
+      c60113LegacyAudioFreezeProvenance({
+        ...input,
+        regions: { ...regions, unexpected: "tampering" },
+      }),
+    ).toBe(false);
+  });
+
   it("does not count unused extraction padding as duplicated planned playback", () => {
     const accounting = c60113AudioBurdenAccounting({
       plannedIntervals: [

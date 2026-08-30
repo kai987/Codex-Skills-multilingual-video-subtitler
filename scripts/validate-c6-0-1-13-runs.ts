@@ -267,6 +267,26 @@ export function c60113AudioBurdenAccounting(input: {
   };
 }
 
+export function c60113LegacyAudioFreezeProvenance(input: {
+  expectedFreezeHash: string;
+  freeze: {
+    semanticHash: string;
+    regionHash: string;
+    audioManifestHash: string;
+  };
+  regions: unknown;
+  audioManifest: unknown;
+}): boolean {
+  // C6.0.1.12 freeze fields bind the complete validated artifact, including
+  // its nested semanticHash. C6.0.1.13 core freeze uses different semantics.
+  return (
+    input.freeze.semanticHash === input.expectedFreezeHash &&
+    input.freeze.regionHash === machineQualitySemanticHash(input.regions) &&
+    input.freeze.audioManifestHash ===
+      machineQualitySemanticHash(input.audioManifest)
+  );
+}
+
 export function c60113MissingMandatoryValid(
   missing: C60113MissingSpeechEvidence,
 ): boolean {
@@ -1126,9 +1146,12 @@ export async function validateC60113Runs(options: C60113ValidationOptions) {
   });
   check(
     "baseline_audio_accounting_frozen_provenance",
-    upstreamFreeze.semanticHash === baseline.upstreamFreezeHash &&
-      upstreamFreeze.regionHash === upstreamRegions.semanticHash &&
-      upstreamFreeze.audioManifestHash === upstreamAudio.semanticHash &&
+    c60113LegacyAudioFreezeProvenance({
+      expectedFreezeHash: baseline.upstreamFreezeHash,
+      freeze: upstreamFreeze,
+      regions: upstreamRegions,
+      audioManifest: upstreamAudio,
+    }) &&
       close(
         baselineAudioAccounting.actualClipSumSeconds,
         baseline.totalClipSeconds,
