@@ -138,6 +138,12 @@ Gold is evaluation-only. The machine builder, review workspace, synthetic workfl
 
 Run `npm run review:synthetic-workflow` for workflow coverage only; label its session, corrections, and dataset as synthetic and never substitute them for real human evidence. The UI must order the frozen `priorityScore` descending, then source time and stable item ID, select the first ranked item on initial load, and persist reviewer notes for ordinary edits as well as waivers. Validate delivered HTML/CSS/JavaScript against the current runtime templates without rewriting frozen review evidence. Parse every C6.0.1.12 artifact with its strict schema, verify Gold isolation and freeze ordering, confirm source/Gold immutability, confirm Final A/B parity with C6.0.1.11, and validate the shareable package for secrets, absolute paths, broken relative references, and full Gold leakage before reporting acceptance.
 
+### Investigate C6.1 token/span consensus in shadow only
+
+C6.1 is an opt-in research route parallel to C6.0.1.12 human-on-exception review, not a replacement or automatic release path. Read [references/consensus-investigation.md](references/consensus-investigation.md) before running it. Reuse verified frozen machine candidates; do not run ASR, search online, consult human terminology memory, or introduce an LLM judge. Keep every historical candidate accounted for, cap same-provider voting, require candidate-supported token adjacency and contiguous span provenance, and retain Current when localization, path legality, ambiguity, or fixed-cue presentation prevents a safe shadow change.
+
+Only the separate post-freeze evaluator may read Gold. Freeze all P0–P9 definitions and both complete, byte-identical machine replays before that read; never tune the same C6.1 policy after seeing Gold results. Shadow text stays local-only, preserves production cue structure/timing, and does not replace production files. Report realized rendered changes separately from blocked decoder proposals, exact legal-path oracle potential separately from Gold-free decoding, and known-development-benchmark results separately from prospective validation. Production remains `needs-review`, `finalizationMethod: none`, machine release unauthorized, and C6.0.2 held regardless of the research result.
+
 ## Apply the source priority
 
 Use evidence in this order:
