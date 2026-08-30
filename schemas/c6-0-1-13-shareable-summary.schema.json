@@ -40,7 +40,23 @@
       "maximum": 9007199254740991
     },
     "clipSumSeconds": { "type": "number", "minimum": 0 },
+    "actualClipSumSeconds": { "type": "number", "minimum": 0 },
+    "clipSumMeaning": {
+      "type": "string",
+      "const": "ACTUAL_EXTRACTED_WAV_DURATION_SUM"
+    },
+    "plannedContextSumSeconds": { "type": "number", "minimum": 0 },
+    "extractedClipUnionSeconds": { "type": "number", "minimum": 0 },
     "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+    "uniqueUnionMeaning": {
+      "type": "string",
+      "const": "PLANNED_REVIEW_PLAYBACK_UNION"
+    },
+    "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+    "duplicateContextMeaning": {
+      "type": "string",
+      "const": "PLANNED_CONTEXT_SUM_MINUS_PLANNED_UNION"
+    },
     "requiredUniqueSeconds": { "type": "number", "minimum": 0 },
     "requiredUniqueRatio": { "type": "number", "minimum": 0, "maximum": 1 },
     "maxScoreShare": { "type": "number", "minimum": 0, "maximum": 1 },
@@ -120,7 +136,14 @@
     "requiredItemCount",
     "requiredRegionCount",
     "clipSumSeconds",
+    "actualClipSumSeconds",
+    "clipSumMeaning",
+    "plannedContextSumSeconds",
+    "extractedClipUnionSeconds",
     "uniqueUnionSeconds",
+    "uniqueUnionMeaning",
+    "duplicateContextSeconds",
+    "duplicateContextMeaning",
     "requiredUniqueSeconds",
     "requiredUniqueRatio",
     "maxScoreShare",

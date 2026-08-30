@@ -114,17 +114,27 @@ export const c60113ProspectiveTrialReadinessSchema = z
   })
   .strict();
 
+const audioAccountingFields = {
+  clipSumSeconds: z.number().nonnegative(),
+  actualClipSumSeconds: z.number().nonnegative(),
+  clipSumMeaning: z.literal("ACTUAL_EXTRACTED_WAV_DURATION_SUM"),
+  plannedContextSumSeconds: z.number().nonnegative(),
+  extractedClipUnionSeconds: z.number().nonnegative(),
+  uniqueUnionSeconds: z.number().nonnegative(),
+  uniqueUnionMeaning: z.literal("PLANNED_REVIEW_PLAYBACK_UNION"),
+  duplicateContextSeconds: z.number().nonnegative(),
+  duplicateContextMeaning: z.literal("PLANNED_CONTEXT_SUM_MINUS_PLANNED_UNION"),
+};
+
 const burden = z
   .object({
     itemCount: count,
     regionCount: count,
     requiredItemCount: count,
     requiredRegionCount: count,
-    clipSumSeconds: z.number().nonnegative(),
-    uniqueUnionSeconds: z.number().nonnegative(),
+    ...audioAccountingFields,
     requiredUniqueSeconds: z.number().nonnegative(),
     requiredUniqueRatio: ratio,
-    duplicateContextSeconds: z.number().nonnegative(),
     scoreDiagnostics,
   })
   .strict();
@@ -285,8 +295,7 @@ export const c60113ShareableSummarySchema = z
     regionCount: count,
     requiredItemCount: count,
     requiredRegionCount: count,
-    clipSumSeconds: z.number().nonnegative(),
-    uniqueUnionSeconds: z.number().nonnegative(),
+    ...audioAccountingFields,
     requiredUniqueSeconds: z.number().nonnegative(),
     requiredUniqueRatio: ratio,
     maxScoreShare: ratio,
