@@ -1,0 +1,421 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-multi-asr-rover-consensus.schema.json",
+  "title": "machine-multi-asr-rover-consensus",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-multi-asr-rover-consensus"
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "variant": {
+            "type": "string",
+            "enum": ["R0", "R1", "R2", "R3", "R4", "R5"]
+          },
+          "outputMode": {
+            "type": "string",
+            "enum": [
+              "EXISTING_CANDIDATE_ONLY",
+              "LEGAL_LATTICE_PATH",
+              "ABSTAIN_PRESERVE_CURRENT"
+            ]
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "KEEP_CURRENT",
+              "SELECT_EXISTING_CANDIDATE",
+              "SELECT_LEGAL_CONSENSUS_PATH",
+              "ABSTAIN_AMBIGUOUS",
+              "BLOCKED_UNSAFE",
+              "SINGLE_HYPOTHESIS_NO_ACTION"
+            ]
+          },
+          "selectedPath": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "nodeIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "edgeIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "displayText": { "type": "string" },
+                  "normalizedText": { "type": "string" },
+                  "pronunciationText": {
+                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                  },
+                  "sourceCandidateIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "equivalentCandidateIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "providerSwitchCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "candidateSwitchCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "pathLegal": { "type": "boolean" },
+                  "provenanceComplete": { "type": "boolean" },
+                  "pathKind": {
+                    "type": "string",
+                    "enum": [
+                      "EXISTING_CANDIDATE_PATH",
+                      "NOVEL_LEGAL_PATH",
+                      "CURRENT_CONTROL_PATH"
+                    ]
+                  },
+                  "semanticHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "nodeIds",
+                  "edgeIds",
+                  "displayText",
+                  "normalizedText",
+                  "pronunciationText",
+                  "sourceCandidateIds",
+                  "equivalentCandidateIds",
+                  "providerSwitchCount",
+                  "candidateSwitchCount",
+                  "pathLegal",
+                  "provenanceComplete",
+                  "pathKind",
+                  "semanticHash"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "slotDecisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slotId": { "type": "string", "minLength": 1 },
+                "position": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["WINNER", "TIE", "ABSTAIN"]
+                },
+                "winnerNodeIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "alternatives": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "nodeId": { "type": "string", "minLength": 1 },
+                      "voteWeight": { "type": "number", "minimum": 0 },
+                      "pronunciationAggregatedWeight": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "rawCandidateSupport": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "correlatedGroupSupport": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "providerFamilySupport": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "nodeId",
+                      "voteWeight",
+                      "pronunciationAggregatedWeight",
+                      "rawCandidateSupport",
+                      "correlatedGroupSupport",
+                      "providerFamilySupport"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "normalizedEntropy": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "normalizedVoteMargin": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "acousticEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "reasons": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": [
+                "slotId",
+                "position",
+                "status",
+                "winnerNodeIds",
+                "alternatives",
+                "normalizedEntropy",
+                "normalizedVoteMargin",
+                "acousticEvidenceIds",
+                "reasons"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "abstainedSlots": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "candidateSupport": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "providerFamily": {
+                  "type": "string",
+                  "enum": ["WHISPER", "REAZON", "CURRENT"]
+                },
+                "correlationGroupId": { "type": "string", "minLength": 1 },
+                "rawCandidateSupport": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "correlatedGroupSupport": { "type": "number", "minimum": 0 },
+                "providerFamilySupport": { "type": "number", "minimum": 0 },
+                "stabilityMultiplier": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "acousticMultiplier": {
+                  "type": "number",
+                  "minimum": 0.9,
+                  "maximum": 1.1
+                },
+                "acousticStatus": {
+                  "type": "string",
+                  "enum": ["EXACT_CACHE_MATCH", "UNKNOWN"]
+                },
+                "acousticEvidenceId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedHypothesisWeight": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "candidateId",
+                "providerFamily",
+                "correlationGroupId",
+                "rawCandidateSupport",
+                "correlatedGroupSupport",
+                "providerFamilySupport",
+                "stabilityMultiplier",
+                "acousticMultiplier",
+                "acousticStatus",
+                "acousticEvidenceId",
+                "normalizedHypothesisWeight"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "providerSwitchCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pathLegal": { "type": "boolean" },
+          "provenanceComplete": { "type": "boolean" },
+          "ambiguousSlotCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "ambiguousSpanCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "normalizedEntropy": { "type": "number", "minimum": 0, "maximum": 1 },
+          "providerDisagreement": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "pathRiskMargin": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "reasons": { "type": "array", "items": { "type": "string" } },
+          "search": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "algorithm": {
+                    "type": "string",
+                    "enum": ["EXACT_LATTICE_MBR", "APPROXIMATE_LATTICE_MBR"]
+                  },
+                  "beamWidth": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "maxPaths": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "maxProviderSwitches": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "maxPathLength": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "visitedStateCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "beamPrunedStateCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "maxPathsTruncatedCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "lengthRejectedCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "unsafeRejectedCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "candidatePathsSeeded": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "exhaustiveWithinConstraints": { "type": "boolean" },
+                  "semanticHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "algorithm",
+                  "beamWidth",
+                  "maxPaths",
+                  "maxProviderSwitches",
+                  "maxPathLength",
+                  "visitedStateCount",
+                  "beamPrunedStateCount",
+                  "maxPathsTruncatedCount",
+                  "lengthRejectedCount",
+                  "unsafeRejectedCount",
+                  "candidatePathsSeeded",
+                  "exhaustiveWithinConstraints",
+                  "semanticHash"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "variant",
+          "outputMode",
+          "outcome",
+          "selectedPath",
+          "slotDecisions",
+          "abstainedSlots",
+          "candidateSupport",
+          "providerSwitchCount",
+          "pathLegal",
+          "provenanceComplete",
+          "ambiguousSlotCount",
+          "ambiguousSpanCount",
+          "normalizedEntropy",
+          "providerDisagreement",
+          "pathRiskMargin",
+          "reasons",
+          "search",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "results",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
