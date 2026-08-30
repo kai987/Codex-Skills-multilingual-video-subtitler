@@ -5,6 +5,7 @@ import {
   mkdir,
   open,
   readFile,
+  readdir,
   realpath,
   rename,
   rm,
@@ -22,7 +23,12 @@ import {
   humanCorrectionRecordSchema,
   reviewAuditRecordSchema,
   reviewSessionSchema,
+  c60113CorrectionInstrumentationSchema,
+  type C60113CorrectionInstrumentation,
+  type C60113WorkspaceExtension,
 } from "@mvl/shared";
+import { assertC60113WorkspaceExtension } from "./c60113-review-workspace.js";
+import { c60113WorkspaceJavascript } from "./c60113-review-workspace-ui.js";
 
 export const C60112_REVIEW_WORKSPACE_VERSION =
   "c6.0.1.12-review-workspace-v1" as const;
@@ -83,6 +89,8 @@ export interface C60112WorkspaceRegion {
   coreIntervals: { start: number; end: number }[];
   audioPath: string;
   audioSha256: string | null;
+  /** Actual WAV extraction bounds; may include more context than the risk region. */
+  audioSourceInterval?: { start: number; end: number };
 }
 
 export interface C60112WorkspaceCandidate {
@@ -110,6 +118,7 @@ export interface C60112ReviewWorkspaceData {
   items: C60112WorkspaceReviewItem[];
   regions: C60112WorkspaceRegion[];
   candidateBundles: C60112WorkspaceCandidateBundle[];
+  regionReviewV2?: C60113WorkspaceExtension;
 }
 
 export interface C60112ReviewDecisionRequest {
@@ -123,6 +132,7 @@ export interface C60112ReviewDecisionRequest {
   reviewerNote: string | null;
   expectedReviewPackageSemanticHash: string;
   expectedMachineDraftHash: string;
+  reviewInstrumentation?: C60113CorrectionInstrumentation | undefined;
 }
 
 interface C60112UndoRequest {
@@ -197,6 +207,7 @@ interface C60112CorrectionRecord {
   };
   reviewerNote: string | null;
   createdAt: string;
+  reviewInstrumentation?: C60113CorrectionInstrumentation | undefined;
 }
 
 interface C60112AuditRecord {
@@ -421,6 +432,7 @@ function workspaceSourceDurationMs(data: C60112ReviewWorkspaceData): number {
 export function assertC60112ReviewWorkspaceData(
   data: C60112ReviewWorkspaceData,
 ): void {
+  assertC60113WorkspaceExtension(data);
   if (data.workspaceVersion !== C60112_REVIEW_WORKSPACE_VERSION) {
     throw new Error("Unsupported review workspace version.");
   }
@@ -503,6 +515,17 @@ export function assertC60112ReviewWorkspaceData(
       { start: region.contextStart, end: region.contextEnd },
       `${region.regionId} context interval`,
     );
+    if (region.audioSourceInterval) {
+      validateInterval(
+        region.audioSourceInterval,
+        `${region.regionId} audio source interval`,
+      );
+      if (
+        region.audioSourceInterval.start > region.contextStart ||
+        region.audioSourceInterval.end < region.contextEnd
+      )
+        throw new Error("REVIEW_AUDIO_DOES_NOT_COVER_REGION");
+    }
     assertC60112SafeRelativePath(
       region.audioPath,
       `${region.regionId} audioPath`,
@@ -642,7 +665,7 @@ function renderProgress(){const required=state.data.items.filter(item=>item.requ
 function renderQueue(){const queue=byId('queue');queue.replaceChildren();state.filtered.forEach((item,index)=>{const itemState=sessionState(item.reviewItemId);const node=button('',()=>{state.index=index;render()},'queue-item'+(index===state.index?' active':'')+(itemState?(itemState.decisionType==='UNRESOLVED'?' unresolved':' resolved'):''));node.append(text('span',item.priorityTier,'priority '+item.priorityTier),text('div',item.currentText||'[missing speech]'),text('small',item.sourceInterval.start.toFixed(3)+' → '+item.sourceInterval.end.toFixed(3)));queue.append(node)});if(!state.filtered.length)queue.append(text('div','No items match the filters.','empty'))}
 function addLabeled(container,label,node){const wrapper=document.createElement('label');wrapper.append(text('span',label,'label'),node);container.append(wrapper)}
 function candidateView(item){const container=document.createElement('section');container.append(text('div','Alternative candidates','label'));const selected=state.selectedCandidate.get(item.reviewItemId)??sessionState(item.reviewItemId)?.selectedCandidateId??null;for(const candidate of bundleFor(item.reviewItemId).candidates){const card=document.createElement('div');card.className='candidate'+(candidate.candidateId===selected?' selected':'');card.append(text('strong',candidate.labels.join(' / ')),text('div',candidate.text,'subtitle'));const badges=document.createElement('div');badges.className='badges';candidate.evidenceBadges.forEach(value=>badges.append(text('span',value,'badge')));card.append(badges,button('Select candidate',()=>{state.selectedCandidate.set(item.reviewItemId,candidate.candidateId);render()}));container.append(card)}return container}
-function audioView(item){const region=regionFor(item.regionId);const card=document.createElement('section');card.className='card';card.append(text('div','Review audio','label'));if(!region){card.append(text('p','Region audio metadata is unavailable.','empty'));return card}const audio=document.createElement('audio');audio.id='review-audio';audio.controls=true;audio.preload='metadata';if(/^audio\/[A-Za-z0-9._/-]+$/u.test(region.audioPath)&&!region.audioPath.includes('..'))audio.src=region.audioPath;else showStatus('Unsafe audio path rejected.',true);const core=item.coreInterval;const jump=()=>{audio.currentTime=Math.max(0,core.start-region.contextStart);audio.play().catch(error=>showStatus('Audio playback failed: '+error.message,true))};const replay=()=>{audio.currentTime=0;audio.play().catch(error=>showStatus('Audio playback failed: '+error.message,true))};const controls=document.createElement('div');controls.className='audio-actions';controls.append(button('Replay region',replay),button('Jump to core',jump));for(const speed of [.75,1,1.25])controls.append(button(speed.toFixed(2).replace(/0$/u,'')+'×',()=>{audio.playbackRate=speed}));card.append(audio,controls,text('p','Core '+core.start.toFixed(3)+' → '+core.end.toFixed(3)+' · region '+region.contextStart.toFixed(3)+' → '+region.contextEnd.toFixed(3),'note'));return card}
+function audioView(item){const region=regionFor(item.regionId);const card=document.createElement('section');card.className='card';card.append(text('div','Review audio','label'));if(!region){card.append(text('p','Region audio metadata is unavailable.','empty'));return card}const audio=document.createElement('audio');audio.id='review-audio';audio.controls=true;audio.preload='metadata';if(/^audio\/[A-Za-z0-9._/-]+$/u.test(region.audioPath)&&!region.audioPath.includes('..'))audio.src=region.audioPath;else showStatus('Unsafe audio path rejected.',true);const core=item.coreInterval;const audioStart=region.audioSourceInterval?.start??region.contextStart;const jump=()=>{audio.currentTime=Math.max(0,core.start-audioStart);audio.play().catch(error=>showStatus('Audio playback failed: '+error.message,true))};const replay=()=>{audio.currentTime=0;audio.play().catch(error=>showStatus('Audio playback failed: '+error.message,true))};const controls=document.createElement('div');controls.className='audio-actions';controls.append(button('Replay region',replay),button('Jump to core',jump));for(const speed of [.75,1,1.25])controls.append(button(speed.toFixed(2).replace(/0$/u,'')+'×',()=>{audio.playbackRate=speed}));card.append(audio,controls,text('p','Core '+core.start.toFixed(3)+' → '+core.end.toFixed(3)+' · region '+region.contextStart.toFixed(3)+' → '+region.contextEnd.toFixed(3),'note'));return card}
 function operationId(prefix){return prefix+'-'+(globalThis.crypto?.randomUUID?.()??Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
 function currentDecisionPayload(item,decisionType,fields={}){return{decisionId:operationId('decision'),reviewItemId:item.reviewItemId,decisionType,selectedCandidateId:fields.selectedCandidateId??null,afterText:fields.afterText??null,afterStart:fields.afterStart??null,afterEnd:fields.afterEnd??null,reviewerNote:(fields.reviewerNote??byId('reviewer-note')?.value)||null,expectedReviewPackageSemanticHash:state.data.reviewPackageSemanticHash,expectedMachineDraftHash:state.data.machineDraftHash}}
 async function postJson(url,body){const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json','x-mvl-review-request':'c6-0-1-12'},body:JSON.stringify(body)});const result=await response.json();if(!response.ok)throw new Error((result.code??'REQUEST_FAILED')+': '+(result.message??response.statusText));return result}
@@ -694,7 +717,11 @@ export async function writeC60112ReviewWorkspace(input: {
   await mkdir(paths.sessionDirectory, { recursive: true });
   await Promise.all([
     atomicWriteText(indexPath, reviewWorkspaceHtml()),
-    atomicWriteText(javascriptPath, reviewWorkspaceJavascript()),
+    atomicWriteText(
+      javascriptPath,
+      reviewWorkspaceJavascript() +
+        (input.reviewData.regionReviewV2 ? c60113WorkspaceJavascript() : ""),
+    ),
     atomicWriteText(cssPath, reviewWorkspaceCss()),
     atomicWriteText(
       paths.data,
@@ -835,6 +862,7 @@ function parseDecisionRequest(value: unknown): C60112ReviewDecisionRequest {
     "reviewerNote",
     "expectedReviewPackageSemanticHash",
     "expectedMachineDraftHash",
+    "reviewInstrumentation",
   ]);
   if (Object.keys(value).some((key) => !allowedKeys.has(key))) {
     throw new WorkspaceHttpError(
@@ -871,6 +899,8 @@ function parseDecisionRequest(value: unknown): C60112ReviewDecisionRequest {
       "Decision fields do not match the local review contract.",
     );
   }
+  if (value.reviewInstrumentation !== undefined)
+    c60113CorrectionInstrumentationSchema.parse(value.reviewInstrumentation);
   return value as unknown as C60112ReviewDecisionRequest;
 }
 
@@ -928,6 +958,30 @@ function correctionForDecision(input: {
   const selectedCandidate = bundle.candidates.find(
     (candidate) => candidate.candidateId === input.request.selectedCandidateId,
   );
+  const instrumentation = input.request.reviewInstrumentation;
+  if (instrumentation !== undefined) {
+    const region = input.data.regionReviewV2?.regions.find(
+      (entry) => entry.regionId === item.regionId,
+    );
+    const budget = input.data.regionReviewV2?.plans.find(
+      (entry) => entry.planId === instrumentation.reviewBudget,
+    );
+    const expectedRank = (budget?.regionIds.indexOf(item.regionId) ?? -1) + 1;
+    if (
+      !region ||
+      instrumentation.regionRank !== expectedRank ||
+      (instrumentation.initialEditingCandidateId !== null &&
+        !bundle.candidates.some(
+          (candidate) =>
+            candidate.candidateId === instrumentation.initialEditingCandidateId,
+        ))
+    )
+      throw new WorkspaceHttpError(
+        400,
+        "REVIEW_INSTRUMENTATION_SCOPE_MISMATCH",
+        "Instrumentation must reference this frozen region and item candidate.",
+      );
+  }
   const machineText = item.finalCueIds.length === 0 ? null : item.currentText;
   const previousState = input.session.itemStates[item.reviewItemId];
   const beforeText =
@@ -1084,6 +1138,9 @@ function correctionForDecision(input: {
     machineDraftHash: input.data.machineDraftHash,
     evidenceSnapshotHash: item.semanticHash || sha256Value(item),
     candidateSetHash: sha256Value(bundle),
+    ...(input.request.reviewInstrumentation === undefined
+      ? {}
+      : { reviewInstrumentation: input.request.reviewInstrumentation }),
     decisionType: input.request.decisionType,
     selectedCandidateId,
     beforeText,
@@ -1190,7 +1247,48 @@ function assertRecoveredSessionTiming(
 async function acquireWorkspaceMutationLock(paths: WorkspacePaths): Promise<{
   release: () => Promise<void>;
 }> {
+  const root = await lstat(paths.root);
+  if (root.isSymbolicLink() || !root.isDirectory()) {
+    throw new WorkspaceHttpError(
+      403,
+      "WORKSPACE_ROOT_SYMLINK_REJECTED",
+      "The review workspace must be a local directory, not a symbolic link.",
+    );
+  }
   await mkdir(paths.sessionDirectory, { recursive: true });
+  const session = await lstat(paths.sessionDirectory);
+  const rootReal = await realpath(paths.root);
+  if (
+    session.isSymbolicLink() ||
+    !session.isDirectory() ||
+    (await realpath(paths.sessionDirectory)) !== path.join(rootReal, "session")
+  ) {
+    throw new WorkspaceHttpError(
+      403,
+      "WORKSPACE_SESSION_SYMLINK_REJECTED",
+      "Review session state must remain inside the workspace.",
+    );
+  }
+  // Append-only journals and the SQLite mutex must never follow a substituted
+  // local link. This guard covers both legacy state and additive trial files.
+  for (const entry of await readdir(paths.sessionDirectory)) {
+    let metadata;
+    try {
+      metadata = await lstat(path.join(paths.sessionDirectory, entry));
+    } catch (error) {
+      // An active holder may finish an atomic snapshot rename while this
+      // process is waiting to acquire the mutex. Removed temp files are safe.
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") continue;
+      throw error;
+    }
+    if (metadata.isSymbolicLink()) {
+      throw new WorkspaceHttpError(
+        403,
+        "WORKSPACE_SESSION_FILE_SYMLINK_REJECTED",
+        "Symbolic links are not accepted as review session state.",
+      );
+    }
+  }
   const deadline = Date.now() + 10_000;
   // SQLite owns the cross-process lock in the OS, so SIGKILL releases it. A
   // persistent PID file cannot provide this property without unsafe stale-lock
@@ -1241,6 +1339,17 @@ async function withWorkspaceMutationLock<T>(
   } finally {
     await lock.release();
   }
+}
+
+/** Shared OS-released mutex for extension state; callers must not nest it. */
+export async function withC60112WorkspaceMutationLock<T>(
+  workspaceDirectory: string,
+  operation: () => Promise<T>,
+): Promise<T> {
+  return withWorkspaceMutationLock(
+    workspacePaths(workspaceDirectory),
+    operation,
+  );
 }
 
 function uniqueHistoryRecords<T>(input: {
@@ -1628,7 +1737,9 @@ function assertDecisionRetryMatchesCorrection(
   let matches =
     request.reviewItemId === correction.reviewItemId &&
     request.decisionType === correction.decisionType &&
-    request.reviewerNote === correction.reviewerNote;
+    request.reviewerNote === correction.reviewerNote &&
+    sha256Value(request.reviewInstrumentation ?? null) ===
+      sha256Value(correction.reviewInstrumentation ?? null);
   switch (request.decisionType) {
     case "USE_REAZON":
     case "USE_WHISPER_ALTERNATE":
@@ -2282,7 +2393,26 @@ export async function startC60112ReviewWorkspaceServer(input: {
         return;
       }
       if (
-        ["/api/decision", "/api/undo"].includes(decodedPath) &&
+        data.regionReviewV2 &&
+        request.method === "GET" &&
+        ["/api/trial", "/api/playback"].includes(decodedPath)
+      ) {
+        const extension = await import("./c60113-prospective-trial.js");
+        sendJson(
+          response,
+          200,
+          decodedPath === "/api/trial"
+            ? { trial: await extension.readC60113Trial(paths.root, data) }
+            : await extension.c60113PlaybackState(paths.root, data),
+        );
+        return;
+      }
+      if (
+        [
+          "/api/decision",
+          "/api/undo",
+          ...(data.regionReviewV2 ? ["/api/trial/event", "/api/playback"] : []),
+        ].includes(decodedPath) &&
         request.method === "POST"
       ) {
         if (request.headers["x-mvl-review-request"] !== "c6-0-1-12") {
@@ -2301,22 +2431,125 @@ export async function startC60112ReviewWorkspaceServer(input: {
           );
         }
         const body = await readRequestJson(request);
+        if (
+          decodedPath === "/api/trial/event" ||
+          decodedPath === "/api/playback"
+        ) {
+          const extension = await import("./c60113-prospective-trial.js");
+          if (decodedPath === "/api/trial/event") {
+            if (
+              !isRecord(body) ||
+              ["DECISION_COMMITTED", "DECISION_UNDONE"].includes(
+                String(body.eventType),
+              )
+            )
+              throw new WorkspaceHttpError(
+                400,
+                "SERVER_DECISION_EVENT_ONLY",
+                "Decision events are emitted from committed correction history only.",
+              );
+            const { c60113TrialEventInputSchema } = await import("@mvl/shared");
+            const event = c60113TrialEventInputSchema.parse(body);
+            if (
+              (event.itemId &&
+                !data.items.some((i) => i.reviewItemId === event.itemId)) ||
+              (event.regionId &&
+                !data.regions.some((r) => r.regionId === event.regionId)) ||
+              (event.candidateId &&
+                !data.candidateBundles.some(
+                  (b) =>
+                    b.reviewItemId === event.itemId &&
+                    b.candidates.some(
+                      (c) => c.candidateId === event.candidateId,
+                    ),
+                ))
+            )
+              throw new WorkspaceHttpError(
+                400,
+                "TRIAL_REFERENCE_MISMATCH",
+                "Unknown trial item, region, or candidate.",
+              );
+            sendJson(response, 200, {
+              state: await extension.recordC60113TrialEvent({
+                workspaceDirectory: paths.root,
+                event,
+                data,
+              }),
+            });
+          } else {
+            if (
+              !isRecord(body) ||
+              Object.keys(body).some(
+                (k) =>
+                  !["intervals", "playbackSeconds", "playbackCount"].includes(
+                    k,
+                  ),
+              ) ||
+              !Array.isArray(body.intervals)
+            )
+              throw new WorkspaceHttpError(
+                400,
+                "INVALID_PLAYBACK_SAMPLE",
+                "Invalid playback sample.",
+              );
+            sendJson(
+              response,
+              200,
+              await extension.c60113PlaybackState(
+                paths.root,
+                data,
+                body as unknown as {
+                  intervals: { start: number; end: number }[];
+                  playbackSeconds: number;
+                  playbackCount: number;
+                },
+              ),
+            );
+          }
+          return;
+        }
         if (decodedPath === "/api/decision") {
           const decision = parseDecisionRequest(body);
-          const session = await serializeMutation(() =>
-            withWorkspaceMutationLock(paths, () =>
+          const session = await serializeMutation(async () => {
+            const saved = await withWorkspaceMutationLock(paths, () =>
               saveDecision(paths, data, decision),
-            ),
-          );
+            );
+            if (data.regionReviewV2)
+              await recordCommittedC60113TrialDecision(
+                paths,
+                data,
+                decision.decisionId,
+                decision.reviewItemId,
+                decision.decisionType,
+                false,
+              );
+            return saved;
+          });
           sendJson(response, 200, { ok: true, session });
           return;
         }
         const undo = parseUndoRequest(body);
-        const session = await serializeMutation(() =>
-          withWorkspaceMutationLock(paths, () =>
+        const session = await serializeMutation(async () => {
+          const saved = await withWorkspaceMutationLock(paths, () =>
             undoLastDecision(paths, data, undo),
-          ),
-        );
+          );
+          if (data.regionReviewV2) {
+            const history = await readWorkspaceHistory(paths, data);
+            const audit = history.audits.find(
+              (a) => a.auditId === undoAuditId(saved.sessionId, undo.undoId),
+            );
+            if (audit)
+              await recordCommittedC60113TrialDecision(
+                paths,
+                data,
+                undo.undoId,
+                audit.reviewItemId,
+                null,
+                true,
+              );
+          }
+          return saved;
+        });
         sendJson(response, 200, { ok: true, session });
         return;
       }
@@ -2384,4 +2617,38 @@ export async function startC60112ReviewWorkspaceServer(input: {
         });
       }),
   };
+}
+
+async function recordCommittedC60113TrialDecision(
+  paths: WorkspacePaths,
+  data: C60112ReviewWorkspaceData,
+  operationId: string,
+  itemId: string,
+  decisionType: C60112ReviewDecisionType | null,
+  undo: boolean,
+): Promise<void> {
+  const extension = await import("./c60113-prospective-trial.js");
+  const trial = await extension.readC60113Trial(paths.root, data);
+  if (trial?.state.status !== "ACTIVE") return;
+  const item = data.items.find((i) => i.reviewItemId === itemId);
+  await extension.recordC60113TrialEvent({
+    workspaceDirectory: paths.root,
+    data,
+    event: {
+      eventId: `committed-${operationId}`,
+      eventType: undo ? "DECISION_UNDONE" : "DECISION_COMMITTED",
+      expectedReviewPackageHash: data.reviewPackageSemanticHash,
+      expectedRankerHash: trial.manifest.rankerHash,
+      visible: false,
+      focused: false,
+      interaction: true,
+      audioPlaying: false,
+      regionId: item?.regionId ?? null,
+      itemId,
+      candidateId: null,
+      sourceInterval: null,
+      manualCharactersEntered: 0,
+      decisionType,
+    },
+  });
 }
