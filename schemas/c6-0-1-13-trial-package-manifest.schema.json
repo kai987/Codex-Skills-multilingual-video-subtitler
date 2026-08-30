@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-trial-package-manifest.schema.json",
+  "title": "c6-0-1-13-trial-package-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "packageVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-prospective-package-v1"
+    },
+    "status": {
+      "type": "string",
+      "const": "AWAITING_ELIGIBILITY_DECLARATIONS"
+    },
+    "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewPackageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "workspaceDataHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "workspaceExtensionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "deploymentRankerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machinePackagePath": {
+      "type": "string",
+      "const": "machine-subtitle-package.json"
+    },
+    "reviewPackageFreezePath": {
+      "type": "string",
+      "const": "review-package-freeze.json"
+    },
+    "reviewPackageFreezeFileHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "machineFeaturesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "deploymentSelections": {
+      "minItems": 7,
+      "maxItems": 7,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "enum": [
+              "UNIQUE_AUDIO_10_PERCENT",
+              "UNIQUE_AUDIO_20_PERCENT",
+              "UNIQUE_AUDIO_30_PERCENT",
+              "UNIQUE_AUDIO_40_PERCENT",
+              "UNIQUE_AUDIO_50_PERCENT",
+              "ALL_MANDATORY",
+              "FULL_QUEUE"
+            ]
+          },
+          "selectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["planId", "selectionHash"],
+        "additionalProperties": false
+      }
+    },
+    "reviewWorkspacePath": { "type": "string", "const": "review-workspace" },
+    "audio": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relativePath": {
+            "type": "string",
+            "pattern": "^review-workspace\\/audio\\/[A-Za-z0-9._/-]+$"
+          },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["relativePath", "sha256"],
+        "additionalProperties": false
+      }
+    },
+    "inheritedSessionCount": { "type": "number", "const": 0 },
+    "inheritedCorrectionCount": { "type": "number", "const": 0 },
+    "inheritedPrivateEventCount": { "type": "number", "const": 0 },
+    "realHumanSessionExecuted": { "type": "boolean", "const": false },
+    "humanReviewTimeMeasured": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "packageVersion",
+    "status",
+    "machineDraftHash",
+    "reviewPackageHash",
+    "workspaceDataHash",
+    "workspaceExtensionHash",
+    "deploymentRankerHash",
+    "machinePackagePath",
+    "reviewPackageFreezePath",
+    "reviewPackageFreezeFileHash",
+    "machineFeaturesHash",
+    "deploymentSelections",
+    "reviewWorkspacePath",
+    "audio",
+    "inheritedSessionCount",
+    "inheritedCorrectionCount",
+    "inheritedPrivateEventCount",
+    "realHumanSessionExecuted",
+    "humanReviewTimeMeasured",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

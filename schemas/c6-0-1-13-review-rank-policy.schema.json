@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-review-rank-policy.schema.json",
+  "title": "c6-0-1-13-review-rank-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-review-rank-policy"
+    },
+    "productRoute": { "type": "string", "const": "HUMAN_ON_EXCEPTION" },
+    "missingSpeech": {
+      "type": "object",
+      "properties": {
+        "minimumIndependentStrongFamilies": { "type": "number", "const": 3 },
+        "maximumCoveredRatioForMissing": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lexicalMinimumIntervalCoverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "strongContradictionThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "legacyDefault": { "type": "string", "const": "SPEECH_GAP_OBSERVED" }
+      },
+      "required": [
+        "minimumIndependentStrongFamilies",
+        "maximumCoveredRatioForMissing",
+        "lexicalMinimumIntervalCoverage",
+        "strongContradictionThreshold",
+        "legacyDefault"
+      ],
+      "additionalProperties": false
+    },
+    "evidenceCorrelation": {
+      "type": "object",
+      "properties": {
+        "sharedRootIsCorrelated": { "type": "boolean", "const": true },
+        "sameProviderFamilyIsCorrelated": { "type": "boolean", "const": true },
+        "absenceRiskWeight": { "type": "number", "const": 0 },
+        "independentBreadth": {
+          "type": "string",
+          "const": "DISTINCT_FAMILY_DISJOINT_ROOT_MATCHING"
+        }
+      },
+      "required": [
+        "sharedRootIsCorrelated",
+        "sameProviderFamilyIsCorrelated",
+        "absenceRiskWeight",
+        "independentBreadth"
+      ],
+      "additionalProperties": false
+    },
+    "mandatoryRules": {
+      "type": "object",
+      "properties": {
+        "strongEvidenceThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumTimingFamilies": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredSeparatedFromDisplayScore": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "strongEvidenceThreshold",
+        "minimumTimingFamilies",
+        "requiredSeparatedFromDisplayScore"
+      ],
+      "additionalProperties": false
+    },
+    "itemPriority": {
+      "type": "object",
+      "properties": {
+        "mainOrder": { "type": "string", "const": "STRUCTURED_VECTOR" },
+        "displayMeaning": { "type": "string", "const": "NOT_PROBABILITY" },
+        "reasonCountBoost": { "type": "number", "const": 0 }
+      },
+      "required": ["mainOrder", "displayMeaning", "reasonCountBoost"],
+      "additionalProperties": false
+    },
+    "regionMerge": {
+      "type": "object",
+      "properties": {
+        "maximumCoreSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "maximumGapSeconds": { "type": "number", "minimum": 0 },
+        "minimumContextOverlapRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximumIncrementalSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "preContextSeconds": { "type": "number", "minimum": 0 },
+        "postContextSeconds": { "type": "number", "minimum": 0 },
+        "preserveScene": { "type": "boolean", "const": true },
+        "preserveSpeaker": { "type": "boolean", "const": true },
+        "preserveCategory": { "type": "boolean", "const": true }
+      },
+      "required": [
+        "maximumCoreSeconds",
+        "maximumGapSeconds",
+        "minimumContextOverlapRatio",
+        "maximumIncrementalSeconds",
+        "preContextSeconds",
+        "postContextSeconds",
+        "preserveScene",
+        "preserveSpeaker",
+        "preserveCategory"
+      ],
+      "additionalProperties": false
+    },
+    "regionAggregation": {
+      "type": "string",
+      "const": "DEDUPLICATED_RISK_FAMILIES_CUES_EVENTS_COST"
+    },
+    "playbackUnion": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_HALF_OPEN_SORTED_MERGED"
+    },
+    "marginalUtility": {
+      "type": "object",
+      "properties": {
+        "riskWeight": { "type": "number", "minimum": 0 },
+        "mandatoryWeight": { "type": "number", "minimum": 0 },
+        "actionableWeight": { "type": "number", "minimum": 0 },
+        "redundancyPenaltyWeight": { "type": "number", "minimum": 0 },
+        "fixedReviewOverheadSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minimumAudioCostSeconds": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": [
+        "riskWeight",
+        "mandatoryWeight",
+        "actionableWeight",
+        "redundancyPenaltyWeight",
+        "fixedReviewOverheadSeconds",
+        "minimumAudioCostSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "percentBudgets": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1, "maximum": 100 }
+    },
+    "fixedSecondsBudgets": {
+      "type": "array",
+      "items": { "type": "number", "exclusiveMinimum": 0 }
+    },
+    "fallbackRanker": { "type": "string", "const": "REGION_RISK_DENSITY_V3" },
+    "goldBarrier": {
+      "type": "object",
+      "properties": {
+        "runtimeGoldInputAllowed": { "type": "boolean", "const": false },
+        "freezeBeforeLabels": { "type": "boolean", "const": true },
+        "foldsBeforeLabels": { "type": "boolean", "const": true },
+        "sameVersionRetuneAllowed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "runtimeGoldInputAllowed",
+        "freezeBeforeLabels",
+        "foldsBeforeLabels",
+        "sameVersionRetuneAllowed"
+      ],
+      "additionalProperties": false
+    },
+    "prospectiveTrial": {
+      "type": "object",
+      "properties": {
+        "priorGoldExposureDisqualifies": { "type": "boolean", "const": true },
+        "realHumanEpisodeOneTrialAllowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "instrumentationIsNotMeasuredHumanTime": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "priorGoldExposureDisqualifies",
+        "realHumanEpisodeOneTrialAllowed",
+        "instrumentationIsNotMeasuredHumanTime"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "productRoute",
+    "missingSpeech",
+    "evidenceCorrelation",
+    "mandatoryRules",
+    "itemPriority",
+    "regionMerge",
+    "regionAggregation",
+    "playbackUnion",
+    "marginalUtility",
+    "percentBudgets",
+    "fixedSecondsBudgets",
+    "fallbackRanker",
+    "goldBarrier",
+    "prospectiveTrial",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

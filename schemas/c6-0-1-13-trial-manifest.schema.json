@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-trial-manifest.schema.json",
+  "title": "c6-0-1-13-trial-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "trialVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-prospective-trial-v1"
+    },
+    "trialId": { "type": "string", "minLength": 1 },
+    "sourceMediaHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewPackageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "workspaceExtensionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rankerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "requiredItemIds": { "type": "array", "items": { "type": "string" } },
+    "declarations": {
+      "type": "object",
+      "properties": {
+        "goldUnavailable": { "type": "boolean", "const": true },
+        "previousHumanSubtitleUnavailable": {
+          "type": "boolean",
+          "const": true
+        },
+        "reviewerPriorExposure": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "goldUnavailable",
+        "previousHumanSubtitleUnavailable",
+        "reviewerPriorExposure"
+      ],
+      "additionalProperties": false
+    },
+    "synthetic": { "type": "boolean" },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "activeTimePolicy": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "visible-focused-interaction-or-playback-v1"
+        },
+        "idleTimeoutSeconds": { "type": "number", "const": 60 },
+        "maximumSampleGapSeconds": { "type": "number", "const": 5 }
+      },
+      "required": ["version", "idleTimeoutSeconds", "maximumSampleGapSeconds"],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "trialVersion",
+    "trialId",
+    "sourceMediaHash",
+    "machineDraftHash",
+    "reviewPackageHash",
+    "workspaceExtensionHash",
+    "rankerHash",
+    "sourceDurationSeconds",
+    "requiredItemIds",
+    "declarations",
+    "synthetic",
+    "createdAt",
+    "activeTimePolicy",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

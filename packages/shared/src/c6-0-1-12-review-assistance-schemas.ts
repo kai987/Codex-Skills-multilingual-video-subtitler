@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { c60113CorrectionInstrumentationSchema } from "./c6-0-1-13-review-workspace-schemas.js";
 
 export const c60112PolicyVersion =
   "c6.0.1.12-multi-asr-review-assistance-v2" as const;
@@ -672,6 +673,7 @@ export const humanCorrectionRecordSchema = z
     machineDraftHash: sha256,
     evidenceSnapshotHash: sha256,
     candidateSetHash: sha256,
+    reviewInstrumentation: c60113CorrectionInstrumentationSchema.optional(),
     decisionType: reviewDecisionTypeSchema,
     selectedCandidateId: z.string().min(1).nullable(),
     beforeText: z.string().nullable(),

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-validation.schema.json",
+  "title": "c6-0-1-13-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-13-validation" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rankerFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "checkId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["PASSED", "FAILED", "NOT_RUN"]
+          },
+          "evidence": { "type": "string" }
+        },
+        "required": ["checkId", "status", "evidence"],
+        "additionalProperties": false
+      }
+    },
+    "regressionGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["PASSED", "FAILED", "NOT_RUN"]
+          },
+          "command": { "type": "string" },
+          "exitCode": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "outputHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["groupId", "status", "command", "exitCode", "outputHash"],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "passedChecks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedChecks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "notRunChecks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "passedRegressionGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedRegressionGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "notRunRegressionGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "passedChecks",
+        "failedChecks",
+        "notRunChecks",
+        "passedRegressionGroups",
+        "failedRegressionGroups",
+        "notRunRegressionGroups"
+      ],
+      "additionalProperties": false
+    },
+    "engineeringAcceptance": {
+      "type": "string",
+      "enum": ["PASSED", "FAILED", "INCOMPLETE"]
+    },
+    "rankingResult": { "type": "string" },
+    "burdenResult": { "type": "string" },
+    "trialReadiness": { "type": "string" },
+    "route": { "type": "string" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "asrInferenceCount": { "type": "number", "const": 0 },
+    "networkUsedForAcceptance": { "type": "boolean", "const": false },
+    "datasetSpecificHardcodingCount": {
+      "anyOf": [
+        { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        { "type": "null" }
+      ]
+    },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "policyHash",
+    "machineFreezeHash",
+    "rankerFreezeHash",
+    "checks",
+    "regressionGroups",
+    "summary",
+    "engineeringAcceptance",
+    "rankingResult",
+    "burdenResult",
+    "trialReadiness",
+    "route",
+    "runtimeGoldInputCount",
+    "asrInferenceCount",
+    "networkUsedForAcceptance",
+    "datasetSpecificHardcodingCount",
+    "machineOnlyReleaseAuthorized",
+    "c602Status",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

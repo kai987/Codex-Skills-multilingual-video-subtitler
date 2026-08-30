@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-region-ranker-deployment.schema.json",
+  "title": "c6-0-1-13-region-ranker-deployment",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "deploymentVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-ranker-deployment-v1"
+    },
+    "rankerType": {
+      "type": "string",
+      "enum": ["L2_LOGISTIC_REGRESSION", "REGION_RISK_DENSITY_V3"]
+    },
+    "featureSchemaVersion": {
+      "type": "string",
+      "const": "c60113-structural-features-v1"
+    },
+    "featureNames": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "missingSeverity",
+          "hallucinationStrength",
+          "timingStrength",
+          "crossModelConflictStrength",
+          "whisperInstability",
+          "reazonInstability",
+          "acousticMargin",
+          "acousticScorability",
+          "speechCompleteness",
+          "requestEdgeRisk",
+          "localizationQuality",
+          "independentFamilyCount",
+          "correlatedEvidenceCount",
+          "affectedCueCount",
+          "affectedEventCount",
+          "candidateActionableCount",
+          "orphanCount",
+          "coreDurationSeconds",
+          "contextDurationSeconds",
+          "chronologicalIncrementalAudioSeconds",
+          "neighborContextOverlapSeconds",
+          "sceneCount",
+          "speakerGroupCount",
+          "positiveEvidenceStrength"
+        ]
+      }
+    },
+    "rankingPolicy": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "mandatoryPolicy": {
+      "type": "string",
+      "const": "POSITIVE_SAFETY_EVIDENCE_ONLY"
+    },
+    "burdenSelectionPolicy": {
+      "type": "string",
+      "const": "MARGINAL_UNIQUE_AUDIO_GREEDY_FIXED_OVERHEAD_V1"
+    },
+    "fixedReviewOverheadSeconds": { "type": "number", "const": 8 },
+    "model": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "coefficients": {
+              "minItems": 72,
+              "maxItems": 72,
+              "type": "array",
+              "items": { "type": "number" }
+            },
+            "intercept": { "type": "number" },
+            "preprocessing": {
+              "type": "object",
+              "properties": {
+                "featureNames": {
+                  "minItems": 72,
+                  "maxItems": 72,
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "medians": {
+                  "minItems": 24,
+                  "maxItems": 24,
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "means": {
+                  "minItems": 72,
+                  "maxItems": 72,
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "scales": {
+                  "minItems": 72,
+                  "maxItems": 72,
+                  "type": "array",
+                  "items": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "missingValueEncoding": {
+                  "type": "string",
+                  "const": "MEDIAN_PLUS_SEPARATE_UNKNOWN_UNAVAILABLE_INDICATORS"
+                }
+              },
+              "required": [
+                "featureNames",
+                "medians",
+                "means",
+                "scales",
+                "missingValueEncoding"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": ["coefficients", "intercept", "preprocessing"],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "deploymentVersion",
+    "rankerType",
+    "featureSchemaVersion",
+    "featureNames",
+    "rankingPolicy",
+    "mandatoryPolicy",
+    "burdenSelectionPolicy",
+    "fixedReviewOverheadSeconds",
+    "model",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

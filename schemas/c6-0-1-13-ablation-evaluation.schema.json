@@ -1,0 +1,363 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-ablation-evaluation.schema.json",
+  "title": "c6-0-1-13-ablation-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-ablation-evaluation"
+    },
+    "ablationFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceQualityEvaluationHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sameUniqueErrorDenominator": { "type": "boolean", "const": true },
+    "uniqueErrorComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "stages": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"]
+          },
+          "featuresHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "foldsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "machineFreezeHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "labelsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "selectionSource": {
+            "type": "string",
+            "enum": [
+              "NATIVE_LEGACY_R3_STATIC_ORDER",
+              "FROZEN_NATIVE_MACHINE_BURDEN_PLANS",
+              "HELD_OUT_OOF_SCORES",
+              "SELECTED_OOF_OR_DETERMINISTIC_NOT_FUTURE_IN_SAMPLE"
+            ]
+          },
+          "learnedEvaluationSourceFreezeHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "itemCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "requiredItemCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "requiredRegionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budget": { "type": "string" },
+                "budgetSeconds": { "type": "number", "minimum": 0 },
+                "selectedRegionIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "selectedRegionCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "selectedItemCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "clipSumSeconds": { "type": "number", "minimum": 0 },
+                "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+                "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+                "incrementalUniqueSeconds": {
+                  "type": "array",
+                  "items": { "type": "number", "minimum": 0 }
+                },
+                "materialRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "severeTimingRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "hallucinationRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "missingDialogueRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "reviewPrecision": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "residualErrorRate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "coveredErrorComponentIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "totalMaterialErrors": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "totalSevereTimingErrors": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "totalHallucinations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "totalMissingDialogue": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "budget",
+                "budgetSeconds",
+                "selectedRegionIds",
+                "selectedRegionCount",
+                "selectedItemCount",
+                "clipSumSeconds",
+                "uniqueUnionSeconds",
+                "duplicateContextSeconds",
+                "incrementalUniqueSeconds",
+                "materialRecall",
+                "severeTimingRecall",
+                "hallucinationRecall",
+                "missingDialogueRecall",
+                "reviewPrecision",
+                "residualErrorRate",
+                "coveredErrorComponentIds",
+                "totalMaterialErrors",
+                "totalSevereTimingErrors",
+                "totalHallucinations",
+                "totalMissingDialogue"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "foldMetrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string" },
+                "metrics": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "budget": { "type": "string" },
+                      "budgetSeconds": { "type": "number", "minimum": 0 },
+                      "selectedRegionIds": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "selectedRegionCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "selectedItemCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "clipSumSeconds": { "type": "number", "minimum": 0 },
+                      "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+                      "duplicateContextSeconds": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "incrementalUniqueSeconds": {
+                        "type": "array",
+                        "items": { "type": "number", "minimum": 0 }
+                      },
+                      "materialRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "severeTimingRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "hallucinationRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "missingDialogueRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "reviewPrecision": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "residualErrorRate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "coveredErrorComponentIds": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "totalMaterialErrors": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "totalSevereTimingErrors": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "totalHallucinations": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "totalMissingDialogue": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "budget",
+                      "budgetSeconds",
+                      "selectedRegionIds",
+                      "selectedRegionCount",
+                      "selectedItemCount",
+                      "clipSumSeconds",
+                      "uniqueUnionSeconds",
+                      "duplicateContextSeconds",
+                      "incrementalUniqueSeconds",
+                      "materialRecall",
+                      "severeTimingRecall",
+                      "hallucinationRecall",
+                      "missingDialogueRecall",
+                      "reviewPrecision",
+                      "residualErrorRate",
+                      "coveredErrorComponentIds",
+                      "totalMaterialErrors",
+                      "totalSevereTimingErrors",
+                      "totalHallucinations",
+                      "totalMissingDialogue"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["foldId", "metrics"],
+              "additionalProperties": false
+            }
+          },
+          "foldMetricBasis": {
+            "type": "string",
+            "enum": [
+              "GLOBAL_PLAN_PROJECTED_TO_FOLD",
+              "FOLD_LOCAL_UNIQUE_AUDIO_BUDGET"
+            ]
+          },
+          "uniqueErrorComponentCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "stage",
+          "featuresHash",
+          "foldsHash",
+          "machineFreezeHash",
+          "labelsHash",
+          "selectionSource",
+          "learnedEvaluationSourceFreezeHash",
+          "itemCount",
+          "regionCount",
+          "requiredItemCount",
+          "requiredRegionCount",
+          "metrics",
+          "foldMetrics",
+          "foldMetricBasis",
+          "uniqueErrorComponentCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "ablationFreezeHash",
+    "sourceQualityEvaluationHash",
+    "sameUniqueErrorDenominator",
+    "uniqueErrorComponentCount",
+    "stages",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,457 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-review-items-v3.schema.json",
+  "title": "machine-review-items-v3",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-machine-review-items-v3"
+    },
+    "evidenceFamiliesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "missingEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewItemId": { "type": "string", "minLength": 1 },
+          "eventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "itemTypes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TEXT_CROSS_MODEL_DISAGREEMENT",
+                "TEXT_WHISPER_INSTABILITY",
+                "TEXT_REAZON_INSTABILITY",
+                "TEXT_HALLUCINATION_RISK",
+                "TEXT_LOW_ACOUSTIC_SUPPORT",
+                "TEXT_PARTIAL_AGREEMENT",
+                "MISSING_SPEECH_RISK",
+                "TIMING_BOUNDARY_RISK",
+                "TIMING_SEVERE_RISK",
+                "OVERLAP_RISK",
+                "MULTI_SPEAKER_RISK",
+                "LOCALIZATION_RISK",
+                "SPAN_LINEAGE_BLOCKED",
+                "EVIDENCE_CONFLICT",
+                "GENERAL_UNCERTAINTY"
+              ]
+            }
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "coreInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "currentText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reviewReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "WHISPER_REAZON_LEXICAL_CONFLICT",
+                "WHISPER_CORE_UNSTABLE",
+                "REAZON_CORE_UNSTABLE",
+                "WHISPER_HALLUCINATION_SIGNAL",
+                "REAZON_HALLUCINATION_SIGNAL",
+                "INDEPENDENT_ACOUSTIC_DISAGREEMENT",
+                "INDEPENDENT_ACOUSTIC_LOW_MARGIN",
+                "DECODER_WEAK",
+                "SPEECH_INCOMPLETE",
+                "REQUEST_EDGE_RISK",
+                "TIMING_EVIDENCE_CONFLICT",
+                "OVERLAP_UNRESOLVED",
+                "SPEAKER_OVERLAP",
+                "LOCALIZATION_AMBIGUOUS",
+                "MISSING_DIALOGUE_SUSPECTED",
+                "SPAN_LINEAGE_UNAVAILABLE",
+                "MACHINE_EVIDENCE_INCOMPLETE"
+              ]
+            }
+          },
+          "priorityTier": {
+            "type": "string",
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+          },
+          "priorityScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "displayPriorityScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "priorityVector": {
+            "type": "object",
+            "properties": {
+              "mandatorySafetyClass": {
+                "type": "string",
+                "enum": [
+                  "NONE",
+                  "STRONG_HALLUCINATION",
+                  "STRONG_MISSING",
+                  "STRONG_TIMING",
+                  "STRONG_OVERLAP",
+                  "STRUCTURAL_CORRUPTION"
+                ]
+              },
+              "positiveEvidenceStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "independentEvidenceFamilyCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "errorTypeSeverity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "crossModelConflictStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "hallucinationStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "missingStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "timingStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "candidateActionability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "localizationQuality": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "estimatedReviewCost": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "sourceTime": { "type": "number", "minimum": 0 }
+            },
+            "required": [
+              "mandatorySafetyClass",
+              "positiveEvidenceStrength",
+              "independentEvidenceFamilyCount",
+              "errorTypeSeverity",
+              "crossModelConflictStrength",
+              "hallucinationStrength",
+              "missingStrength",
+              "timingStrength",
+              "candidateActionability",
+              "localizationQuality",
+              "estimatedReviewCost",
+              "sourceTime"
+            ],
+            "additionalProperties": false
+          },
+          "structuredRankKey": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "rankPosition": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "requiredLevel": {
+            "type": "string",
+            "enum": ["REQUIRED", "RECOMMENDED", "INFORMATIONAL"]
+          },
+          "mandatoryReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "suggestedActions": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "KEEP_CURRENT",
+                "USE_REAZON",
+                "USE_WHISPER_ALTERNATE",
+                "MANUAL_EDIT",
+                "TIMING_EDIT",
+                "ADD_NEW_CUE",
+                "MARK_FALSE_POSITIVE",
+                "UNRESOLVED",
+                "WAIVE_REVIEW"
+              ]
+            }
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerGroupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "missingClassification": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "SPEECH_GAP_OBSERVED",
+                  "MISSING_DIALOGUE_POSSIBLE",
+                  "MISSING_DIALOGUE_STRONG",
+                  "MISSING_DIALOGUE_CONTRADICTED",
+                  "MISSING_DIALOGUE_UNRESOLVED"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "missingGapIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentEvidenceFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SPEECH_ACTIVITY",
+                "ASR_LEXICAL_CONTENT",
+                "CUE_COVERAGE",
+                "NEIGHBOR_CONTINUITY",
+                "SPEAKER_ACTIVITY",
+                "CROSS_MODEL_CONTENT",
+                "MUSIC_LYRICS_CONTRADICTION",
+                "LOCALIZATION",
+                "WHISPER_STABILITY",
+                "REAZON_STABILITY",
+                "ACOUSTIC_ALIGNMENT",
+                "DECODER",
+                "TIMING_BOUNDARY",
+                "HALLUCINATION",
+                "OVERLAP",
+                "STRUCTURAL_INTEGRITY"
+              ]
+            }
+          },
+          "evidenceCorrelationGroups": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "uncertaintyReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "legacySemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "reviewItemId",
+          "eventIds",
+          "finalCueIds",
+          "itemTypes",
+          "sourceInterval",
+          "coreInterval",
+          "currentText",
+          "candidateIds",
+          "evidenceIds",
+          "reviewReasons",
+          "priorityTier",
+          "priorityScore",
+          "displayPriorityScore",
+          "priorityVector",
+          "structuredRankKey",
+          "rankPosition",
+          "requiredLevel",
+          "mandatoryReasons",
+          "suggestedActions",
+          "sceneIds",
+          "speakerGroupIds",
+          "missingClassification",
+          "missingGapIds",
+          "independentEvidenceFamilies",
+          "evidenceCorrelationGroups",
+          "uncertaintyReasons",
+          "legacySemanticHash",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recommendedItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "informationalItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "criticalItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "scoreDistribution": {
+          "type": "object",
+          "properties": {
+            "itemCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "maxScore": { "type": "number", "minimum": 0, "maximum": 100 },
+            "maxScoreItemCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "largestTieGroupCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "uniqueScoreCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "uniqueStructuredRankCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "scoreEntropy": { "type": "number", "minimum": 0 },
+            "maxScoreShare": { "type": "number", "minimum": 0, "maximum": 1 },
+            "genuineMandatoryMaxTie": { "type": "boolean" },
+            "distribution": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "score": { "type": "number" },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["score", "count"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "itemCount",
+            "maxScore",
+            "maxScoreItemCount",
+            "largestTieGroupCount",
+            "uniqueScoreCount",
+            "uniqueStructuredRankCount",
+            "scoreEntropy",
+            "maxScoreShare",
+            "genuineMandatoryMaxTie",
+            "distribution"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "itemCount",
+        "requiredItemCount",
+        "recommendedItemCount",
+        "informationalItemCount",
+        "criticalItemCount",
+        "scoreDistribution"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "evidenceFamiliesHash",
+    "missingEvidenceHash",
+    "items",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

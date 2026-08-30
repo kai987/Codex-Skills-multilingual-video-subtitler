@@ -1,4 +1,5 @@
 import path from "node:path";
+import * as c60113 from "@mvl/shared";
 
 import {
   acousticSceneWindowsArtifactSchema,
@@ -321,7 +322,77 @@ import {
 import { format } from "prettier";
 import { z } from "zod";
 
+const c60113Schemas = [
+  [
+    "machine-missing-speech-evidence-v2",
+    c60113.c60113MissingSpeechEvidenceSchema,
+  ],
+  ["machine-review-evidence-families", c60113.c60113EvidenceFamilyGraphSchema],
+  ["machine-review-items-v3", c60113.c60113ReviewItemsV3Schema],
+  ["machine-review-regions-v2", c60113.c60113ReviewRegionsV2Schema],
+  ["machine-region-review-priority", c60113.c60113RegionReviewPrioritySchema],
+  [
+    "machine-review-playback-timeline",
+    c60113.c60113ReviewPlaybackTimelineSchema,
+  ],
+  ["machine-review-burden-plans", c60113.c60113ReviewBurdenPlansSchema],
+  ["c6-0-1-13-review-rank-policy", c60113.c60113ReviewPolicySchema],
+  ["machine-review-region-features", c60113.c60113RegionFeaturesSchema],
+  ["c6-0-1-13-review-ranker-folds", c60113.c60113RankerFoldsSchema],
+  [
+    "c6-0-1-13-review-ranker-machine-freeze",
+    c60113.c60113RankerMachineFreezeSchema,
+  ],
+  ["gold-review-region-labels", c60113.c60113RegionLabelsSchema],
+  ["c6-0-1-13-review-ranker-oof", c60113.c60113RankerOofSchema],
+  [
+    "c6-0-1-13-region-ranking-evaluation",
+    c60113.c60113RegionRankingEvaluationSchema,
+  ],
+  ["c6-0-1-13-region-ranker-freeze", c60113.c60113RegionRankerFreezeSchema],
+  ["c6-0-1-13-region-ranker-deployment", c60113.c60113DeploymentRankerSchema],
+  ["c6-0-1-13-data-quality-audit", c60113.c60113DataQualityAuditSchema],
+  ["c6-0-1-13-workspace-extension", c60113.c60113WorkspaceExtensionSchema],
+  [
+    "c6-0-1-13-correction-instrumentation",
+    c60113.c60113CorrectionInstrumentationSchema,
+  ],
+  ["c6-0-1-13-trial-manifest", c60113.c60113TrialManifestSchema],
+  ["c6-0-1-13-trial-event", c60113.c60113TrialEventSchema],
+  ["c6-0-1-13-trial-state", c60113.c60113TrialStateSchema],
+  ["c6-0-1-13-trial-package-manifest", c60113.c60113TrialPackageManifestSchema],
+  ["c6-0-1-13-blank-review-session", c60113.c60113BlankReviewSessionSchema],
+  ["c6-0-1-13-baseline-replay", c60113.c60113BaselineReplaySchema],
+  [
+    "c6-0-1-13-prospective-trial-readiness",
+    c60113.c60113ProspectiveTrialReadinessSchema,
+  ],
+  [
+    "c6-0-1-13-review-burden-validation",
+    c60113.c60113ReviewBurdenValidationSchema,
+  ],
+  ["c6-0-1-13-validation", c60113.c60113ValidationSchema],
+  ["c6-0-1-13-ablation-machine-freeze", c60113.c60113AblationFreezeSchema],
+  ["c6-0-1-13-ui-acceptance-results", c60113.c60113UiAcceptanceResultsSchema],
+  ["c6-0-1-13-shareable-summary", c60113.c60113ShareableSummarySchema],
+  ["c6-0-1-13-shareable-audit", c60113.c60113ShareableAuditSchema],
+  ["c6-0-1-13-ablation-evaluation", c60113.c60113AblationEvaluationSchema],
+  [
+    "c6-0-1-13-missing-evidence-evaluation",
+    c60113.c60113MissingEvidenceEvaluationSchema,
+  ],
+  [
+    "c6-0-1-13-post-freeze-evaluation-audit",
+    c60113.c60113PostFreezeEvaluationAuditSchema,
+  ],
+] as const;
+
 const schemas = [
+  ...c60113Schemas.map(([name, schema]) => ({
+    fileName: `${name}.schema.json`,
+    id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
+    schema,
+  })),
   {
     fileName: "machine-vad-global-timebase.schema.json",
     id: "https://schemas.local/multilingual-video-learning/machine-vad-global-timebase.schema.json",

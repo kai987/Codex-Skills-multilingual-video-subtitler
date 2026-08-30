@@ -30,6 +30,60 @@
     "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "evidenceSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "candidateSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewInstrumentation": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "regionRank": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewBudget": {
+          "type": "string",
+          "enum": [
+            "UNIQUE_AUDIO_10_PERCENT",
+            "UNIQUE_AUDIO_20_PERCENT",
+            "UNIQUE_AUDIO_30_PERCENT",
+            "UNIQUE_AUDIO_40_PERCENT",
+            "UNIQUE_AUDIO_50_PERCENT",
+            "ALL_MANDATORY",
+            "FULL_QUEUE"
+          ]
+        },
+        "uniqueAudioSecondsBeforeDecision": { "type": "number", "minimum": 0 },
+        "playedSecondsBeforeDecision": { "type": "number", "minimum": 0 },
+        "candidateUsedAsEditingBase": { "type": "boolean" },
+        "initialEditingCandidateId": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "editDistanceFromCandidate": {
+          "anyOf": [
+            { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            { "type": "null" }
+          ]
+        },
+        "decisionLatencySeconds": { "type": "number", "minimum": 0 },
+        "playbackCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "regionRank",
+        "reviewBudget",
+        "uniqueAudioSecondsBeforeDecision",
+        "playedSecondsBeforeDecision",
+        "candidateUsedAsEditingBase",
+        "initialEditingCandidateId",
+        "editDistanceFromCandidate",
+        "decisionLatencySeconds",
+        "playbackCount"
+      ],
+      "additionalProperties": false
+    },
     "decisionType": {
       "type": "string",
       "enum": [

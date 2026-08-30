@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-region-ranker-freeze.schema.json",
+  "title": "c6-0-1-13-region-ranker-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-region-ranker-freeze"
+    },
+    "rankerType": {
+      "type": "string",
+      "enum": ["L2_LOGISTIC_REGRESSION", "REGION_RISK_DENSITY_V3"]
+    },
+    "featureSchemaVersion": {
+      "type": "string",
+      "const": "c60113-structural-features-v1"
+    },
+    "featureNames": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "missingSeverity",
+          "hallucinationStrength",
+          "timingStrength",
+          "crossModelConflictStrength",
+          "whisperInstability",
+          "reazonInstability",
+          "acousticMargin",
+          "acousticScorability",
+          "speechCompleteness",
+          "requestEdgeRisk",
+          "localizationQuality",
+          "independentFamilyCount",
+          "correlatedEvidenceCount",
+          "affectedCueCount",
+          "affectedEventCount",
+          "candidateActionableCount",
+          "orphanCount",
+          "coreDurationSeconds",
+          "contextDurationSeconds",
+          "chronologicalIncrementalAudioSeconds",
+          "neighborContextOverlapSeconds",
+          "sceneCount",
+          "speakerGroupCount",
+          "positiveEvidenceStrength"
+        ]
+      }
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "modelType": {
+              "type": "string",
+              "const": "L2_LOGISTIC_REGRESSION"
+            },
+            "preprocessing": {
+              "type": "object",
+              "properties": {
+                "featureNames": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "medians": { "type": "array", "items": { "type": "number" } },
+                "means": { "type": "array", "items": { "type": "number" } },
+                "scales": {
+                  "type": "array",
+                  "items": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "fittedRegionIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "missingValueEncoding": {
+                  "type": "string",
+                  "const": "MEDIAN_PLUS_SEPARATE_UNKNOWN_UNAVAILABLE_INDICATORS"
+                }
+              },
+              "required": [
+                "featureNames",
+                "medians",
+                "means",
+                "scales",
+                "fittedRegionIds",
+                "missingValueEncoding"
+              ],
+              "additionalProperties": false
+            },
+            "coefficients": { "type": "array", "items": { "type": "number" } },
+            "intercept": { "type": "number" },
+            "positiveClassWeight": { "type": "number", "exclusiveMinimum": 0 },
+            "negativeClassWeight": { "type": "number", "exclusiveMinimum": 0 },
+            "l2": { "type": "number", "exclusiveMinimum": 0 },
+            "iterations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "classificationThreshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "trainingStatus": {
+              "type": "string",
+              "enum": ["FITTED", "SINGLE_CLASS_CONSTANT", "NO_TRAINING_DATA"]
+            }
+          },
+          "required": [
+            "modelType",
+            "preprocessing",
+            "coefficients",
+            "intercept",
+            "positiveClassWeight",
+            "negativeClassWeight",
+            "l2",
+            "iterations",
+            "classificationThreshold",
+            "trainingStatus"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "rankingPolicy": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "mandatoryPolicy": {
+      "type": "string",
+      "const": "POSITIVE_SAFETY_EVIDENCE_ONLY"
+    },
+    "burdenSelectionPolicy": {
+      "type": "string",
+      "const": "MARGINAL_UNIQUE_AUDIO_GREEDY_FIXED_OVERHEAD_V1"
+    },
+    "fixedReviewOverheadSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "trainingDatasetHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "foldsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "oofHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "use": { "type": "string", "const": "FUTURE_UNREVIEWED_EPISODES_ONLY" },
+    "episodeOneProspectiveClaim": { "type": "boolean", "const": false },
+    "reason": { "type": "string" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "rankerType",
+    "featureSchemaVersion",
+    "featureNames",
+    "model",
+    "rankingPolicy",
+    "mandatoryPolicy",
+    "burdenSelectionPolicy",
+    "fixedReviewOverheadSeconds",
+    "trainingDatasetHash",
+    "foldsHash",
+    "oofHash",
+    "evaluationHash",
+    "use",
+    "episodeOneProspectiveClaim",
+    "reason",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

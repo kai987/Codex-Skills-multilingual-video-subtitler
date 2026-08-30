@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-missing-evidence-evaluation.schema.json",
+  "title": "c6-0-1-13-missing-evidence-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-missing-evidence-evaluation"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "missingEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labelsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "classificationChangedByGold": { "type": "boolean", "const": false },
+    "denominatorMeaning": {
+      "type": "string",
+      "const": "DISTINCT_GAPS_AND_DISTINCT_LEGACY_ITEMS_REPORTED_SEPARATELY"
+    },
+    "totalGoldMissingComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "legacyMissingItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "deduplicatedGapCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "legacyTruePositiveItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "legacyFalsePositiveItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "legacyItemPrecision": {
+      "anyOf": [
+        { "type": "number", "minimum": 0, "maximum": 1 },
+        { "type": "null" }
+      ]
+    },
+    "anyGapCapturedMissingComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "anyGapRecall": { "type": "number", "minimum": 0, "maximum": 1 },
+    "strongCapturedMissingComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "strongRecall": { "type": "number", "minimum": 0, "maximum": 1 },
+    "classifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "classification": {
+            "type": "string",
+            "enum": [
+              "SPEECH_GAP_OBSERVED",
+              "MISSING_DIALOGUE_POSSIBLE",
+              "MISSING_DIALOGUE_STRONG",
+              "MISSING_DIALOGUE_CONTRADICTED",
+              "MISSING_DIALOGUE_UNRESOLVED"
+            ]
+          },
+          "gapCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "truePositiveGapCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "falsePositiveGapCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "precisionIfTreatedAsMissing": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "capturedMissingComponentIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "recall": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "required": [
+          "classification",
+          "gapCount",
+          "truePositiveGapCount",
+          "falsePositiveGapCount",
+          "precisionIfTreatedAsMissing",
+          "capturedMissingComponentIds",
+          "recall"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorComponentId": { "type": "string" },
+          "sourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "capturedByAnyGap": { "type": "boolean" },
+          "capturedByStrong": { "type": "boolean" },
+          "gapIds": { "type": "array", "items": { "type": "string" } },
+          "legacyItemIds": { "type": "array", "items": { "type": "string" } },
+          "classifications": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SPEECH_GAP_OBSERVED",
+                "MISSING_DIALOGUE_POSSIBLE",
+                "MISSING_DIALOGUE_STRONG",
+                "MISSING_DIALOGUE_CONTRADICTED",
+                "MISSING_DIALOGUE_UNRESOLVED"
+              ]
+            }
+          },
+          "evidenceGapReason": { "type": "string" }
+        },
+        "required": [
+          "errorComponentId",
+          "sourceInterval",
+          "capturedByAnyGap",
+          "capturedByStrong",
+          "gapIds",
+          "legacyItemIds",
+          "classifications",
+          "evidenceGapReason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "machineFreezeHash",
+    "missingEvidenceHash",
+    "labelsHash",
+    "evaluationOnly",
+    "classificationChangedByGold",
+    "denominatorMeaning",
+    "totalGoldMissingComponents",
+    "legacyMissingItemCount",
+    "deduplicatedGapCount",
+    "legacyTruePositiveItemCount",
+    "legacyFalsePositiveItemCount",
+    "legacyItemPrecision",
+    "anyGapCapturedMissingComponentCount",
+    "anyGapRecall",
+    "strongCapturedMissingComponentCount",
+    "strongRecall",
+    "classifications",
+    "components",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,406 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-review-burden-validation.schema.json",
+  "title": "c6-0-1-13-review-burden-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-review-burden-validation"
+    },
+    "before": {
+      "type": "object",
+      "properties": {
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "regionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredRegionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "clipSumSeconds": { "type": "number", "minimum": 0 },
+        "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+        "requiredUniqueSeconds": { "type": "number", "minimum": 0 },
+        "requiredUniqueRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+        "scoreDiagnostics": {
+          "type": "object",
+          "properties": {
+            "maximumScore": { "type": "number" },
+            "maximumScoreCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "largestTieGroup": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "uniqueScoreCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "entropyBits": { "type": "number", "minimum": 0 },
+            "distribution": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "score": { "type": "number" },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["score", "count"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "maximumScore",
+            "maximumScoreCount",
+            "largestTieGroup",
+            "uniqueScoreCount",
+            "entropyBits",
+            "distribution"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "itemCount",
+        "regionCount",
+        "requiredItemCount",
+        "requiredRegionCount",
+        "clipSumSeconds",
+        "uniqueUnionSeconds",
+        "requiredUniqueSeconds",
+        "requiredUniqueRatio",
+        "duplicateContextSeconds",
+        "scoreDiagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "after": {
+      "type": "object",
+      "properties": {
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "regionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredRegionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "clipSumSeconds": { "type": "number", "minimum": 0 },
+        "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+        "requiredUniqueSeconds": { "type": "number", "minimum": 0 },
+        "requiredUniqueRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+        "scoreDiagnostics": {
+          "type": "object",
+          "properties": {
+            "maximumScore": { "type": "number" },
+            "maximumScoreCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "largestTieGroup": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "uniqueScoreCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "entropyBits": { "type": "number", "minimum": 0 },
+            "distribution": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "score": { "type": "number" },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["score", "count"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "maximumScore",
+            "maximumScoreCount",
+            "largestTieGroup",
+            "uniqueScoreCount",
+            "entropyBits",
+            "distribution"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "itemCount",
+        "regionCount",
+        "requiredItemCount",
+        "requiredRegionCount",
+        "clipSumSeconds",
+        "uniqueUnionSeconds",
+        "requiredUniqueSeconds",
+        "requiredUniqueRatio",
+        "duplicateContextSeconds",
+        "scoreDiagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "requiredAudioReductionSeconds": { "type": "number" },
+    "requiredAudioReductionRatio": { "type": "number" },
+    "missingClassificationCounts": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "SPEECH_GAP_OBSERVED",
+          "MISSING_DIALOGUE_POSSIBLE",
+          "MISSING_DIALOGUE_STRONG",
+          "MISSING_DIALOGUE_CONTRADICTED",
+          "MISSING_DIALOGUE_UNRESOLVED"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      "required": [
+        "SPEECH_GAP_OBSERVED",
+        "MISSING_DIALOGUE_POSSIBLE",
+        "MISSING_DIALOGUE_STRONG",
+        "MISSING_DIALOGUE_CONTRADICTED",
+        "MISSING_DIALOGUE_UNRESOLVED"
+      ]
+    },
+    "independentFamilyMean": { "type": "number", "minimum": 0 },
+    "deduplicatedEvidenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "absenceRiskBoostCount": { "type": "number", "const": 0 },
+    "machineTextMutationCount": { "type": "number", "const": 0 },
+    "machineTimingMutationCount": { "type": "number", "const": 0 },
+    "finalABArtifactParity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "artifact": { "type": "string" },
+          "aHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "bHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "equal": { "type": "boolean" }
+        },
+        "required": ["artifact", "aHash", "bHash", "equal"],
+        "additionalProperties": false
+      }
+    },
+    "finalSubtitleByteParity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "filename": { "type": "string" },
+          "sourceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "aHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "bHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "equal": { "type": "boolean" }
+        },
+        "required": ["filename", "sourceHash", "aHash", "bHash", "equal"],
+        "additionalProperties": false
+      }
+    },
+    "canonicalIdentities": {
+      "type": "object",
+      "properties": {
+        "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalTimingHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "machineDraftHash",
+        "cueCount",
+        "canonicalTextHash",
+        "canonicalTimingHash",
+        "presentationHash"
+      ],
+      "additionalProperties": false
+    },
+    "sourceReadOnly": { "type": "boolean" },
+    "sourceIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "sourceIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "goldReadOnly": { "type": "boolean" },
+    "goldIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "goldIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "before",
+    "after",
+    "requiredAudioReductionSeconds",
+    "requiredAudioReductionRatio",
+    "missingClassificationCounts",
+    "independentFamilyMean",
+    "deduplicatedEvidenceCount",
+    "absenceRiskBoostCount",
+    "machineTextMutationCount",
+    "machineTimingMutationCount",
+    "finalABArtifactParity",
+    "finalSubtitleByteParity",
+    "canonicalIdentities",
+    "sourceReadOnly",
+    "sourceIdentityBefore",
+    "sourceIdentityAfter",
+    "goldReadOnly",
+    "goldIdentityBefore",
+    "goldIdentityAfter",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}
