@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-shareable-summary.schema.json",
+  "title": "c6-1-1-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-1-shareable-summary" },
+    "privacy": { "type": "string", "const": "SANITIZED_AGGREGATES_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profileResultsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "routeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "readOnlyProofHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baseline": {
+      "type": "object",
+      "properties": {
+        "exactCer": { "type": "number", "minimum": 0 },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucination": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialErrors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTiming": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMae": { "type": "number", "minimum": 0 },
+        "endMae": { "type": "number", "minimum": 0 },
+        "boundaryP95": { "type": "number", "minimum": 0 },
+        "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overlap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "exactCer",
+        "normalizedCer",
+        "coverage",
+        "missing",
+        "hallucination",
+        "materialErrors",
+        "cueCount",
+        "severeTiming",
+        "startMae",
+        "endMae",
+        "boundaryP95",
+        "medianIoU",
+        "overlap"
+      ],
+      "additionalProperties": false
+    },
+    "profiles": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "selected": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluableSelected": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "correct": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "wrong": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutral": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "precision": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "harm": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "fixedCoverage": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "jointNormalizedGain": { "type": "number" },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "exactCer": { "type": "number", "minimum": 0 },
+              "normalizedCer": { "type": "number", "minimum": 0 },
+              "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+              "missing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "hallucination": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "materialErrors": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "cueCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "severeTiming": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "startMae": { "type": "number", "minimum": 0 },
+              "endMae": { "type": "number", "minimum": 0 },
+              "boundaryP95": { "type": "number", "minimum": 0 },
+              "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+              "overlap": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "exactCer",
+              "normalizedCer",
+              "coverage",
+              "missing",
+              "hallucination",
+              "materialErrors",
+              "cueCount",
+              "severeTiming",
+              "startMae",
+              "endMae",
+              "boundaryP95",
+              "medianIoU",
+              "overlap"
+            ],
+            "additionalProperties": false
+          },
+          "canonicalTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "canonicalTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "profileId",
+          "selected",
+          "evaluableSelected",
+          "correct",
+          "wrong",
+          "neutral",
+          "unknown",
+          "precision",
+          "harm",
+          "fixedCoverage",
+          "jointNormalizedGain",
+          "metrics",
+          "canonicalTextHash",
+          "canonicalTimingHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "route": { "type": "string", "minLength": 1 },
+    "frozenModelCreated": { "type": "boolean" },
+    "sourceReadOnly": { "type": "boolean" },
+    "goldReadOnly": { "type": "boolean" },
+    "productionUnchanged": { "type": "boolean" },
+    "rawTextIncluded": { "type": "boolean", "const": false },
+    "audioIncluded": { "type": "boolean", "const": false },
+    "absolutePathsIncluded": { "type": "boolean", "const": false },
+    "freshAsrInferences": { "type": "number", "const": 0 },
+    "freshCtcInferences": { "type": "number", "const": 0 },
+    "networkUsed": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "privacy",
+    "machineFreezeHash",
+    "profileResultsHash",
+    "routeHash",
+    "readOnlyProofHash",
+    "baseline",
+    "profiles",
+    "route",
+    "frozenModelCreated",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "productionUnchanged",
+    "rawTextIncluded",
+    "audioIncluded",
+    "absolutePathsIncluded",
+    "freshAsrInferences",
+    "freshCtcInferences",
+    "networkUsed",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status"
+  ],
+  "additionalProperties": false
+}

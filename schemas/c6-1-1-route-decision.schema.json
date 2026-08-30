@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-route-decision.schema.json",
+  "title": "c6-1-1-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-1-route-decision" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "SELECTIVE_EXISTING_CANDIDATE_MBR_SUPPORTED",
+        "SELECTIVE_MBR_PROMISING_BUT_NOT_PROVEN",
+        "EVALUATION_COVERAGE_INSUFFICIENT",
+        "SELECTIVE_MBR_NOT_SUPPORTED",
+        "SELECTIVE_MBR_ENGINEERING_INVALID"
+      ]
+    },
+    "nextRoute": {
+      "type": "string",
+      "enum": [
+        "GO_C6_1_2_FROZEN_PROSPECTIVE_SHADOW",
+        "MORE_INDEPENDENT_EPISODE_CALIBRATION_OR_PROSPECTIVE_OBSERVE_ONLY",
+        "STOP_AUTOMATIC_CONSENSUS_DECODER_EXPANSION",
+        "REPAIR_FIXED_EVALUATION_COVERAGE",
+        "REPAIR_ENGINEERING_BEFORE_QUALITY_CLAIMS"
+      ]
+    },
+    "engineeringPassed": { "type": "boolean" },
+    "engineeringChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["code", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "profiles": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "activeCandidate": { "type": "boolean" },
+          "minimumEvaluableSelected": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "fixedChangedGroupCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "jointNormalizedGain": { "type": "number" },
+          "jointExactGain": { "type": "number" },
+          "negativeActiveFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknownActiveFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "strongPassed": { "type": "boolean" },
+          "promisingPassed": { "type": "boolean" },
+          "strongChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string", "minLength": 1 },
+                "passed": { "type": "boolean" },
+                "observed": { "type": "string" },
+                "expected": { "type": "string" }
+              },
+              "required": ["code", "passed", "observed", "expected"],
+              "additionalProperties": false
+            }
+          },
+          "promisingChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string", "minLength": 1 },
+                "passed": { "type": "boolean" },
+                "observed": { "type": "string" },
+                "expected": { "type": "string" }
+              },
+              "required": ["code", "passed", "observed", "expected"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "profileId",
+          "activeCandidate",
+          "minimumEvaluableSelected",
+          "fixedChangedGroupCoverage",
+          "jointNormalizedGain",
+          "jointExactGain",
+          "negativeActiveFoldCount",
+          "unknownActiveFoldCount",
+          "strongPassed",
+          "promisingPassed",
+          "strongChecks",
+          "promisingChecks"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "selectedProfile": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "strongProfiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+      }
+    },
+    "promisingProfiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+      }
+    },
+    "futureModelTrainingAuthorized": { "type": "boolean" },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "benchmarkStatus": {
+      "type": "string",
+      "const": "KNOWN_DEVELOPMENT_BENCHMARK_CALIBRATION_FEASIBILITY_NOT_UNSEEN_VALIDATION"
+    },
+    "metricAuthority": {
+      "type": "string",
+      "const": "ACTUAL_JOINT_SHADOW_UNIQUE_FIXED_GROUP_GAIN_NOT_PROPOSAL_SUM"
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "policyHash",
+    "baselineHash",
+    "evidenceHash",
+    "outcome",
+    "nextRoute",
+    "engineeringPassed",
+    "engineeringChecks",
+    "profiles",
+    "selectedProfile",
+    "strongProfiles",
+    "promisingProfiles",
+    "futureModelTrainingAuthorized",
+    "reasons",
+    "benchmarkStatus",
+    "metricAuthority",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status"
+  ],
+  "additionalProperties": false
+}

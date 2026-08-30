@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-1-hierarchical-correlation-groups.schema.json",
+  "title": "machine-c6-1-1-hierarchical-correlation-groups",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-1-hierarchical-correlation-groups"
+    },
+    "candidateUniverseHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "correlationPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceAudioIdentity": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "providerFamily": { "type": "string", "enum": ["WHISPER", "REAZON"] },
+          "legacyCorrelationGroupId": { "type": "string", "minLength": 1 },
+          "modelGroupId": { "type": "string", "minLength": 1 },
+          "coreGroupId": { "type": "string", "minLength": 1 },
+          "observationGroupId": { "type": "string", "minLength": 1 },
+          "modelIdentity": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "coreInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "requestInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "coreAudioSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "requestAudioSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "decodeConfigurationHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "promptPolicyHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "requestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "windowType": { "type": "string", "minLength": 1 },
+          "metadataEvidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "missingMetadata": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "coreIdentityVerified": { "type": "boolean" },
+          "normalizedTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "providerFamily",
+          "legacyCorrelationGroupId",
+          "modelGroupId",
+          "coreGroupId",
+          "observationGroupId",
+          "modelIdentity",
+          "sourceInterval",
+          "coreInterval",
+          "requestInterval",
+          "coreAudioSha256",
+          "requestAudioSha256",
+          "decodeConfigurationHash",
+          "promptPolicyHash",
+          "requestId",
+          "windowType",
+          "metadataEvidenceHashes",
+          "missingMetadata",
+          "coreIdentityVerified",
+          "normalizedTextHash",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "currentIndependentVoteCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "candidateUniverseHash",
+    "correlationPolicyHash",
+    "sourceAudioIdentity",
+    "observations",
+    "currentIndependentVoteCount"
+  ],
+  "additionalProperties": false
+}

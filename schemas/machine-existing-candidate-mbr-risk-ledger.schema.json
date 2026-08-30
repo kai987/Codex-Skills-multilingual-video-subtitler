@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-existing-candidate-mbr-risk-ledger.schema.json",
+  "title": "machine-existing-candidate-mbr-risk-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-existing-candidate-mbr-risk-ledger"
+    },
+    "candidateUniverseHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "correlationGroupsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "riskPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "role": {
+            "type": "string",
+            "enum": ["CURRENT_NO_SWITCH", "ASR_CANDIDATE"]
+          },
+          "providerFamily": {
+            "type": "string",
+            "enum": ["WHISPER", "REAZON", "CURRENT"]
+          },
+          "legacyRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "withinProviderRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "crossProviderRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "withinCorrelationRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "providerBalancedRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "hierarchicalRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "providerRisks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "providerFamily": {
+                  "type": "string",
+                  "enum": ["WHISPER", "REAZON"]
+                },
+                "meanRisk": { "type": "number", "minimum": 0 },
+                "medoidCandidateId": { "type": "string", "minLength": 1 },
+                "medoidRisk": { "type": "number", "minimum": 0 },
+                "coreGroupCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "providerFamily",
+                "meanRisk",
+                "medoidCandidateId",
+                "medoidRisk",
+                "coreGroupCount"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "role",
+          "providerFamily",
+          "legacyRisk",
+          "withinProviderRisk",
+          "crossProviderRisk",
+          "withinCorrelationRisk",
+          "providerBalancedRisk",
+          "hierarchicalRisk",
+          "providerRisks",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "currentIndependentVoteCount": { "type": "number", "const": 0 },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "candidateUniverseHash",
+    "correlationGroupsHash",
+    "riskPolicyHash",
+    "rows",
+    "currentIndependentVoteCount",
+    "reasons"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-calibration-folds.schema.json",
+  "title": "c6-1-1-calibration-folds",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "artifactType": { "type": "string", "const": "c6-1-1-calibration-folds" },
+    "frozenBeforeLabels": { "type": "boolean", "const": true },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "unitHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "proposalId": { "type": "string", "minLength": 1 },
+          "sourceAudioIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "minimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "acousticIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "cueIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sharedSpanKeys": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "eventId",
+          "proposalId",
+          "sourceAudioIdentity",
+          "sourceInterval",
+          "acousticIntervals",
+          "cueIntervals",
+          "finalCueIds",
+          "sharedSpanKeys"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "requestedFoldCount": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "foldCount": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "status": {
+      "type": "string",
+      "enum": ["READY", "INSUFFICIENT_INDEPENDENT_GROUPS"]
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string", "minLength": 1 },
+          "eventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "proposalIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceAudioIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "minimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "foldId": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "groupId",
+          "eventIds",
+          "proposalIds",
+          "sourceAudioIdentity",
+          "sourceInterval",
+          "foldId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "folds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "foldId": { "type": "string", "minLength": 1 },
+          "groupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "eventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "proposalIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["foldId", "groupIds", "eventIds", "proposalIds"],
+        "additionalProperties": false
+      }
+    },
+    "audioLeakageCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eventLeakageCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "cueLeakageCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "frozenBeforeLabels",
+    "policyHash",
+    "unitHash",
+    "units",
+    "requestedFoldCount",
+    "foldCount",
+    "status",
+    "groups",
+    "folds",
+    "audioLeakageCount",
+    "eventLeakageCount",
+    "cueLeakageCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

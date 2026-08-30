@@ -1,0 +1,331 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-selective-existing-candidate-proposals.schema.json",
+  "title": "machine-selective-existing-candidate-proposals",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-selective-existing-candidate-proposals"
+    },
+    "candidateUniverseHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "correlationGroupsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "riskLedgerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "proposalPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "primaryVariant": { "type": "string", "const": "H2" },
+    "novelApplicationCount": { "type": "number", "const": 0 },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "sourceAudioIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "acousticIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "currentCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "proposedCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "proposedProvider": {
+            "anyOf": [
+              { "type": "string", "enum": ["WHISPER", "REAZON"] },
+              { "type": "null" }
+            ]
+          },
+          "proposedRole": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "currentMbrRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "proposedMbrRisk": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "rawMbrMargin": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "hierarchicalMbrMargin": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "runnerUpCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "runnerUpMargin": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "topKCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": ["ELIGIBLE", "BLOCKED_STRUCTURAL", "NO_ALTERNATIVE"]
+          },
+          "eligibilityReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "spanApplication": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "finalCueId": { "type": "string", "minLength": 1 },
+                  "spanStart": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "spanEnd": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "baselineSpanTextHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "cueTextHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "cueTimingHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "lineageEvidenceHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "replacementTextHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "applicationProofHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "finalCueId",
+                  "spanStart",
+                  "spanEnd",
+                  "baselineSpanTextHash",
+                  "cueTextHash",
+                  "cueTimingHash",
+                  "lineageEvidenceHash",
+                  "replacementTextHash",
+                  "applicationProofHash"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "eligibleCandidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "spanApplication": {
+                  "type": "object",
+                  "properties": {
+                    "finalCueId": { "type": "string", "minLength": 1 },
+                    "spanStart": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "spanEnd": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "baselineSpanTextHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "cueTextHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "cueTimingHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "lineageEvidenceHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "replacementTextHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "applicationProofHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "finalCueId",
+                    "spanStart",
+                    "spanEnd",
+                    "baselineSpanTextHash",
+                    "cueTextHash",
+                    "cueTimingHash",
+                    "lineageEvidenceHash",
+                    "replacementTextHash",
+                    "applicationProofHash"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": ["candidateId", "spanApplication"],
+              "additionalProperties": false
+            }
+          },
+          "diagnosticProposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variant": { "type": "string", "enum": ["H0", "H1", "H2"] },
+                "candidateId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "currentRisk": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "proposedRisk": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "margin": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "eligibilityStatus": {
+                  "type": "string",
+                  "enum": ["ELIGIBLE", "BLOCKED_STRUCTURAL", "NO_ALTERNATIVE"]
+                }
+              },
+              "required": [
+                "variant",
+                "candidateId",
+                "currentRisk",
+                "proposedRisk",
+                "margin",
+                "eligibilityStatus"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rejectedCandidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "reasons": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": ["candidateId", "reasons"],
+              "additionalProperties": false
+            }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "sourceAudioIdentity",
+          "sourceInterval",
+          "acousticIntervals",
+          "finalCueIds",
+          "currentCandidateId",
+          "proposedCandidateId",
+          "proposedProvider",
+          "proposedRole",
+          "currentMbrRisk",
+          "proposedMbrRisk",
+          "rawMbrMargin",
+          "hierarchicalMbrMargin",
+          "runnerUpCandidateId",
+          "runnerUpMargin",
+          "topKCandidateIds",
+          "eligibilityStatus",
+          "eligibilityReasons",
+          "spanApplication",
+          "eligibleCandidates",
+          "diagnosticProposals",
+          "rejectedCandidates",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "candidateUniverseHash",
+    "correlationGroupsHash",
+    "riskLedgerHash",
+    "proposalPolicyHash",
+    "primaryVariant",
+    "novelApplicationCount",
+    "records"
+  ],
+  "additionalProperties": false
+}

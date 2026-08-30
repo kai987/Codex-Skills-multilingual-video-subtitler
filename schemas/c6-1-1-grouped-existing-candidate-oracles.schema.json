@@ -1,0 +1,753 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-grouped-existing-candidate-oracles.schema.json",
+  "title": "c6-1-1-grouped-existing-candidate-oracles",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-1-grouped-existing-candidate-oracles"
+    },
+    "fixedMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mappingSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "frozenAlternativeOptionsHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "primaryProposalsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "oraclePolicy": {
+      "type": "object",
+      "properties": {
+        "oraclePolicyVersion": {
+          "type": "string",
+          "const": "c6.1.1-fixed-group-existing-oracles-v1"
+        },
+        "maxCombinationsPerGroup": { "type": "number", "const": 65536 },
+        "objective": {
+          "type": "string",
+          "const": "NORMALIZED_ERROR_THEN_FEWER_SWITCHES_THEN_EXACT_ERROR_THEN_SELECTION_HASH"
+        },
+        "searchMethod": {
+          "type": "string",
+          "const": "EXHAUSTIVE_COMPLETE_GROUP_ASSIGNMENTS"
+        },
+        "searchLimitAction": {
+          "type": "string",
+          "const": "SKIP_SEARCH_EXACT_VALUE_UNKNOWN"
+        },
+        "crossGroupEventAction": {
+          "type": "string",
+          "const": "UNEVALUABLE_COUPLED_ASSIGNMENT"
+        },
+        "individualProposalGainsSummed": { "type": "boolean", "const": false },
+        "newTextGenerationAllowed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "oraclePolicyVersion",
+        "maxCombinationsPerGroup",
+        "objective",
+        "searchMethod",
+        "searchLimitAction",
+        "crossGroupEventAction",
+        "individualProposalGainsSummed",
+        "newTextGenerationAllowed"
+      ],
+      "additionalProperties": false
+    },
+    "oraclePolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "productionMutationCount": { "type": "number", "const": 0 },
+    "evaluationMethod": {
+      "type": "string",
+      "const": "FIXED_GROUP_JOINT_COMPLETE_CANDIDATE_SEARCH"
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string", "minLength": 1 },
+          "eventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "mappingStatus": {
+            "type": "string",
+            "enum": [
+              "FIXED_ONE_TO_ONE",
+              "FIXED_ONE_TO_MANY",
+              "FIXED_MANY_TO_ONE",
+              "FIXED_MANY_TO_MANY",
+              "AMBIGUOUS_BASELINE_MAPPING",
+              "NO_BASELINE_MAPPING",
+              "STRUCTURE_INCOMPATIBLE"
+            ]
+          },
+          "currentExactError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "currentNormalizedError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "goldExactGraphemeCount": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "goldNormalizedGraphemeCount": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "proposalOracle": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "EXACT",
+                  "SEARCH_LIMIT",
+                  "UNEVALUABLE",
+                  "ASSEMBLY_ERROR"
+                ]
+              },
+              "theoreticalCombinations": {
+                "type": "string",
+                "pattern": "^[0-9]+$"
+              },
+              "searchedCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "validCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "rejectedCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "assemblyErrorCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "rejectionReasons": {
+                "type": "object",
+                "propertyNames": { "type": "string", "minLength": 1 },
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "bestExactError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestNormalizedError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "exactGain": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "normalizedGain": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestObservedExactError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestObservedNormalizedError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestObservedSelections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "eventId": { "type": "string", "minLength": 1 },
+                    "candidateId": { "type": "string", "minLength": 1 }
+                  },
+                  "required": ["eventId", "candidateId"],
+                  "additionalProperties": false
+                }
+              },
+              "bestObservedCueHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "optimumBounds": {
+                "type": "string",
+                "enum": ["EXACT_VALUE", "UNKNOWN"]
+              },
+              "reasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "status",
+              "theoreticalCombinations",
+              "searchedCombinations",
+              "validCombinations",
+              "rejectedCombinations",
+              "assemblyErrorCombinations",
+              "rejectionReasons",
+              "bestExactError",
+              "bestNormalizedError",
+              "exactGain",
+              "normalizedGain",
+              "bestObservedExactError",
+              "bestObservedNormalizedError",
+              "bestObservedSelections",
+              "bestObservedCueHash",
+              "optimumBounds",
+              "reasons",
+              "semanticHash"
+            ],
+            "additionalProperties": false
+          },
+          "bestExistingCandidateOracle": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "EXACT",
+                  "SEARCH_LIMIT",
+                  "UNEVALUABLE",
+                  "ASSEMBLY_ERROR"
+                ]
+              },
+              "theoreticalCombinations": {
+                "type": "string",
+                "pattern": "^[0-9]+$"
+              },
+              "searchedCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "validCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "rejectedCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "assemblyErrorCombinations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "rejectionReasons": {
+                "type": "object",
+                "propertyNames": { "type": "string", "minLength": 1 },
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "bestExactError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestNormalizedError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "exactGain": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "normalizedGain": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestObservedExactError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestObservedNormalizedError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "bestObservedSelections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "eventId": { "type": "string", "minLength": 1 },
+                    "candidateId": { "type": "string", "minLength": 1 }
+                  },
+                  "required": ["eventId", "candidateId"],
+                  "additionalProperties": false
+                }
+              },
+              "bestObservedCueHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "optimumBounds": {
+                "type": "string",
+                "enum": ["EXACT_VALUE", "UNKNOWN"]
+              },
+              "reasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "status",
+              "theoreticalCombinations",
+              "searchedCombinations",
+              "validCombinations",
+              "rejectedCombinations",
+              "assemblyErrorCombinations",
+              "rejectionReasons",
+              "bestExactError",
+              "bestNormalizedError",
+              "exactGain",
+              "normalizedGain",
+              "bestObservedExactError",
+              "bestObservedNormalizedError",
+              "bestObservedSelections",
+              "bestObservedCueHash",
+              "optimumBounds",
+              "reasons",
+              "semanticHash"
+            ],
+            "additionalProperties": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "groupId",
+          "eventIds",
+          "cueIds",
+          "mappingStatus",
+          "currentExactError",
+          "currentNormalizedError",
+          "goldExactGraphemeCount",
+          "goldNormalizedGraphemeCount",
+          "proposalOracle",
+          "bestExistingCandidateOracle",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "totalCueGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmappedAlternativeEventIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "unmappedPrimaryEventIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "proposalOracle": {
+          "type": "object",
+          "properties": {
+            "exactGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "searchLimitGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "unevaluableGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "assemblyErrorGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "entireFixedMapExact": { "type": "boolean" },
+            "exactGroupCoverage": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            },
+            "baselineExactError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "baselineNormalizedError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "bestExactError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "bestNormalizedError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "exactGain": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "normalizedGain": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "goldExactGraphemeCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "goldNormalizedGraphemeCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "baselineExactCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "baselineNormalizedCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "bestExactCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "bestNormalizedCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "searchedCombinations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "validCombinations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "rejectedCombinations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "errorAggregation": {
+              "type": "string",
+              "const": "UNIQUE_EXACT_FIXED_GROUPS_ONLY"
+            }
+          },
+          "required": [
+            "exactGroups",
+            "searchLimitGroups",
+            "unevaluableGroups",
+            "assemblyErrorGroups",
+            "entireFixedMapExact",
+            "exactGroupCoverage",
+            "baselineExactError",
+            "baselineNormalizedError",
+            "bestExactError",
+            "bestNormalizedError",
+            "exactGain",
+            "normalizedGain",
+            "goldExactGraphemeCount",
+            "goldNormalizedGraphemeCount",
+            "baselineExactCer",
+            "baselineNormalizedCer",
+            "bestExactCer",
+            "bestNormalizedCer",
+            "searchedCombinations",
+            "validCombinations",
+            "rejectedCombinations",
+            "errorAggregation"
+          ],
+          "additionalProperties": false
+        },
+        "bestExistingCandidateOracle": {
+          "type": "object",
+          "properties": {
+            "exactGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "searchLimitGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "unevaluableGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "assemblyErrorGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "entireFixedMapExact": { "type": "boolean" },
+            "exactGroupCoverage": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            },
+            "baselineExactError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "baselineNormalizedError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "bestExactError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "bestNormalizedError": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "exactGain": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "normalizedGain": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "goldExactGraphemeCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "goldNormalizedGraphemeCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "baselineExactCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "baselineNormalizedCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "bestExactCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "bestNormalizedCer": {
+              "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+            },
+            "searchedCombinations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "validCombinations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "rejectedCombinations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "errorAggregation": {
+              "type": "string",
+              "const": "UNIQUE_EXACT_FIXED_GROUPS_ONLY"
+            }
+          },
+          "required": [
+            "exactGroups",
+            "searchLimitGroups",
+            "unevaluableGroups",
+            "assemblyErrorGroups",
+            "entireFixedMapExact",
+            "exactGroupCoverage",
+            "baselineExactError",
+            "baselineNormalizedError",
+            "bestExactError",
+            "bestNormalizedError",
+            "exactGain",
+            "normalizedGain",
+            "goldExactGraphemeCount",
+            "goldNormalizedGraphemeCount",
+            "baselineExactCer",
+            "baselineNormalizedCer",
+            "bestExactCer",
+            "bestNormalizedCer",
+            "searchedCombinations",
+            "validCombinations",
+            "rejectedCombinations",
+            "errorAggregation"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "totalCueGroups",
+        "unmappedAlternativeEventIds",
+        "unmappedPrimaryEventIds",
+        "proposalOracle",
+        "bestExistingCandidateOracle"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "evaluationOnly",
+    "privacy",
+    "semanticHash",
+    "artifactType",
+    "fixedMapHash",
+    "mappingSemanticHash",
+    "baselineCueHash",
+    "frozenAlternativeOptionsHash",
+    "primaryProposalsHash",
+    "oraclePolicy",
+    "oraclePolicyHash",
+    "productionMutationCount",
+    "evaluationMethod",
+    "groups",
+    "summary"
+  ],
+  "additionalProperties": false
+}

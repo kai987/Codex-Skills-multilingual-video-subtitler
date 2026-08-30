@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-selective-existing-candidate-labels.schema.json",
+  "title": "gold-selective-existing-candidate-labels",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-selective-existing-candidate-labels"
+    },
+    "proposalSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fixedMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldMembershipHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "groupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "groupIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "counterfactualHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "SWITCH_IMPROVES",
+              "SWITCH_REGRESSES",
+              "SWITCH_NEUTRAL",
+              "SWITCH_UNEVALUABLE"
+            ]
+          },
+          "baselineError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "proposedError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "exactGain": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "normalizedGain": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "groupResults": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupId": { "type": "string", "minLength": 1 },
+                "eventIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "goldCueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "mappingStatus": {
+                  "type": "string",
+                  "enum": [
+                    "FIXED_ONE_TO_ONE",
+                    "FIXED_ONE_TO_MANY",
+                    "FIXED_MANY_TO_ONE",
+                    "FIXED_MANY_TO_MANY",
+                    "AMBIGUOUS_BASELINE_MAPPING",
+                    "NO_BASELINE_MAPPING",
+                    "STRUCTURE_INCOMPATIBLE"
+                  ]
+                },
+                "changed": { "type": "boolean" },
+                "baselineTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "shadowTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "baselineExactError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "baselineNormalizedError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "shadowExactError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "shadowNormalizedError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "goldExactGraphemeCount": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "goldNormalizedGraphemeCount": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "exactGain": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedGain": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "outcome": {
+                  "type": "string",
+                  "enum": ["IMPROVED", "REGRESSED", "NEUTRAL", "UNEVALUABLE"]
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "groupId",
+                "eventIds",
+                "cueIds",
+                "goldCueIds",
+                "mappingStatus",
+                "changed",
+                "baselineTextHash",
+                "shadowTextHash",
+                "baselineExactError",
+                "baselineNormalizedError",
+                "shadowExactError",
+                "shadowNormalizedError",
+                "goldExactGraphemeCount",
+                "goldNormalizedGraphemeCount",
+                "exactGain",
+                "normalizedGain",
+                "outcome",
+                "reasons",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "candidateId",
+          "groupIds",
+          "groupIdentityHash",
+          "counterfactualHash",
+          "outcome",
+          "baselineError",
+          "proposedError",
+          "exactGain",
+          "normalizedGain",
+          "reasons",
+          "groupResults",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "totalProposals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "improved": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "regressed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "neutral": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unevaluable": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fixedGroupCrossFoldCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniqueEvaluableGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "groupErrorAggregation": {
+          "type": "string",
+          "const": "NO_SUMMATION_OF_CORRELATED_PROPOSAL_COUNTERFACTUAL_ERRORS"
+        }
+      },
+      "required": [
+        "totalProposals",
+        "improved",
+        "regressed",
+        "neutral",
+        "unevaluable",
+        "fixedGroupCrossFoldCount",
+        "uniqueEvaluableGroups",
+        "groupErrorAggregation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "evaluationOnly",
+    "privacy",
+    "semanticHash",
+    "artifactType",
+    "proposalSetHash",
+    "fixedMapHash",
+    "foldMembershipHash",
+    "labels",
+    "summary"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,699 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-selective-mbr-error-attribution.schema.json",
+  "title": "c6-1-1-selective-mbr-error-attribution",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-1-selective-mbr-error-attribution"
+    },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "metricUnit": {
+      "type": "string",
+      "const": "FROZEN_SINGLE_PROPOSAL_COUNTERFACTUAL_CASE"
+    },
+    "causalInterpretation": {
+      "type": "string",
+      "const": "DESCRIPTIVE_ASSOCIATION_NOT_UNIQUE_CAUSATION"
+    },
+    "correlatedGainsSummed": { "type": "boolean", "const": false },
+    "proposalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "completenessHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decisionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "applicationEvidenceHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "profileQualityHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "eventId": { "type": "string", "minLength": 1 },
+          "proposalId": { "type": "string", "minLength": 1 },
+          "candidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "labelCandidateMatched": { "type": "boolean" },
+          "requestedSwitch": { "type": "boolean" },
+          "applicationStatus": {
+            "type": "string",
+            "enum": ["APPLIED", "BLOCKED", "NOT_SELECTED", "UNKNOWN"]
+          },
+          "counterfactualOutcome": {
+            "type": "string",
+            "enum": [
+              "SWITCH_IMPROVES",
+              "SWITCH_REGRESSES",
+              "SWITCH_NEUTRAL",
+              "SWITCH_UNEVALUABLE"
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["WHISPER", "REAZON", "UNKNOWN"]
+          },
+          "lengthBucket": {
+            "type": "string",
+            "enum": [
+              "STRONG_CONTRACTION",
+              "MILD_CONTRACTION",
+              "SAME_LENGTH",
+              "EXPANSION",
+              "UNKNOWN"
+            ]
+          },
+          "ctcEvidence": {
+            "type": "string",
+            "enum": ["SUPPORT", "VETO", "TIED", "UNKNOWN"]
+          },
+          "riskClasses": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "diagnosticErrorTypes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profileId",
+          "eventId",
+          "proposalId",
+          "candidateId",
+          "labelCandidateMatched",
+          "requestedSwitch",
+          "applicationStatus",
+          "counterfactualOutcome",
+          "provider",
+          "lengthBucket",
+          "ctcEvidence",
+          "riskClasses",
+          "diagnosticErrorTypes",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "caseCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedCorrectCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedWrongCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedNeutralCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedUnknownCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "actualAppliedCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedCorrectCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedWrongCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedNeutralCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedUnknownCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "rendererBlockedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "applicationUnknownCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "notSelectedImprovingProposalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "caseCount",
+              "requestedSwitchCount",
+              "requestedCorrectCount",
+              "requestedWrongCount",
+              "requestedNeutralCount",
+              "requestedUnknownCount",
+              "actualAppliedCount",
+              "actualAppliedCorrectCount",
+              "actualAppliedWrongCount",
+              "actualAppliedNeutralCount",
+              "actualAppliedUnknownCount",
+              "rendererBlockedCount",
+              "applicationUnknownCount",
+              "notSelectedImprovingProposalCount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["profileId", "counts"],
+        "additionalProperties": false
+      }
+    },
+    "strata": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "dimension": {
+            "type": "string",
+            "enum": ["PROVIDER", "LENGTH", "CTC", "RISK"]
+          },
+          "value": { "type": "string", "minLength": 1 },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "caseCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedCorrectCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedWrongCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedNeutralCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "requestedUnknownCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "actualAppliedCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedCorrectCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedWrongCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedNeutralCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "actualAppliedUnknownCount": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "rendererBlockedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "applicationUnknownCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "notSelectedImprovingProposalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "caseCount",
+              "requestedSwitchCount",
+              "requestedCorrectCount",
+              "requestedWrongCount",
+              "requestedNeutralCount",
+              "requestedUnknownCount",
+              "actualAppliedCount",
+              "actualAppliedCorrectCount",
+              "actualAppliedWrongCount",
+              "actualAppliedNeutralCount",
+              "actualAppliedUnknownCount",
+              "rendererBlockedCount",
+              "applicationUnknownCount",
+              "notSelectedImprovingProposalCount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["profileId", "dimension", "value", "counts"],
+        "additionalProperties": false
+      }
+    },
+    "ctcUtility": {
+      "type": "object",
+      "properties": {
+        "comparison": {
+          "type": "string",
+          "const": "S6_VS_S5_PAIRED_PROFILE_ABLATION"
+        },
+        "available": { "type": "boolean" },
+        "pairedCaseCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectionChangedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcKnownSelectionChangedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ctcUnknownSelectionChangedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "switchedOn": {
+          "type": "object",
+          "properties": {
+            "caseCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedSwitchCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedCorrectCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedWrongCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedNeutralCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedUnknownCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "actualAppliedCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedCorrectCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedWrongCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedNeutralCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedUnknownCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "rendererBlockedCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "applicationUnknownCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "notSelectedImprovingProposalCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "caseCount",
+            "requestedSwitchCount",
+            "requestedCorrectCount",
+            "requestedWrongCount",
+            "requestedNeutralCount",
+            "requestedUnknownCount",
+            "actualAppliedCount",
+            "actualAppliedCorrectCount",
+            "actualAppliedWrongCount",
+            "actualAppliedNeutralCount",
+            "actualAppliedUnknownCount",
+            "rendererBlockedCount",
+            "applicationUnknownCount",
+            "notSelectedImprovingProposalCount"
+          ],
+          "additionalProperties": false
+        },
+        "switchedOff": {
+          "type": "object",
+          "properties": {
+            "caseCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedSwitchCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedCorrectCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedWrongCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedNeutralCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestedUnknownCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "actualAppliedCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedCorrectCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedWrongCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedNeutralCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "actualAppliedUnknownCount": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                { "type": "null" }
+              ]
+            },
+            "rendererBlockedCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "applicationUnknownCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "notSelectedImprovingProposalCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "caseCount",
+            "requestedSwitchCount",
+            "requestedCorrectCount",
+            "requestedWrongCount",
+            "requestedNeutralCount",
+            "requestedUnknownCount",
+            "actualAppliedCount",
+            "actualAppliedCorrectCount",
+            "actualAppliedWrongCount",
+            "actualAppliedNeutralCount",
+            "actualAppliedUnknownCount",
+            "rendererBlockedCount",
+            "applicationUnknownCount",
+            "notSelectedImprovingProposalCount"
+          ],
+          "additionalProperties": false
+        },
+        "changedSelectedCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniquelyCausedByCtcClaim": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "comparison",
+        "available",
+        "pairedCaseCount",
+        "selectionChangedCount",
+        "ctcKnownSelectionChangedCount",
+        "ctcUnknownSelectionChangedCount",
+        "switchedOn",
+        "switchedOff",
+        "changedSelectedCandidateCount",
+        "uniquelyCausedByCtcClaim"
+      ],
+      "additionalProperties": false
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "evaluationOnly",
+    "privacy",
+    "metricUnit",
+    "causalInterpretation",
+    "correlatedGainsSummed",
+    "proposalHash",
+    "featureHash",
+    "completenessHash",
+    "labelHash",
+    "decisionHash",
+    "applicationEvidenceHash",
+    "profileQualityHashes",
+    "cases",
+    "profiles",
+    "strata",
+    "ctcUtility",
+    "limitations",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

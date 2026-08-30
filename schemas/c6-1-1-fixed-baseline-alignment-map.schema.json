@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-fixed-baseline-alignment-map.schema.json",
+  "title": "c6-1-1-fixed-baseline-alignment-map",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-1-fixed-baseline-alignment-map"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineFrozenAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "goldFirstReadAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "machineArtifactsFrozenBeforeGold": { "type": "boolean", "const": true },
+    "baselineCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineCueOrder": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldCueOrder": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "eventBindingsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mappingPolicyVersion": {
+      "type": "string",
+      "const": "c6.1.1-time-connected-fixed-groups-v1"
+    },
+    "mappingPolicy": {
+      "type": "object",
+      "properties": {
+        "mappingPolicyVersion": {
+          "type": "string",
+          "const": "c6.1.1-time-connected-fixed-groups-v1"
+        },
+        "algorithm": {
+          "type": "string",
+          "const": "BASELINE_TEMPORAL_BIPARTITE_COMPONENTS"
+        },
+        "minimumMachineCoveredRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumGoldCoveredRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maxMachineCues": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxGoldCues": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxGroupDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "maxWithinSideGapSeconds": { "type": "number", "minimum": 0 },
+        "profileRematchingAllowed": { "type": "boolean", "const": false },
+        "exactView": {
+          "type": "string",
+          "const": "NFC_GRAPHEME_CONCATENATED_CUES"
+        },
+        "normalizedView": {
+          "type": "string",
+          "const": "C61_NFKC_CASE_PUNCTUATION_WHITESPACE_INSENSITIVE_GRAPHEMES"
+        }
+      },
+      "required": [
+        "mappingPolicyVersion",
+        "algorithm",
+        "minimumMachineCoveredRatio",
+        "minimumGoldCoveredRatio",
+        "maxMachineCues",
+        "maxGoldCues",
+        "maxGroupDurationSeconds",
+        "maxWithinSideGapSeconds",
+        "profileRematchingAllowed",
+        "exactView",
+        "normalizedView"
+      ],
+      "additionalProperties": false
+    },
+    "mappingPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mappingSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string", "minLength": 1 },
+          "machineCueIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "machineCueIndexes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "machineEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "goldCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "goldCueIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "minimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "baselineTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "baselineTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "goldTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "goldTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "machineCoveredRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "goldCoveredRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "mappingStatus": {
+            "type": "string",
+            "enum": [
+              "FIXED_ONE_TO_ONE",
+              "FIXED_ONE_TO_MANY",
+              "FIXED_MANY_TO_ONE",
+              "FIXED_MANY_TO_MANY",
+              "AMBIGUOUS_BASELINE_MAPPING",
+              "NO_BASELINE_MAPPING",
+              "STRUCTURE_INCOMPATIBLE"
+            ]
+          },
+          "ambiguityReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "groupId",
+          "machineCueIds",
+          "machineCueIndexes",
+          "machineEventIds",
+          "goldCueIds",
+          "goldCueIndexes",
+          "sourceInterval",
+          "baselineTextHash",
+          "baselineTimingHash",
+          "goldTextHash",
+          "goldTimingHash",
+          "machineCoveredRatio",
+          "goldCoveredRatio",
+          "mappingStatus",
+          "ambiguityReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "unmappedGoldCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "totalCueGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "stableMappedGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmappedGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "structureIncompatibleGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oneToOne": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oneToMany": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manyToOne": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manyToMany": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "assignedMachineCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "assignedGoldCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmappedGoldCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "totalCueGroups",
+        "stableMappedGroups",
+        "ambiguousGroups",
+        "unmappedGroups",
+        "structureIncompatibleGroups",
+        "oneToOne",
+        "oneToMany",
+        "manyToOne",
+        "manyToMany",
+        "assignedMachineCueCount",
+        "assignedGoldCueCount",
+        "unmappedGoldCueCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "evaluationOnly",
+    "privacy",
+    "semanticHash",
+    "artifactType",
+    "machineFreezeHash",
+    "machineFrozenAt",
+    "goldFirstReadAt",
+    "machineArtifactsFrozenBeforeGold",
+    "baselineCueHash",
+    "baselineTimingHash",
+    "baselineCueOrder",
+    "goldCueHash",
+    "goldCueOrder",
+    "eventBindingsHash",
+    "mappingPolicyVersion",
+    "mappingPolicy",
+    "mappingPolicyHash",
+    "mappingSemanticHash",
+    "groups",
+    "unmappedGoldCueIds",
+    "summary"
+  ],
+  "additionalProperties": false
+}

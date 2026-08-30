@@ -1,0 +1,1122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-selective-profile-results.schema.json",
+  "title": "c6-1-1-selective-profile-results",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-1-selective-profile-results"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fixedMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "oofHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "metricAuthority": {
+      "type": "string",
+      "const": "ACTUAL_ASSEMBLED_SHADOW_UNIQUE_FIXED_GROUPS"
+    },
+    "profiles": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "requestedMetrics": {
+            "type": "object",
+            "properties": {
+              "profileId": {
+                "type": "string",
+                "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+              },
+              "foldId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "metricUnit": {
+                "type": "string",
+                "const": "FROZEN_SINGLE_PROPOSAL_COUNTERFACTUAL"
+              },
+              "sharedEvaluationGroupCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "eligibleProposalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "evaluableProposalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "selectedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "evaluableSelectedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "selectedUnevaluableCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "correctSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "wrongSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "neutralSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "blockedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "abstainCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "precision": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "harmRate": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "selectiveCoverage": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "allEligibleCoverage": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "rawSelectedOverEvaluableRatio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "normalizedEditGain": { "type": "number" },
+              "exactEditGain": { "type": "number" },
+              "oracleAvailableGain": { "type": "number", "minimum": 0 },
+              "oracleCaptureRate": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "candidateOracleAvailableGain": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "candidateOracleCaptureRate": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "catastrophicDeletionRegressionCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "minimumActiveSelected": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "modelClass": {
+                "type": "string",
+                "enum": [
+                  "SAFE_NULL_BASELINE",
+                  "ACTIVE_SELECTIVE_MODEL",
+                  "INACTIVE_SELECTIVE_MODEL",
+                  "LEGACY_NONSELECTIVE_CONTROL"
+                ]
+              },
+              "wilson": {
+                "type": "object",
+                "properties": {
+                  "lower": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "upper": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "confidenceLevel": { "type": "number", "const": 0.95 },
+                  "n": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["lower", "upper", "confidenceLevel", "n"],
+                "additionalProperties": false
+              },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "profileId",
+              "foldId",
+              "metricUnit",
+              "sharedEvaluationGroupCount",
+              "eligibleProposalCount",
+              "evaluableProposalCount",
+              "selectedCount",
+              "evaluableSelectedCount",
+              "selectedUnevaluableCount",
+              "correctSwitchCount",
+              "wrongSwitchCount",
+              "neutralSwitchCount",
+              "blockedCount",
+              "abstainCount",
+              "precision",
+              "harmRate",
+              "selectiveCoverage",
+              "allEligibleCoverage",
+              "rawSelectedOverEvaluableRatio",
+              "normalizedEditGain",
+              "exactEditGain",
+              "oracleAvailableGain",
+              "oracleCaptureRate",
+              "candidateOracleAvailableGain",
+              "candidateOracleCaptureRate",
+              "catastrophicDeletionRegressionCount",
+              "minimumActiveSelected",
+              "modelClass",
+              "wilson",
+              "semanticHash"
+            ],
+            "additionalProperties": false
+          },
+          "appliedMetrics": {
+            "type": "object",
+            "properties": {
+              "profileId": {
+                "type": "string",
+                "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+              },
+              "foldId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "metricUnit": {
+                "type": "string",
+                "const": "FROZEN_SINGLE_PROPOSAL_COUNTERFACTUAL"
+              },
+              "sharedEvaluationGroupCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "eligibleProposalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "evaluableProposalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "selectedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "evaluableSelectedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "selectedUnevaluableCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "correctSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "wrongSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "neutralSwitchCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "blockedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "abstainCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "precision": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "harmRate": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "selectiveCoverage": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "allEligibleCoverage": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "rawSelectedOverEvaluableRatio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "normalizedEditGain": { "type": "number" },
+              "exactEditGain": { "type": "number" },
+              "oracleAvailableGain": { "type": "number", "minimum": 0 },
+              "oracleCaptureRate": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "candidateOracleAvailableGain": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "candidateOracleCaptureRate": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "catastrophicDeletionRegressionCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "minimumActiveSelected": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "modelClass": {
+                "type": "string",
+                "enum": [
+                  "SAFE_NULL_BASELINE",
+                  "ACTIVE_SELECTIVE_MODEL",
+                  "INACTIVE_SELECTIVE_MODEL",
+                  "LEGACY_NONSELECTIVE_CONTROL"
+                ]
+              },
+              "wilson": {
+                "type": "object",
+                "properties": {
+                  "lower": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "upper": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "confidenceLevel": { "type": "number", "const": 0.95 },
+                  "n": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["lower", "upper", "confidenceLevel", "n"],
+                "additionalProperties": false
+              },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "profileId",
+              "foldId",
+              "metricUnit",
+              "sharedEvaluationGroupCount",
+              "eligibleProposalCount",
+              "evaluableProposalCount",
+              "selectedCount",
+              "evaluableSelectedCount",
+              "selectedUnevaluableCount",
+              "correctSwitchCount",
+              "wrongSwitchCount",
+              "neutralSwitchCount",
+              "blockedCount",
+              "abstainCount",
+              "precision",
+              "harmRate",
+              "selectiveCoverage",
+              "allEligibleCoverage",
+              "rawSelectedOverEvaluableRatio",
+              "normalizedEditGain",
+              "exactEditGain",
+              "oracleAvailableGain",
+              "oracleCaptureRate",
+              "candidateOracleAvailableGain",
+              "candidateOracleCaptureRate",
+              "catastrophicDeletionRegressionCount",
+              "minimumActiveSelected",
+              "modelClass",
+              "wilson",
+              "semanticHash"
+            ],
+            "additionalProperties": false
+          },
+          "fixed": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "string", "const": "1.0.0" },
+              "policyVersion": {
+                "type": "string",
+                "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+              },
+              "evaluationOnly": { "type": "boolean", "const": true },
+              "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "artifactType": {
+                "type": "string",
+                "const": "c6-1-1-fixed-alignment-evaluation"
+              },
+              "evaluationMethod": {
+                "type": "string",
+                "const": "FIXED_GROUP_EVALUATION"
+              },
+              "errorUnit": {
+                "type": "string",
+                "const": "GRAPHEME_EDIT_COUNT_UNIQUE_CUE_GROUP"
+              },
+              "profileId": { "type": "string", "minLength": 1 },
+              "fixedMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "mappingSemanticHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "baselineCueHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "shadowCueHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "invariance": {
+                "type": "object",
+                "properties": {
+                  "cueIdSetParity": { "type": "boolean" },
+                  "cueOrderParity": { "type": "boolean" },
+                  "timingParity": { "type": "boolean" },
+                  "groupStructureParity": { "type": "boolean" },
+                  "baselineIdentityParity": { "type": "boolean" },
+                  "goldIdentityParity": { "type": "boolean" },
+                  "mappingIntegrityParity": { "type": "boolean" },
+                  "eligible": { "type": "boolean" },
+                  "reasons": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                },
+                "required": [
+                  "cueIdSetParity",
+                  "cueOrderParity",
+                  "timingParity",
+                  "groupStructureParity",
+                  "baselineIdentityParity",
+                  "goldIdentityParity",
+                  "mappingIntegrityParity",
+                  "eligible",
+                  "reasons"
+                ],
+                "additionalProperties": false
+              },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "groupId": { "type": "string", "minLength": 1 },
+                    "eventIds": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "cueIds": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "goldCueIds": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "mappingStatus": {
+                      "type": "string",
+                      "enum": [
+                        "FIXED_ONE_TO_ONE",
+                        "FIXED_ONE_TO_MANY",
+                        "FIXED_MANY_TO_ONE",
+                        "FIXED_MANY_TO_MANY",
+                        "AMBIGUOUS_BASELINE_MAPPING",
+                        "NO_BASELINE_MAPPING",
+                        "STRUCTURE_INCOMPATIBLE"
+                      ]
+                    },
+                    "changed": { "type": "boolean" },
+                    "baselineTextHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "shadowTextHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "baselineExactError": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "baselineNormalizedError": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "shadowExactError": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "shadowNormalizedError": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "goldExactGraphemeCount": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "goldNormalizedGraphemeCount": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "exactGain": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "normalizedGain": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": [
+                        "IMPROVED",
+                        "REGRESSED",
+                        "NEUTRAL",
+                        "UNEVALUABLE"
+                      ]
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "semanticHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "groupId",
+                    "eventIds",
+                    "cueIds",
+                    "goldCueIds",
+                    "mappingStatus",
+                    "changed",
+                    "baselineTextHash",
+                    "shadowTextHash",
+                    "baselineExactError",
+                    "baselineNormalizedError",
+                    "shadowExactError",
+                    "shadowNormalizedError",
+                    "goldExactGraphemeCount",
+                    "goldNormalizedGraphemeCount",
+                    "exactGain",
+                    "normalizedGain",
+                    "outcome",
+                    "reasons",
+                    "semanticHash"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "summary": {
+                "type": "object",
+                "properties": {
+                  "totalCueGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "changedCueGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "stableMappedGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "ambiguousGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "unmappedGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "structureIncompatibleGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "fixedMappedChangedGroupCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "evaluableGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "improvedGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "regressedGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "neutralGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "unevaluableGroups": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "fixedEvaluationCoverage": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "changedGroupCoverage": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "baselineExactError": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "baselineNormalizedError": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "shadowExactError": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "shadowNormalizedError": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "exactGain": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "normalizedGain": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "goldExactGraphemeCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "goldNormalizedGraphemeCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "baselineExactCer": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "baselineNormalizedCer": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "shadowExactCer": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "shadowNormalizedCer": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": [
+                  "totalCueGroups",
+                  "changedCueGroups",
+                  "stableMappedGroups",
+                  "ambiguousGroups",
+                  "unmappedGroups",
+                  "structureIncompatibleGroups",
+                  "fixedMappedChangedGroupCount",
+                  "evaluableGroups",
+                  "improvedGroups",
+                  "regressedGroups",
+                  "neutralGroups",
+                  "unevaluableGroups",
+                  "fixedEvaluationCoverage",
+                  "changedGroupCoverage",
+                  "baselineExactError",
+                  "baselineNormalizedError",
+                  "shadowExactError",
+                  "shadowNormalizedError",
+                  "exactGain",
+                  "normalizedGain",
+                  "goldExactGraphemeCount",
+                  "goldNormalizedGraphemeCount",
+                  "baselineExactCer",
+                  "baselineNormalizedCer",
+                  "shadowExactCer",
+                  "shadowNormalizedCer"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "policyVersion",
+              "evaluationOnly",
+              "privacy",
+              "semanticHash",
+              "artifactType",
+              "evaluationMethod",
+              "errorUnit",
+              "profileId",
+              "fixedMapHash",
+              "mappingSemanticHash",
+              "baselineCueHash",
+              "shadowCueHash",
+              "invariance",
+              "groups",
+              "summary"
+            ],
+            "additionalProperties": false
+          },
+          "quality": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": { "type": "string", "const": "1.0.0" },
+              "policyVersion": {
+                "type": "string",
+                "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+              },
+              "evaluationOnly": { "type": "boolean", "const": true },
+              "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "artifactType": {
+                "type": "string",
+                "const": "c6-1-1-selective-profile-quality"
+              },
+              "profileId": { "type": "string", "minLength": 1 },
+              "fixedEvaluationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "fixedMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "legacyEvaluationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "baselineLegacyEvaluationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "fixedEvaluationMethod": {
+                "type": "string",
+                "const": "FIXED_GROUP_EVALUATION"
+              },
+              "fullEpisodeEvaluationMethod": {
+                "type": "string",
+                "const": "LEGACY_GLOBAL_CUE_GROUP_MATCHING_DIAGNOSTIC_ONLY"
+              },
+              "legacyMetricsUsedForProposalLabels": {
+                "type": "boolean",
+                "const": false
+              },
+              "baselineMetrics": {
+                "type": "object",
+                "properties": {
+                  "exactCer": { "type": "number", "minimum": 0 },
+                  "normalizedCer": { "type": "number", "minimum": 0 },
+                  "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "missing": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hallucination": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "materialErrors": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "cueCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "severeTiming": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "startMae": { "type": "number", "minimum": 0 },
+                  "endMae": { "type": "number", "minimum": 0 },
+                  "boundaryP95": { "type": "number", "minimum": 0 },
+                  "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "overlap": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "exactCer",
+                  "normalizedCer",
+                  "coverage",
+                  "missing",
+                  "hallucination",
+                  "materialErrors",
+                  "cueCount",
+                  "severeTiming",
+                  "startMae",
+                  "endMae",
+                  "boundaryP95",
+                  "medianIoU",
+                  "overlap"
+                ],
+                "additionalProperties": false
+              },
+              "shadowMetrics": {
+                "type": "object",
+                "properties": {
+                  "exactCer": { "type": "number", "minimum": 0 },
+                  "normalizedCer": { "type": "number", "minimum": 0 },
+                  "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "missing": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hallucination": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "materialErrors": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "cueCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "severeTiming": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "startMae": { "type": "number", "minimum": 0 },
+                  "endMae": { "type": "number", "minimum": 0 },
+                  "boundaryP95": { "type": "number", "minimum": 0 },
+                  "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "overlap": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "exactCer",
+                  "normalizedCer",
+                  "coverage",
+                  "missing",
+                  "hallucination",
+                  "materialErrors",
+                  "cueCount",
+                  "severeTiming",
+                  "startMae",
+                  "endMae",
+                  "boundaryP95",
+                  "medianIoU",
+                  "overlap"
+                ],
+                "additionalProperties": false
+              },
+              "timingHashUnchanged": { "type": "boolean" },
+              "matchingInducedTimingDelta": { "type": "boolean" },
+              "baselineAllPairOverlapCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "shadowAllPairOverlapCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "policyVersion",
+              "evaluationOnly",
+              "privacy",
+              "semanticHash",
+              "artifactType",
+              "profileId",
+              "fixedEvaluationHash",
+              "fixedMapHash",
+              "legacyEvaluationHash",
+              "baselineLegacyEvaluationHash",
+              "fixedEvaluationMethod",
+              "fullEpisodeEvaluationMethod",
+              "legacyMetricsUsedForProposalLabels",
+              "baselineMetrics",
+              "shadowMetrics",
+              "timingHashUnchanged",
+              "matchingInducedTimingDelta",
+              "baselineAllPairOverlapCount",
+              "shadowAllPairOverlapCount"
+            ],
+            "additionalProperties": false
+          },
+          "requestedSelectionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "appliedSelectionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "blockedRequestedEventIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "canonicalTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "canonicalTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "foldJointGains": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string" },
+                "selectedCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evaluableSelectedCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "normalizedGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                }
+              },
+              "required": [
+                "foldId",
+                "selectedCount",
+                "evaluableSelectedCount",
+                "normalizedGain"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "profileId",
+          "requestedMetrics",
+          "appliedMetrics",
+          "fixed",
+          "quality",
+          "requestedSelectionCount",
+          "appliedSelectionCount",
+          "blockedRequestedEventIds",
+          "canonicalTextHash",
+          "canonicalTimingHash",
+          "foldJointGains"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "machineFreezeHash",
+    "fixedMapHash",
+    "oofHash",
+    "metricAuthority",
+    "profiles"
+  ],
+  "additionalProperties": false
+}

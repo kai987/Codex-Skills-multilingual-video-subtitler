@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-calibration-policy.schema.json",
+  "title": "c6-1-1-calibration-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "artifactType": { "type": "string", "const": "c6-1-1-calibration-policy" },
+    "outerFoldCount": { "type": "integer", "minimum": 2, "maximum": 5 },
+    "innerFoldCount": { "type": "integer", "minimum": 2, "maximum": 5 },
+    "neighborGapSeconds": { "type": "number", "minimum": 0 },
+    "foldConstruction": {
+      "type": "string",
+      "const": "SOURCE_AUDIO_OVERLAP_NEIGHBOR_SHARED_CUE_CONTIGUOUS_GROUPS"
+    },
+    "foldAdaptation": {
+      "type": "string",
+      "const": "NO_LABEL_BASED_REPARTITION"
+    },
+    "thresholdObjective": {
+      "type": "string",
+      "const": "MIN_WRONG_ZERO_CATASTROPHIC_POSITIVE_GAIN_MIN_ACTIVE_THEN_COVERAGE"
+    },
+    "thresholdCandidates": {
+      "type": "string",
+      "const": "INNER_OOF_UNIQUE_SCORES_ONLY"
+    },
+    "innerMinimumSelected": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "minimumSelectedFraction": { "type": "number", "minimum": 0, "maximum": 1 },
+    "outerMinimumSelected": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "l2": { "type": "number", "exclusiveMinimum": 0 },
+    "learningRate": { "type": "number", "exclusiveMinimum": 0 },
+    "iterations": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "tolerance": { "type": "number", "exclusiveMinimum": 0 },
+    "singleClassPolicy": {
+      "type": "string",
+      "const": "SMOOTHED_TRAIN_PRIOR_NO_ACTIVE_WITHOUT_INNER_GAIN"
+    },
+    "preprocessing": {
+      "type": "string",
+      "const": "TRAIN_MEDIAN_TRAIN_MEAN_STD_PLUS_EXPLICIT_MISSING_FLAGS"
+    },
+    "preservationCosts": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "number", "minimum": 0 }
+    },
+    "catastrophicDeletedRatio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "catastrophicMinimumRegression": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "ruleMarginScale": { "type": "number", "exclusiveMinimum": 0 },
+    "ruleDeletionPenalty": { "type": "number", "minimum": 0 },
+    "profiles": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "name": { "type": "string", "minLength": 1 },
+          "modelType": {
+            "type": "string",
+            "enum": [
+              "NULL",
+              "LEGACY",
+              "RAW_MARGIN",
+              "HIERARCHICAL_MARGIN",
+              "PRESERVATION_MARGIN",
+              "L2_LOGISTIC",
+              "CONSERVATIVE_RULE"
+            ]
+          },
+          "featureNames": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "rawMbrMargin",
+                "hierarchicalMbrMargin",
+                "runnerUpMargin",
+                "providerCode",
+                "candidateRoleCode",
+                "providerSupportCount",
+                "correlationSupportCount",
+                "whisperStability",
+                "reazonStability",
+                "crossModelAgreement",
+                "ctcDirection",
+                "ctcMargin",
+                "tokenSupportCoverage",
+                "decoderTruncationRisk",
+                "hallucinationRisk",
+                "requestEdgeRisk",
+                "speechCompleteness",
+                "characterLengthRatio",
+                "tokenLengthRatio",
+                "normalizedLcsCoverage",
+                "deletedCharacterRatio",
+                "insertedCharacterRatio",
+                "prefixRetention",
+                "suffixRetention",
+                "longestDeletedSpanRatio",
+                "longestInsertedSpanRatio",
+                "eventDuration",
+                "charactersPerSecond",
+                "normalizedDistance",
+                "spanApplicationSafe"
+              ]
+            }
+          }
+        },
+        "required": ["profileId", "name", "modelType", "featureNames"],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "outerFoldCount",
+    "innerFoldCount",
+    "neighborGapSeconds",
+    "foldConstruction",
+    "foldAdaptation",
+    "thresholdObjective",
+    "thresholdCandidates",
+    "innerMinimumSelected",
+    "minimumSelectedFraction",
+    "outerMinimumSelected",
+    "l2",
+    "learningRate",
+    "iterations",
+    "tolerance",
+    "singleClassPolicy",
+    "preprocessing",
+    "preservationCosts",
+    "catastrophicDeletedRatio",
+    "catastrophicMinimumRegression",
+    "ruleMarginScale",
+    "ruleDeletionPenalty",
+    "profiles",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

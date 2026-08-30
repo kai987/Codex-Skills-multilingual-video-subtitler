@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-policy-freeze.schema.json",
+  "title": "c6-1-1-policy-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-1-policy-freeze" },
+    "fixedAlignmentPolicyHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "machinePolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "calibrationPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "oraclePolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "existingCandidateOnly": { "type": "boolean", "const": true },
+    "currentIsProviderVote": { "type": "boolean", "const": false },
+    "proposalGoldInputCount": { "type": "number", "const": 0 },
+    "featureGoldInputCount": { "type": "number", "const": 0 },
+    "novelApplicationAllowed": { "type": "boolean", "const": false },
+    "productionMutationAllowed": { "type": "boolean", "const": false },
+    "profileRematchingAllowed": { "type": "boolean", "const": false },
+    "testFoldThresholdTuningAllowed": { "type": "boolean", "const": false },
+    "policyDefinitions": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "strongGate": {
+      "type": "object",
+      "properties": {
+        "minimumFixedCoverage": { "type": "number", "const": 0.8 },
+        "minimumSelected": { "type": "number", "const": 5 },
+        "minimumSelectedFraction": { "type": "number", "const": 0.05 },
+        "maximumWrong": { "type": "number", "const": 0 },
+        "maximumCatastrophicDeletion": { "type": "number", "const": 0 },
+        "requirePositiveGain": { "type": "boolean", "const": true },
+        "requireBaselineQualityNonRegression": {
+          "type": "boolean",
+          "const": true
+        },
+        "maximumNegativeActiveFolds": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "minimumFixedCoverage",
+        "minimumSelected",
+        "minimumSelectedFraction",
+        "maximumWrong",
+        "maximumCatastrophicDeletion",
+        "requirePositiveGain",
+        "requireBaselineQualityNonRegression",
+        "maximumNegativeActiveFolds"
+      ],
+      "additionalProperties": false
+    },
+    "promisingGate": {
+      "type": "object",
+      "properties": {
+        "minimumFixedCoverage": { "type": "number", "const": 0.8 },
+        "minimumPrecision": { "type": "number", "const": 0.85 },
+        "maximumHarm": { "type": "number", "const": 0.1 },
+        "maximumMaterialErrorIncrease": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "minimumFixedCoverage",
+        "minimumPrecision",
+        "maximumHarm",
+        "maximumMaterialErrorIncrease"
+      ],
+      "additionalProperties": false
+    },
+    "insufficientCoverageThreshold": { "type": "number", "const": 0.7 },
+    "c602Status": { "type": "string", "const": "HOLD" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "fixedAlignmentPolicyHash",
+    "machinePolicyHash",
+    "calibrationPolicyHash",
+    "oraclePolicyHash",
+    "existingCandidateOnly",
+    "currentIsProviderVote",
+    "proposalGoldInputCount",
+    "featureGoldInputCount",
+    "novelApplicationAllowed",
+    "productionMutationAllowed",
+    "profileRematchingAllowed",
+    "testFoldThresholdTuningAllowed",
+    "policyDefinitions",
+    "strongGate",
+    "promisingGate",
+    "insufficientCoverageThreshold",
+    "c602Status"
+  ],
+  "additionalProperties": false
+}

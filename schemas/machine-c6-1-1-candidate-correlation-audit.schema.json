@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-1-candidate-correlation-audit.schema.json",
+  "title": "machine-c6-1-1-candidate-correlation-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-1-candidate-correlation-audit"
+    },
+    "correlationGroupsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "legacy": {
+      "type": "object",
+      "properties": {
+        "totalGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singletonGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singletonRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "groupsByProvider": {
+          "type": "object",
+          "properties": {
+            "WHISPER": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "REAZON": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["WHISPER", "REAZON"],
+          "additionalProperties": false
+        },
+        "candidatesPerGroup": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "groupId": { "type": "string", "minLength": 1 },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["groupId", "count"],
+            "additionalProperties": false
+          }
+        },
+        "sameAudioDifferentRequestGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sameModelSameCoreSplitGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactContextSeparatedGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateTextAcrossGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "divergentTextWithinGroup": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "totalGroups",
+        "singletonGroups",
+        "singletonRate",
+        "groupsByProvider",
+        "candidatesPerGroup",
+        "sameAudioDifferentRequestGroups",
+        "sameModelSameCoreSplitGroups",
+        "exactContextSeparatedGroups",
+        "duplicateTextAcrossGroups",
+        "divergentTextWithinGroup"
+      ],
+      "additionalProperties": false
+    },
+    "legacyAllIncludedGroupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "legacyAllIncludedSingletonCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "legacyAllIncludedSingletonRate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "hierarchical": {
+      "type": "object",
+      "properties": {
+        "totalGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singletonGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singletonRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "groupsByProvider": {
+          "type": "object",
+          "properties": {
+            "WHISPER": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "REAZON": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["WHISPER", "REAZON"],
+          "additionalProperties": false
+        },
+        "candidatesPerGroup": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "groupId": { "type": "string", "minLength": 1 },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["groupId", "count"],
+            "additionalProperties": false
+          }
+        },
+        "sameAudioDifferentRequestGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sameModelSameCoreSplitGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactContextSeparatedGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateTextAcrossGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "divergentTextWithinGroup": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "totalGroups",
+        "singletonGroups",
+        "singletonRate",
+        "groupsByProvider",
+        "candidatesPerGroup",
+        "sameAudioDifferentRequestGroups",
+        "sameModelSameCoreSplitGroups",
+        "exactContextSeparatedGroups",
+        "duplicateTextAcrossGroups",
+        "divergentTextWithinGroup"
+      ],
+      "additionalProperties": false
+    },
+    "includedAsrCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "currentControlCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unknownCoreIdentityCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unknownDecodeConfigurationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unknownPromptPolicyCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reconciledSameCoreSplitGroupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "correlationGroupsHash",
+    "legacy",
+    "legacyAllIncludedGroupCount",
+    "legacyAllIncludedSingletonCount",
+    "legacyAllIncludedSingletonRate",
+    "hierarchical",
+    "includedAsrCandidateCount",
+    "currentControlCount",
+    "unknownCoreIdentityCount",
+    "unknownDecodeConfigurationCount",
+    "unknownPromptPolicyCount",
+    "reconciledSameCoreSplitGroupCount",
+    "reasons"
+  ],
+  "additionalProperties": false
+}

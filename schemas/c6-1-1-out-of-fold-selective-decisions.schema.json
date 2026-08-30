@@ -1,0 +1,1013 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-out-of-fold-selective-decisions.schema.json",
+  "title": "c6-1-1-out-of-fold-selective-decisions",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-1-out-of-fold-selective-decisions"
+    },
+    "foldHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sampleHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationRole": {
+      "type": "string",
+      "const": "KNOWN_BENCHMARK_NESTED_OOF_CALIBRATION"
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "eventId": { "type": "string", "minLength": 1 },
+          "proposalId": { "type": "string", "minLength": 1 },
+          "foldId": { "type": "string", "minLength": 1 },
+          "proposedCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "decisionScore": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "threshold": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "KEEP_CURRENT",
+              "SELECT_EXISTING_CANDIDATE",
+              "ABSTAIN_REVIEW",
+              "BLOCKED_STRUCTURAL",
+              "UNEVALUABLE_FOR_CALIBRATION"
+            ]
+          },
+          "machineReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "modelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profileId",
+          "eventId",
+          "proposalId",
+          "foldId",
+          "proposedCandidateId",
+          "decisionScore",
+          "threshold",
+          "decision",
+          "machineReasons",
+          "modelHash",
+          "policyHash",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "calibrationAudits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "outerFoldId": { "type": "string", "minLength": 1 },
+          "outerTrainingProposalIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "outerTestProposalIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "outerTrainingEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "outerTestEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "innerSplits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string", "minLength": 1 },
+                "trainingProposalIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "testProposalIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "modelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                "model": {
+                  "type": "object",
+                  "properties": {
+                    "profileId": {
+                      "type": "string",
+                      "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+                    },
+                    "modelType": { "type": "string", "minLength": 1 },
+                    "policyHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "trainingProposalIds": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "trainingEventIds": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "trainingDatasetHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "featureNames": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "rawMbrMargin",
+                          "hierarchicalMbrMargin",
+                          "runnerUpMargin",
+                          "providerCode",
+                          "candidateRoleCode",
+                          "providerSupportCount",
+                          "correlationSupportCount",
+                          "whisperStability",
+                          "reazonStability",
+                          "crossModelAgreement",
+                          "ctcDirection",
+                          "ctcMargin",
+                          "tokenSupportCoverage",
+                          "decoderTruncationRisk",
+                          "hallucinationRisk",
+                          "requestEdgeRisk",
+                          "speechCompleteness",
+                          "characterLengthRatio",
+                          "tokenLengthRatio",
+                          "normalizedLcsCoverage",
+                          "deletedCharacterRatio",
+                          "insertedCharacterRatio",
+                          "prefixRetention",
+                          "suffixRetention",
+                          "longestDeletedSpanRatio",
+                          "longestInsertedSpanRatio",
+                          "eventDuration",
+                          "charactersPerSecond",
+                          "normalizedDistance",
+                          "spanApplicationSafe"
+                        ]
+                      }
+                    },
+                    "preprocessing": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "featureName": {
+                            "type": "string",
+                            "enum": [
+                              "rawMbrMargin",
+                              "hierarchicalMbrMargin",
+                              "runnerUpMargin",
+                              "providerCode",
+                              "candidateRoleCode",
+                              "providerSupportCount",
+                              "correlationSupportCount",
+                              "whisperStability",
+                              "reazonStability",
+                              "crossModelAgreement",
+                              "ctcDirection",
+                              "ctcMargin",
+                              "tokenSupportCoverage",
+                              "decoderTruncationRisk",
+                              "hallucinationRisk",
+                              "requestEdgeRisk",
+                              "speechCompleteness",
+                              "characterLengthRatio",
+                              "tokenLengthRatio",
+                              "normalizedLcsCoverage",
+                              "deletedCharacterRatio",
+                              "insertedCharacterRatio",
+                              "prefixRetention",
+                              "suffixRetention",
+                              "longestDeletedSpanRatio",
+                              "longestInsertedSpanRatio",
+                              "eventDuration",
+                              "charactersPerSecond",
+                              "normalizedDistance",
+                              "spanApplicationSafe"
+                            ]
+                          },
+                          "observedCount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "missingCount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "imputedValue": { "type": "number" },
+                          "mean": { "type": "number" },
+                          "standardDeviation": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "allMissing": { "type": "boolean" }
+                        },
+                        "required": [
+                          "featureName",
+                          "observedCount",
+                          "missingCount",
+                          "imputedValue",
+                          "mean",
+                          "standardDeviation",
+                          "allMissing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "coefficients": {
+                      "type": "array",
+                      "items": { "type": "number" }
+                    },
+                    "intercept": { "type": "number" },
+                    "preservationCost": { "type": "number", "minimum": 0 },
+                    "positiveCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "negativeCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "iterationsRun": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "FITTED",
+                        "SINGLE_CLASS",
+                        "NO_EVALUABLE_TRAINING",
+                        "NO_TRAINING_REQUIRED"
+                      ]
+                    },
+                    "semanticHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "profileId",
+                    "modelType",
+                    "policyHash",
+                    "trainingProposalIds",
+                    "trainingEventIds",
+                    "trainingDatasetHash",
+                    "featureNames",
+                    "preprocessing",
+                    "coefficients",
+                    "intercept",
+                    "preservationCost",
+                    "positiveCount",
+                    "negativeCount",
+                    "iterationsRun",
+                    "status",
+                    "semanticHash"
+                  ],
+                  "additionalProperties": false
+                },
+                "preservationCost": { "type": "number", "minimum": 0 },
+                "predictions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "proposalId": { "type": "string", "minLength": 1 },
+                      "score": {
+                        "anyOf": [{ "type": "number" }, { "type": "null" }]
+                      }
+                    },
+                    "required": ["proposalId", "score"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "foldId",
+                "trainingProposalIds",
+                "testProposalIds",
+                "modelHash",
+                "model",
+                "preservationCost",
+                "predictions"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "thresholdCandidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "threshold": { "type": "number" },
+                "preservationCost": { "type": "number", "minimum": 0 },
+                "selected": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "correct": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "wrong": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "neutral": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "catastrophic": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "normalizedGain": { "type": "number" },
+                "exactGain": { "type": "number" },
+                "qualified": { "type": "boolean" }
+              },
+              "required": [
+                "threshold",
+                "preservationCost",
+                "selected",
+                "correct",
+                "wrong",
+                "neutral",
+                "catastrophic",
+                "normalizedGain",
+                "exactGain",
+                "qualified"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "threshold": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "preservationCost": { "type": "number", "minimum": 0 },
+          "activeThresholdFound": { "type": "boolean" },
+          "minimumInnerSelected": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "model": {
+            "type": "object",
+            "properties": {
+              "profileId": {
+                "type": "string",
+                "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+              },
+              "modelType": { "type": "string", "minLength": 1 },
+              "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "trainingProposalIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "trainingEventIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "trainingDatasetHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "featureNames": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "rawMbrMargin",
+                    "hierarchicalMbrMargin",
+                    "runnerUpMargin",
+                    "providerCode",
+                    "candidateRoleCode",
+                    "providerSupportCount",
+                    "correlationSupportCount",
+                    "whisperStability",
+                    "reazonStability",
+                    "crossModelAgreement",
+                    "ctcDirection",
+                    "ctcMargin",
+                    "tokenSupportCoverage",
+                    "decoderTruncationRisk",
+                    "hallucinationRisk",
+                    "requestEdgeRisk",
+                    "speechCompleteness",
+                    "characterLengthRatio",
+                    "tokenLengthRatio",
+                    "normalizedLcsCoverage",
+                    "deletedCharacterRatio",
+                    "insertedCharacterRatio",
+                    "prefixRetention",
+                    "suffixRetention",
+                    "longestDeletedSpanRatio",
+                    "longestInsertedSpanRatio",
+                    "eventDuration",
+                    "charactersPerSecond",
+                    "normalizedDistance",
+                    "spanApplicationSafe"
+                  ]
+                }
+              },
+              "preprocessing": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "featureName": {
+                      "type": "string",
+                      "enum": [
+                        "rawMbrMargin",
+                        "hierarchicalMbrMargin",
+                        "runnerUpMargin",
+                        "providerCode",
+                        "candidateRoleCode",
+                        "providerSupportCount",
+                        "correlationSupportCount",
+                        "whisperStability",
+                        "reazonStability",
+                        "crossModelAgreement",
+                        "ctcDirection",
+                        "ctcMargin",
+                        "tokenSupportCoverage",
+                        "decoderTruncationRisk",
+                        "hallucinationRisk",
+                        "requestEdgeRisk",
+                        "speechCompleteness",
+                        "characterLengthRatio",
+                        "tokenLengthRatio",
+                        "normalizedLcsCoverage",
+                        "deletedCharacterRatio",
+                        "insertedCharacterRatio",
+                        "prefixRetention",
+                        "suffixRetention",
+                        "longestDeletedSpanRatio",
+                        "longestInsertedSpanRatio",
+                        "eventDuration",
+                        "charactersPerSecond",
+                        "normalizedDistance",
+                        "spanApplicationSafe"
+                      ]
+                    },
+                    "observedCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "missingCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "imputedValue": { "type": "number" },
+                    "mean": { "type": "number" },
+                    "standardDeviation": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "allMissing": { "type": "boolean" }
+                  },
+                  "required": [
+                    "featureName",
+                    "observedCount",
+                    "missingCount",
+                    "imputedValue",
+                    "mean",
+                    "standardDeviation",
+                    "allMissing"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "coefficients": {
+                "type": "array",
+                "items": { "type": "number" }
+              },
+              "intercept": { "type": "number" },
+              "preservationCost": { "type": "number", "minimum": 0 },
+              "positiveCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "negativeCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "iterationsRun": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "FITTED",
+                  "SINGLE_CLASS",
+                  "NO_EVALUABLE_TRAINING",
+                  "NO_TRAINING_REQUIRED"
+                ]
+              },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "profileId",
+              "modelType",
+              "policyHash",
+              "trainingProposalIds",
+              "trainingEventIds",
+              "trainingDatasetHash",
+              "featureNames",
+              "preprocessing",
+              "coefficients",
+              "intercept",
+              "preservationCost",
+              "positiveCount",
+              "negativeCount",
+              "iterationsRun",
+              "status",
+              "semanticHash"
+            ],
+            "additionalProperties": false
+          },
+          "trainTestIntersectionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profileId",
+          "outerFoldId",
+          "outerTrainingProposalIds",
+          "outerTestProposalIds",
+          "outerTrainingEventIds",
+          "outerTestEventIds",
+          "innerSplits",
+          "thresholdCandidates",
+          "threshold",
+          "preservationCost",
+          "activeThresholdFound",
+          "minimumInnerSelected",
+          "model",
+          "trainTestIntersectionCount",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "profileMetrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "foldId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "metricUnit": {
+            "type": "string",
+            "const": "FROZEN_SINGLE_PROPOSAL_COUNTERFACTUAL"
+          },
+          "sharedEvaluationGroupCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "eligibleProposalCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluableProposalCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluableSelectedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedUnevaluableCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "correctSwitchCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "wrongSwitchCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutralSwitchCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "blockedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "abstainCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "precision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harmRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "selectiveCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "allEligibleCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "rawSelectedOverEvaluableRatio": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "normalizedEditGain": { "type": "number" },
+          "exactEditGain": { "type": "number" },
+          "oracleAvailableGain": { "type": "number", "minimum": 0 },
+          "oracleCaptureRate": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "candidateOracleAvailableGain": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "candidateOracleCaptureRate": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletionRegressionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "minimumActiveSelected": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "modelClass": {
+            "type": "string",
+            "enum": [
+              "SAFE_NULL_BASELINE",
+              "ACTIVE_SELECTIVE_MODEL",
+              "INACTIVE_SELECTIVE_MODEL",
+              "LEGACY_NONSELECTIVE_CONTROL"
+            ]
+          },
+          "wilson": {
+            "type": "object",
+            "properties": {
+              "lower": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "upper": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "confidenceLevel": { "type": "number", "const": 0.95 },
+              "n": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["lower", "upper", "confidenceLevel", "n"],
+            "additionalProperties": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profileId",
+          "foldId",
+          "metricUnit",
+          "sharedEvaluationGroupCount",
+          "eligibleProposalCount",
+          "evaluableProposalCount",
+          "selectedCount",
+          "evaluableSelectedCount",
+          "selectedUnevaluableCount",
+          "correctSwitchCount",
+          "wrongSwitchCount",
+          "neutralSwitchCount",
+          "blockedCount",
+          "abstainCount",
+          "precision",
+          "harmRate",
+          "selectiveCoverage",
+          "allEligibleCoverage",
+          "rawSelectedOverEvaluableRatio",
+          "normalizedEditGain",
+          "exactEditGain",
+          "oracleAvailableGain",
+          "oracleCaptureRate",
+          "candidateOracleAvailableGain",
+          "candidateOracleCaptureRate",
+          "catastrophicDeletionRegressionCount",
+          "minimumActiveSelected",
+          "modelClass",
+          "wilson",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "foldMetrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+          },
+          "foldId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "metricUnit": {
+            "type": "string",
+            "const": "FROZEN_SINGLE_PROPOSAL_COUNTERFACTUAL"
+          },
+          "sharedEvaluationGroupCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "eligibleProposalCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluableProposalCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluableSelectedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedUnevaluableCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "correctSwitchCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "wrongSwitchCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutralSwitchCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "blockedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "abstainCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "precision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harmRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "selectiveCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "allEligibleCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "rawSelectedOverEvaluableRatio": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "normalizedEditGain": { "type": "number" },
+          "exactEditGain": { "type": "number" },
+          "oracleAvailableGain": { "type": "number", "minimum": 0 },
+          "oracleCaptureRate": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "candidateOracleAvailableGain": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "candidateOracleCaptureRate": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletionRegressionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "minimumActiveSelected": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "modelClass": {
+            "type": "string",
+            "enum": [
+              "SAFE_NULL_BASELINE",
+              "ACTIVE_SELECTIVE_MODEL",
+              "INACTIVE_SELECTIVE_MODEL",
+              "LEGACY_NONSELECTIVE_CONTROL"
+            ]
+          },
+          "wilson": {
+            "type": "object",
+            "properties": {
+              "lower": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "upper": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "confidenceLevel": { "type": "number", "const": 0.95 },
+              "n": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["lower", "upper", "confidenceLevel", "n"],
+            "additionalProperties": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profileId",
+          "foldId",
+          "metricUnit",
+          "sharedEvaluationGroupCount",
+          "eligibleProposalCount",
+          "evaluableProposalCount",
+          "selectedCount",
+          "evaluableSelectedCount",
+          "selectedUnevaluableCount",
+          "correctSwitchCount",
+          "wrongSwitchCount",
+          "neutralSwitchCount",
+          "blockedCount",
+          "abstainCount",
+          "precision",
+          "harmRate",
+          "selectiveCoverage",
+          "allEligibleCoverage",
+          "rawSelectedOverEvaluableRatio",
+          "normalizedEditGain",
+          "exactEditGain",
+          "oracleAvailableGain",
+          "oracleCaptureRate",
+          "candidateOracleAvailableGain",
+          "candidateOracleCaptureRate",
+          "catastrophicDeletionRegressionCount",
+          "minimumActiveSelected",
+          "modelClass",
+          "wilson",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "bestActiveProfile": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+        },
+        { "type": "null" }
+      ]
+    },
+    "testLabelInputToPredictionCount": { "type": "number", "const": 0 },
+    "fullDataPredictionCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "foldHash",
+    "policyHash",
+    "sampleHash",
+    "evaluationRole",
+    "decisions",
+    "calibrationAudits",
+    "profileMetrics",
+    "foldMetrics",
+    "bestActiveProfile",
+    "testLabelInputToPredictionCount",
+    "fullDataPredictionCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

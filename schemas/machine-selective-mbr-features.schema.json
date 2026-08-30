@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-selective-mbr-features.schema.json",
+  "title": "machine-selective-mbr-features",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-selective-mbr-features"
+    },
+    "proposalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "completenessHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureSchemaHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureNames": {
+      "minItems": 30,
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "rawMbrMargin",
+          "hierarchicalMbrMargin",
+          "runnerUpMargin",
+          "providerCode",
+          "candidateRoleCode",
+          "providerSupportCount",
+          "correlationSupportCount",
+          "whisperStability",
+          "reazonStability",
+          "crossModelAgreement",
+          "ctcDirection",
+          "ctcMargin",
+          "tokenSupportCoverage",
+          "decoderTruncationRisk",
+          "hallucinationRisk",
+          "requestEdgeRisk",
+          "speechCompleteness",
+          "characterLengthRatio",
+          "tokenLengthRatio",
+          "normalizedLcsCoverage",
+          "deletedCharacterRatio",
+          "insertedCharacterRatio",
+          "prefixRetention",
+          "suffixRetention",
+          "longestDeletedSpanRatio",
+          "longestInsertedSpanRatio",
+          "eventDuration",
+          "charactersPerSecond",
+          "normalizedDistance",
+          "spanApplicationSafe"
+        ]
+      }
+    },
+    "rawTextFeatureCount": { "type": "number", "const": 0 },
+    "goldFeatureCount": { "type": "number", "const": 0 },
+    "datasetSpecificFeatureCount": { "type": "number", "const": 0 },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "values": {
+            "type": "object",
+            "properties": {
+              "rawMbrMargin": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "hierarchicalMbrMargin": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "runnerUpMargin": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "providerCode": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "candidateRoleCode": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "providerSupportCount": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "correlationSupportCount": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "whisperStability": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "reazonStability": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "crossModelAgreement": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "ctcDirection": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "ctcMargin": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "tokenSupportCoverage": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "decoderTruncationRisk": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "hallucinationRisk": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "requestEdgeRisk": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "speechCompleteness": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "characterLengthRatio": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "tokenLengthRatio": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "normalizedLcsCoverage": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "deletedCharacterRatio": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "insertedCharacterRatio": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "prefixRetention": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "suffixRetention": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "longestDeletedSpanRatio": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "longestInsertedSpanRatio": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "eventDuration": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "charactersPerSecond": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "normalizedDistance": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "spanApplicationSafe": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              }
+            },
+            "required": [
+              "rawMbrMargin",
+              "hierarchicalMbrMargin",
+              "runnerUpMargin",
+              "providerCode",
+              "candidateRoleCode",
+              "providerSupportCount",
+              "correlationSupportCount",
+              "whisperStability",
+              "reazonStability",
+              "crossModelAgreement",
+              "ctcDirection",
+              "ctcMargin",
+              "tokenSupportCoverage",
+              "decoderTruncationRisk",
+              "hallucinationRisk",
+              "requestEdgeRisk",
+              "speechCompleteness",
+              "characterLengthRatio",
+              "tokenLengthRatio",
+              "normalizedLcsCoverage",
+              "deletedCharacterRatio",
+              "insertedCharacterRatio",
+              "prefixRetention",
+              "suffixRetention",
+              "longestDeletedSpanRatio",
+              "longestInsertedSpanRatio",
+              "eventDuration",
+              "charactersPerSecond",
+              "normalizedDistance",
+              "spanApplicationSafe"
+            ],
+            "additionalProperties": false
+          },
+          "missingFlags": {
+            "type": "object",
+            "properties": {
+              "rawMbrMargin": { "type": "boolean" },
+              "hierarchicalMbrMargin": { "type": "boolean" },
+              "runnerUpMargin": { "type": "boolean" },
+              "providerCode": { "type": "boolean" },
+              "candidateRoleCode": { "type": "boolean" },
+              "providerSupportCount": { "type": "boolean" },
+              "correlationSupportCount": { "type": "boolean" },
+              "whisperStability": { "type": "boolean" },
+              "reazonStability": { "type": "boolean" },
+              "crossModelAgreement": { "type": "boolean" },
+              "ctcDirection": { "type": "boolean" },
+              "ctcMargin": { "type": "boolean" },
+              "tokenSupportCoverage": { "type": "boolean" },
+              "decoderTruncationRisk": { "type": "boolean" },
+              "hallucinationRisk": { "type": "boolean" },
+              "requestEdgeRisk": { "type": "boolean" },
+              "speechCompleteness": { "type": "boolean" },
+              "characterLengthRatio": { "type": "boolean" },
+              "tokenLengthRatio": { "type": "boolean" },
+              "normalizedLcsCoverage": { "type": "boolean" },
+              "deletedCharacterRatio": { "type": "boolean" },
+              "insertedCharacterRatio": { "type": "boolean" },
+              "prefixRetention": { "type": "boolean" },
+              "suffixRetention": { "type": "boolean" },
+              "longestDeletedSpanRatio": { "type": "boolean" },
+              "longestInsertedSpanRatio": { "type": "boolean" },
+              "eventDuration": { "type": "boolean" },
+              "charactersPerSecond": { "type": "boolean" },
+              "normalizedDistance": { "type": "boolean" },
+              "spanApplicationSafe": { "type": "boolean" }
+            },
+            "required": [
+              "rawMbrMargin",
+              "hierarchicalMbrMargin",
+              "runnerUpMargin",
+              "providerCode",
+              "candidateRoleCode",
+              "providerSupportCount",
+              "correlationSupportCount",
+              "whisperStability",
+              "reazonStability",
+              "crossModelAgreement",
+              "ctcDirection",
+              "ctcMargin",
+              "tokenSupportCoverage",
+              "decoderTruncationRisk",
+              "hallucinationRisk",
+              "requestEdgeRisk",
+              "speechCompleteness",
+              "characterLengthRatio",
+              "tokenLengthRatio",
+              "normalizedLcsCoverage",
+              "deletedCharacterRatio",
+              "insertedCharacterRatio",
+              "prefixRetention",
+              "suffixRetention",
+              "longestDeletedSpanRatio",
+              "longestInsertedSpanRatio",
+              "eventDuration",
+              "charactersPerSecond",
+              "normalizedDistance",
+              "spanApplicationSafe"
+            ],
+            "additionalProperties": false
+          },
+          "acousticEvidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "values",
+          "missingFlags",
+          "acousticEvidenceHashes",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "proposalHash",
+    "completenessHash",
+    "featureSchemaHash",
+    "featureNames",
+    "rawTextFeatureCount",
+    "goldFeatureCount",
+    "datasetSpecificFeatureCount",
+    "rows"
+  ],
+  "additionalProperties": false
+}

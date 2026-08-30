@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-legacy-p6-control.schema.json",
+  "title": "c6-1-1-legacy-p6-control",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-1-legacy-p6-control" },
+    "originalManifestHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "originalSelectionsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "currentCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "proposedCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "eligibilityStatus": {
+            "type": "string",
+            "enum": ["ELIGIBLE", "BLOCKED_STRUCTURAL", "NO_ALTERNATIVE"]
+          },
+          "values": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": {
+              "anyOf": [{ "type": "number" }, { "type": "null" }]
+            }
+          },
+          "missingFlags": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": { "type": "boolean" }
+          },
+          "proposalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "featureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "currentCandidateId",
+          "proposedCandidateId",
+          "eligibilityStatus",
+          "values",
+          "missingFlags",
+          "proposalHash",
+          "featureHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "selectedProposalIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "originalCanonicalTextHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reproducedCanonicalTextHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalTextParity": { "type": "boolean", "const": true },
+    "canonicalTimingParity": { "type": "boolean", "const": true },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "originalManifestHash",
+    "originalSelectionsHash",
+    "samples",
+    "selectedProposalIds",
+    "originalCanonicalTextHash",
+    "reproducedCanonicalTextHash",
+    "canonicalTextParity",
+    "canonicalTimingParity",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

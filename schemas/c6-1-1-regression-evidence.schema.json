@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-regression-evidence.schema.json",
+  "title": "c6-1-1-regression-evidence",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-1-regression-evidence" },
+    "sourceCodeAggregateHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checks": {
+      "minItems": 9,
+      "maxItems": 9,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": [
+              "generate:schemas",
+              "typecheck",
+              "lint",
+              "format:check",
+              "build",
+              "unit",
+              "e2e",
+              "targeted",
+              "skill"
+            ]
+          },
+          "command": { "type": "string", "minLength": 1 },
+          "exitCode": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "durationMs": { "type": "number", "minimum": 0 },
+          "logRelativePath": { "type": "string", "minLength": 1 },
+          "logSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "tests": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "passed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "failed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "skipped": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["passed", "failed", "skipped"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "skipReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "stage",
+          "command",
+          "exitCode",
+          "durationMs",
+          "logRelativePath",
+          "logSha256",
+          "tests",
+          "skipReasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "freshModelInferenceAllowed": { "type": "boolean", "const": false },
+    "sourceUnchangedDuringChecks": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "sourceCodeAggregateHash",
+    "checks",
+    "freshModelInferenceAllowed",
+    "sourceUnchangedDuringChecks"
+  ],
+  "additionalProperties": false
+}

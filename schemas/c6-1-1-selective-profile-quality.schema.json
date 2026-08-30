@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-selective-profile-quality.schema.json",
+  "title": "c6-1-1-selective-profile-quality",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-1-selective-profile-quality"
+    },
+    "profileId": { "type": "string", "minLength": 1 },
+    "fixedEvaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fixedMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "legacyEvaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineLegacyEvaluationHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "fixedEvaluationMethod": {
+      "type": "string",
+      "const": "FIXED_GROUP_EVALUATION"
+    },
+    "fullEpisodeEvaluationMethod": {
+      "type": "string",
+      "const": "LEGACY_GLOBAL_CUE_GROUP_MATCHING_DIAGNOSTIC_ONLY"
+    },
+    "legacyMetricsUsedForProposalLabels": { "type": "boolean", "const": false },
+    "baselineMetrics": {
+      "type": "object",
+      "properties": {
+        "exactCer": { "type": "number", "minimum": 0 },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucination": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialErrors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTiming": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMae": { "type": "number", "minimum": 0 },
+        "endMae": { "type": "number", "minimum": 0 },
+        "boundaryP95": { "type": "number", "minimum": 0 },
+        "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overlap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "exactCer",
+        "normalizedCer",
+        "coverage",
+        "missing",
+        "hallucination",
+        "materialErrors",
+        "cueCount",
+        "severeTiming",
+        "startMae",
+        "endMae",
+        "boundaryP95",
+        "medianIoU",
+        "overlap"
+      ],
+      "additionalProperties": false
+    },
+    "shadowMetrics": {
+      "type": "object",
+      "properties": {
+        "exactCer": { "type": "number", "minimum": 0 },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucination": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialErrors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTiming": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMae": { "type": "number", "minimum": 0 },
+        "endMae": { "type": "number", "minimum": 0 },
+        "boundaryP95": { "type": "number", "minimum": 0 },
+        "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overlap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "exactCer",
+        "normalizedCer",
+        "coverage",
+        "missing",
+        "hallucination",
+        "materialErrors",
+        "cueCount",
+        "severeTiming",
+        "startMae",
+        "endMae",
+        "boundaryP95",
+        "medianIoU",
+        "overlap"
+      ],
+      "additionalProperties": false
+    },
+    "timingHashUnchanged": { "type": "boolean" },
+    "matchingInducedTimingDelta": { "type": "boolean" },
+    "baselineAllPairOverlapCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "shadowAllPairOverlapCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "evaluationOnly",
+    "privacy",
+    "semanticHash",
+    "artifactType",
+    "profileId",
+    "fixedEvaluationHash",
+    "fixedMapHash",
+    "legacyEvaluationHash",
+    "baselineLegacyEvaluationHash",
+    "fixedEvaluationMethod",
+    "fullEpisodeEvaluationMethod",
+    "legacyMetricsUsedForProposalLabels",
+    "baselineMetrics",
+    "shadowMetrics",
+    "timingHashUnchanged",
+    "matchingInducedTimingDelta",
+    "baselineAllPairOverlapCount",
+    "shadowAllPairOverlapCount"
+  ],
+  "additionalProperties": false
+}

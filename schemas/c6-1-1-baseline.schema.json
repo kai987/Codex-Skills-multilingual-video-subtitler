@@ -1,0 +1,334 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-1-baseline.schema.json",
+  "title": "c6-1-1-baseline",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-1-baseline" },
+    "acceptanceCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "baselineBranch": { "type": "string" },
+    "c61MachineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceBefore": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["size", "mtimeMs", "sha256"],
+      "additionalProperties": false
+    },
+    "productionFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relativePath": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["relativePath", "sha256", "size"],
+        "additionalProperties": false
+      }
+    },
+    "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "candidateUniverseHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "officialArtifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "candidateCounts": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "baselineMetrics": {
+      "type": "object",
+      "properties": {
+        "exactCer": { "type": "number", "minimum": 0 },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucination": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialErrors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTiming": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMae": { "type": "number", "minimum": 0 },
+        "endMae": { "type": "number", "minimum": 0 },
+        "boundaryP95": { "type": "number", "minimum": 0 },
+        "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overlap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "exactCer",
+        "normalizedCer",
+        "coverage",
+        "missing",
+        "hallucination",
+        "materialErrors",
+        "cueCount",
+        "severeTiming",
+        "startMae",
+        "endMae",
+        "boundaryP95",
+        "medianIoU",
+        "overlap"
+      ],
+      "additionalProperties": false
+    },
+    "legacyP6Metrics": {
+      "type": "object",
+      "properties": {
+        "exactCer": { "type": "number", "minimum": 0 },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucination": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialErrors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTiming": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMae": { "type": "number", "minimum": 0 },
+        "endMae": { "type": "number", "minimum": 0 },
+        "boundaryP95": { "type": "number", "minimum": 0 },
+        "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overlap": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "exactCer",
+        "normalizedCer",
+        "coverage",
+        "missing",
+        "hallucination",
+        "materialErrors",
+        "cueCount",
+        "severeTiming",
+        "startMae",
+        "endMae",
+        "boundaryP95",
+        "medianIoU",
+        "overlap"
+      ],
+      "additionalProperties": false
+    },
+    "legacyEventEvaluation": {
+      "type": "object",
+      "properties": {
+        "evaluable": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "changed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "improved": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "regressed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "neutral": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unevaluable": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "renderedChangedCues": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "evaluable",
+        "changed",
+        "improved",
+        "regressed",
+        "neutral",
+        "unevaluable",
+        "renderedChangedCues"
+      ],
+      "additionalProperties": false
+    },
+    "legacyOracle": {
+      "type": "object",
+      "properties": {
+        "currentError": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bestExistingError": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "bestLegalError": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unrestrictedError": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateOracleGain": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "currentError",
+        "bestExistingError",
+        "bestLegalError",
+        "unrestrictedError",
+        "candidateOracleGain"
+      ],
+      "additionalProperties": false
+    },
+    "pairwiseCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["name", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "baselineReplayPassed": { "type": "boolean" },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "networkUsed": { "type": "boolean", "const": false },
+    "newAsrInferenceCount": { "type": "number", "const": 0 },
+    "goldFileOpened": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "acceptanceCommit",
+    "baselineBranch",
+    "c61MachineFreezeHash",
+    "sourceBefore",
+    "productionFiles",
+    "canonicalTextHash",
+    "canonicalTimingHash",
+    "candidateUniverseHash",
+    "inputHashes",
+    "officialArtifactHashes",
+    "candidateCounts",
+    "baselineMetrics",
+    "legacyP6Metrics",
+    "legacyEventEvaluation",
+    "legacyOracle",
+    "pairwiseCount",
+    "checks",
+    "baselineReplayPassed",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status",
+    "networkUsed",
+    "newAsrInferenceCount",
+    "goldFileOpened"
+  ],
+  "additionalProperties": false
+}

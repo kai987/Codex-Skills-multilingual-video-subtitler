@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-1-selective-mbr-review-suggestions.schema.json",
+  "title": "machine-c6-1-1-selective-mbr-review-suggestions",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-1-selective-mbr-review-suggestions"
+    },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "usage": { "type": "string", "const": "REVIEW_ASSISTANCE_ONLY" },
+    "scoreAuthority": {
+      "type": "string",
+      "const": "BENCHMARK_OOF_TRAIN_LABEL_DERIVED_NOT_BLIND_NEW_MODEL"
+    },
+    "profileSelection": {
+      "type": "string",
+      "const": "CALLER_FIXED_NOT_CHOSEN_FROM_GOLD_BY_SUGGESTER"
+    },
+    "profileId": {
+      "type": "string",
+      "enum": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"]
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "goldLabelInputCount": { "type": "number", "const": 0 },
+    "productionMutationCount": { "type": "number", "const": 0 },
+    "humanApprovalRequired": { "type": "boolean", "const": true },
+    "candidateUniverseHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "proposalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decisionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "applicationEvidenceHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "proposalId": { "type": "string", "minLength": 1 },
+          "currentCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "currentText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "candidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "candidateText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "candidateProvenanceHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "KEEP_CURRENT",
+              "SELECT_EXISTING_CANDIDATE",
+              "ABSTAIN_REVIEW"
+            ]
+          },
+          "score": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "threshold": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "applicationStatus": {
+            "type": "string",
+            "enum": ["APPLIED", "BLOCKED", "NOT_SELECTED", "UNKNOWN"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "proposalId",
+          "currentCandidateId",
+          "currentText",
+          "candidateId",
+          "candidateText",
+          "candidateProvenanceHash",
+          "decision",
+          "score",
+          "threshold",
+          "applicationStatus",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "privacy",
+    "usage",
+    "scoreAuthority",
+    "profileSelection",
+    "profileId",
+    "runtimeGoldInputCount",
+    "goldLabelInputCount",
+    "productionMutationCount",
+    "humanApprovalRequired",
+    "candidateUniverseHash",
+    "proposalHash",
+    "decisionHash",
+    "applicationEvidenceHash",
+    "rows",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

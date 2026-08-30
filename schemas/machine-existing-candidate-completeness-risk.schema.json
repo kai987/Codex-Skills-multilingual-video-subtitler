@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-existing-candidate-completeness-risk.schema.json",
+  "title": "machine-existing-candidate-completeness-risk",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.1-fixed-alignment-selective-existing-mbr-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-existing-candidate-completeness-risk"
+    },
+    "proposalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "riskPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "currentCharacterCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "proposedCharacterCount": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "characterLengthRatio": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "currentTokenCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "proposedTokenCount": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "tokenLengthRatio": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "normalizedLcsCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "deletedCharacterRatio": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "insertedCharacterRatio": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "prefixRetention": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "suffixRetention": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "longestDeletedSpan": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "longestInsertedSpan": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "speechCompletenessStatus": {
+            "type": "string",
+            "enum": ["COMPLETE", "INCOMPLETE", "UNKNOWN"]
+          },
+          "requestEdgeRisk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "leftEdgePinned": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "rightEdgePinned": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "incompleteSpeech": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "decoderTruncationRisk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "tokenSupportCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "hallucinationRisk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "eventDuration": { "type": "number", "exclusiveMinimum": 0 },
+          "charactersPerSecond": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "riskClasses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "NO_CONTRACTION_RISK",
+                "MILD_CONTRACTION_RISK",
+                "STRONG_CONTRACTION_RISK",
+                "EDGE_TRUNCATION_RISK",
+                "INCOMPLETE_SPEECH_RISK",
+                "UNSUPPORTED_DELETION_RISK"
+              ]
+            }
+          },
+          "missingEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "softEvidenceOnly": { "type": "boolean", "const": true },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "currentCharacterCount",
+          "proposedCharacterCount",
+          "characterLengthRatio",
+          "currentTokenCount",
+          "proposedTokenCount",
+          "tokenLengthRatio",
+          "normalizedLcsCoverage",
+          "deletedCharacterRatio",
+          "insertedCharacterRatio",
+          "prefixRetention",
+          "suffixRetention",
+          "longestDeletedSpan",
+          "longestInsertedSpan",
+          "speechCompletenessStatus",
+          "requestEdgeRisk",
+          "leftEdgePinned",
+          "rightEdgePinned",
+          "incompleteSpeech",
+          "decoderTruncationRisk",
+          "tokenSupportCoverage",
+          "hallucinationRisk",
+          "eventDuration",
+          "charactersPerSecond",
+          "riskClasses",
+          "missingEvidence",
+          "softEvidenceOnly",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "proposalHash",
+    "riskPolicyHash",
+    "rows"
+  ],
+  "additionalProperties": false
+}
