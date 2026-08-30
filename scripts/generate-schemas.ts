@@ -1,4 +1,5 @@
 import path from "node:path";
+import { c61GeneratedSchemas } from "@mvl/shared";
 
 import {
   acousticSceneWindowsArtifactSchema,
@@ -1904,7 +1905,15 @@ const schemas = [
   },
 ] as const;
 
-for (const entry of schemas) {
+const allSchemas = [
+  ...schemas,
+  ...c61GeneratedSchemas.map(([name, schema]) => ({
+    fileName: `${name}.schema.json`,
+    id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
+    schema,
+  })),
+];
+for (const entry of allSchemas) {
   const generated = z.toJSONSchema(entry.schema, {
     target: "draft-2020-12",
     unrepresentable: "any",
@@ -1925,5 +1934,5 @@ for (const entry of schemas) {
 }
 
 console.log(
-  `Generated ${schemas.length} JSON Schemas in ${path.resolve("schemas")}.`,
+  `Generated ${allSchemas.length} JSON Schemas in ${path.resolve("schemas")}.`,
 );

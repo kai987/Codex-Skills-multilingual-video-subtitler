@@ -446,11 +446,16 @@ function evaluationSemanticHash(
   });
 }
 
-function evaluateMachineCues(input: {
+// Pure, read-only evaluation primitive. Callers must enforce their own frozen
+// machine-output barrier before supplying Gold; no decoder imports this module.
+export function evaluateMachineCues(input: {
   generatedAt: string;
   generationRunId: string;
   sourceIdentity: MachineVsGoldEvaluation["sourceIdentity"];
-  freeze: BlindOutputFreeze;
+  freeze: Pick<
+    BlindOutputFreeze,
+    "freezeSemanticHash" | "frozenArtifactAggregateHash"
+  >;
   machineCues: readonly EvaluationCue[];
   goldCues: readonly EvaluationCue[];
   goldIdentity: MachineVsGoldEvaluation["goldIdentity"];

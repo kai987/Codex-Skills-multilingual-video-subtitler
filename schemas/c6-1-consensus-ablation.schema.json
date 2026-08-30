@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-consensus-ablation.schema.json",
+  "title": "c6-1-consensus-ablation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-consensus-ablation" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ablationId": { "type": "string" },
+          "profileId": { "type": "string" },
+          "evaluationOnly": { "type": "boolean" },
+          "metrics": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "exactCer": { "type": "number", "minimum": 0 },
+                  "normalizedCer": { "type": "number", "minimum": 0 },
+                  "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "missing": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hallucination": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "materialErrors": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "cueCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "severeTiming": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "startMae": { "type": "number", "minimum": 0 },
+                  "endMae": { "type": "number", "minimum": 0 },
+                  "boundaryP95": { "type": "number", "minimum": 0 },
+                  "medianIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "overlap": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "exactCer",
+                  "normalizedCer",
+                  "coverage",
+                  "missing",
+                  "hallucination",
+                  "materialErrors",
+                  "cueCount",
+                  "severeTiming",
+                  "startMae",
+                  "endMae",
+                  "boundaryP95",
+                  "medianIoU",
+                  "overlap"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "normalizedEventError": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "changedEvents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "improved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regressed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "novelPaths": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "ablationId",
+          "profileId",
+          "evaluationOnly",
+          "metrics",
+          "normalizedEventError",
+          "changedEvents",
+          "improved",
+          "regressed",
+          "novelPaths",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "evaluationOnly",
+    "machineFreezeHash",
+    "rows"
+  ],
+  "additionalProperties": false
+}

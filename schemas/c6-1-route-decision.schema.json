@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-route-decision.schema.json",
+  "title": "c6-1-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-route-decision" },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "CONSENSUS_DECODING_GAIN_CONFIRMED",
+        "CONSENSUS_ORACLE_POTENTIAL_DECODER_UNSAFE",
+        "CONSENSUS_EXISTING_CANDIDATE_ONLY_BETTER",
+        "NO_CONSENSUS_ADVANTAGE_OVER_CANDIDATE_UNION",
+        "CONSENSUS_ENGINEERING_INVALID"
+      ]
+    },
+    "strongerSignal": {
+      "type": "string",
+      "enum": [
+        "TOKEN_SPAN_COMBINATION_INFORMATION_GAIN_CONFIRMED",
+        "NOT_CONFIRMED"
+      ]
+    },
+    "nextRoute": {
+      "type": "string",
+      "enum": [
+        "C6.1.1_FROZEN_PROSPECTIVE_SHADOW",
+        "C6.1.1_DECODER_CALIBRATION_SHADOW_ONLY",
+        "STOP_AUTOMATIC_CONSENSUS_CONTINUE_HUMAN_ON_EXCEPTION",
+        "REPAIR_ENGINEERING_BEFORE_RESEARCH_CONCLUSION"
+      ]
+    },
+    "c611Status": { "type": "string", "enum": ["GO", "HOLD"] },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "qualifyingProfiles": { "type": "array", "items": { "type": "string" } },
+    "evidenceHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "reasons": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "decision",
+    "strongerSignal",
+    "nextRoute",
+    "c611Status",
+    "c602Status",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "qualifyingProfiles",
+    "evidenceHashes",
+    "reasons"
+  ],
+  "additionalProperties": false
+}

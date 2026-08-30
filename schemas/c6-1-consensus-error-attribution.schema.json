@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-consensus-error-attribution.schema.json",
+  "title": "c6-1-consensus-error-attribution",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-consensus-error-attribution"
+    },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "regressions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string" },
+          "eventId": { "type": "string" },
+          "attribution": {
+            "type": "string",
+            "enum": [
+              "ALIGNMENT_ERROR",
+              "SLOT_VOTE_ERROR",
+              "CORRELATION_DOUBLE_COUNT",
+              "PRONUNCIATION_COLLAPSE_ERROR",
+              "SURFACE_RESTORATION_ERROR",
+              "EPSILON_ERROR",
+              "UNSUPPORTED_PATH_ATTEMPT",
+              "PATH_SWITCH_ERROR",
+              "CANDIDATE_POOL_INSUFFICIENT",
+              "GOLD_ALIGNMENT_UNCERTAIN",
+              "UNKNOWN"
+            ]
+          },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } },
+          "rationale": { "type": "string" }
+        },
+        "required": [
+          "profileId",
+          "eventId",
+          "attribution",
+          "evidenceIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "counts": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "evaluationOnly",
+    "regressions",
+    "counts"
+  ],
+  "additionalProperties": false
+}

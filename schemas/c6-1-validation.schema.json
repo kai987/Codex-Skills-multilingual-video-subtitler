@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-validation.schema.json",
+  "title": "c6-1-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-validation" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "checkId": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "detail": { "type": "string" },
+          "evidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "required": ["checkId", "passed", "detail", "evidenceHashes"],
+        "additionalProperties": false
+      }
+    },
+    "semanticParity": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": { "type": "boolean" }
+    },
+    "byteParity": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": { "type": "boolean" }
+    },
+    "productionTextMutation": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "productionTimingMutation": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "runtimeGoldInputCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "newAsrInferenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "networkUsed": { "type": "boolean" },
+    "sourceReadOnly": { "type": "boolean" },
+    "goldReadOnly": { "type": "boolean" },
+    "engineeringPassed": { "type": "boolean" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "checks",
+    "semanticParity",
+    "byteParity",
+    "productionTextMutation",
+    "productionTimingMutation",
+    "runtimeGoldInputCount",
+    "newAsrInferenceCount",
+    "networkUsed",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "engineeringPassed"
+  ],
+  "additionalProperties": false
+}

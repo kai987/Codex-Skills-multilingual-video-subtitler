@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-consensus-profile-freeze.schema.json",
+  "title": "c6-1-consensus-profile-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-consensus-profile-freeze"
+    },
+    "frozenBeforeGold": { "type": "boolean", "const": true },
+    "outputClass": { "type": "string", "const": "RESEARCH_SHADOW_OUTPUT" },
+    "currentControlVotePolicy": {
+      "type": "string",
+      "const": "ZERO_WHEN_REAL_ASR_EXISTS"
+    },
+    "providerTotals": {
+      "type": "object",
+      "properties": {
+        "WHISPER": { "type": "number", "const": 1 },
+        "REAZON": { "type": "number", "const": 1 }
+      },
+      "required": ["WHISPER", "REAZON"],
+      "additionalProperties": false
+    },
+    "correlationPolicy": {
+      "type": "string",
+      "const": "EQUAL_PROVIDER_THEN_EQUAL_GROUP_THEN_EQUAL_DISTINCT_HYPOTHESIS"
+    },
+    "stabilityBounds": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number", "minimum": 0, "maximum": 1 },
+        { "type": "number", "minimum": 0, "maximum": 1 }
+      ]
+    },
+    "acousticBounds": {
+      "type": "array",
+      "prefixItems": [{ "type": "number" }, { "type": "number" }]
+    },
+    "acousticIdentityPolicy": {
+      "type": "string",
+      "const": "EXACT_MODEL_AUDIO_CANDIDATE_PROVENANCE_CACHE_ONLY"
+    },
+    "weightInterpretation": {
+      "type": "string",
+      "const": "NORMALIZED_HYPOTHESIS_WEIGHT_NOT_CALIBRATED_POSTERIOR"
+    },
+    "distancePolicy": {
+      "type": "string",
+      "const": "LEVENSHTEIN_DIVIDED_BY_MAX_LENGTH_GRAPHEME_PRONUNCIATION_FALLBACK"
+    },
+    "combinedGraphemeWeight": { "type": "number", "minimum": 0, "maximum": 1 },
+    "alignmentPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "alignmentCosts": {
+      "type": "object",
+      "properties": {
+        "exact": { "type": "number", "minimum": 0 },
+        "normalized": { "type": "number", "minimum": 0 },
+        "pronunciation": { "type": "number", "minimum": 0 },
+        "substitution": { "type": "number", "minimum": 0 },
+        "insertion": { "type": "number", "minimum": 0 },
+        "deletion": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "exact",
+        "normalized",
+        "pronunciation",
+        "substitution",
+        "insertion",
+        "deletion"
+      ],
+      "additionalProperties": false
+    },
+    "evaluationPolicy": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "artifactType": {
+          "type": "string",
+          "const": "blind-evaluation-policy"
+        },
+        "policyVersion": {
+          "type": "string",
+          "const": "c6.0.1-gold-isolated-evaluation-v1"
+        },
+        "normalization": {
+          "type": "object",
+          "properties": {
+            "unicode": { "type": "string", "const": "NFKC" },
+            "whitespaceInsensitive": { "type": "boolean", "const": true },
+            "punctuationInsensitive": { "type": "boolean", "const": true },
+            "dialectStandardization": { "type": "boolean", "const": false },
+            "arbitraryKanaConversion": { "type": "boolean", "const": false }
+          },
+          "required": [
+            "unicode",
+            "whitespaceInsensitive",
+            "punctuationInsensitive",
+            "dialectStandardization",
+            "arbitraryKanaConversion"
+          ],
+          "additionalProperties": false
+        },
+        "alignmentWeights": {
+          "type": "object",
+          "properties": {
+            "textSimilarity": { "type": "number", "minimum": 0, "maximum": 1 },
+            "temporalIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+            "centerDistance": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": ["textSimilarity", "temporalIoU", "centerDistance"],
+          "additionalProperties": false
+        },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "maximumAlignmentGroupSize": { "type": "number", "const": 3 },
+            "minimumMatchTextSimilarity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimumMatchTemporalIoU": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maximumMatchCenterDistanceSeconds": {
+              "type": "number",
+              "minimum": 0
+            },
+            "materialMinimumCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "materialTextErrorCer": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "severeTimingBoundarySeconds": { "type": "number", "minimum": 0 },
+            "minorTimingBoundarySeconds": { "type": "number", "minimum": 0 },
+            "maximumCrossRunCer": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maximumCrossRunBoundaryP95Seconds": {
+              "type": "number",
+              "minimum": 0
+            },
+            "maximumCrossRunBoundaryMaxSeconds": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "maximumAlignmentGroupSize",
+            "minimumMatchTextSimilarity",
+            "minimumMatchTemporalIoU",
+            "maximumMatchCenterDistanceSeconds",
+            "materialMinimumCharacters",
+            "materialTextErrorCer",
+            "severeTimingBoundarySeconds",
+            "minorTimingBoundarySeconds",
+            "maximumCrossRunCer",
+            "maximumCrossRunBoundaryP95Seconds",
+            "maximumCrossRunBoundaryMaxSeconds"
+          ],
+          "additionalProperties": false
+        },
+        "defectRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+              "rationale": { "type": "string", "minLength": 1 }
+            },
+            "required": ["code", "severity", "rationale"],
+            "additionalProperties": false
+          }
+        },
+        "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "schemaVersion",
+        "artifactType",
+        "policyVersion",
+        "normalization",
+        "alignmentWeights",
+        "thresholds",
+        "defectRules",
+        "policyHash"
+      ],
+      "additionalProperties": false
+    },
+    "eventEvaluationPolicy": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "c6.1-time-only-rendered-event-evaluation-v1"
+        },
+        "minimumGoldOverlapRatio": { "type": "number", "const": 0.5 },
+        "minimumEventOverlapRatio": { "type": "number", "const": 0.5 },
+        "sharedGoldClaimPolicy": {
+          "type": "string",
+          "const": "EXCLUDE_ALL_MULTIPLE_EVENT_CLAIMS"
+        },
+        "outputScope": { "type": "string", "const": "RENDERED_SHADOW_ONLY" },
+        "currentTextSource": {
+          "type": "string",
+          "const": "FROZEN_EVENT_CURRENT_TEXT_OR_EMPTY"
+        },
+        "oracleDistanceUnit": {
+          "type": "string",
+          "const": "UNICODE_GRAPHEME_LEVENSHTEIN"
+        },
+        "oracleGoldDenominatorUnit": {
+          "type": "string",
+          "const": "UNICODE_GRAPHEME"
+        },
+        "normalization": {
+          "type": "string",
+          "const": "NFKC_PUNCTUATION_WHITESPACE_INSENSITIVE_LOWERCASE_NO_KANA_GUESS"
+        },
+        "invalidMappingPolicy": {
+          "type": "string",
+          "const": "EXCLUDE_FROM_EVENT_METRICS"
+        },
+        "bestProfilePolicy": {
+          "type": "string",
+          "const": "PRIMARY_P1_P9_POST_HOC_ONLY"
+        }
+      },
+      "required": [
+        "version",
+        "minimumGoldOverlapRatio",
+        "minimumEventOverlapRatio",
+        "sharedGoldClaimPolicy",
+        "outputScope",
+        "currentTextSource",
+        "oracleDistanceUnit",
+        "oracleGoldDenominatorUnit",
+        "normalization",
+        "invalidMappingPolicy",
+        "bestProfilePolicy"
+      ],
+      "additionalProperties": false
+    },
+    "alignmentAblations": {
+      "minItems": 3,
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": [
+              "ALIGN_PRONUNCIATION_R2",
+              "ALIGN_CENTER_CURRENT_R2",
+              "ALIGN_CENTER_MEDOID_R2"
+            ]
+          },
+          "center": {
+            "type": "string",
+            "enum": [
+              "CENTER_CURRENT",
+              "CENTER_MEDOID",
+              "CENTER_PROVIDER_BALANCED_MEDOID"
+            ]
+          },
+          "pronunciationAware": { "type": "boolean" },
+          "roverVariant": { "type": "string", "const": "R2" },
+          "allowAmbiguousSlots": { "type": "boolean", "const": false },
+          "minimumMargin": { "type": "number", "minimum": 0, "maximum": 1 },
+          "maxProviderSwitches": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "profileId",
+          "center",
+          "pronunciationAware",
+          "roverVariant",
+          "allowAmbiguousSlots",
+          "minimumMargin",
+          "maxProviderSwitches"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "slotMinimumVoteMargin": { "type": "number", "minimum": 0, "maximum": 1 },
+    "pathMinimumRiskMargin": { "type": "number", "minimum": 0, "maximum": 1 },
+    "providerSwitchPenalty": { "type": "number", "minimum": 0 },
+    "epsilonComplexityPenalty": { "type": "number", "minimum": 0 },
+    "beamWidth": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "maxPaths": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "maxPathLength": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "switchAblations": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          { "type": "null" }
+        ]
+      }
+    },
+    "profiles": {
+      "minItems": 10,
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9"]
+          },
+          "name": { "type": "string", "minLength": 1 },
+          "decoder": {
+            "type": "string",
+            "enum": [
+              "CURRENT",
+              "ROVER",
+              "CANDIDATE_MBR",
+              "LATTICE_MBR",
+              "ABSTENTION_FIRST",
+              "EXISTING_ONLY"
+            ]
+          },
+          "roverVariant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["R0", "R1", "R2", "R3", "R4", "R5"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "distanceMethod": {
+            "type": "string",
+            "enum": ["GRAPHEME", "PRONUNCIATION", "COMBINED"]
+          },
+          "maxProviderSwitches": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "minimumMargin": { "type": "number", "minimum": 0, "maximum": 1 },
+          "allowAmbiguousSlots": { "type": "boolean" }
+        },
+        "required": [
+          "profileId",
+          "name",
+          "decoder",
+          "roverVariant",
+          "distanceMethod",
+          "maxProviderSwitches",
+          "minimumMargin",
+          "allowAmbiguousSlots"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "supplementalRoverVariants": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["R0", "R1", "R2", "R3", "R4", "R5"]
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "frozenBeforeGold",
+    "outputClass",
+    "currentControlVotePolicy",
+    "providerTotals",
+    "correlationPolicy",
+    "stabilityBounds",
+    "acousticBounds",
+    "acousticIdentityPolicy",
+    "weightInterpretation",
+    "distancePolicy",
+    "combinedGraphemeWeight",
+    "alignmentPolicyHash",
+    "alignmentCosts",
+    "evaluationPolicy",
+    "eventEvaluationPolicy",
+    "alignmentAblations",
+    "slotMinimumVoteMargin",
+    "pathMinimumRiskMargin",
+    "providerSwitchPenalty",
+    "epsilonComplexityPenalty",
+    "beamWidth",
+    "maxPaths",
+    "maxPathLength",
+    "switchAblations",
+    "profiles",
+    "supplementalRoverVariants",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

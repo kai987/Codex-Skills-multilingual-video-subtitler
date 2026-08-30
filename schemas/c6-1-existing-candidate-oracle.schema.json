@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-existing-candidate-oracle.schema.json",
+  "title": "c6-1-existing-candidate-oracle",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "enum": ["c6-1-existing-candidate-oracle", "c6-1-legal-path-oracle"]
+    },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string" },
+          "evaluationStatus": {
+            "type": "string",
+            "enum": [
+              "EVALUABLE",
+              "AMBIGUOUS_GOLD_MAPPING",
+              "NO_GOLD_MAPPING",
+              "NO_INCLUDED_CANDIDATE"
+            ]
+          },
+          "currentError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "goldCharacterCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "bestExistingCandidateId": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "bestExistingCandidateError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "bestLegalPathError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "unrestrictedSlotError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "candidateOracleGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "consensusOracleGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "bestLegalNodeIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "oracleSearchStatus": {
+            "type": "string",
+            "enum": ["EXACT_LEGAL_LATTICE", "UNAVAILABLE"]
+          },
+          "goldMappingIds": { "type": "array", "items": { "type": "string" } },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "evaluationStatus",
+          "currentError",
+          "goldCharacterCount",
+          "bestExistingCandidateId",
+          "bestExistingCandidateError",
+          "bestLegalPathError",
+          "unrestrictedSlotError",
+          "candidateOracleGain",
+          "consensusOracleGain",
+          "bestLegalNodeIds",
+          "oracleSearchStatus",
+          "goldMappingIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "currentError": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bestExistingCandidateError": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bestLegalPathError": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unrestrictedSlotError": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "goldCharacterCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "candidateOracleGain": { "type": "number" },
+    "legalPathOracleGain": { "type": "number" },
+    "consensusSpecificOracleGain": { "type": "number" },
+    "evaluableEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unevaluableEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "evaluationOnly",
+    "machineFreezeHash",
+    "events",
+    "currentError",
+    "bestExistingCandidateError",
+    "bestLegalPathError",
+    "unrestrictedSlotError",
+    "goldCharacterCount",
+    "candidateOracleGain",
+    "legalPathOracleGain",
+    "consensusSpecificOracleGain",
+    "evaluableEventCount",
+    "unevaluableEventCount"
+  ],
+  "additionalProperties": false
+}

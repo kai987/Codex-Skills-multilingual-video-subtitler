@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-shareable-summary.schema.json",
+  "title": "c6-1-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-shareable-summary" },
+    "engineeringPassed": { "type": "boolean" },
+    "route": { "type": "string" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "productionMutationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "candidateCounts": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "safetyCounts": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string" },
+          "normalizedCer": { "type": "number", "minimum": 0 },
+          "exactCer": { "type": "number", "minimum": 0 },
+          "materialErrors": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "hallucination": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "missing": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+          "improved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regressed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "profileId",
+          "normalizedCer",
+          "exactCer",
+          "materialErrors",
+          "hallucination",
+          "missing",
+          "coverage",
+          "improved",
+          "regressed"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "localTextIncluded": { "type": "boolean", "const": false },
+    "rawAudioIncluded": { "type": "boolean", "const": false },
+    "absolutePathsIncluded": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "engineeringPassed",
+    "route",
+    "c602Status",
+    "productionMutationCount",
+    "candidateCounts",
+    "safetyCounts",
+    "profiles",
+    "localTextIncluded",
+    "rawAudioIncluded",
+    "absolutePathsIncluded"
+  ],
+  "additionalProperties": false
+}
