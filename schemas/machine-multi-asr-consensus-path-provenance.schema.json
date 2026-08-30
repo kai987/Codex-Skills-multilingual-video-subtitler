@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-multi-asr-consensus-path-provenance.schema.json",
+  "title": "machine-multi-asr-consensus-path-provenance",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-multi-asr-consensus-path-provenance"
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string" },
+          "eventId": { "type": "string" },
+          "pathHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "outputText": { "type": "string" },
+          "pathClass": {
+            "type": "string",
+            "enum": [
+              "EXISTING_CANDIDATE",
+              "NOVEL_LEGAL_PATH",
+              "PRESERVED_CURRENT",
+              "REJECTED"
+            ]
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "outputPosition": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "outputSurface": { "type": "string" },
+                "sourceCandidateIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "sourceCandidateSpans": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "candidateId": { "type": "string" },
+                      "start": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["candidateId", "start", "end"],
+                    "additionalProperties": false
+                  }
+                },
+                "providerFamilies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["WHISPER", "REAZON", "CURRENT"]
+                  }
+                },
+                "latticeNodeIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "latticeEdgeIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "selectionMethod": { "type": "string" },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "required": [
+                "outputPosition",
+                "outputSurface",
+                "sourceCandidateIds",
+                "sourceCandidateSpans",
+                "providerFamilies",
+                "latticeNodeIds",
+                "latticeEdgeIds",
+                "selectionMethod",
+                "evidenceIds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "provenanceComplete": { "type": "boolean" }
+        },
+        "required": [
+          "profileId",
+          "eventId",
+          "pathHash",
+          "outputText",
+          "pathClass",
+          "tokens",
+          "provenanceComplete"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "paths"
+  ],
+  "additionalProperties": false
+}

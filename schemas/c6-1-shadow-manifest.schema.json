@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-shadow-manifest.schema.json",
+  "title": "c6-1-shadow-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-shadow-manifest" },
+    "outputRole": { "type": "string", "const": "RESEARCH_SHADOW_OUTPUT" },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string" },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relativePath": { "type": "string", "minLength": 1 },
+                "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                "size": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["relativePath", "sha256", "size"],
+              "additionalProperties": false
+            }
+          },
+          "cueCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "changedCueIds": { "type": "array", "items": { "type": "string" } },
+          "canonicalTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "canonicalTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "assemblyDecisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "eventId": { "type": "string" },
+                "cueId": {
+                  "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "APPLIED_SHADOW_ONLY",
+                    "KEEP_CURRENT",
+                    "BLOCKED_UNSAFE",
+                    "UNMAPPABLE_LINEAGE",
+                    "CONFLICTING_REPLACEMENT",
+                    "PRESENTATION_CAPACITY"
+                  ]
+                },
+                "reason": { "type": "string" },
+                "inputTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "outputTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "eventId",
+                "cueId",
+                "status",
+                "reason",
+                "inputTextHash",
+                "outputTextHash"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "profileId",
+          "files",
+          "cueCount",
+          "changedCueIds",
+          "canonicalTextHash",
+          "canonicalTimingHash",
+          "assemblyDecisions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "productionMutationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "outputRole",
+    "privacy",
+    "profiles",
+    "productionMutationCount"
+  ],
+  "additionalProperties": false
+}

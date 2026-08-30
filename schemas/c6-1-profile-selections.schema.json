@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-profile-selections.schema.json",
+  "title": "c6-1-profile-selections",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1-consensus-investigation-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-1-profile-selections" },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string" },
+          "eventId": { "type": "string" },
+          "latticeHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "nodeIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "edgeIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "displayText": { "type": "string" },
+                  "normalizedText": { "type": "string" },
+                  "pronunciationText": {
+                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                  },
+                  "sourceCandidateIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "equivalentCandidateIds": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "providerSwitchCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "candidateSwitchCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "pathLegal": { "type": "boolean" },
+                  "provenanceComplete": { "type": "boolean" },
+                  "pathKind": {
+                    "type": "string",
+                    "enum": [
+                      "EXISTING_CANDIDATE_PATH",
+                      "NOVEL_LEGAL_PATH",
+                      "CURRENT_CONTROL_PATH"
+                    ]
+                  },
+                  "semanticHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "nodeIds",
+                  "edgeIds",
+                  "displayText",
+                  "normalizedText",
+                  "pronunciationText",
+                  "sourceCandidateIds",
+                  "equivalentCandidateIds",
+                  "providerSwitchCount",
+                  "candidateSwitchCount",
+                  "pathLegal",
+                  "provenanceComplete",
+                  "pathKind",
+                  "semanticHash"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "maxProviderSwitches": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["profileId", "eventId", "path", "maxProviderSwitches"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "semanticHash",
+    "artifactType",
+    "paths"
+  ],
+  "additionalProperties": false
+}
