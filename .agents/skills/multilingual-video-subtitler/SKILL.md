@@ -146,6 +146,8 @@ For the separately requested C6.0.1.14 missing-dialogue localization mode, read 
 
 For completion of an already executed C6.0.1.14 snapshot, use the reference's **Existing-probe completion** route: zero new inference, model loads, or provider processes; read-only exact-cache replay, fail closed on missing evidence, and freeze every machine projection plus independent final A/B before Gold evaluation. Shadow selection does not authorize another probe. Full-queue delivery and mandatory-subset ranking are separate gates.
 
+For an explicitly requested C6.0.1.14.1 run, use the reference's **Multi-view speech inventory recovery** route. It permits bounded whole-source speech activity detection, not whole-source ASR: at most 12 detector requests and 32 local ASR requests, with no hidden retry or target backfill. Freeze the independent sample-based inventory and the non-mandatory 24-target/60-second safety reserve before probes. Keep full physical playback coverage, lexical usefulness, and canonical subtitle correctness separate; only evaluate Gold after both final machine freezes.
+
 Freeze machine features and contiguous audio-isolated folds before opening Gold labels. Keep post-freeze calibration and its training provenance outside the machine workspace and trial package. Report independent-audio union, incremental playback cost, remaining critical misses, and negative fold gains even when a ranking fails its target. Treat Episode 1 as a previously exposed calibration dataset, never as a prospective human trial; synthetic timer/workflow tests are not measured human efficiency. A future trial requires an unseen episode, a frozen deployment ranker, explicit no-Gold/no-prior-review declarations, and the versioned protocol.
 
 ## Apply the source priority
