@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-cross-stage-selection-continuity-ledger.schema.json",
+  "title": "machine-cross-stage-selection-continuity-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-cross-stage-selection-continuity-ledger"
+    },
+    "obligationsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalSelectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "obligationId": { "type": "string", "minLength": 1 },
+          "originalTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "originalNativeIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "finalChildIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalTargetBundleIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalCoveredIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "uncoveredIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "requiredNativeSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "coveredNativeSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "coverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "preservationMethod": {
+            "type": "string",
+            "enum": [
+              "EXACT_TARGET_RETAINED",
+              "EQUIVALENT_CHILD_TARGET",
+              "EQUIVALENT_TARGET_BUNDLE",
+              "SUPERSET_CORE_COVERAGE",
+              "REGRESSED_NOT_COVERED"
+            ]
+          },
+          "reason": { "type": "string", "minLength": 1 },
+          "regression": { "type": "boolean" }
+        },
+        "required": [
+          "obligationId",
+          "originalTargetIds",
+          "originalNativeIntervals",
+          "finalChildIds",
+          "finalTargetBundleIds",
+          "finalCoveredIntervals",
+          "uncoveredIntervals",
+          "requiredNativeSamples",
+          "coveredNativeSamples",
+          "coverageRatio",
+          "preservationMethod",
+          "reason",
+          "regression"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "candidateDecisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "childUnitId": { "type": "string", "minLength": 1 },
+          "newDetectorEvidence": { "type": "boolean" },
+          "selected": { "type": "boolean" },
+          "finalBundleIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reason": { "type": "string", "minLength": 1 },
+          "coreSeconds": { "type": "number", "minimum": 0 },
+          "addedNativeSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "childUnitId",
+          "newDetectorEvidence",
+          "selected",
+          "finalBundleIds",
+          "reason",
+          "coreSeconds",
+          "addedNativeSamples"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "monotonicityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "obligationsHash",
+    "finalSelectionHash",
+    "entries",
+    "candidateDecisions",
+    "monotonicityHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c601143-frozen-lexical-bindings.schema.json",
+  "title": "machine-c601143-frozen-lexical-bindings",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c601143-frozen-lexical-bindings"
+    },
+    "frozenLexicalArtifactHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "safetyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "previousLexicalArtifactHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "candidate": {
+            "type": "object",
+            "properties": {
+              "requestId": { "type": "string", "minLength": 1 },
+              "provider": {
+                "type": "string",
+                "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+              },
+              "nativeInterval": {
+                "type": "object",
+                "properties": {
+                  "startSample": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "endSample": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["startSample", "endSample"],
+                "additionalProperties": false
+              },
+              "sourceInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              "text": { "type": "string" },
+              "reading": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "readingRuntimeHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "source": {
+                "type": "string",
+                "enum": ["PREVIOUS_C601141", "CURRENT_C601142"]
+              },
+              "localizationStatus": {
+                "type": "string",
+                "enum": [
+                  "EXACT_SOURCE_WINDOW",
+                  "TRUSTED_TOKEN_PROJECTION",
+                  "CONTEXT_UNPROJECTABLE",
+                  "EMPTY",
+                  "FAILED"
+                ]
+              },
+              "lexicalTruthGuaranteed": { "type": "boolean", "const": false }
+            },
+            "required": [
+              "requestId",
+              "provider",
+              "nativeInterval",
+              "sourceInterval",
+              "text",
+              "reading",
+              "readingRuntimeHash",
+              "source",
+              "localizationStatus",
+              "lexicalTruthGuaranteed"
+            ],
+            "additionalProperties": false
+          },
+          "sourceTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalBundleIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "childUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "binding": {
+            "type": "string",
+            "enum": [
+              "CORE_CONTAINED",
+              "CONTEXT_ONLY_UNPROJECTABLE",
+              "OUTSIDE_FINAL_SELECTION"
+            ]
+          },
+          "originalIntervalsPreserved": { "type": "boolean", "const": true },
+          "canonicalInsertAllowed": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "candidateHash",
+          "candidate",
+          "sourceTargetIds",
+          "finalBundleIds",
+          "childUnitIds",
+          "binding",
+          "originalIntervalsPreserved",
+          "canonicalInsertAllowed"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "originalCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "deduplicatedCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "coreContainedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "contextOnlyCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "outsideSelectionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "frozenLexicalArtifactHash",
+    "safetyHash",
+    "previousLexicalArtifactHash",
+    "entries",
+    "originalCandidateCount",
+    "deduplicatedCandidateCount",
+    "coreContainedCount",
+    "contextOnlyCount",
+    "outsideSelectionCount"
+  ],
+  "additionalProperties": false
+}

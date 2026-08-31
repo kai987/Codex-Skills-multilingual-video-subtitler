@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-browser-read-only-acceptance.schema.json",
+  "title": "c6-0-1-14-3-browser-read-only-acceptance",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-browser-read-only-acceptance"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "checkedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "workspaceDataByteHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "workspaceJavascriptByteHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checks": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "detail": { "type": "string" }
+        },
+        "required": ["id", "passed", "detail"],
+        "additionalProperties": false
+      }
+    },
+    "consoleErrorCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sessionBefore": { "type": "null" },
+    "sessionAfter": { "type": "null" },
+    "savedHumanDecisionCount": { "type": "number", "const": 0 },
+    "humanTrialStarted": { "type": "boolean", "const": false },
+    "passed": { "type": "boolean" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "checkedAt",
+    "workspaceDataByteHash",
+    "workspaceJavascriptByteHash",
+    "checks",
+    "consoleErrorCount",
+    "sessionBefore",
+    "sessionAfter",
+    "savedHumanDecisionCount",
+    "humanTrialStarted",
+    "passed"
+  ],
+  "additionalProperties": false
+}

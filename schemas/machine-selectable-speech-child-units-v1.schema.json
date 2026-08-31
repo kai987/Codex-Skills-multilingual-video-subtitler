@@ -1,0 +1,819 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-selectable-speech-child-units-v1.schema.json",
+  "title": "machine-selectable-speech-child-units-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-selectable-speech-child-units-v1"
+    },
+    "inventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "obligationsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "parentClustersHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "scoreTracksHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "boundaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "atSample": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PHASE_A_TARGET",
+              "PHASE_A_OBLIGATION",
+              "IMMUTABLE_TARGET",
+              "FINAL_CUE_MASK",
+              "VERIFIED_SILENCE",
+              "SOURCE_DISCONTINUITY",
+              "CONTRADICTION_TRANSITION",
+              "TIMEBASE_TRANSITION",
+              "DETECTOR_FAMILY_TRANSITION",
+              "EVIDENCE_STRATUM_TRANSITION",
+              "POSTERIOR_VALLEY",
+              "AUDIO_VIEW_TRANSITION",
+              "SCENE",
+              "SPEAKER",
+              "LARGE_INTERNAL_GAP"
+            ]
+          },
+          "hard": { "type": "boolean" },
+          "strength": { "type": "number", "minimum": 0 },
+          "evidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "required": ["atSample", "kind", "hard", "strength", "evidenceHashes"],
+        "additionalProperties": false
+      }
+    },
+    "atoms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "atomId": { "type": "string", "minLength": 1 },
+          "nativeInterval": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "parentClusterIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "observationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "detectorRunIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "detectorFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SILERO",
+                "PYANNOTE",
+                "WEBRTC",
+                "LEGACY_FINGERPRINT",
+                "EXISTING_VERIFIED",
+                "LOCALIZED_LEXICAL"
+              ]
+            }
+          },
+          "independentFamilies": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "distinctPcmViewIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rootLineageIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceStrata": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MULTI_DETECTOR",
+                "PYANNOTE_EXCLUSIVE",
+                "SILERO_EXCLUSIVE",
+                "WEBRTC_EXCLUSIVE",
+                "LEGACY_FINGERPRINT_EXCLUSIVE",
+                "MULTI_VIEW_SAME_DETECTOR",
+                "EXISTING_VERIFIED",
+                "MASKED_SUBTHRESHOLD",
+                "AUDIT_ONLY"
+              ]
+            }
+          },
+          "timelineBins": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "obligationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "verifiedTimebase": { "type": "boolean" },
+          "strongContradiction": { "type": "boolean" },
+          "cueCovered": { "type": "boolean" },
+          "immutableTargetCovered": { "type": "boolean" },
+          "eligibleEvidence": { "type": "boolean" },
+          "machinePriority": { "type": "number" },
+          "posterior": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["VERIFIED_EXISTING_TRACK", "NO_MAPPABLE_TRACK"]
+              },
+              "trackHashes": {
+                "type": "array",
+                "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+              },
+              "frameCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "minimum": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "maximum": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "mean": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "valleySamples": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              }
+            },
+            "required": [
+              "status",
+              "trackHashes",
+              "frameCount",
+              "minimum",
+              "maximum",
+              "mean",
+              "valleySamples"
+            ],
+            "additionalProperties": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "atomId",
+          "nativeInterval",
+          "sourceInterval",
+          "parentClusterIds",
+          "candidateIds",
+          "observationIds",
+          "evidenceIds",
+          "detectorRunIds",
+          "detectorFamilies",
+          "independentFamilies",
+          "distinctPcmViewIds",
+          "rootLineageIds",
+          "evidenceStrata",
+          "timelineBins",
+          "sceneIds",
+          "obligationIds",
+          "verifiedTimebase",
+          "strongContradiction",
+          "cueCovered",
+          "immutableTargetCovered",
+          "eligibleEvidence",
+          "machinePriority",
+          "posterior",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "parents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "parentClusterId": { "type": "string", "minLength": 1 },
+          "parentSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "reviewEnvelope": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "atomicMemberCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "childUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "parentClusterId",
+          "parentSemanticHash",
+          "reviewEnvelope",
+          "atomicMemberCount",
+          "childUnitIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "childUnitId": { "type": "string", "minLength": 1 },
+          "parentClusterIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "observationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "detectorRunIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rootLineageIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomicNativeIntervals": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "atomicSourceIntervals": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "nativeIntervalUnion": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "reviewEnvelope": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "coreUnionSeconds": { "type": "number", "minimum": 0 },
+          "internalSilenceSeconds": { "type": "number", "minimum": 0 },
+          "detectorFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SILERO",
+                "PYANNOTE",
+                "WEBRTC",
+                "LEGACY_FINGERPRINT",
+                "EXISTING_VERIFIED",
+                "LOCALIZED_LEXICAL"
+              ]
+            }
+          },
+          "independentFamilies": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceStrata": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MULTI_DETECTOR",
+                "PYANNOTE_EXCLUSIVE",
+                "SILERO_EXCLUSIVE",
+                "WEBRTC_EXCLUSIVE",
+                "LEGACY_FINGERPRINT_EXCLUSIVE",
+                "MULTI_VIEW_SAME_DETECTOR",
+                "EXISTING_VERIFIED",
+                "MASKED_SUBTHRESHOLD",
+                "AUDIT_ONLY"
+              ]
+            }
+          },
+          "distinctPcmViewIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "timelineBins": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "obligationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "overlapsFinalCueMask": { "type": "boolean" },
+          "overlapsImmutableTarget": { "type": "boolean" },
+          "verifiedTimebase": { "type": "boolean" },
+          "strongContradiction": { "type": "boolean" },
+          "machinePriority": { "type": "number" },
+          "posterior": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["VERIFIED_EXISTING_TRACK", "NO_MAPPABLE_TRACK"]
+              },
+              "trackHashes": {
+                "type": "array",
+                "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+              },
+              "frameCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "minimum": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "maximum": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "mean": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "valleySamples": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              }
+            },
+            "required": [
+              "status",
+              "trackHashes",
+              "frameCount",
+              "minimum",
+              "maximum",
+              "mean",
+              "valleySamples"
+            ],
+            "additionalProperties": false
+          },
+          "splitReasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "atSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "PHASE_A_TARGET",
+                    "PHASE_A_OBLIGATION",
+                    "IMMUTABLE_TARGET",
+                    "FINAL_CUE_MASK",
+                    "VERIFIED_SILENCE",
+                    "SOURCE_DISCONTINUITY",
+                    "CONTRADICTION_TRANSITION",
+                    "TIMEBASE_TRANSITION",
+                    "DETECTOR_FAMILY_TRANSITION",
+                    "EVIDENCE_STRATUM_TRANSITION",
+                    "POSTERIOR_VALLEY",
+                    "AUDIO_VIEW_TRANSITION",
+                    "SCENE",
+                    "SPEAKER",
+                    "LARGE_INTERNAL_GAP"
+                  ]
+                },
+                "hard": { "type": "boolean" },
+                "strength": { "type": "number", "minimum": 0 },
+                "evidenceHashes": {
+                  "type": "array",
+                  "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+                }
+              },
+              "required": [
+                "atSample",
+                "kind",
+                "hard",
+                "strength",
+                "evidenceHashes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "eligible": { "type": "boolean" },
+          "eligibilityReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "unsplittableLargeChild": { "type": "boolean" },
+          "sourceIdentity": {
+            "type": "object",
+            "properties": {
+              "sourceMediaSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+              "sampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioStreamIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioTimebase": {
+                "type": "string",
+                "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+              },
+              "sourceTimebase": {
+                "type": "string",
+                "const": "SOURCE_GLOBAL_SECONDS"
+              }
+            },
+            "required": [
+              "sourceMediaSha256",
+              "durationSeconds",
+              "sampleRate",
+              "audioStreamIndex",
+              "audioTimebase",
+              "sourceTimebase"
+            ],
+            "additionalProperties": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "childUnitId",
+          "parentClusterIds",
+          "atomIds",
+          "candidateIds",
+          "observationIds",
+          "evidenceIds",
+          "detectorRunIds",
+          "rootLineageIds",
+          "atomicNativeIntervals",
+          "atomicSourceIntervals",
+          "nativeIntervalUnion",
+          "reviewEnvelope",
+          "coreUnionSeconds",
+          "internalSilenceSeconds",
+          "detectorFamilies",
+          "independentFamilies",
+          "evidenceStrata",
+          "distinctPcmViewIds",
+          "timelineBins",
+          "sceneIds",
+          "obligationIds",
+          "overlapsFinalCueMask",
+          "overlapsImmutableTarget",
+          "verifiedTimebase",
+          "strongContradiction",
+          "machinePriority",
+          "posterior",
+          "splitReasons",
+          "eligible",
+          "eligibilityReasons",
+          "unsplittableLargeChild",
+          "sourceIdentity",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "parentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "atomCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "childCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "eligibleChildCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiChildParentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maximumParentMemberCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maximumChildMemberCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maximumChildCoreSeconds": { "type": "number", "minimum": 0 },
+        "maximumChildEnvelopeSeconds": { "type": "number", "minimum": 0 },
+        "oversizedParentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsplittableLargeChildCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hardSplitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "softSplitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "posteriorValleyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmappableTrackCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "intervalConservationPassed": { "type": "boolean" },
+        "envelopeAsSpeechCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "parentCount",
+        "atomCount",
+        "childCount",
+        "eligibleChildCount",
+        "multiChildParentCount",
+        "maximumParentMemberCount",
+        "maximumChildMemberCount",
+        "maximumChildCoreSeconds",
+        "maximumChildEnvelopeSeconds",
+        "oversizedParentCount",
+        "unsplittableLargeChildCount",
+        "hardSplitCount",
+        "softSplitCount",
+        "posteriorValleyCount",
+        "unmappableTrackCount",
+        "intervalConservationPassed",
+        "envelopeAsSpeechCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "inventoryHash",
+    "obligationsHash",
+    "parentClustersHash",
+    "scoreTracksHash",
+    "boundaries",
+    "atoms",
+    "parents",
+    "children",
+    "summary"
+  ],
+  "additionalProperties": false
+}
