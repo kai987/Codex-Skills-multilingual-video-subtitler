@@ -5,6 +5,7 @@ import {
   c6121EdgeSchema,
   c6121SupergroupSchema,
   c6121GroupScoreSchema,
+  c6121FoldMetricSchema,
   c6121ProfileMetricSchema,
   c6121CandidateRowSchema,
   c6121ModelsSchema,
@@ -614,6 +615,10 @@ export const c61211WholeSchema = art(
 export const c61211BiasSchema = art("c6-1-2-1-1-partition-bias-audit", {
   partitionMapHash: sha,
   wholeDiagnosticHash: sha,
+  cutEdgeCount: count,
+  cutOverlapSeconds: num.nonnegative(),
+  maximumComponentDiscardedOverlapRatio: ratio,
+  labelDirectionDisagreementCount: count,
   comparedProfileComponents: count,
   gainDirectionAgreementCount: count,
   gainDirectionDisagreementCount: count,
@@ -640,7 +645,21 @@ export const c61211SensitivitySchema = art("c6-1-2-1-1-evaluator-sensitivity", {
         normalizedJointGain: num.nullable(),
         materialDelta: num.nullable(),
         catastrophic: count,
+        folds: z.array(c6121FoldMetricSchema),
         diagnosticOnly: z.boolean(),
+      })
+      .strict(),
+  ),
+  coverageRows: z.array(
+    z
+      .object({
+        evaluator: z.enum(["E0", "E1", "E2", "E3", "E4"]),
+        machineGroupCoverage: fraction,
+        productionCueCoverage: fraction,
+        globalGoldCoverage: fraction,
+        reachableGoldCoverage: fraction,
+        candidateEventLabelCoverage: fraction.nullable(),
+        topKCandidateLabelCoverage: fraction.nullable(),
       })
       .strict(),
   ),

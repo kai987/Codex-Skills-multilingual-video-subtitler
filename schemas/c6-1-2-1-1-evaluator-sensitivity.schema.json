@@ -62,6 +62,59 @@
             "minimum": 0,
             "maximum": 9007199254740991
           },
+          "folds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string", "minLength": 1 },
+                "changed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evaluated": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "improved": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "regressed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "neutral": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "unknown": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "normalizedJointGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                }
+              },
+              "required": [
+                "foldId",
+                "changed",
+                "evaluated",
+                "improved",
+                "regressed",
+                "neutral",
+                "unknown",
+                "normalizedJointGain"
+              ],
+              "additionalProperties": false
+            }
+          },
           "diagnosticOnly": { "type": "boolean" }
         },
         "required": [
@@ -76,7 +129,130 @@
           "normalizedJointGain",
           "materialDelta",
           "catastrophic",
+          "folds",
           "diagnosticOnly"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "coverageRows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evaluator": {
+            "type": "string",
+            "enum": ["E0", "E1", "E2", "E3", "E4"]
+          },
+          "machineGroupCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "productionCueCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "globalGoldCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "reachableGoldCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "candidateEventLabelCoverage": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "numerator": { "type": "number", "minimum": 0 },
+                  "denominator": { "type": "number", "minimum": 0 },
+                  "ratio": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["numerator", "denominator", "ratio"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "topKCandidateLabelCoverage": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "numerator": { "type": "number", "minimum": 0 },
+                  "denominator": { "type": "number", "minimum": 0 },
+                  "ratio": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "required": ["numerator", "denominator", "ratio"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "evaluator",
+          "machineGroupCoverage",
+          "productionCueCoverage",
+          "globalGoldCoverage",
+          "reachableGoldCoverage",
+          "candidateEventLabelCoverage",
+          "topKCandidateLabelCoverage"
         ],
         "additionalProperties": false
       }
@@ -90,6 +266,7 @@
     "policyHash",
     "semanticHash",
     "rows",
+    "coverageRows",
     "primaryEvaluator"
   ],
   "additionalProperties": false
