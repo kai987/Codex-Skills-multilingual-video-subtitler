@@ -48,6 +48,7 @@ export * from "./c6-1-2-top-k-reranking-schemas.js";
 export * from "./c6-1-2-evaluation-schemas.js";
 export * from "./c6-1-2-schema-registry.js";
 export * from "./c6-1-2-1-evaluation-recovery-schemas.js";
+export * from "./c6-1-2-1-1-partition-evaluation-schemas.js";
 export * from "./c6-1-1-route-schemas.js";
 export * from "./c6-1-1-diagnostic-schemas.js";
 export * from "./c6-1-1-validation-schemas.js";

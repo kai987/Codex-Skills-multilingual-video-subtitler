@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-validation.schema.json",
+  "title": "c6-1-2-1-1-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-1-validation" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["name", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "checkedArtifacts": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "schemaCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "aBSemanticParity": { "type": "boolean" },
+    "aBByteParity": { "type": "boolean" },
+    "productionParity": { "type": "boolean" },
+    "sourceReadOnly": { "type": "boolean" },
+    "goldReadOnly": { "type": "boolean" },
+    "modelExecutionCount": { "type": "number", "const": 0 },
+    "networkDuringResearch": { "type": "boolean", "const": false },
+    "qaEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "checks",
+    "passed",
+    "checkedArtifacts",
+    "schemaCount",
+    "aBSemanticParity",
+    "aBByteParity",
+    "productionParity",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "modelExecutionCount",
+    "networkDuringResearch",
+    "qaEvidenceHash",
+    "generatedAt"
+  ],
+  "additionalProperties": false
+}

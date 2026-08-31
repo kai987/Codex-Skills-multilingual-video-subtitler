@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-coverage-gate-v2.schema.json",
+  "title": "c6-1-2-1-1-coverage-gate-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-coverage-gate-v2"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "coverageAuditHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["name", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "profileSelectionUsed": { "type": "boolean", "const": false },
+    "globalGoldCoverageUsed": { "type": "boolean", "const": false },
+    "primaryMode": { "type": "string", "const": "D1_CONSERVATIVE_MONOTONIC" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "partitionMapHash",
+    "coverageAuditHash",
+    "checks",
+    "passed",
+    "profileSelectionUsed",
+    "globalGoldCoverageUsed",
+    "primaryMode"
+  ],
+  "additionalProperties": false
+}

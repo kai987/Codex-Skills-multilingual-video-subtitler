@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-completeness-diagnosis-v2.schema.json",
+  "title": "c6-1-2-1-1-completeness-diagnosis-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-completeness-diagnosis-v2"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nonUnknownCompletenessCoverage": {
+      "type": "object",
+      "properties": {
+        "numerator": { "type": "number", "minimum": 0 },
+        "denominator": { "type": "number", "minimum": 0 },
+        "ratio": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "blockedSelectionOccurrences": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "blockedUniqueCandidates": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "blockedCandidateIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "catastrophicCandidatesBlocked": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "safeCandidatesBlocked": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "safeCandidateFalseBlockRate": {
+      "type": "object",
+      "properties": {
+        "numerator": { "type": "number", "minimum": 0 },
+        "denominator": { "type": "number", "minimum": 0 },
+        "ratio": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "gatedZeroSelectionProfiles": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "nonGatedPositiveUnsafeProfiles": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "nonGatedNegativeGainProfiles": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "diagnosticMainBlocker": { "type": "boolean" },
+    "coverageQualifiedMainBlocker": { "type": "boolean" },
+    "noThresholdChange": { "type": "boolean", "const": true },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "nonUnknownCompletenessCoverage",
+    "blockedSelectionOccurrences",
+    "blockedUniqueCandidates",
+    "blockedCandidateIds",
+    "catastrophicCandidatesBlocked",
+    "safeCandidatesBlocked",
+    "safeCandidateFalseBlockRate",
+    "gatedZeroSelectionProfiles",
+    "nonGatedPositiveUnsafeProfiles",
+    "nonGatedNegativeGainProfiles",
+    "diagnosticMainBlocker",
+    "coverageQualifiedMainBlocker",
+    "noThresholdChange",
+    "reasons"
+  ],
+  "additionalProperties": false
+}

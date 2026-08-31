@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-reachable-coverage-audit.schema.json",
+  "title": "c6-1-2-1-1-reachable-coverage-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-reachable-coverage-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "D0_NO_CUT",
+        "D1_CONSERVATIVE_MONOTONIC",
+        "D2_RELAXED_DIAGNOSTIC_ONLY"
+      ]
+    },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reachableScopeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "allMachineGroupCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "productionCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "globalGoldCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "interventionReachableGoldCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateReachableMachineGroupCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateReachableProductionCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateEventLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "topKCandidateLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "machineDurationCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "globalGoldDurationCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "reachableGoldDurationCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "globalGoldCharacterCoverage": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "numerator": { "type": "number", "minimum": 0 },
+                "denominator": { "type": "number", "minimum": 0 },
+                "ratio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": ["numerator", "denominator", "ratio"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "allMachineGroupCoverage",
+        "productionCueCoverage",
+        "globalGoldCueCoverage",
+        "interventionReachableGoldCueCoverage",
+        "candidateReachableMachineGroupCoverage",
+        "candidateReachableProductionCueCoverage",
+        "candidateEventLabelCoverage",
+        "candidateLabelCoverage",
+        "topKCandidateLabelCoverage",
+        "machineDurationCoverage",
+        "globalGoldDurationCoverage",
+        "reachableGoldDurationCoverage",
+        "globalGoldCharacterCoverage"
+      ],
+      "additionalProperties": false
+    },
+    "evaluableMachineGroupIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evaluableProductionCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evaluableGoldCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evaluableEventIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evaluableCandidateIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "globalGoldCoverageIsDiagnosticOnly": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "mode",
+    "partitionMapHash",
+    "reachableScopeHash",
+    "coverage",
+    "evaluableMachineGroupIds",
+    "evaluableProductionCueIds",
+    "evaluableGoldCueIds",
+    "evaluableEventIds",
+    "evaluableCandidateIds",
+    "globalGoldCoverageIsDiagnosticOnly"
+  ],
+  "additionalProperties": false
+}

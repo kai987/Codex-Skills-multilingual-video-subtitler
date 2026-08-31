@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-policy-freeze.schema.json",
+  "title": "c6-1-2-1-1-policy-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-1-policy-freeze" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "serializedDefinition": { "type": "string", "minLength": 1 },
+    "definitionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "partitionPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "coveragePolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "routePolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "frozenBeforeGoldText": { "type": "boolean", "const": true },
+    "primaryEvaluator": {
+      "type": "string",
+      "const": "E3_CONSTRAINED_MONOTONIC_PARTITIONED_SUPERGROUP"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "serializedDefinition",
+    "definitionHash",
+    "partitionPolicyHash",
+    "coveragePolicyHash",
+    "routePolicyHash",
+    "frozenBeforeGoldText",
+    "primaryEvaluator"
+  ],
+  "additionalProperties": false
+}

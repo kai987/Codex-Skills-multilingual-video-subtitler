@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-reachable-scope.schema.json",
+  "title": "c6-1-2-1-1-reachable-scope",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-1-reachable-scope" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "e2MapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "candidateSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "scopeDefinitionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "globalGoldCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "interventionReachableGoldCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldOnlyUnreachableCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "allMachineGroupIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "candidateReachableMachineGroupIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "allProductionCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "candidateReachableProductionCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "candidateReachableEventIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "frozenCandidateEventIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "allCandidateIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "topKCandidateIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rawGoldTextIncluded": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "e2MapHash",
+    "candidateSetHash",
+    "scopeDefinitionHash",
+    "globalGoldCueIds",
+    "interventionReachableGoldCueIds",
+    "goldOnlyUnreachableCueIds",
+    "allMachineGroupIds",
+    "candidateReachableMachineGroupIds",
+    "allProductionCueIds",
+    "candidateReachableProductionCueIds",
+    "candidateReachableEventIds",
+    "frozenCandidateEventIds",
+    "allCandidateIds",
+    "topKCandidateIds",
+    "rawGoldTextIncluded"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-training-contract-parity.schema.json",
+  "title": "c6-1-2-1-1-training-contract-parity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-training-contract-parity"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profileDefinitionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "thresholdGridHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "trainingCodeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "candidateSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "candidateRankHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "correlationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "completenessHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "contractionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["name", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "onlyNumericLabelsRebound": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "featureHash",
+    "foldHash",
+    "profileDefinitionHash",
+    "thresholdGridHash",
+    "trainingCodeHash",
+    "candidateSetHash",
+    "candidateRankHash",
+    "correlationHash",
+    "completenessHash",
+    "contractionHash",
+    "checks",
+    "passed",
+    "onlyNumericLabelsRebound"
+  ],
+  "additionalProperties": false
+}

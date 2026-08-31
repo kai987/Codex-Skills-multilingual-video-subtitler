@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-partition-bias-audit.schema.json",
+  "title": "c6-1-2-1-1-partition-bias-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-partition-bias-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "wholeDiagnosticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "comparedProfileComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "gainDirectionAgreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "gainDirectionDisagreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "incomparableCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "materialDirectionDisagreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "catastrophicDisagreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "disagreementComponentIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["name", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "wholeComponentScoresUsedForRoute": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "partitionMapHash",
+    "wholeDiagnosticHash",
+    "comparedProfileComponents",
+    "gainDirectionAgreementCount",
+    "gainDirectionDisagreementCount",
+    "incomparableCount",
+    "materialDirectionDisagreementCount",
+    "catastrophicDisagreementCount",
+    "disagreementComponentIds",
+    "checks",
+    "passed",
+    "wholeComponentScoresUsedForRoute"
+  ],
+  "additionalProperties": false
+}

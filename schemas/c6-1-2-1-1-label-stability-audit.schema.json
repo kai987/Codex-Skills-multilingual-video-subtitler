@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-label-stability-audit.schema.json",
+  "title": "c6-1-2-1-1-label-stability-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-label-stability-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "oldEvaluableCandidateLabels": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "newEvaluableCandidateLabels": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "newlyRecoveredCandidateLabels": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "previouslyEvaluableNowLost": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "commonEvaluableCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "stillUnevaluableCandidateLabels": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "exactLabelAgreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "normalizedGainDirectionAgreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "exactGainDirectionAgreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "materialDirectionAgreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "catastrophicAgreementCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "oldSupergroupId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "partitionBlockId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "oldEligible": { "type": "boolean" },
+          "newEligible": { "type": "boolean" },
+          "oldLabelClass": { "type": "string", "minLength": 1 },
+          "newLabelClass": { "type": "string", "minLength": 1 },
+          "exactLabelAgreement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "normalizedGainDirectionAgreement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "exactGainDirectionAgreement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "materialDirectionAgreement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "catastrophicAgreement": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "oldSupergroupId",
+          "partitionBlockId",
+          "oldEligible",
+          "newEligible",
+          "oldLabelClass",
+          "newLabelClass",
+          "exactLabelAgreement",
+          "normalizedGainDirectionAgreement",
+          "exactGainDirectionAgreement",
+          "materialDirectionAgreement",
+          "catastrophicAgreement"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "oldEvaluableCandidateLabels",
+    "newEvaluableCandidateLabels",
+    "newlyRecoveredCandidateLabels",
+    "previouslyEvaluableNowLost",
+    "commonEvaluableCount",
+    "stillUnevaluableCandidateLabels",
+    "exactLabelAgreementCount",
+    "normalizedGainDirectionAgreementCount",
+    "exactGainDirectionAgreementCount",
+    "materialDirectionAgreementCount",
+    "catastrophicAgreementCount",
+    "rows"
+  ],
+  "additionalProperties": false
+}

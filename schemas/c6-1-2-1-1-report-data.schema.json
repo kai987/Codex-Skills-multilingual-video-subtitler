@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-report-data.schema.json",
+  "title": "c6-1-2-1-1-report-data",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-1-report-data" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "validationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "qaEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reportRelativePath": { "type": "string", "minLength": 1 },
+    "sections": {
+      "minItems": 144,
+      "maxItems": 144,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "value": { "type": "string" }
+        },
+        "required": ["number", "title", "value"],
+        "additionalProperties": false
+      }
+    },
+    "finalFields": {
+      "minItems": 150,
+      "maxItems": 150,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "value": { "type": "string" }
+        },
+        "required": ["number", "title", "value"],
+        "additionalProperties": false
+      }
+    },
+    "questions": {
+      "minItems": 20,
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "answer": { "type": "string" }
+        },
+        "required": ["number", "answer"],
+        "additionalProperties": false
+      }
+    },
+    "rawGoldTextIncluded": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "validationHash",
+    "qaEvidenceHash",
+    "reportRelativePath",
+    "sections",
+    "finalFields",
+    "questions",
+    "rawGoldTextIncluded"
+  ],
+  "additionalProperties": false
+}

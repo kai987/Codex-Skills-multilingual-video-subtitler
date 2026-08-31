@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-research-shadow-manifest.schema.json",
+  "title": "c6-1-2-1-1-research-shadow-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-research-shadow-manifest"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "track": {
+            "type": "string",
+            "enum": [
+              "FROZEN_DECISION_REEVALUATION",
+              "SAME_FEATURE_SAME_PROFILE_OOF_RETRAIN"
+            ]
+          },
+          "relativeDirectory": { "type": "string", "minLength": 1 },
+          "selectedCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "textHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "relativePath": { "type": "string", "minLength": 1 },
+                "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+              },
+              "required": ["relativePath", "sha256"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "profileId",
+          "track",
+          "relativeDirectory",
+          "selectedCandidateIds",
+          "timingHash",
+          "textHash",
+          "files"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "productionMutation": { "type": "number", "const": 0 },
+    "newCandidates": { "type": "number", "const": 0 },
+    "localOnly": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "partitionMapHash",
+    "rows",
+    "productionMutation",
+    "newCandidates",
+    "localOnly"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-partition-residuals.schema.json",
+  "title": "c6-1-2-1-1-partition-residuals",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-partition-residuals"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "D0_NO_CUT",
+        "D1_CONSERVATIVE_MONOTONIC",
+        "D2_RELAXED_DIAGNOSTIC_ONLY"
+      ]
+    },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "residualBlockId": { "type": "string", "minLength": 1 },
+          "parentE2SupergroupId": { "type": "string", "minLength": 1 },
+          "residualMachineGroupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "residualProductionCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "residualGoldCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "residualEdgeIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "residualReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "potentiallyRecoverableWithRelaxedPolicy": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "residualBlockId",
+          "parentE2SupergroupId",
+          "residualMachineGroupIds",
+          "residualProductionCueIds",
+          "residualGoldCueIds",
+          "residualEdgeIds",
+          "residualReasons",
+          "potentiallyRecoverableWithRelaxedPolicy",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "mode",
+    "partitionMapHash",
+    "rows"
+  ],
+  "additionalProperties": false
+}

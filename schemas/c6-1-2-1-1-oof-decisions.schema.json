@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-oof-decisions.schema.json",
+  "title": "c6-1-2-1-1-oof-decisions",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-1-oof-decisions" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rankingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configurationsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "foldId": { "type": "string", "minLength": 1 },
+          "groupId": { "type": "string", "minLength": 1 },
+          "configurationId": { "type": "string", "minLength": 1 },
+          "selections": {
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "eventId": { "type": "string", "minLength": 1 },
+                "candidateId": { "type": "string", "minLength": 1 }
+              },
+              "required": ["eventId", "candidateId"],
+              "additionalProperties": false
+            }
+          },
+          "changed": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "profileId",
+          "foldId",
+          "groupId",
+          "configurationId",
+          "selections",
+          "changed",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "productionMutationAllowed": { "type": "boolean", "const": false },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "rankingHash",
+    "configurationsHash",
+    "rows",
+    "productionMutationAllowed",
+    "partitionMapHash"
+  ],
+  "additionalProperties": false
+}

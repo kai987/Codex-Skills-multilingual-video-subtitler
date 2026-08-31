@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-cut-edge-ledger.schema.json",
+  "title": "c6-1-2-1-1-cut-edge-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-1-cut-edge-ledger" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "D0_NO_CUT",
+        "D1_CONSERVATIVE_MONOTONIC",
+        "D2_RELAXED_DIAGNOSTIC_ONLY"
+      ]
+    },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "edgeId": { "type": "string", "minLength": 1 },
+          "parentComponentId": { "type": "string", "minLength": 1 },
+          "machineGroupId": { "type": "string", "minLength": 1 },
+          "goldCueId": { "type": "string", "minLength": 1 },
+          "sourceBlockId": { "type": "string", "minLength": 1 },
+          "targetBlockId": { "type": "string", "minLength": 1 },
+          "overlapIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number" },
+                "end": { "type": "number" }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "overlapSeconds": { "type": "number", "minimum": 0 },
+          "machineIntersectionRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "goldIntersectionRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "weakBridgeStrength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "strongBridge": { "type": "boolean" },
+          "cutAllowed": { "type": "boolean" },
+          "cutReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "edgeId",
+          "parentComponentId",
+          "machineGroupId",
+          "goldCueId",
+          "sourceBlockId",
+          "targetBlockId",
+          "overlapIntervals",
+          "overlapSeconds",
+          "machineIntersectionRatio",
+          "goldIntersectionRatio",
+          "weakBridgeStrength",
+          "strongBridge",
+          "cutAllowed",
+          "cutReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "independentCutOverlapSeconds": { "type": "number", "minimum": 0 },
+    "unsafeCutCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "strongBridgeCutCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "mode",
+    "partitionMapHash",
+    "rows",
+    "independentCutOverlapSeconds",
+    "unsafeCutCount",
+    "strongBridgeCutCount"
+  ],
+  "additionalProperties": false
+}

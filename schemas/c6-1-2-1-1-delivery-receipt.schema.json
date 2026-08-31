@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-delivery-receipt.schema.json",
+  "title": "c6-1-2-1-1-delivery-receipt",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-delivery-receipt"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "branch": { "type": "string", "minLength": 1 },
+    "baselineCommit": { "type": "string", "minLength": 1 },
+    "head": { "type": "string", "minLength": 1 },
+    "remoteHead": { "type": "string", "minLength": 1 },
+    "commits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string", "minLength": 1 },
+          "sha": { "type": "string", "minLength": 1 },
+          "subject": { "type": "string", "minLength": 1 }
+        },
+        "required": ["role", "sha", "subject"],
+        "additionalProperties": false
+      }
+    },
+    "upstreamAhead": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "upstreamBehind": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "workingTreeClean": { "type": "boolean" },
+    "validationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "qaEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reportRelativePath": { "type": "string", "minLength": 1 },
+    "outputDirectories": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_1_3_FROZEN_TOP_K_RERANKER_PROSPECTIVE_SHADOW",
+        "GO_C6_1_2_2_ACOUSTIC_COMPLETENESS_CALIBRATION",
+        "STOP_EXISTING_CANDIDATE_AUTOMATIC_RERANKING",
+        "EVALUATION_PARTITION_UNRECOVERABLE_WITHOUT_UNSAFE_CUTS",
+        "C6_1_2_1_1_ENGINEERING_INVALID"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "branch",
+    "baselineCommit",
+    "head",
+    "remoteHead",
+    "commits",
+    "upstreamAhead",
+    "upstreamBehind",
+    "workingTreeClean",
+    "validationHash",
+    "qaEvidenceHash",
+    "reportRelativePath",
+    "outputDirectories",
+    "route"
+  ],
+  "additionalProperties": false
+}

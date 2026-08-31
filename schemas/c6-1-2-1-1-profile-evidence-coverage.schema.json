@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-profile-evidence-coverage.schema.json",
+  "title": "c6-1-2-1-1-profile-evidence-coverage",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-profile-evidence-coverage"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "track": {
+            "type": "string",
+            "enum": [
+              "FROZEN_DECISION_REEVALUATION",
+              "SAME_FEATURE_SAME_PROFILE_OOF_RETRAIN"
+            ]
+          },
+          "selectedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "changedBlockCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "changedMachineGroupCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "selectionPrecision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harmRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "passed": { "type": "boolean" },
+          "safeProfileEligible": { "type": "boolean" }
+        },
+        "required": [
+          "profileId",
+          "track",
+          "selectedCount",
+          "changedBlockCoverage",
+          "changedMachineGroupCoverage",
+          "selectionPrecision",
+          "harmRate",
+          "passed",
+          "safeProfileEligible"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "evaluatorGateInput": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "partitionMapHash",
+    "rows",
+    "evaluatorGateInput"
+  ],
+  "additionalProperties": false
+}

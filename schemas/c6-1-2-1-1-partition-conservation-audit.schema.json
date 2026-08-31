@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-1-partition-conservation-audit.schema.json",
+  "title": "c6-1-2-1-1-partition-conservation-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-1-partition-conservation-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "D0_NO_CUT",
+        "D1_CONSERVATIVE_MONOTONIC",
+        "D2_RELAXED_DIAGNOSTIC_ONLY"
+      ]
+    },
+    "partitionMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "duplicatedMachineGroupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "missingMachineGroupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "extraMachineGroupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "duplicatedProductionCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "missingProductionCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "extraProductionCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "duplicatedGoldCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "missingGoldCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "extraGoldCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unaccountedEdgeCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "multiplyAccountedEdgeCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unsafeCutCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "strongBridgeCutCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "nonMonotonicPartitionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "crossFoldPartitionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "retainedOverlapViolationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "cutLossViolationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "goldTextUsedForPartitionCount": { "type": "number", "const": 0 },
+    "profileRematchingCount": { "type": "number", "const": 0 },
+    "passed": { "type": "boolean" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "mode",
+    "partitionMapHash",
+    "duplicatedMachineGroupCount",
+    "missingMachineGroupCount",
+    "extraMachineGroupCount",
+    "duplicatedProductionCueCount",
+    "missingProductionCueCount",
+    "extraProductionCueCount",
+    "duplicatedGoldCueCount",
+    "missingGoldCueCount",
+    "extraGoldCueCount",
+    "unaccountedEdgeCount",
+    "multiplyAccountedEdgeCount",
+    "unsafeCutCount",
+    "strongBridgeCutCount",
+    "nonMonotonicPartitionCount",
+    "crossFoldPartitionCount",
+    "retainedOverlapViolationCount",
+    "cutLossViolationCount",
+    "goldTextUsedForPartitionCount",
+    "profileRematchingCount",
+    "passed"
+  ],
+  "additionalProperties": false
+}
