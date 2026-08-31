@@ -29,6 +29,7 @@ import {
   type C60114WorkspaceExtension,
   type C601141WorkspaceExtension,
   type Workspace142,
+  type Workspace143,
 } from "@mvl/shared";
 import { assertC60113WorkspaceExtension } from "./c60113-review-workspace.js";
 import { c60113WorkspaceJavascript } from "./c60113-review-workspace-ui.js";
@@ -38,6 +39,8 @@ import { assertInventoryWorkspace141 } from "./c601141-review-delivery.js";
 import { c601141WorkspaceJavascript } from "./c601141-review-workspace-ui.js";
 import { assertWorkspace142 } from "./c601142-review-delivery.js";
 import { c601142WorkspaceJavascript } from "./c601142-review-workspace-ui.js";
+import { assertWorkspace143 } from "./c601143-review-delivery.js";
+import { c601143WorkspaceJavascript } from "./c601143-review-workspace-ui.js";
 import { machineQualitySemanticHash } from "../machine-quality/evidence-correlation.js";
 
 export const C60112_REVIEW_WORKSPACE_VERSION =
@@ -132,6 +135,7 @@ export interface C60112ReviewWorkspaceData {
   sourceTargetReviewV3?: C60114WorkspaceExtension;
   speechInventoryReviewV1?: C601141WorkspaceExtension;
   detectorCeilingReviewV2?: Workspace142;
+  monotonicSafetyReviewV3?: Workspace143;
 }
 
 export interface C60112ReviewDecisionRequest {
@@ -449,6 +453,7 @@ export function assertC60112ReviewWorkspaceData(
   assertC60114WorkspaceExtension(data);
   assertInventoryWorkspace141(data);
   assertWorkspace142(data);
+  assertWorkspace143(data);
   if (data.workspaceVersion !== C60112_REVIEW_WORKSPACE_VERSION) {
     throw new Error("Unsupported review workspace version.");
   }
@@ -752,6 +757,9 @@ export async function writeC60112ReviewWorkspace(input: {
           : "") +
         (input.reviewData.detectorCeilingReviewV2
           ? c601142WorkspaceJavascript()
+          : "") +
+        (input.reviewData.monotonicSafetyReviewV3
+          ? c601143WorkspaceJavascript()
           : ""),
     ),
     atomicWriteText(cssPath, reviewWorkspaceCss()),
