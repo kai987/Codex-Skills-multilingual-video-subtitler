@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-delivery-selection.schema.json",
+  "title": "c6-0-1-14-2-delivery-selection",
+  "type": "object",
+  "properties": {
+    "directoryName": { "type": "string", "minLength": 1 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "physical": {
+      "type": "object",
+      "properties": {
+        "actualAudioCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hashVerifiedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "allPassed": { "type": "boolean", "const": true }
+      },
+      "required": [
+        "actualAudioCount",
+        "playableCount",
+        "hashVerifiedCount",
+        "allPassed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": ["directoryName", "semanticHash", "physical"],
+  "additionalProperties": false
+}

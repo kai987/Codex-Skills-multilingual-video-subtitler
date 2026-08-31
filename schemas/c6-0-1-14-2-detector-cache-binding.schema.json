@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-detector-cache-binding.schema.json",
+  "title": "c6-0-1-14-2-detector-cache-binding",
+  "type": "object",
+  "properties": {
+    "planHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "jobHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "receiptHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": ["planHash", "jobHash", "receiptHash"],
+  "additionalProperties": false
+}

@@ -493,6 +493,11 @@ const schemas = [
     ...c60114.c601141DeliverySchemas,
     ...c60114.c601141EvaluationSchemas,
     ...c60114.c601141AcceptanceSchemas,
+    ...c60114.c601142SelectionSchemas,
+    ...c60114.c601142AcousticSchemas,
+    ...c60114.c601142ReviewSchemas,
+    ...c60114.c601142AcceptanceSchemas,
+    ...c60114.c601142LocalSchemas,
   }).map(([name, schema]) => ({
     fileName: `${name}.schema.json`,
     id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,

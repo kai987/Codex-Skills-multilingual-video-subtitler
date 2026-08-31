@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-post-freeze-evaluation-audit.schema.json",
+  "title": "c6-0-1-14-2-post-freeze-evaluation-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-2-post-freeze-evaluation-audit"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "firstGoldReadAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "finalAFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalBFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalAFreezeCompletedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "finalBFreezeCompletedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "projectionSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "codeValidationByteHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineABSemanticParity": { "type": "boolean", "const": true },
+    "canonicalABByteParity": { "type": "boolean", "const": true },
+    "freezeBeforeGold": { "type": "boolean", "const": true },
+    "sourceIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number" },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "sourceIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number" },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "goldIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number" },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "goldIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number" },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "upstreamGoldEvaluationHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "upstreamQualityEvaluationHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "upstreamRegionLabelsHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceReadOnly": { "type": "boolean", "const": true },
+    "goldReadOnly": { "type": "boolean", "const": true },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "evaluatorGoldInputCount": { "type": "number", "const": 1 },
+    "newInferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "matchingRulesChanged": { "type": "boolean", "const": false },
+    "canonicalMutationCount": { "type": "number", "const": 0 },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "newOofRun": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "firstReadIntentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "durableIntentBeforeGoldRead": { "type": "boolean", "const": true },
+    "browserAuditByteHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "firstGoldReadAt",
+    "finalAFreezeHash",
+    "finalBFreezeHash",
+    "finalAFreezeCompletedAt",
+    "finalBFreezeCompletedAt",
+    "projectionSemanticHash",
+    "codeValidationByteHash",
+    "machineABSemanticParity",
+    "canonicalABByteParity",
+    "freezeBeforeGold",
+    "sourceIdentityBefore",
+    "sourceIdentityAfter",
+    "goldIdentityBefore",
+    "goldIdentityAfter",
+    "upstreamGoldEvaluationHash",
+    "upstreamQualityEvaluationHash",
+    "upstreamRegionLabelsHash",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "runtimeGoldInputCount",
+    "evaluatorGoldInputCount",
+    "newInferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "matchingRulesChanged",
+    "canonicalMutationCount",
+    "rankerRetrained",
+    "newOofRun",
+    "semanticHash",
+    "firstReadIntentHash",
+    "durableIntentBeforeGoldRead",
+    "browserAuditByteHash"
+  ],
+  "additionalProperties": false
+}

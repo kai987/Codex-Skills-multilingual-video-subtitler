@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-audio-view-effectiveness-audit.schema.json",
+  "title": "machine-audio-view-effectiveness-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-audio-view-effectiveness-audit"
+    },
+    "baselineViewsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureAlgorithm": {
+      "type": "string",
+      "const": "pcm-rms-stft-modulation-autocorrelation-v1"
+    },
+    "syntheticControlsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "viewId": { "type": "string", "minLength": 1 },
+          "role": {
+            "type": "string",
+            "enum": [
+              "NATIVE_MONO",
+              "LEFT",
+              "RIGHT",
+              "CENTER_OR_MID",
+              "VOICE_BAND_CENTER",
+              "DIALOGUE_COMPRESSED_MID_V2",
+              "PREEMPHASIS_VOICE_BAND_V1",
+              "LIGHT_DENOISED_CENTER_V1"
+            ]
+          },
+          "pcmSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "parentPcmSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "frameCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "durationDeltaSamples": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "parentCorrelation": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "maximumCrossCorrelation": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "maximumCrossCorrelationLagSamples16k": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "spectralShapeDifference": { "type": "number", "minimum": 0 },
+          "features": {
+            "type": "object",
+            "properties": {
+              "rms": { "type": "number", "minimum": 0 },
+              "levelDbfsProxy": { "type": "number" },
+              "dynamicRangeDb": { "type": "number", "minimum": 0 },
+              "voiceBandRatio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "lowBandRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+              "highBandRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+              "spectralFlatness": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "modulation2To16HzRatio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "harmonicityProxy": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "pitchContinuityProxy": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "onsetDensityPerSecond": { "type": "number", "minimum": 0 },
+              "centerSideEnergyRatio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": [
+              "rms",
+              "levelDbfsProxy",
+              "dynamicRangeDb",
+              "voiceBandRatio",
+              "lowBandRatio",
+              "highBandRatio",
+              "spectralFlatness",
+              "modulation2To16HzRatio",
+              "harmonicityProxy",
+              "pitchContinuityProxy",
+              "onsetDensityPerSecond",
+              "centerSideEnergyRatio"
+            ],
+            "additionalProperties": false
+          },
+          "duplicateOfViewId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "amplitudeOnlyNoOp": { "type": "boolean" },
+          "effectiveNoOp": { "type": "boolean" },
+          "measuredImpulseDelayNativeSamples": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "verifiedTimebase": { "type": "boolean" },
+          "detectorEligible": { "type": "boolean" },
+          "rejectionReason": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "viewId",
+          "role",
+          "pcmSha256",
+          "parentPcmSha256",
+          "frameCount",
+          "durationDeltaSamples",
+          "parentCorrelation",
+          "maximumCrossCorrelation",
+          "maximumCrossCorrelationLagSamples16k",
+          "spectralShapeDifference",
+          "features",
+          "duplicateOfViewId",
+          "amplitudeOnlyNoOp",
+          "effectiveNoOp",
+          "measuredImpulseDelayNativeSamples",
+          "verifiedTimebase",
+          "detectorEligible",
+          "rejectionReason",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "newInferenceCount": { "type": "number", "const": 0 },
+    "canonicalMutationCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "baselineViewsHash",
+    "featureAlgorithm",
+    "syntheticControlsHash",
+    "rows",
+    "newInferenceCount",
+    "canonicalMutationCount"
+  ],
+  "additionalProperties": false
+}

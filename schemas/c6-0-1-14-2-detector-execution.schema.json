@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-detector-execution.schema.json",
+  "title": "c6-0-1-14-2-detector-execution",
+  "maxItems": 8,
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "runId": { "type": "string", "minLength": 1 },
+      "audioPath": { "type": "string", "minLength": 1 },
+      "backend": {
+        "type": "object",
+        "properties": {
+          "identity": {
+            "type": "object",
+            "properties": {
+              "detectorFamily": {
+                "type": "string",
+                "enum": ["SILERO", "PYANNOTE", "WEBRTC"]
+              },
+              "modelId": { "type": "string", "minLength": 1 },
+              "modelSnapshotHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "runtimeIdentityHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "workerSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "binarySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "device": { "type": "string", "enum": ["cpu", "mps", "metal"] },
+              "offline": { "type": "boolean", "const": true },
+              "modelDownloadCount": { "type": "number", "const": 0 },
+              "versions": {
+                "type": "object",
+                "propertyNames": { "type": "string", "minLength": 1 },
+                "additionalProperties": { "type": "string", "minLength": 1 }
+              },
+              "implementationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "posteriorCapture": {
+                "type": "string",
+                "enum": [
+                  "SILERO_VAD_PROBS",
+                  "PYANNOTE_PRE_CONVERSION_POWERSET_ANONYMOUS",
+                  "WEBRTC_BINARY_DECISIONS"
+                ]
+              }
+            },
+            "required": [
+              "detectorFamily",
+              "modelId",
+              "modelSnapshotHash",
+              "runtimeIdentityHash",
+              "workerSha256",
+              "binarySha256",
+              "device",
+              "offline",
+              "modelDownloadCount",
+              "versions",
+              "implementationHash",
+              "posteriorCapture"
+            ],
+            "additionalProperties": false
+          },
+          "worker": { "type": "string", "minLength": 1 },
+          "python": { "type": "string", "minLength": 1 },
+          "model": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "library": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          }
+        },
+        "required": ["identity", "worker", "python", "model", "library"],
+        "additionalProperties": false
+      }
+    },
+    "required": ["runId", "audioPath", "backend"],
+    "additionalProperties": false
+  }
+}

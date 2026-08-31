@@ -1,0 +1,645 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-phase-a-selection-projection.schema.json",
+  "title": "c6-0-1-14-2-phase-a-selection-projection",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-2-phase-a-selection-projection"
+    },
+    "frozenAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "oldSafetyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "pathologyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "clustersHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "variants": {
+      "minItems": 3,
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": { "type": "string", "const": "1.0.0" },
+          "policyVersion": {
+            "type": "string",
+            "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+          },
+          "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "sourceIdentity": {
+            "type": "object",
+            "properties": {
+              "sourceMediaSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+              "sampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioStreamIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioTimebase": {
+                "type": "string",
+                "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+              },
+              "sourceTimebase": {
+                "type": "string",
+                "const": "SOURCE_GLOBAL_SECONDS"
+              }
+            },
+            "required": [
+              "sourceMediaSha256",
+              "durationSeconds",
+              "sampleRate",
+              "audioStreamIndex",
+              "audioTimebase",
+              "sourceTimebase"
+            ],
+            "additionalProperties": false
+          },
+          "sourceTimebase": {
+            "type": "string",
+            "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+          },
+          "runtimeGoldInputCount": { "type": "number", "const": 0 },
+          "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "artifactType": {
+            "type": "string",
+            "const": "machine-missing-safety-reserve-targets-v2"
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "CLUSTER_ONLY",
+              "STRATUM_DIVERSITY",
+              "SELECTION_REPAIR_ONLY",
+              "DETECTOR_CEILING_ONLY",
+              "DETECTOR_CEILING_COMBINED"
+            ]
+          },
+          "clustersHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "oldSafetyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "targets": {
+            "maxItems": 24,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "clusterId": { "type": "string", "minLength": 1 },
+                "memberCandidateIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "parentIslandIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "atomicNativeIntervals": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "startSample": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "endSample": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["startSample", "endSample"],
+                    "additionalProperties": false
+                  }
+                },
+                "atomicSourceIntervals": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "number", "minimum": 0 },
+                      "end": { "type": "number", "exclusiveMinimum": 0 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  }
+                },
+                "targetCoreUnion": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "startSample": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "endSample": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": ["startSample", "endSample"],
+                    "additionalProperties": false
+                  }
+                },
+                "reviewEnvelope": {
+                  "type": "object",
+                  "properties": {
+                    "startSample": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "endSample": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": ["startSample", "endSample"],
+                  "additionalProperties": false
+                },
+                "observationIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "requestIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "detectorFamilies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "SILERO",
+                      "PYANNOTE",
+                      "WEBRTC",
+                      "LEGACY_FINGERPRINT",
+                      "EXISTING_VERIFIED",
+                      "LOCALIZED_LEXICAL"
+                    ]
+                  }
+                },
+                "independentFamilies": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "independentFamilyCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evidenceStrata": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "MULTI_DETECTOR",
+                      "PYANNOTE_EXCLUSIVE",
+                      "SILERO_EXCLUSIVE",
+                      "WEBRTC_EXCLUSIVE",
+                      "LEGACY_FINGERPRINT_EXCLUSIVE",
+                      "MULTI_VIEW_SAME_DETECTOR",
+                      "EXISTING_VERIFIED",
+                      "MASKED_SUBTHRESHOLD",
+                      "AUDIT_ONLY"
+                    ]
+                  }
+                },
+                "distinctPcmViewIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "diversityBins": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "sceneIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "uncoveredSpeechSeconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "internalSilenceSeconds": { "type": "number", "minimum": 0 },
+                "crossesCueBoundary": { "type": "boolean", "const": false },
+                "crossesExistingTarget": { "type": "boolean", "const": false },
+                "crossesSceneBoundary": { "type": "boolean", "const": false },
+                "crossesSpeakerBoundary": { "type": "boolean", "const": false },
+                "verifiedTimebase": { "type": "boolean" },
+                "strongContradiction": { "type": "boolean" },
+                "eligible": { "type": "boolean" },
+                "eligibilityReasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "evidenceStrength": { "type": "number" },
+                "oldTargetIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "maskedEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "targetId": { "type": "string", "minLength": 1 },
+                "selectionStage": {
+                  "type": "string",
+                  "enum": [
+                    "PRESERVE_OLD",
+                    "EXCLUSIVE_RESERVE",
+                    "TIMELINE_DIVERSITY",
+                    "DYNAMIC_MARGINAL",
+                    "STATIC_ABLATION"
+                  ]
+                },
+                "marginalUtility": { "type": "number" },
+                "incrementalUnionSeconds": { "type": "number", "minimum": 0 },
+                "densityOverrideReason": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "requiredLevel": {
+                  "type": "string",
+                  "enum": ["RECOMMENDED", "INFORMATIONAL"]
+                },
+                "canonicalInsertAllowed": { "type": "boolean", "const": false }
+              },
+              "required": [
+                "clusterId",
+                "memberCandidateIds",
+                "parentIslandIds",
+                "atomicNativeIntervals",
+                "atomicSourceIntervals",
+                "targetCoreUnion",
+                "reviewEnvelope",
+                "observationIds",
+                "evidenceIds",
+                "requestIds",
+                "detectorFamilies",
+                "independentFamilies",
+                "independentFamilyCount",
+                "evidenceStrata",
+                "distinctPcmViewIds",
+                "diversityBins",
+                "sceneIds",
+                "uncoveredSpeechSeconds",
+                "internalSilenceSeconds",
+                "crossesCueBoundary",
+                "crossesExistingTarget",
+                "crossesSceneBoundary",
+                "crossesSpeakerBoundary",
+                "verifiedTimebase",
+                "strongContradiction",
+                "eligible",
+                "eligibilityReasons",
+                "evidenceStrength",
+                "oldTargetIds",
+                "maskedEvidenceIds",
+                "semanticHash",
+                "targetId",
+                "selectionStage",
+                "marginalUtility",
+                "incrementalUnionSeconds",
+                "densityOverrideReason",
+                "requiredLevel",
+                "canonicalInsertAllowed"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "audit": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "clusterId": { "type": "string", "minLength": 1 },
+                "candidateIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "targetId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "SELECTED",
+                    "SUPERSEDED_BY_CLUSTER",
+                    "BUDGET_OVERFLOW",
+                    "REDUNDANT_WITH_SELECTED_CLUSTER",
+                    "LOCAL_DENSITY_REJECTED",
+                    "LOW_SUPPORT_AUDIT_ONLY",
+                    "CONTRADICTED",
+                    "INVALID_TIMEBASE"
+                  ]
+                },
+                "reason": { "type": "string", "minLength": 1 },
+                "densityOverrideReason": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "clusterId",
+                "candidateIds",
+                "targetId",
+                "status",
+                "reason",
+                "densityOverrideReason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "decisionTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "iteration": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "selectedClusterId": { "type": "string", "minLength": 1 },
+                "stage": {
+                  "type": "string",
+                  "enum": [
+                    "PRESERVE_OLD",
+                    "EXCLUSIVE_RESERVE",
+                    "TIMELINE_DIVERSITY",
+                    "DYNAMIC_MARGINAL",
+                    "STATIC_ABLATION"
+                  ]
+                },
+                "selectedSetBeforeHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "eligiblePoolHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "utility": { "type": "number" },
+                "incrementalUnionSeconds": { "type": "number", "minimum": 0 }
+              },
+              "required": [
+                "iteration",
+                "selectedClusterId",
+                "stage",
+                "selectedSetBeforeHash",
+                "eligiblePoolHash",
+                "utility",
+                "incrementalUnionSeconds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "targetCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+              "atomicMemberCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "targetUnionSeconds": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 60
+              },
+              "slotUtilization": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "durationUtilization": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "preservedOldTargetCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "oldCoveragePreserved": { "type": "boolean" },
+              "reservedExclusiveSelectedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "unusedReservedSlotsReturned": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "overflowCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "auditOnlyCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "densityRejectedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "densityOverrideCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "selectedBins": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "selectedStrata": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "MULTI_DETECTOR",
+                    "PYANNOTE_EXCLUSIVE",
+                    "SILERO_EXCLUSIVE",
+                    "WEBRTC_EXCLUSIVE",
+                    "LEGACY_FINGERPRINT_EXCLUSIVE",
+                    "MULTI_VIEW_SAME_DETECTOR",
+                    "EXISTING_VERIFIED",
+                    "MASKED_SUBTHRESHOLD",
+                    "AUDIT_ONLY"
+                  ]
+                }
+              },
+              "catchAllTargetCount": { "type": "number", "const": 0 },
+              "requiredLevelPromotionCount": { "type": "number", "const": 0 }
+            },
+            "required": [
+              "targetCount",
+              "atomicMemberCount",
+              "targetUnionSeconds",
+              "slotUtilization",
+              "durationUtilization",
+              "preservedOldTargetCount",
+              "oldCoveragePreserved",
+              "reservedExclusiveSelectedCount",
+              "unusedReservedSlotsReturned",
+              "overflowCount",
+              "auditOnlyCount",
+              "densityRejectedCount",
+              "densityOverrideCount",
+              "selectedBins",
+              "selectedStrata",
+              "catchAllTargetCount",
+              "requiredLevelPromotionCount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "policyVersion",
+          "policyHash",
+          "sourceIdentity",
+          "sourceTimebase",
+          "runtimeGoldInputCount",
+          "visibility",
+          "semanticHash",
+          "artifactType",
+          "variant",
+          "clustersHash",
+          "oldSafetyHash",
+          "targets",
+          "audit",
+          "decisionTrace",
+          "summary"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "supersessionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "predictedAddedCoreSeconds": { "type": "number", "minimum": 0 },
+    "predictedAddedEnvelopeSeconds": { "type": "number", "minimum": 0 },
+    "actualAudioNotYetMaterialized": { "type": "boolean", "const": true },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "frozenAt",
+    "oldSafetyHash",
+    "pathologyHash",
+    "clustersHash",
+    "variants",
+    "supersessionHash",
+    "predictedAddedCoreSeconds",
+    "predictedAddedEnvelopeSeconds",
+    "actualAudioNotYetMaterialized",
+    "inferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount"
+  ],
+  "additionalProperties": false
+}

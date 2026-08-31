@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-acoustic-features-request.schema.json",
+  "title": "c6-0-1-14-2-acoustic-features-request",
+  "type": "object",
+  "properties": {
+    "audioPath": { "type": "string", "minLength": 1 },
+    "intervals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "startSample16k": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "endSample16k": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["id", "startSample16k", "endSample16k"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["audioPath", "intervals"],
+  "additionalProperties": false
+}

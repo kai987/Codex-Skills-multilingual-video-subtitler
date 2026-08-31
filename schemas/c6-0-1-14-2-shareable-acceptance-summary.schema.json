@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-shareable-acceptance-summary.schema.json",
+  "title": "c6-0-1-14-2-shareable-acceptance-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-2-shareable-acceptance-summary"
+    },
+    "visibility": { "type": "string", "const": "SHAREABLE_AGGREGATE_ONLY" },
+    "codeSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "detectorEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "asrEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "detectorFreshCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+    "detectorReplayHits": { "type": "integer", "minimum": 0, "maximum": 8 },
+    "asrFreshCount": { "type": "integer", "minimum": 0, "maximum": 12 },
+    "asrReplayHits": { "type": "integer", "minimum": 0, "maximum": 12 },
+    "finalAReplayInference": { "type": "number", "const": 0 },
+    "finalBReplayInference": { "type": "number", "const": 0 },
+    "safetyTargetCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+    "safetyUnionSeconds": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 60.000001
+    },
+    "physicalWavCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "regionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "missingComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audibleMissingComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "fullMissingComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "hallucinationComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audibleHallucinationComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "fullQueueSeconds": { "type": "number", "minimum": 0 },
+    "engineeringPassed": { "type": "boolean" },
+    "evaluationIntegrityPassed": { "type": "boolean" },
+    "fullQueueGatePassed": { "type": "boolean" },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_ENGINEERING_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_SAFETY_TARGET_SELECTION_REPAIR",
+        "HOLD_FOR_INDEPENDENT_DETECTOR_RUNTIME",
+        "HOLD_FOR_MASKED_SPEECH_DETECTOR_CEILING",
+        "HOLD_FOR_DIALOGUE_ENHANCEMENT_SOURCE_SEPARATION_INVESTIGATION",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR"
+      ]
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "canonicalMutationCount": { "type": "number", "const": 0 },
+    "rawDialogueIncluded": { "type": "boolean", "const": false },
+    "goldIncluded": { "type": "boolean", "const": false },
+    "nativeScoresIncluded": { "type": "boolean", "const": false },
+    "localPathsIncluded": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "codeSnapshotHash",
+    "detectorEvidenceHash",
+    "asrEvidenceHash",
+    "finalEvidenceHash",
+    "canonicalTextHash",
+    "canonicalTimingHash",
+    "presentationHash",
+    "detectorFreshCount",
+    "detectorReplayHits",
+    "asrFreshCount",
+    "asrReplayHits",
+    "finalAReplayInference",
+    "finalBReplayInference",
+    "safetyTargetCount",
+    "safetyUnionSeconds",
+    "physicalWavCount",
+    "targetCount",
+    "regionCount",
+    "missingComponents",
+    "audibleMissingComponents",
+    "fullMissingComponents",
+    "hallucinationComponents",
+    "audibleHallucinationComponents",
+    "fullQueueSeconds",
+    "engineeringPassed",
+    "evaluationIntegrityPassed",
+    "fullQueueGatePassed",
+    "route",
+    "productionStatus",
+    "finalizationMethod",
+    "c602Status",
+    "canonicalMutationCount",
+    "rawDialogueIncluded",
+    "goldIncluded",
+    "nativeScoresIncluded",
+    "localPathsIncluded",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

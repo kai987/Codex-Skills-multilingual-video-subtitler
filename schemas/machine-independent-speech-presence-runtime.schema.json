@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-independent-speech-presence-runtime.schema.json",
+  "title": "machine-independent-speech-presence-runtime",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-independent-speech-presence-runtime"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "status": {
+      "type": "string",
+      "enum": ["AVAILABLE", "WEBRTC_RUNTIME_UNAVAILABLE"]
+    },
+    "detectorFamily": { "type": "string", "const": "WEBRTC" },
+    "packageName": { "type": "string", "const": "webrtcvad-wheels" },
+    "packageVersion": { "type": "string", "const": "2.0.14" },
+    "implementation": {
+      "type": "string",
+      "const": "WEBRTC_GMM_VAD_NO_ASR_NO_NEURAL_MODEL"
+    },
+    "implementationHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "pythonVersion": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "pythonBinaryHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "platform": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "moduleHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "packageRecordHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "workerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "networkUsedForBootstrap": { "type": "boolean" },
+    "inferenceNetworkAllowed": { "type": "boolean", "const": false },
+    "errorCode": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "status",
+    "detectorFamily",
+    "packageName",
+    "packageVersion",
+    "implementation",
+    "implementationHash",
+    "pythonVersion",
+    "pythonBinaryHash",
+    "platform",
+    "moduleHash",
+    "packageRecordHash",
+    "workerHash",
+    "runtimeIdentityHash",
+    "modelLoadCount",
+    "inferenceCount",
+    "networkUsedForBootstrap",
+    "inferenceNetworkAllowed",
+    "errorCode",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

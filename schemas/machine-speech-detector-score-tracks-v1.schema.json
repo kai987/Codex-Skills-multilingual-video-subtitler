@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-speech-detector-score-tracks-v1.schema.json",
+  "title": "machine-speech-detector-score-tracks-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-speech-detector-score-tracks-v1"
+    },
+    "planHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "tracks": {
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "runId": { "type": "string", "minLength": 1 },
+          "family": {
+            "type": "string",
+            "enum": ["SILERO", "PYANNOTE", "WEBRTC"]
+          },
+          "viewId": { "type": "string", "minLength": 1 },
+          "pcmSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "scoreKind": {
+            "type": "string",
+            "enum": ["PROBABILITY", "BINARY_DECISION"]
+          },
+          "relativePath": { "type": "string", "minLength": 1 },
+          "scoreSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "dtype": { "type": "string", "const": "FLOAT32_LITTLE_ENDIAN" },
+          "frameCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "frameHopSamples16k": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "frameWindowSamples16k": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "frameOffsetSamples16k": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "timeMapping": {
+            "type": "object",
+            "properties": {
+              "sourceStartSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "sourceSampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "outputSampleRate": { "type": "number", "const": 16000 },
+              "numerator": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "denominator": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "outputStartSample": { "type": "number", "const": 0 },
+              "mappingStatus": {
+                "type": "string",
+                "const": "VERIFIED_INTEGER_RATIONAL"
+              },
+              "measuredImpulsePeakDelaySamples": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "syntheticValidationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "sourceStartSample",
+              "sourceSampleRate",
+              "outputSampleRate",
+              "numerator",
+              "denominator",
+              "outputStartSample",
+              "mappingStatus",
+              "measuredImpulsePeakDelaySamples",
+              "syntheticValidationHash"
+            ],
+            "additionalProperties": false
+          },
+          "maximumNativeSample": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "mainThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+          "auditThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+          "statistics": {
+            "type": "object",
+            "properties": {
+              "minimum": { "type": "number", "minimum": 0, "maximum": 1 },
+              "maximum": { "type": "number", "minimum": 0, "maximum": 1 },
+              "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+              "q05": { "type": "number", "minimum": 0, "maximum": 1 },
+              "q25": { "type": "number", "minimum": 0, "maximum": 1 },
+              "q50": { "type": "number", "minimum": 0, "maximum": 1 },
+              "q75": { "type": "number", "minimum": 0, "maximum": 1 },
+              "q95": { "type": "number", "minimum": 0, "maximum": 1 },
+              "q99": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "required": [
+              "minimum",
+              "maximum",
+              "mean",
+              "q05",
+              "q25",
+              "q50",
+              "q75",
+              "q95",
+              "q99"
+            ],
+            "additionalProperties": false
+          },
+          "mainCrossingNativeIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "subthresholdPeakNativeIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "originalChunkScores": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "relativePath": { "type": "string", "minLength": 1 },
+                  "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  "shape": {
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "chunkStepSamples16k": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "frameHopSamples16k": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "frameWindowSamples16k": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "frameOffsetSamples16k": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "anonymousReduction": {
+                    "type": "string",
+                    "const": "ONE_MINUS_EMPTY_POWERSET_PROBABILITY"
+                  },
+                  "aggregation": {
+                    "type": "string",
+                    "const": "MEAN_OVERLAP_CELL_PROJECTION_10MS"
+                  }
+                },
+                "required": [
+                  "relativePath",
+                  "sha256",
+                  "shape",
+                  "chunkStepSamples16k",
+                  "frameHopSamples16k",
+                  "frameWindowSamples16k",
+                  "frameOffsetSamples16k",
+                  "anonymousReduction",
+                  "aggregation"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "runId",
+          "family",
+          "viewId",
+          "pcmSha256",
+          "scoreKind",
+          "relativePath",
+          "scoreSha256",
+          "dtype",
+          "frameCount",
+          "frameHopSamples16k",
+          "frameWindowSamples16k",
+          "frameOffsetSamples16k",
+          "timeMapping",
+          "maximumNativeSample",
+          "mainThreshold",
+          "auditThreshold",
+          "statistics",
+          "mainCrossingNativeIntervals",
+          "subthresholdPeakNativeIntervals",
+          "originalChunkScores",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "scorePolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rawScoresPreserved": { "type": "boolean", "const": true },
+    "postGoldThresholdChangeCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "planHash",
+    "tracks",
+    "scorePolicyHash",
+    "rawScoresPreserved",
+    "postGoldThresholdChangeCount"
+  ],
+  "additionalProperties": false
+}
