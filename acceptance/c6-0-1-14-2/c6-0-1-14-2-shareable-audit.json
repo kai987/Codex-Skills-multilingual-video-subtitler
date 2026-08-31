@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "artifactType": "c6-0-1-14-2-shareable-audit",
+  "summaryByteHash": "a5fc779745f09a821c14a84c84b7fbdc821be24472b4990f489545b29e6799b7",
+  "strictSchemaPassed": true,
+  "absolutePathLeakCount": 0,
+  "secretPatternCount": 0,
+  "rawDialogueOrAudioFieldCount": 0,
+  "sourceOrGoldIntervalFieldCount": 0,
+  "brokenRelativeReferenceCount": 0,
+  "passed": true
+}
