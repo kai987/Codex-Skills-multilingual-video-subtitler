@@ -232,6 +232,10 @@ Generated `output/`, transcription caches, media, GGML/Core ML models, dependenc
 
 ## Validation
 
+C6.0.1.14 completion uses `replay:c6-0-1-14-final` with a frozen run-paths file, existing probes/cache, existing probe-audio directories, and `--stage final-a` or `final-b`. This entrypoint is read-only for probe evidence and has no ASR execution fallback. It independently materializes local Review WAVs and freezes the A0–A8 coverage projections. `evaluate:c6-0-1-14-playback` requires both freezes and successful code-validation logs before it can open Gold. See [the completion workflow](.agents/skills/multilingual-video-subtitler/references/missing-dialogue-playback-integrity.md) for exact evidence boundaries. Canonical subtitles remain `needs-review`; ranker readiness and machine-only release are separate decisions.
+
+The [C6.0.1.14 completion report](C6_0_1_14_MISSING_LOCALIZATION_PLAYBACK_INTEGRITY_REPORT.md) records engineering and evaluation-integrity PASS with 64/64 exact cache replay and zero new inference. Quality remains `HOLD_FOR_MACHINE_SPEECH_DETECTION_REPAIR`: Full Queue missing audible coverage is 3/6 and hallucination coverage is 1/1, despite complete delivery of all 292 known machine targets. This does not authorize C6.0.1.15 or a machine-only subtitle release.
+
 ```bash
 npm run typecheck
 npm run lint
