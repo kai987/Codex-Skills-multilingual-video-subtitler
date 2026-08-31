@@ -46,6 +46,22 @@ export function verifyC612SelfHash(value: { semanticHash: string }) {
   const { semanticHash, ...body } = value;
   sameC612(semanticHash, hash(body), "C612_INVALID_ARTIFACT_SELF_HASH");
 }
+/** General deletion regressions are not automatically catastrophic deletions. */
+export function countC612CatastrophicDeletionClasses(
+  rows: readonly Pick<
+    z.infer<typeof s.c612ContractionEvaluationSchema>["rows"][number],
+    "goldClass" | "catastrophic"
+  >[],
+) {
+  const counts = { leading: 0, trailing: 0, internal: 0 };
+  for (const row of rows) {
+    if (row.catastrophic !== true) continue;
+    if (row.goldClass === "LEADING_DIALOGUE_DELETION") counts.leading++;
+    if (row.goldClass === "TRAILING_DIALOGUE_DELETION") counts.trailing++;
+    if (row.goldClass === "INTERNAL_DIALOGUE_DELETION") counts.internal++;
+  }
+  return counts;
+}
 export async function c612Json<T>(
   root: string,
   name: string,

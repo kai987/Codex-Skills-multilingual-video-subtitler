@@ -4,11 +4,34 @@ import {
   verifyC612LatticeArray,
   verifyC612CtcOccupancy,
   verifyC612AcceptanceOnlySourceChanges,
+  countC612CatastrophicDeletionClasses,
 } from "../packages/video-subtitler/src/consensus/top-k/c612-artifact-validator.js";
 import { hash } from "../packages/video-subtitler/src/consensus/top-k/c612-policy.js";
 import { SHA } from "./helpers/c612-fixture.js";
 
 describe("C6.1.2 independent acceptance contracts", () => {
+  it("reports only explicitly catastrophic deletion classes, not every negative deletion", () => {
+    expect(
+      countC612CatastrophicDeletionClasses([
+        { goldClass: "LEADING_DIALOGUE_DELETION", catastrophic: true },
+        { goldClass: "LEADING_DIALOGUE_DELETION", catastrophic: false },
+        { goldClass: "TRAILING_DIALOGUE_DELETION", catastrophic: true },
+        { goldClass: "TRAILING_DIALOGUE_DELETION", catastrophic: null },
+        { goldClass: "INTERNAL_DIALOGUE_DELETION", catastrophic: true },
+        { goldClass: "VALID_SHORTENING", catastrophic: false },
+        { goldClass: "UNEVALUABLE", catastrophic: null },
+      ]),
+    ).toEqual({ leading: 1, trailing: 1, internal: 1 });
+  });
+  it("keeps unknown catastrophic labels out of every confirmed count", () => {
+    expect(
+      countC612CatastrophicDeletionClasses([
+        { goldClass: "LEADING_DIALOGUE_DELETION", catastrophic: null },
+        { goldClass: "TRAILING_DIALOGUE_DELETION", catastrophic: null },
+        { goldClass: "INTERNAL_DIALOGUE_DELETION", catastrophic: null },
+      ]),
+    ).toEqual({ leading: 0, trailing: 0, internal: 0 });
+  });
   it("validates the exact historical array container and every row self-hash", () => {
     const body = {
       eventId: "synthetic-event",

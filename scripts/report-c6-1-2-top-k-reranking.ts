@@ -11,6 +11,7 @@ import {
 import {
   c612Json,
   verifyC612SelfHash,
+  countC612CatastrophicDeletionClasses,
 } from "../packages/video-subtitler/src/consensus/top-k/c612-artifact-validator.js";
 import {
   C612_POLICY,
@@ -284,11 +285,7 @@ const hashes = {
   })),
 };
 const safeShort = allClasses.VALID_SHORTENING ?? 0,
-  catastrophe = {
-    leading: allClasses.LEADING_DIALOGUE_DELETION ?? 0,
-    trailing: allClasses.TRAILING_DIALOGUE_DELETION ?? 0,
-    internal: allClasses.INTERNAL_DIALOGUE_DELETION ?? 0,
-  };
+  catastrophe = countC612CatastrophicDeletionClasses(contractionGold.rows);
 const chronology =
   "机器候选/证据/特征/固定映射/分折/模型策略先冻结；独立 evaluator 随后读取 Gold 并生成数值标签；训练进程仅使用训练折数值标签，OOF Shadow 在训练后冻结；最终 evaluator 复用固定映射。学习型 Shadow 并非在首次 Gold 读取前存在。";
 const oracleCaveat =
@@ -424,7 +421,18 @@ const R: Record<number, unknown> = {
   45: {
     priorC611: baseline.strongContractionCount,
     topKStrong: contraction.rows.filter((r) => r.strong).length,
+    postHocAuditRows: contractionGold.rows.length,
+    priorOnlyNotStrong: contractionGold.rows.filter(
+      (r) => r.priorStrong && !r.strong,
+    ).length,
     priorReclassified: priorClasses,
+    allDeletionRegressions: {
+      leading: allClasses.LEADING_DIALOGUE_DELETION ?? 0,
+      trailing: allClasses.TRAILING_DIALOGUE_DELETION ?? 0,
+      internal: allClasses.INTERNAL_DIALOGUE_DELETION ?? 0,
+    },
+    catastrophicSubset: catastrophe,
+    unit: "CANDIDATE_DIAGNOSTIC_NOT_APPLIED_GROUPS",
   },
   46: {
     postHocGoldValidShortening: safeShort,
@@ -443,6 +451,9 @@ const R: Record<number, unknown> = {
   51: {
     machineUnknown: machineClasses.UNKNOWN_CONTRACTION ?? 0,
     postHocUnevaluable: allClasses.UNEVALUABLE ?? 0,
+    strongPostHocUnevaluable: contractionGold.rows.filter(
+      (r) => r.strong && r.goldClass === "UNEVALUABLE",
+    ).length,
   },
   52: {
     machineGroups: mapping.groups.length,
@@ -518,10 +529,13 @@ const R: Record<number, unknown> = {
   78: L("L7"),
   79: L("L8"),
   80: {
+    qualifiedBestSupportedProfile: route.strongSupportPassed
+      ? primary.profileId
+      : null,
     predeclaredPrimary: primary.profileId,
     postHocBestObserved: bestObserved?.profileId ?? null,
     warning:
-      "bestGoldFreeProfile是冻结的主检验策略，不是根据本集Gold重新挑出的获胜策略。",
+      "后续主指标汇报预冻结L6；没有通过Strong Gate时不得称为已验证的最佳策略。事后最高收益对照仅用于描述，不替换主检验策略。",
   },
   81: primary.top1Accuracy,
   82: primary.mrr,
@@ -823,7 +837,13 @@ const F: Record<number, unknown> = {
   110: L("L6").normalizedJointGain,
   111: L("L6").materialDelta,
   112: L("L6").catastrophicDeletions,
-  113: primary.profileId,
+  113: {
+    qualifiedBestSupportedProfile: route.strongSupportPassed
+      ? primary.profileId
+      : null,
+    primaryForFields114To132: primary.profileId,
+    postHocBestObservedDiagnosticOnly: bestObserved?.profileId ?? null,
+  },
   114: primary.top1Accuracy,
   115: primary.mrr,
   116: primary.ndcg4,
@@ -879,7 +899,7 @@ const F: Record<number, unknown> = {
   150: "最终git receipt记录；报告生成阶段不预先声称clean或已推送。",
 };
 const answers = [
-  `H2 Rank 分布（可评价且有改进空间的事件）：${JSON.stringify(rankDistribution)}。`,
+  `H2 Rank 分布（可评价且有改进空间的事件）：${JSON.stringify(rankDistribution)}。分布对并列Oracle采用确定性的候选ID代表；Recall@K则允许任一并列Oracle命中，因此代表候选Rank的累计数不必等于Recall分子。`,
   `T0 Recall@1/2/3/4=${[T(0).recall1, T(0).recall2, T(0).recall3, T(0).recall4].map(pct).join("/")}；MRR=${T(0).mrr}，nDCG@4=${T(0).ndcg4}。`,
   `在当前可评价集合中 full-pool oracle gain=${primary.localFullExistingOracleGain}、Top-K gain=${primary.localTopKOracleGain}；主策略失败分布=${JSON.stringify(fail)}。结论以固定映射覆盖为界，不用Unknown证明候选池充分或不足。`,
   `事后检索对照最优=${bestRetrieval.profile}，Recall@4=${pct(bestRetrieval.recall4)}；预冻结运行主策略仍为T3，不按Gold切换。`,
@@ -895,7 +915,7 @@ const answers = [
   `冻结主策略${primary.profileId}的已应用、可评价组 catastrophic=${primary.catastrophicDeletions}、实际选择组=${primary.selectedGroups}。若为零选择，只能说明安全回退，不能宣称自动修复能力已验证。`,
   `主策略active=${primary.activeFolds}/5，negative=${primary.negativeGainFolds}，unknown-gain=${primary.unknownGainFolds}；事后最优${bestObserved?.profileId ?? "unknown"} active=${bestObserved?.activeFolds ?? "unknown"}，不用于改换主检验策略。`,
   `主策略improved/regressed/neutral/unknown=${primary.improved}/${primary.regressed}/${primary.neutral}/${primary.unknown}；post-hoc最优对照=${bestObserved ? `${bestObserved.profileId}:${bestObserved.improved}/${bestObserved.regressed}/${bestObserved.neutral}/${bestObserved.unknown}` : "unknown"}。`,
-  `主策略precision=${pct(primary.precision)}，harm=${pct(primary.harm)}，selective coverage=${pct(primary.coverage)}，normalized joint gain=${primary.normalizedJointGain}，fixed-group material delta=${primary.materialDelta}。`,
+  `主策略precision=${pct(primary.precision)}，harm=${pct(primary.harm)}，selective coverage=${pct(primary.coverage)}，normalized joint gain=${primary.normalizedJointGain}，fixed-group material delta=${primary.materialDelta}。事后最高收益对照${bestObserved?.profileId ?? "unknown"}：${bestObserved ? `precision=${pct(bestObserved.precision)}，harm=${pct(bestObserved.harm)}，selective coverage=${pct(bestObserved.coverage)}，normalized joint gain=${bestObserved.normalizedJointGain}，fixed-group material delta=${bestObserved.materialDelta}` : "unknown"}；不用于部署选择。`,
   `Top-K分母 capture=${pct(primary.top1OracleCapture)}；full-pool分母=${pct(primary.top1FullPoolOracleCapture)}；同V2的H2=${pct(L("L0").top1FullPoolOracleCapture)}。80%目标=${primary.top1OracleCapture !== null && primary.top1OracleCapture >= 0.8 ? "数值达到；仍需其余strong gates" : "未达到或unknown"}。${oracleCaveat}`,
   `主策略分布=${JSON.stringify(fail)}；最大未恢复类别=${
     Object.entries(fail)
@@ -958,6 +978,8 @@ const body = [
   "运行时身份包括Python/torch/transformers版本及worker源码；本次固定本地运行时与历史记录版本不同，已经生成新的runtime identity，未伪称相同。FFmpeg仅重读所选source，CTC不产生转写。",
   "",
   "生成源码冻结与最终验收源码分开绑定。独立验收发现历史lattice数组容器注册缺失，以及浮点请求区间与实际PCM样本时基的校验口径不一致；仅修复校验器并新增回归测试。使用原始生成源码checkout验证原有A/B Freeze，逐文件证明检索、证据、完整性、阈值、重排、Gold evaluator及全部既有数据未改写。生成前QA与修订后QA均保留并核验，未在Gold后重建候选、重训模型或改调阈值。",
+  "",
+  "报告交叉检查还区分了一般删除退化与catastrophic=true的严格子集。报告中的Catastrophic Leading/Trailing/Internal只计入已有冻结标记为true的候选；未知标记不计为已确认，候选诊断计数也不是实际应用组的退化数。收缩后验审计保留历史强收缩而本版不再判强的记录，故审计行数可以多于本版Strong Contraction数。该修订仅调整报告汇总并新增回归测试，没有改写标签或质量指标。",
   "",
   ...validation.checks
     .filter(
