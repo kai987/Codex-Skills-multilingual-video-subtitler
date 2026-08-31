@@ -223,7 +223,19 @@ export function buildLexical142(input: {
 }
 export function buildMissing142(
   inventory: Inventory142,
-  safety: Safety142,
+  safety: {
+    sourceIdentity: Safety142["sourceIdentity"];
+    semanticHash: string;
+    targets: Pick<
+      Safety142["targets"][number],
+      | "targetId"
+      | "targetCoreUnion"
+      | "independentFamilyCount"
+      | "evidenceIds"
+      | "evidenceStrata"
+      | "maskedEvidenceIds"
+    >[];
+  },
   lexical: Lexical142,
   policy: Policy142,
 ) {

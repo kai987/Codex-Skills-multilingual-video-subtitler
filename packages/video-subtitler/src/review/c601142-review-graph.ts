@@ -39,11 +39,34 @@ import {
   buildC60113EvidenceFamilyGraph,
 } from "./review-evidence-family-graph.js";
 import { clusterC60114ReviewRegions } from "./review-region-clustering-v3.js";
+/** The graph consumes positive cores, not C142 cluster-eligibility decisions.
+ * Keeping this structural boundary explicit lets later bundle delivery reuse
+ * the unchanged R3/transaction projection without falsely claiming that a
+ * bundle envelope satisfies C142's no-cue-crossing cluster contract. */
+export interface SafetyCoreGraphProjection142 {
+  sourceIdentity: Safety142["sourceIdentity"];
+  semanticHash: string;
+  targets: (Pick<
+    Safety142["targets"][number],
+    | "targetId"
+    | "clusterId"
+    | "targetCoreUnion"
+    | "reviewEnvelope"
+    | "parentIslandIds"
+    | "memberCandidateIds"
+    | "observationIds"
+    | "evidenceIds"
+    | "sceneIds"
+    | "evidenceStrata"
+    | "detectorFamilies"
+  > & { reviewEventIds?: string[] })[];
+  summary: { targetUnionSeconds: number };
+}
 export function buildReviewGraph142(input: {
   policy: Policy142;
   compatibilityPolicy: C60114Policy;
   inventory: Inventory142;
-  safety: Safety142;
+  safety: SafetyCoreGraphProjection142;
   lexical: Lexical142;
   missing: Missing142;
   supersessionHash: string;
@@ -90,7 +113,7 @@ export function buildReviewGraph142(input: {
             ...cluster.parentIslandIds,
           ],
           finalCueIds: [],
-          eventIds: cluster.memberCandidateIds,
+          eventIds: cluster.reviewEventIds ?? cluster.memberCandidateIds,
           evidenceIds: cluster.evidenceIds,
           mandatoryForAudio: false,
           audioRequired: true,
@@ -192,7 +215,7 @@ export function buildReviewGraph142(input: {
         signals: [
           {
             reviewGroupId: first.parentReviewItemId,
-            eventIds: cluster.memberCandidateIds,
+            eventIds: cluster.reviewEventIds ?? cluster.memberCandidateIds,
             finalCueIds: [],
             itemTypes: ["MISSING_SPEECH_RISK"],
             sourceInterval: seconds141(cluster.reviewEnvelope, rate),
