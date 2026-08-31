@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-oof-retrain-thresholds.schema.json",
+  "title": "c6-1-2-1-oof-retrain-thresholds",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-oof-retrain-thresholds"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supergroupMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "thresholdGridHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "outerFoldId": { "type": "string", "minLength": 1 },
+          "threshold": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "status": {
+            "type": "string",
+            "enum": [
+              "TRAIN_ONLY_CALIBRATED",
+              "ABSTAIN_ALL_NO_SAFE_TRAIN_THRESHOLD",
+              "NO_SWITCH_THRESHOLD"
+            ]
+          },
+          "trainingFoldIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "innerPredictionHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "candidateThresholds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "threshold": { "type": "number" },
+                "selected": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "improved": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "regressed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "neutral": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "precision": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "harm": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                }
+              },
+              "required": [
+                "threshold",
+                "selected",
+                "improved",
+                "regressed",
+                "neutral",
+                "precision",
+                "harm",
+                "normalizedGain"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "outerTestLabelsUsed": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "profileId",
+          "outerFoldId",
+          "threshold",
+          "status",
+          "trainingFoldIds",
+          "innerPredictionHash",
+          "candidateThresholds",
+          "outerTestLabelsUsed"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "supergroupMapHash",
+    "foldHash",
+    "thresholdGridHash",
+    "rows"
+  ],
+  "additionalProperties": false
+}

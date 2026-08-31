@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-shareable-summary.schema.json",
+  "title": "c6-1-2-1-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-shareable-summary" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineCommit": { "type": "string", "minLength": 1 },
+    "sourceIdentity": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supergroupMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "machineGroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "productionCues": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "goldCues": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "supergroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "eligibleSupergroups": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossFoldComponents": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "newAsrInference": { "type": "number", "const": 0 },
+        "newCtcInference": { "type": "number", "const": 0 },
+        "productionMutations": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "machineGroups",
+        "productionCues",
+        "goldCues",
+        "supergroups",
+        "eligibleSupergroups",
+        "crossFoldComponents",
+        "newAsrInference",
+        "newCtcInference",
+        "productionMutations"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "evaluableSupergroupCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableMachineGroupCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableProductionCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableGoldCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableMachineDurationCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableGoldDurationCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateEventLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "topKCandidateLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableGoldCharacterCoverage": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "numerator": { "type": "number", "minimum": 0 },
+                "denominator": { "type": "number", "minimum": 0 },
+                "ratio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": ["numerator", "denominator", "ratio"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "evaluableSupergroupCoverage",
+        "evaluableMachineGroupCoverage",
+        "evaluableProductionCueCoverage",
+        "evaluableGoldCueCoverage",
+        "evaluableMachineDurationCoverage",
+        "evaluableGoldDurationCoverage",
+        "candidateEventLabelCoverage",
+        "candidateLabelCoverage",
+        "topKCandidateLabelCoverage",
+        "evaluableGoldCharacterCoverage"
+      ],
+      "additionalProperties": false
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_1_3_FROZEN_TOP_K_RERANKER_PROSPECTIVE_SHADOW",
+        "GO_C6_1_2_2_ACOUSTIC_COMPLETENESS_CALIBRATION",
+        "STOP_EXISTING_CANDIDATE_AUTOMATIC_RERANKING",
+        "EVALUATION_COVERAGE_STILL_INSUFFICIENT",
+        "C6_1_2_1_ENGINEERING_INVALID"
+      ]
+    },
+    "engineeringGate": { "type": "boolean" },
+    "evaluationCoverageGate": { "type": "boolean" },
+    "selectedSafeProfile": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "privacy": { "type": "string", "const": "AGGREGATES_AND_HASHES_ONLY" },
+    "containsGoldText": { "type": "boolean", "const": false },
+    "containsCandidateText": { "type": "boolean", "const": false },
+    "absolutePrivatePathCount": { "type": "number", "const": 0 },
+    "secretCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "baselineCommit",
+    "sourceIdentity",
+    "supergroupMapHash",
+    "counts",
+    "coverage",
+    "route",
+    "engineeringGate",
+    "evaluationCoverageGate",
+    "selectedSafeProfile",
+    "productionStatus",
+    "finalizationMethod",
+    "privacy",
+    "containsGoldText",
+    "containsCandidateText",
+    "absolutePrivatePathCount",
+    "secretCount"
+  ],
+  "additionalProperties": false
+}

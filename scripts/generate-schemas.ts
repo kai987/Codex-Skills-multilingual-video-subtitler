@@ -3,6 +3,7 @@ import {
   c61GeneratedSchemas,
   c611GeneratedSchemas,
   c612GeneratedSchemas,
+  c6121GeneratedSchemas,
 } from "@mvl/shared";
 
 import {
@@ -1915,6 +1916,7 @@ const allSchemas = [
     ...c61GeneratedSchemas,
     ...c611GeneratedSchemas,
     ...c612GeneratedSchemas,
+    ...c6121GeneratedSchemas,
   ].map(([name, schema]) => ({
     fileName: `${name}.schema.json`,
     id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,

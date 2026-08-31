@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-oof-retrain-configurations.schema.json",
+  "title": "c6-1-2-1-oof-retrain-configurations",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-oof-retrain-configurations"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supergroupMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rankingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "frozenMachineMappingHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "originalAssemblerArtifactHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "foldId": { "type": "string", "minLength": 1 },
+          "groupId": { "type": "string", "minLength": 1 },
+          "configurationId": { "type": "string", "minLength": 1 },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "CURRENT_ALL",
+              "SINGLE_EVENT",
+              "TOP1_COMBINED",
+              "BOUNDED_BEAM"
+            ]
+          },
+          "selections": {
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "eventId": { "type": "string", "minLength": 1 },
+                "candidateId": { "type": "string", "minLength": 1 }
+              },
+              "required": ["eventId", "candidateId"],
+              "additionalProperties": false
+            }
+          },
+          "aggregateScore": { "type": "number" },
+          "baselineScore": { "type": "number" },
+          "eligible": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "outputTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "outputTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profileId",
+          "foldId",
+          "groupId",
+          "configurationId",
+          "kind",
+          "selections",
+          "aggregateScore",
+          "baselineScore",
+          "eligible",
+          "reasons",
+          "outputTextHash",
+          "outputTimingHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "goldUsed": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "supergroupMapHash",
+    "rankingHash",
+    "frozenMachineMappingHash",
+    "originalAssemblerArtifactHash",
+    "rows",
+    "goldUsed"
+  ],
+  "additionalProperties": false
+}

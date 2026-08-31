@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-evaluator-sensitivity.schema.json",
+  "title": "c6-1-2-1-evaluator-sensitivity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-evaluator-sensitivity"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "mode": { "type": "string", "minLength": 1 },
+          "improved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regressed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutral": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "normalizedJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "materialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "precision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harm": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "folds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string", "minLength": 1 },
+                "changed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evaluated": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "improved": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "regressed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "neutral": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "unknown": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "normalizedJointGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                }
+              },
+              "required": [
+                "foldId",
+                "changed",
+                "evaluated",
+                "improved",
+                "regressed",
+                "neutral",
+                "unknown",
+                "normalizedJointGain"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "profileId",
+          "mode",
+          "improved",
+          "regressed",
+          "neutral",
+          "unknown",
+          "normalizedJointGain",
+          "materialDelta",
+          "catastrophicDeletionCount",
+          "precision",
+          "harm",
+          "folds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "directionDisagreements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "machineGroupId": { "type": "string", "minLength": 1 },
+          "supergroupId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number" },
+              "end": { "type": "number" }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "oldGain": { "type": "number" },
+          "newGain": { "type": "number" },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "profileId",
+          "machineGroupId",
+          "supergroupId",
+          "sourceInterval",
+          "oldGain",
+          "newGain",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "frozenL1CatastrophicTrace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "machineGroupId": { "type": "string", "minLength": 1 },
+          "supergroupId": { "type": "string", "minLength": 1 },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "STILL_CATASTROPHIC",
+              "EVALUABLE_NOT_CATASTROPHIC",
+              "UNEVALUABLE"
+            ]
+          },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": ["machineGroupId", "supergroupId", "outcome", "reason"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "comparisons",
+    "directionDisagreements",
+    "frozenL1CatastrophicTrace"
+  ],
+  "additionalProperties": false
+}

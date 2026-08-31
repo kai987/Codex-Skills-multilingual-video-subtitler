@@ -1,0 +1,933 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-diagnostic-mode-metrics.schema.json",
+  "title": "c6-1-2-1-diagnostic-mode-metrics",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-diagnostic-mode-metrics"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "e0": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "track": {
+            "type": "string",
+            "enum": [
+              "FROZEN_DECISION_REEVALUATION",
+              "SAME_FEATURE_SAME_PROFILE_OOF_RETRAIN"
+            ]
+          },
+          "supergroupMapHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "changedSupergroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluableChangedSupergroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "changedMachineGroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "improved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regressed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutral": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectionPrecision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harmRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "exactJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "normalizedJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "materialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "legacyMaterialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "changedSupergroupCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "changedMachineGroupCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "zeroSelectionChangedCoverage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "activeFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "negativeGainFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknownGainFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "top1Accuracy": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "folds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string", "minLength": 1 },
+                "changed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evaluated": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "improved": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "regressed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "neutral": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "unknown": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "normalizedJointGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                }
+              },
+              "required": [
+                "foldId",
+                "changed",
+                "evaluated",
+                "improved",
+                "regressed",
+                "neutral",
+                "unknown",
+                "normalizedJointGain"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "supergroupId": { "type": "string", "minLength": 1 },
+                "machineGroupIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "goldCueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "foldId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "changed": { "type": "boolean" },
+                "evaluated": { "type": "boolean" },
+                "exactError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "exactGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "normalizedGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "materialDelta": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "legacyMaterialDelta": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "catastrophicDeletion": {
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "baselineMaterial": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "baselineExactError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "baselineNormalizedError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "goldCharacterCount": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "classification": {
+                  "type": "string",
+                  "enum": ["IMPROVED", "REGRESSED", "NEUTRAL", "UNEVALUABLE"]
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "supergroupId",
+                "machineGroupIds",
+                "goldCueIds",
+                "foldId",
+                "changed",
+                "evaluated",
+                "exactError",
+                "normalizedError",
+                "exactGain",
+                "normalizedGain",
+                "materialDelta",
+                "legacyMaterialDelta",
+                "catastrophicDeletion",
+                "baselineMaterial",
+                "baselineExactError",
+                "baselineNormalizedError",
+                "goldCharacterCount",
+                "classification",
+                "reasons"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "profileId",
+          "track",
+          "supergroupMapHash",
+          "changedSupergroups",
+          "evaluableChangedSupergroups",
+          "changedMachineGroups",
+          "improved",
+          "regressed",
+          "neutral",
+          "unknown",
+          "selectionPrecision",
+          "harmRate",
+          "exactJointGain",
+          "normalizedJointGain",
+          "materialDelta",
+          "legacyMaterialDelta",
+          "catastrophicDeletionCount",
+          "changedSupergroupCoverage",
+          "changedMachineGroupCoverage",
+          "zeroSelectionChangedCoverage",
+          "activeFoldCount",
+          "negativeGainFoldCount",
+          "unknownGainFoldCount",
+          "top1Accuracy",
+          "folds",
+          "groups"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "e1": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "track": {
+            "type": "string",
+            "enum": [
+              "FROZEN_DECISION_REEVALUATION",
+              "SAME_FEATURE_SAME_PROFILE_OOF_RETRAIN"
+            ]
+          },
+          "supergroupMapHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "changedSupergroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluableChangedSupergroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "changedMachineGroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "improved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regressed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutral": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectionPrecision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harmRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "exactJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "normalizedJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "materialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "legacyMaterialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "changedSupergroupCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "changedMachineGroupCoverage": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "zeroSelectionChangedCoverage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "activeFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "negativeGainFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknownGainFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "top1Accuracy": {
+            "type": "object",
+            "properties": {
+              "numerator": { "type": "number", "minimum": 0 },
+              "denominator": { "type": "number", "minimum": 0 },
+              "ratio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["numerator", "denominator", "ratio"],
+            "additionalProperties": false
+          },
+          "folds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string", "minLength": 1 },
+                "changed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evaluated": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "improved": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "regressed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "neutral": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "unknown": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "normalizedJointGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                }
+              },
+              "required": [
+                "foldId",
+                "changed",
+                "evaluated",
+                "improved",
+                "regressed",
+                "neutral",
+                "unknown",
+                "normalizedJointGain"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "supergroupId": { "type": "string", "minLength": 1 },
+                "machineGroupIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "goldCueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "foldId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "changed": { "type": "boolean" },
+                "evaluated": { "type": "boolean" },
+                "exactError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "exactGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "normalizedGain": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "materialDelta": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "legacyMaterialDelta": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "catastrophicDeletion": {
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "baselineMaterial": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "baselineExactError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "baselineNormalizedError": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "goldCharacterCount": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "classification": {
+                  "type": "string",
+                  "enum": ["IMPROVED", "REGRESSED", "NEUTRAL", "UNEVALUABLE"]
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "supergroupId",
+                "machineGroupIds",
+                "goldCueIds",
+                "foldId",
+                "changed",
+                "evaluated",
+                "exactError",
+                "normalizedError",
+                "exactGain",
+                "normalizedGain",
+                "materialDelta",
+                "legacyMaterialDelta",
+                "catastrophicDeletion",
+                "baselineMaterial",
+                "baselineExactError",
+                "baselineNormalizedError",
+                "goldCharacterCount",
+                "classification",
+                "reasons"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "profileId",
+          "track",
+          "supergroupMapHash",
+          "changedSupergroups",
+          "evaluableChangedSupergroups",
+          "changedMachineGroups",
+          "improved",
+          "regressed",
+          "neutral",
+          "unknown",
+          "selectionPrecision",
+          "harmRate",
+          "exactJointGain",
+          "normalizedJointGain",
+          "materialDelta",
+          "legacyMaterialDelta",
+          "catastrophicDeletionCount",
+          "changedSupergroupCoverage",
+          "changedMachineGroupCoverage",
+          "zeroSelectionChangedCoverage",
+          "activeFoldCount",
+          "negativeGainFoldCount",
+          "unknownGainFoldCount",
+          "top1Accuracy",
+          "folds",
+          "groups"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "e1CandidateLabels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "machineGroupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "supergroupId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "foldId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "applicationCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "applicationEligible": { "type": "boolean" },
+          "oofTrainingEligible": { "type": "boolean" },
+          "label": {
+            "type": "object",
+            "properties": {
+              "candidateId": { "type": "string", "minLength": 1 },
+              "eventId": { "type": "string", "minLength": 1 },
+              "groupId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "foldId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "current": { "type": "boolean" },
+              "eligible": { "type": "boolean" },
+              "reasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "baselineExactError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "candidateExactError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "baselineNormalizedError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "candidateNormalizedError": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "normalizedGain": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "exactGain": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "materialDelta": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "catastrophicDeletion": {
+                "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+              },
+              "classification": {
+                "type": "string",
+                "enum": ["IMPROVED", "REGRESSED", "NEUTRAL", "UNEVALUABLE"]
+              },
+              "labelClass": {
+                "type": "string",
+                "enum": [
+                  "ORACLE_BEST",
+                  "IMPROVES_CURRENT",
+                  "EQUIVALENT_TO_CURRENT",
+                  "REGRESSES_FROM_CURRENT",
+                  "CATASTROPHIC_REGRESSION",
+                  "UNEVALUABLE"
+                ]
+              },
+              "labelRole": {
+                "type": "string",
+                "const": "DIAGNOSTIC_LOCAL_COUNTERFACTUAL"
+              },
+              "topKProfiles": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "T0_H2_TOP4",
+                    "T1_RAW_MBR_TOP4",
+                    "T2_H2_RAW_UNION_TOP4",
+                    "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+                  ]
+                }
+              },
+              "oracleRank": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": [
+              "candidateId",
+              "eventId",
+              "groupId",
+              "foldId",
+              "current",
+              "eligible",
+              "reasons",
+              "baselineExactError",
+              "candidateExactError",
+              "baselineNormalizedError",
+              "candidateNormalizedError",
+              "normalizedGain",
+              "exactGain",
+              "materialDelta",
+              "catastrophicDeletion",
+              "classification",
+              "labelClass",
+              "labelRole",
+              "topKProfiles",
+              "oracleRank"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "machineGroupIds",
+          "supergroupId",
+          "foldId",
+          "applicationCueIds",
+          "applicationEligible",
+          "oofTrainingEligible",
+          "label"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "primaryEvaluatorChanged": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "e0",
+    "e1",
+    "e1CandidateLabels",
+    "primaryEvaluatorChanged"
+  ],
+  "additionalProperties": false
+}

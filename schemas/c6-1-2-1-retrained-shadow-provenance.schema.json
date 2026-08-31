@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-retrained-shadow-provenance.schema.json",
+  "title": "c6-1-2-1-retrained-shadow-provenance",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-retrained-shadow-provenance"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supergroupMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "machineGroupId": { "type": "string", "minLength": 1 },
+          "supergroupId": { "type": "string", "minLength": 1 },
+          "foldId": { "type": "string", "minLength": 1 },
+          "modelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "thresholdHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "decisionReason": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceSpan": {
+            "type": "object",
+            "properties": {
+              "cueId": { "type": "string", "minLength": 1 },
+              "start": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["cueId", "start", "end"],
+            "additionalProperties": false
+          },
+          "textBefore": { "type": "string" },
+          "textAfter": { "type": "string" }
+        },
+        "required": [
+          "profileId",
+          "eventId",
+          "candidateId",
+          "machineGroupId",
+          "supergroupId",
+          "foldId",
+          "modelHash",
+          "thresholdHash",
+          "decisionReason",
+          "sourceSpan",
+          "textBefore",
+          "textAfter"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "relativePath": { "type": "string", "minLength": 1 },
+          "cueCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profileId",
+          "relativePath",
+          "cueCount",
+          "timingHash",
+          "presentationHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "localOnly": { "type": "boolean", "const": true },
+    "newCandidateCount": { "type": "number", "const": 0 },
+    "productionMutationCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "supergroupMapHash",
+    "rows",
+    "profiles",
+    "localOnly",
+    "newCandidateCount",
+    "productionMutationCount"
+  ],
+  "additionalProperties": false
+}

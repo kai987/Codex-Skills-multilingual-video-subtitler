@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-policy-freeze.schema.json",
+  "title": "c6-1-2-1-policy-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-policy-freeze" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "serializedDefinition": { "type": "string", "minLength": 1 },
+    "definitionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "primaryEvaluator": {
+      "type": "string",
+      "const": "E2_FROZEN_MACHINE_GROUP_GOLD_TIMING_SUPERGROUP"
+    },
+    "frozenBeforeGoldText": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "serializedDefinition",
+    "definitionHash",
+    "primaryEvaluator",
+    "frozenBeforeGoldText"
+  ],
+  "additionalProperties": false
+}

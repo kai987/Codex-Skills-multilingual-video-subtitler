@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-oof-retrain-models.schema.json",
+  "title": "c6-1-2-1-oof-retrain-models",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-oof-retrain-models"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supergroupMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profileDefinitionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "trainingCodeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "modelId": { "type": "string", "minLength": 1 },
+          "profileId": { "type": "string", "minLength": 1 },
+          "outerFoldId": { "type": "string", "minLength": 1 },
+          "algorithm": {
+            "type": "string",
+            "enum": ["PAIRWISE_LOGISTIC", "LISTWISE_SOFTMAX", "FIXED_BASELINE"]
+          },
+          "featureNames": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "enabled": { "type": "array", "items": { "type": "boolean" } },
+          "means": { "type": "array", "items": { "type": "number" } },
+          "scales": {
+            "type": "array",
+            "items": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "weights": { "type": "array", "items": { "type": "number" } },
+          "intercept": { "type": "number" },
+          "regularization": { "type": "number" },
+          "iterations": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "trainingEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "trainingGroupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "trainingCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "trainingLabelHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "trainingFeatureHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "modelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "outerTestLabelRead": { "type": "boolean", "const": false },
+          "missingFlagCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "modelId",
+          "profileId",
+          "outerFoldId",
+          "algorithm",
+          "featureNames",
+          "enabled",
+          "means",
+          "scales",
+          "weights",
+          "intercept",
+          "regularization",
+          "iterations",
+          "trainingEventIds",
+          "trainingGroupIds",
+          "trainingCandidateIds",
+          "trainingLabelHash",
+          "trainingFeatureHash",
+          "modelHash",
+          "outerTestLabelRead",
+          "missingFlagCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rawGoldTextFeatureCount": { "type": "number", "const": 0 },
+    "trainingNumericLabelCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "outerTestLabelInputToPredictionCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "supergroupMapHash",
+    "featureHash",
+    "foldHash",
+    "profileDefinitionHash",
+    "trainingCodeHash",
+    "models",
+    "rawGoldTextFeatureCount",
+    "trainingNumericLabelCount",
+    "outerTestLabelInputToPredictionCount"
+  ],
+  "additionalProperties": false
+}

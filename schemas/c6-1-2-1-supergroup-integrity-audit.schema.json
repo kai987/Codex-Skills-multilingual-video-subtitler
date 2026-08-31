@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-supergroup-integrity-audit.schema.json",
+  "title": "c6-1-2-1-supergroup-integrity-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-supergroup-integrity-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supergroupMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineGroupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "goldCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "edgeCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "connectedComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "goldConnectedComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "noGoldComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "crossFoldComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "stableShadowEvaluationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "stableCandidateLabelCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "oofTrainingEligibleCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "structureIncompatibleCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "durationLimitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "gapLimitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "cueLimitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "noncontiguousCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "oneToOne": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "oneToMany": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "manyToOne": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "manyToMany": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "duplicateMachineAssignmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "duplicateGoldAssignmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "goldTextUsedForGroupingCount": { "type": "number", "const": 0 },
+    "profileRematchingCount": { "type": "number", "const": 0 },
+    "reasonCounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reason": { "type": "string", "minLength": 1 },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["reason", "count"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "supergroupMapHash",
+    "machineGroupCount",
+    "goldCueCount",
+    "edgeCount",
+    "connectedComponentCount",
+    "goldConnectedComponentCount",
+    "noGoldComponentCount",
+    "crossFoldComponentCount",
+    "stableShadowEvaluationCount",
+    "stableCandidateLabelCount",
+    "oofTrainingEligibleCount",
+    "structureIncompatibleCount",
+    "durationLimitCount",
+    "gapLimitCount",
+    "cueLimitCount",
+    "noncontiguousCount",
+    "oneToOne",
+    "oneToMany",
+    "manyToOne",
+    "manyToMany",
+    "duplicateMachineAssignmentCount",
+    "duplicateGoldAssignmentCount",
+    "goldTextUsedForGroupingCount",
+    "profileRematchingCount",
+    "reasonCounts"
+  ],
+  "additionalProperties": false
+}

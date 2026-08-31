@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-e0-legacy-replay.schema.json",
+  "title": "c6-1-2-1-e0-legacy-replay",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-1-e0-legacy-replay" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "stable": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "ambiguous": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "noMapping": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "groupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "numerator": { "type": "number", "minimum": 0 },
+        "denominator": { "type": "number", "minimum": 0 },
+        "ratio": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["name", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string", "minLength": 1 },
+          "goldCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FIXED_ONE_TO_ONE",
+              "FIXED_ONE_TO_MANY",
+              "FIXED_MANY_TO_ONE",
+              "FIXED_MANY_TO_MANY",
+              "AMBIGUOUS",
+              "NO_MAPPING",
+              "STRUCTURE_INCOMPATIBLE"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "machineCoveredRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "goldCoveredRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "baselineExactError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "baselineNormalizedError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "goldCharacterCount": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "baselineMaterial": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "groupId",
+          "goldCueIds",
+          "status",
+          "reasons",
+          "machineCoveredRatio",
+          "goldCoveredRatio",
+          "baselineExactError",
+          "baselineNormalizedError",
+          "goldCharacterCount",
+          "baselineMaterial"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "candidateLabelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "originalQualityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "recomputedQualityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "stable",
+    "ambiguous",
+    "noMapping",
+    "groupCount",
+    "coverage",
+    "checks",
+    "passed",
+    "bindings",
+    "candidateLabelHash",
+    "originalQualityHash",
+    "recomputedQualityHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-evaluator-supergroup-map.schema.json",
+  "title": "c6-1-2-1-evaluator-supergroup-map",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-evaluator-supergroup-map"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineMappingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "edgeLedgerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineCueOrder": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldCueOrder": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "supergroupId": { "type": "string", "minLength": 1 },
+          "machineGroupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "machineCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "machineEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "goldCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "edgeIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "foldId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "frozenFoldIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "machineSourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number" },
+                  "end": { "type": "number" }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "goldSourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number" },
+                  "end": { "type": "number" }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "totalSourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number" },
+              "end": { "type": "number" }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "machineCoveredRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "goldCoveredRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "machineCueCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "goldCueCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "machineGroupCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maximumMachineGapSeconds": { "type": "number", "minimum": 0 },
+          "maximumGoldGapSeconds": { "type": "number", "minimum": 0 },
+          "durationSeconds": { "type": "number", "minimum": 0 },
+          "structuralStatus": {
+            "type": "string",
+            "enum": [
+              "FIXED_ONE_TO_ONE",
+              "FIXED_ONE_TO_MANY",
+              "FIXED_MANY_TO_ONE",
+              "FIXED_MANY_TO_MANY",
+              "CROSS_FOLD_COMPONENT",
+              "STRUCTURE_INCOMPATIBLE",
+              "INSUFFICIENT_BIDIRECTIONAL_COVERAGE",
+              "TEMPORAL_COMPONENT_CUE_LIMIT",
+              "TEMPORAL_COMPONENT_DURATION_LIMIT",
+              "TEMPORAL_BRIDGE_GAP_LIMIT",
+              "NONCONTIGUOUS_MACHINE_CUES",
+              "NONCONTIGUOUS_GOLD_CUES",
+              "NO_GOLD_MAPPING",
+              "CANDIDATE_LABEL_AMBIGUOUS",
+              "NO_MACHINE_MAPPING"
+            ]
+          },
+          "shadowEvaluationEligible": { "type": "boolean" },
+          "candidateLabelEligible": { "type": "boolean" },
+          "oofTrainingEligible": { "type": "boolean" },
+          "candidateEligibleEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "candidateAmbiguousEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "supergroupId",
+          "machineGroupIds",
+          "machineCueIds",
+          "machineEventIds",
+          "goldCueIds",
+          "edgeIds",
+          "foldId",
+          "frozenFoldIds",
+          "machineSourceInterval",
+          "goldSourceInterval",
+          "totalSourceInterval",
+          "machineCoveredRatio",
+          "goldCoveredRatio",
+          "machineCueCount",
+          "goldCueCount",
+          "machineGroupCount",
+          "maximumMachineGapSeconds",
+          "maximumGoldGapSeconds",
+          "durationSeconds",
+          "structuralStatus",
+          "shadowEvaluationEligible",
+          "candidateLabelEligible",
+          "oofTrainingEligible",
+          "candidateEligibleEventIds",
+          "candidateAmbiguousEventIds",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "unmappedGoldCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldTextUsedForGroupingCount": { "type": "number", "const": 0 },
+    "profileRematchingCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "machineMappingHash",
+    "foldHash",
+    "goldTimingHash",
+    "edgeLedgerHash",
+    "baselineCueOrder",
+    "goldCueOrder",
+    "groups",
+    "unmappedGoldCueIds",
+    "goldTextUsedForGroupingCount",
+    "profileRematchingCount"
+  ],
+  "additionalProperties": false
+}

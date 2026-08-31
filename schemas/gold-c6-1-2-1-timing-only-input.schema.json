@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-c6-1-2-1-timing-only-input.schema.json",
+  "title": "gold-c6-1-2-1-timing-only-input",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-c6-1-2-1-timing-only-input"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "timingBarrierHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "start": { "type": "number" },
+          "end": { "type": "number" }
+        },
+        "required": ["id", "start", "end"],
+        "additionalProperties": false
+      }
+    },
+    "rawGoldTextIncluded": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "timingBarrierHash",
+    "rows",
+    "rawGoldTextIncluded"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-bipartite-edge-ledger.schema.json",
+  "title": "c6-1-2-1-bipartite-edge-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-bipartite-edge-ledger"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mappingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "edgeId": { "type": "string", "minLength": 1 },
+          "machineGroupId": { "type": "string", "minLength": 1 },
+          "machineCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "goldCueId": { "type": "string", "minLength": 1 },
+          "overlapStart": { "type": "number" },
+          "overlapEnd": { "type": "number" },
+          "overlapSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "overlapIntervals": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number" },
+                "end": { "type": "number" }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "machineIntersectionRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "goldIntersectionRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "edgeType": {
+            "type": "string",
+            "const": "STRICT_POSITIVE_TEMPORAL_OVERLAP"
+          },
+          "goldTextUsed": { "type": "boolean", "const": false },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "edgeId",
+          "machineGroupId",
+          "machineCueIds",
+          "goldCueId",
+          "overlapStart",
+          "overlapEnd",
+          "overlapSeconds",
+          "overlapIntervals",
+          "machineIntersectionRatio",
+          "goldIntersectionRatio",
+          "edgeType",
+          "goldTextUsed",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "goldTextUsedForGroupingCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "mappingHash",
+    "foldHash",
+    "goldTimingHash",
+    "rows",
+    "goldTextUsedForGroupingCount"
+  ],
+  "additionalProperties": false
+}

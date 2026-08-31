@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-1-evaluation-coverage-recovery-audit.schema.json",
+  "title": "c6-1-2-1-evaluation-coverage-recovery-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-1-evaluation-coverage-recovery-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2.1-gold-isolated-supergroup-evaluation-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "supergroupMapHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "evaluableSupergroupCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableMachineGroupCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableProductionCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableGoldCueCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableMachineDurationCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableGoldDurationCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateEventLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "candidateLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "topKCandidateLabelCoverage": {
+          "type": "object",
+          "properties": {
+            "numerator": { "type": "number", "minimum": 0 },
+            "denominator": { "type": "number", "minimum": 0 },
+            "ratio": {
+              "anyOf": [
+                { "type": "number", "minimum": 0, "maximum": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        "evaluableGoldCharacterCoverage": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "numerator": { "type": "number", "minimum": 0 },
+                "denominator": { "type": "number", "minimum": 0 },
+                "ratio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": ["numerator", "denominator", "ratio"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "evaluableSupergroupCoverage",
+        "evaluableMachineGroupCoverage",
+        "evaluableProductionCueCoverage",
+        "evaluableGoldCueCoverage",
+        "evaluableMachineDurationCoverage",
+        "evaluableGoldDurationCoverage",
+        "candidateEventLabelCoverage",
+        "candidateLabelCoverage",
+        "topKCandidateLabelCoverage",
+        "evaluableGoldCharacterCoverage"
+      ],
+      "additionalProperties": false
+    },
+    "recoveredMachineGroups": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "recoveredGoldCues": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldSpanningMachineGroups": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldSpanningGoldCues": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldSpanningConnectedComponents": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "recoveredGoldSpanningMachineGroups": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "machineGroupId": { "type": "string", "minLength": 1 },
+          "supergroupId": { "type": "string", "minLength": 1 },
+          "oldStatus": { "type": "string", "minLength": 1 },
+          "newStatus": { "type": "string", "minLength": 1 },
+          "recovered": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "machineGroupId",
+          "supergroupId",
+          "oldStatus",
+          "newStatus",
+          "recovered",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "policyHash",
+    "semanticHash",
+    "supergroupMapHash",
+    "coverage",
+    "recoveredMachineGroups",
+    "recoveredGoldCues",
+    "goldSpanningMachineGroups",
+    "goldSpanningGoldCues",
+    "goldSpanningConnectedComponents",
+    "recoveredGoldSpanningMachineGroups",
+    "rows"
+  ],
+  "additionalProperties": false
+}
