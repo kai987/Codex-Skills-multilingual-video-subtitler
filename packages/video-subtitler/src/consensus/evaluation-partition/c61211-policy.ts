@@ -157,7 +157,7 @@ export function validateC61211Artifact(value: unknown) {
     ([name]) => name === row.artifactType,
   )?.[1];
   demand(schema, "C61211_UNKNOWN_ARTIFACT:" + String(row.artifactType));
-  const parsed = schema.parse(value) as Record<string, unknown>;
+  const parsed = schema.parse(value);
   demand(parsed.policyHash === C61211_POLICY_HASH, "C61211_POLICY_DRIFT");
   demand(
     parsed.semanticHash ===

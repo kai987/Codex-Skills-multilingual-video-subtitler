@@ -21,7 +21,7 @@ export const C61211_VERSION =
   "c6.1.2.1.1-constrained-monotonic-partition-reachable-evaluation-v1" as const;
 const id = z.string().min(1),
   sha = z.string().regex(/^[a-f0-9]{64}$/);
-const num = z.number().finite(),
+const num = z.number(),
   count = num.int().nonnegative(),
   ratio = num.min(0).max(1);
 const ids = z.array(id),

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { c612Defined } from "../packages/video-subtitler/src/consensus/top-k/c612-policy.js";
 import { c61211GeneratedSchemas, c61211PolicySchema } from "@mvl/shared";
 import { c61211Fixture } from "./helpers/c61211-fixture.js";
 import {
@@ -62,7 +63,7 @@ describe("C6.1.2.1.1 pre-text inventory and immutable policy", () => {
   it("enumerates a legal block without losing candidate and fold eligibility", () => {
     const f = c61211Fixture(),
       graph = f.graph(),
-      parent = graph.map.groups[0]!;
+      parent = c612Defined(graph.map.groups[0]);
     const block = candidateC61211Block(
       f.input,
       graph,
@@ -107,9 +108,9 @@ describe("C6.1.2.1.1 pre-text inventory and immutable policy", () => {
     ];
     const graph = inventoryC61211(f.input),
       parentGraph = f.graph(f.input.goldTiming);
-    const parent = parentGraph.map.groups.find(
-      (g) => g.goldCueIds.length === 2,
-    )!;
+    const parent = c612Defined(
+      parentGraph.map.groups.find((g) => g.goldCueIds.length === 2),
+    );
     const block = candidateC61211Block(
       f.input,
       parentGraph,
