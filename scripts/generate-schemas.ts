@@ -488,6 +488,16 @@ const c60114Schemas = [
 ] as const;
 
 const schemas = [
+  ...Object.entries({
+    ...c60114.c601141Schemas,
+    ...c60114.c601141DeliverySchemas,
+    ...c60114.c601141EvaluationSchemas,
+    ...c60114.c601141AcceptanceSchemas,
+  }).map(([name, schema]) => ({
+    fileName: `${name}.schema.json`,
+    id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
+    schema,
+  })),
   ...c60114Schemas.map(([name, schema]) => ({
     fileName: `${name}.schema.json`,
     id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
@@ -2085,6 +2095,26 @@ for (const entry of schemas) {
     target: "draft-2020-12",
     unrepresentable: "any",
   });
+  // This closed Zod tuple has no rest provider. The installed Zod exporter
+  // omits its length bounds; retain the same two-provider contract in JSON.
+  if (entry.fileName === "c6-0-1-14-1-policy.schema.json") {
+    const policy = generated as unknown as {
+      properties: {
+        asr: {
+          properties: {
+            providers: {
+              prefixItems: unknown[];
+              minItems?: number;
+              maxItems?: number;
+            };
+          };
+        };
+      };
+    };
+    const providers = policy.properties.asr.properties.providers;
+    providers.minItems = providers.prefixItems.length;
+    providers.maxItems = providers.prefixItems.length;
+  }
   const output = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: entry.id,

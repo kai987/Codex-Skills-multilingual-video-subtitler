@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-1-route-decision.schema.json",
+  "title": "c6-0-1-14-1-route-decision",
+  "type": "object",
+  "properties": {
+    "primaryDecision": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_ENGINEERING_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_LEGACY_PROVENANCE_RECOVERY",
+        "HOLD_FOR_MACHINE_SPEECH_DETECTION_MODEL_CEILING",
+        "HOLD_FOR_DIALOGUE_ENHANCEMENT_SOURCE_SEPARATION_INVESTIGATION",
+        "HOLD_FOR_SAFETY_RESERVE_SELECTION_REPAIR",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR"
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "diagnosis": { "type": "string", "minLength": 1 },
+          "errorComponentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["diagnosis", "errorComponentIds", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "advisories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "diagnosis": { "type": "string", "minLength": 1 },
+          "errorComponentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["diagnosis", "errorComponentIds", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "fullQueueGatePassed": { "type": "boolean" },
+    "targetBudgetPassed": { "type": "boolean" },
+    "engineeringPassed": { "type": "boolean" },
+    "evaluationIntegrityPassed": { "type": "boolean" },
+    "mandatorySubsetRecallIsBlocking": { "type": "boolean", "const": false },
+    "lexicalIncompleteWhenAudibleIsBlocking": {
+      "type": "boolean",
+      "const": false
+    },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "humanTrialStarted": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "primaryDecision",
+    "blockers",
+    "advisories",
+    "fullQueueGatePassed",
+    "targetBudgetPassed",
+    "engineeringPassed",
+    "evaluationIntegrityPassed",
+    "mandatorySubsetRecallIsBlocking",
+    "lexicalIncompleteWhenAudibleIsBlocking",
+    "finalizationMethod",
+    "productionStatus",
+    "c602Status",
+    "machineOnlyReleaseAuthorized",
+    "rankerRetrained",
+    "humanTrialStarted",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-1-audio-view-synthetic-controls.schema.json",
+  "title": "c6-0-1-14-1-audio-view-synthetic-controls",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-1-audio-view-synthetic-controls"
+    },
+    "results": {
+      "minItems": 5,
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "NATIVE_MONO",
+              "LEFT",
+              "RIGHT",
+              "CENTER_OR_MID",
+              "VOICE_BAND_CENTER"
+            ]
+          },
+          "frameCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "impulsePeakDelays": {
+            "minItems": 3,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "sourceFrameCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rationalMapping": {
+            "type": "object",
+            "properties": {
+              "numerator": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "denominator": { "type": "number", "const": 16000 }
+            },
+            "required": ["numerator", "denominator"],
+            "additionalProperties": false
+          },
+          "ptsResetPreservesSourceOrigin": { "type": "boolean", "const": true }
+        },
+        "required": [
+          "role",
+          "frameCount",
+          "impulsePeakDelays",
+          "sourceFrameCount",
+          "rationalMapping",
+          "ptsResetPreservesSourceOrigin"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "results",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

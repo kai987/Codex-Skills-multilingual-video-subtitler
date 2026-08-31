@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-missing-safety-reserve-targets-v1.schema.json",
+  "title": "machine-missing-safety-reserve-targets-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.1-multiview-speech-inventory-v1"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-missing-safety-reserve-targets-v1"
+    },
+    "uncoveredHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "targets": {
+      "maxItems": 24,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "islandId": { "type": "string", "minLength": 1 },
+          "nativeInterval": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "observationIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentFamilies": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentFamilyCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "distinctPcmViewIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceClass": {
+            "type": "string",
+            "enum": [
+              "MULTI_DETECTOR_CONFIRMED",
+              "LEGACY_FINGERPRINT_CONFIRMED",
+              "EXISTING_VERIFIED_SPEECH",
+              "MULTI_VIEW_SPEECH_POSITIVE",
+              "PYANNOTE_ONLY_SPEECH_POSITIVE",
+              "SINGLE_DETECTOR_HIGH_RECALL",
+              "DETECTOR_DISAGREEMENT",
+              "LOW_SUPPORT_VIEW_SPECIFIC",
+              "STRONG_CONTRADICTION",
+              "TIMEBASE_UNVERIFIED"
+            ]
+          },
+          "verifiedTimebase": { "type": "boolean" },
+          "strongContradiction": { "type": "boolean" },
+          "reliableLexical": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "parentIslandId": { "type": "string", "minLength": 1 },
+          "uncoveredRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "partialCueOverlap": { "type": "boolean" },
+          "partialExistingTargetOverlap": { "type": "boolean" },
+          "priority": { "type": "number" },
+          "diversityBin": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "targetId": { "type": "string", "minLength": 1 },
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "SPEECH_INVENTORY_STRONG_UNCOVERED",
+              "SPEECH_INVENTORY_POSSIBLE_UNCOVERED"
+            ]
+          },
+          "requiredLevel": { "type": "string", "const": "RECOMMENDED" },
+          "canonicalInsertAllowed": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "islandId",
+          "nativeInterval",
+          "sourceInterval",
+          "observationIds",
+          "evidenceIds",
+          "requestIds",
+          "independentFamilies",
+          "independentFamilyCount",
+          "distinctPcmViewIds",
+          "evidenceClass",
+          "verifiedTimebase",
+          "strongContradiction",
+          "reliableLexical",
+          "semanticHash",
+          "candidateId",
+          "parentIslandId",
+          "uncoveredRatio",
+          "partialCueOverlap",
+          "partialExistingTargetOverlap",
+          "priority",
+          "diversityBin",
+          "targetId",
+          "targetType",
+          "requiredLevel",
+          "canonicalInsertAllowed"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["SELECTED", "LOW_SUPPORT_AUDIT_ONLY", "BUDGET_OVERFLOW"]
+          },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": ["candidateId", "status", "reason"],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "targetCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "strongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "possibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetUnionSeconds": { "type": "number", "minimum": 0, "maximum": 60 },
+        "overflowCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "auditOnlyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "catchAllTargetCount": { "type": "number", "const": 0 },
+        "requiredLevelPromotionCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "targetCount",
+        "strongCount",
+        "possibleCount",
+        "targetUnionSeconds",
+        "overflowCount",
+        "auditOnlyCount",
+        "catchAllTargetCount",
+        "requiredLevelPromotionCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "sourceIdentity",
+    "sourceTimebase",
+    "policyHash",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "uncoveredHash",
+    "targets",
+    "audit",
+    "summary"
+  ],
+  "additionalProperties": false
+}

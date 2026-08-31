@@ -1,0 +1,360 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-0-1-14-1-local-asr-probes.schema.json",
+  "title": "machine-c6-0-1-14-1-local-asr-probes",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.1-multiview-speech-inventory-v1"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-0-1-14-1-local-asr-probes"
+    },
+    "mode": { "type": "string", "enum": ["FRESH", "EXACT_CACHE_ONLY"] },
+    "selectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "requests": {
+      "maxItems": 32,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "targetId": { "type": "string", "minLength": 1 },
+          "provider": {
+            "type": "string",
+            "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+          },
+          "windowType": {
+            "type": "string",
+            "enum": ["CORE_EXACT", "CORE_CONTEXT"]
+          },
+          "targetInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "extractionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "nativeInterval": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "requestIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "runtimeIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "modelSnapshotHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "audioSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "relativeAudioPath": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "sampleCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "prompt": { "type": "string", "const": "" },
+          "vadEnabled": { "type": "boolean", "const": false },
+          "inferenceConsumed": { "type": "boolean" },
+          "resultPersisted": { "type": "boolean" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "EMPTY_OUTPUT",
+              "FAILED",
+              "INFERENCE_CONSUMED_RESULT_NOT_PERSISTED",
+              "RUNTIME_UNAVAILABLE"
+            ]
+          },
+          "rawResultHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "displayText": { "type": "string" },
+          "normalizedText": { "type": "string" },
+          "readingText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "readingRuntimeHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string" },
+                "sourceInterval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "trusted": { "type": "boolean" },
+                "probability": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "reason": { "type": "string" }
+              },
+              "required": [
+                "text",
+                "sourceInterval",
+                "trusted",
+                "probability",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "localizedText": { "type": "string" },
+          "localizationStatus": {
+            "type": "string",
+            "enum": [
+              "EXACT_SOURCE_WINDOW",
+              "TRUSTED_TOKEN_PROJECTION",
+              "CONTEXT_UNPROJECTABLE",
+              "EMPTY",
+              "FAILED"
+            ]
+          },
+          "hallucinationRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+          "strongContradiction": { "type": "boolean" },
+          "modelLoadDelta": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "providerProcessDelta": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "errorCode": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "requestId",
+          "targetId",
+          "provider",
+          "windowType",
+          "targetInterval",
+          "extractionInterval",
+          "nativeInterval",
+          "cacheKey",
+          "requestIdentityHash",
+          "runtimeIdentityHash",
+          "modelSnapshotHash",
+          "audioSha256",
+          "relativeAudioPath",
+          "sampleCount",
+          "prompt",
+          "vadEnabled",
+          "inferenceConsumed",
+          "resultPersisted",
+          "status",
+          "rawResultHash",
+          "displayText",
+          "normalizedText",
+          "readingText",
+          "readingRuntimeHash",
+          "tokens",
+          "localizedText",
+          "localizationStatus",
+          "hallucinationRisk",
+          "strongContradiction",
+          "modelLoadDelta",
+          "providerProcessDelta",
+          "errorCode",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "contextDecisions": {
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetId": { "type": "string", "minLength": 1 },
+          "executed": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["targetId", "executed", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "properties": {
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "exactCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "contextCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resultPersistedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hiddenRetryCount": { "type": "number", "const": 0 },
+        "fullMediaAsrCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "inferenceCount",
+        "exactCount",
+        "contextCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "resultPersistedCount",
+        "failedCount",
+        "hiddenRetryCount",
+        "fullMediaAsrCount"
+      ],
+      "additionalProperties": false
+    },
+    "evidenceSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "sourceIdentity",
+    "sourceTimebase",
+    "policyHash",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "mode",
+    "selectionHash",
+    "requests",
+    "contextDecisions",
+    "accounting",
+    "evidenceSemanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,323 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-review-playback-timeline-v3.schema.json",
+  "title": "machine-review-playback-timeline-v3",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.1-multiview-speech-inventory-v1"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-review-playback-timeline-v3"
+    },
+    "audioManifestHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "regionsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "targetsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "compatibilityPlaybackHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "playbackSegmentId": { "type": "string", "minLength": 1 },
+          "audioId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "audioLocalInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "reviewTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reviewItemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "regionIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceIdentity": {
+            "type": "object",
+            "properties": {
+              "sourceMediaSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+              "sampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioStreamIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioTimebase": {
+                "type": "string",
+                "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+              },
+              "sourceTimebase": {
+                "type": "string",
+                "const": "SOURCE_GLOBAL_SECONDS"
+              }
+            },
+            "required": [
+              "sourceMediaSha256",
+              "durationSeconds",
+              "sampleRate",
+              "audioStreamIndex",
+              "audioTimebase",
+              "sourceTimebase"
+            ],
+            "additionalProperties": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "playbackSegmentId",
+          "audioId",
+          "sourceInterval",
+          "audioLocalInterval",
+          "reviewTargetIds",
+          "reviewItemIds",
+          "regionIds",
+          "sourceIdentity",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "plans": {
+      "minItems": 9,
+      "maxItems": 9,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "enum": [
+              "UNIQUE_AUDIO_10_PERCENT",
+              "UNIQUE_AUDIO_20_PERCENT",
+              "UNIQUE_AUDIO_30_PERCENT",
+              "UNIQUE_AUDIO_40_PERCENT",
+              "UNIQUE_AUDIO_50_PERCENT",
+              "ALL_MANDATORY",
+              "FULL_QUEUE",
+              "FULL_QUEUE_CONSERVATIVE_SPEECH",
+              "FULL_QUEUE_WITH_SAFETY_RESERVE"
+            ]
+          },
+          "budgetSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "regionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reviewTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reviewItemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "playbackSegmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "audioIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "physicalAudioSha256s": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "sourceIntervalUnion": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "uniqueAudioSeconds": { "type": "number", "minimum": 0 },
+          "rankerStatus": {
+            "type": "string",
+            "const": "RANKER_NOT_RECALIBRATED_IN_C6_0_1_14"
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "planId",
+          "budgetSeconds",
+          "regionIds",
+          "reviewTargetIds",
+          "reviewItemIds",
+          "playbackSegmentIds",
+          "audioIds",
+          "physicalAudioSha256s",
+          "sourceIntervalUnion",
+          "uniqueAudioSeconds",
+          "rankerStatus",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "officialFullQueuePlan": {
+      "type": "string",
+      "const": "FULL_QUEUE_WITH_SAFETY_RESERVE"
+    },
+    "targetCoverageChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewTargetId": { "type": "string", "minLength": 1 },
+          "mandatoryForAudio": { "type": "boolean" },
+          "audioRequired": { "type": "boolean" },
+          "coverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "fullyCovered": { "type": "boolean" }
+        },
+        "required": [
+          "reviewTargetId",
+          "mandatoryForAudio",
+          "coverageRatio",
+          "fullyCovered"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "segmentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mandatoryTargetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coveredMandatoryTargetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetCoveragePassed": { "type": "boolean" },
+        "fullQueueUniqueAudioSeconds": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "segmentCount",
+        "audioMappingCount",
+        "targetMappingCount",
+        "mandatoryTargetCount",
+        "coveredMandatoryTargetCount",
+        "targetCoveragePassed",
+        "fullQueueUniqueAudioSeconds"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "sourceIdentity",
+    "sourceTimebase",
+    "policyHash",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "audioManifestHash",
+    "regionsHash",
+    "targetsHash",
+    "compatibilityPlaybackHash",
+    "segments",
+    "plans",
+    "officialFullQueuePlan",
+    "targetCoverageChecks",
+    "summary"
+  ],
+  "additionalProperties": false
+}
