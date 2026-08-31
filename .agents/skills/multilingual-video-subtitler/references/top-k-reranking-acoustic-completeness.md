@@ -1,0 +1,31 @@
+# C6.1.2 Top-K existing-candidate reranking
+
+Use only for an explicitly requested offline, shadow-only investigation. This is a known development benchmark, not prospective validation. The ordinary subtitle workflow, production canonical text/timing, and Skill 2/3 stay unchanged. Reuse the complete C6.1 candidate universe, original machine task and verified C6.1.1 baseline. CURRENT is a retained no-switch control, never a provider vote or one of the four alternative slots.
+
+## Machine-only phase
+
+Use Node 24 and source-mode TSX with `tsconfig.base.json`. `investigate:c6-1-2-top-k` takes explicit task, previous, baseline-run, source, ASR-cache, verifier-cache, local model-directory and Python inputs, an external output directory, `--network off`, `--production-mutation off`, and `--verifier-mode exact-cache|bounded-fresh|cache-replay`. Existing directories are not overwritten. No production-write option exists.
+
+Recompute the complete C6.1.1 risk order, preserve every considered candidate in a conservation ledger, and build T0 H2, T1 raw-MBR, T2 union and T3 provider-diverse/correlation-deduplicated Top-4 sets. Keep full identity recovery evidence so all retrieval profiles can be independently replayed. Explicit interval identity alone is provisional; verified core identity requires actual source PCM and explicit request/core lineage. Unknown decode/prompt/audio identity must not create an independent vote.
+
+Candidate-specific completeness uses verified VAD and exact candidate-owned mapped tokens or target-constrained CTC occupancy. Missing speech, unknown token support and unavailable CTC remain null/unknown. A low candidate-conditioned CTC loss does not prove complete dialogue. Strong shortening needs acoustic completeness, not merely a short text; safe shortening is not banned by a length rule. Never generate a new transcript or load an ASR model. The optional local CTC verifier performs at most 200 source-core encoder requests, each at most 30 seconds; the fixed existing-target union is scored once per core. Snapshot, runtime, source PCM and targets bind every exact cache entry. Final replays must use those entries without inference or model loading.
+
+Freeze source, candidate/risk/Top-K/identity/CTC/completeness/contraction artifacts, machine-only fixed groups, numeric features, five contiguous grouped folds and all L0–L8/A0–A8 profile definitions before any Gold access. Shared or overlapping source audio, acoustic observations and production cue groups cannot cross folds. No raw candidate text, embedding, event ID, filename, exact timestamp or Gold value is a model feature.
+
+## Evaluator, training and final evaluation
+
+Run both machine freezes before `evaluate:c6-1-2-top-k -- --phase labels`. Only that evaluator subprocess receives the Gold path. It validates both freezes first and creates one time-only binding to the already frozen machine groups. Ambiguous, unmapped and structurally incompatible groups remain unevaluable. Gold text never changes the machine grouping or retrieval. Numeric candidate labels are local counterfactual diagnostics, not realized joint gains.
+
+`train:c6-1-2-top-k -- --run <run> --network off` reads frozen machine features and numeric labels, never raw Gold. L2 is a regularized pairwise logistic model; L3 is a regularized listwise softmax model. L4 adds completeness/contraction gating, L5 correlation balancing, L6 nested training-only abstention, and L7/L8 fixed provider/acoustic ablations. Every outer fold has training-only imputation/scaling/fitting and inner threshold selection. Test labels cannot reach prediction. The primary L6 policy is declared before Gold; a post-hoc best observed profile is diagnostic, not a retrospectively chosen deployment policy.
+
+Generate at most 16 whole-existing-candidate configurations per group/profile, changing at most two events, and retain CURRENT_ALL. Recheck whole-cue presentation capacity without changing cue count or times. Freeze all model coefficients, thresholds, decisions, provenance and research ASS/SRT/VTT. Supervised OOF shadows are necessarily created after training-label extraction; do not falsely claim that these learned shadows predate the first Gold read. Final `--phase final` evaluation requires both reranking freezes and reuses the one fixed Gold binding for every profile.
+
+## Metrics and acceptance
+
+Selection precision is improved/(improved+regressed); neutral is separate. Harm is regressed/evaluable changed groups. Selective coverage is evaluable changed/eligible evaluable groups. Unknown group gain is null, not zero. Actual joint gain comes from each assembled fixed group once, never the sum of event counterfactual gains. Report all five folds and active/negative/unknown-gain folds.
+
+Distinguish full-pool oracle recall, Top-K ranking quality, event-counterfactual Top-1 capture, Top-K candidate capture and bounded joint-configuration capture. Different mapping or oracle denominators are not directly comparable to the historical 46.27% ceiling. Report the unchanged full-episode legacy material baseline of 77 separately from fixed-V2 group material deltas. Do not tune policy from this episode's outer-test labels.
+
+Run schema generation/validation, typecheck, lint, format check, build, all unit/E2E tests, C6.1/C6.1.1/C6.1.2 and historical regressions, toy-logit CTC tests, the skill validator and independent C6.1.1 acceptance. `validate:c6-1-2-top-k` recomputes ranks, retrieval, correlation, folds, features, models, thresholds and joint decisions; validates A/B semantic parity plus exact shadow bytes; and verifies source/production hashes and immutable QA logs without reopening raw Gold.
+
+Only aggregate, strict-schema summaries belong in `shareable/`. Full machine, numeric-label, model and research-shadow outputs are local research artifacts, not a public-shareable package. No raw Gold, candidate text, audio, model caches, private paths or credentials belong in Git. Strong research support requires positive joint gain, safe material/deletion outcomes, adequate evidence/evaluation coverage, broad fold support and full engineering acceptance. A safe abstain-all result is not a successful reranker. Until all required gates pass, C6.1.3 remains HOLD; production remains `needs-review`, `finalizationMethod: none`, and machine-only release is unauthorized.

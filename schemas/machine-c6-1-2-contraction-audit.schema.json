@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-contraction-audit.schema.json",
+  "title": "machine-c6-1-2-contraction-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-contraction-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "priorStrongContraction": { "type": "boolean" },
+          "strong": { "type": "boolean" },
+          "lengthRatio": { "type": "number", "minimum": 0 },
+          "prefixRetention": { "type": "number", "minimum": 0, "maximum": 1 },
+          "suffixRetention": { "type": "number", "minimum": 0, "maximum": 1 },
+          "lcsRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "leadingDeletionLength": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "trailingDeletionLength": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "internalDeletionSpans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "end": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "deletedPronunciationUnits": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "deletedAcousticallySupportedUnits": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "completenessStatus": {
+            "type": "string",
+            "enum": [
+              "VERIFIED_COMPLETE",
+              "LIKELY_COMPLETE",
+              "PARTIAL_LEADING",
+              "PARTIAL_TRAILING",
+              "PARTIAL_INTERNAL",
+              "EDGE_TRUNCATED",
+              "ADJACENT_CONTAMINATED",
+              "BOTH_TRUNCATED_AND_CONTAMINATED",
+              "INSUFFICIENT_EVIDENCE",
+              "UNSCORABLE"
+            ]
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "NOT_STRONG_CONTRACTION",
+              "VERIFIED_HALLUCINATION_REMOVAL",
+              "SAFE_REDUNDANCY_REMOVAL",
+              "POSSIBLE_VALID_CONTRACTION",
+              "CATASTROPHIC_LEADING_DELETION",
+              "CATASTROPHIC_TRAILING_DELETION",
+              "CATASTROPHIC_INTERNAL_DELETION",
+              "UNKNOWN_CONTRACTION"
+            ]
+          },
+          "selectable": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "priorStrongContraction",
+          "strong",
+          "lengthRatio",
+          "prefixRetention",
+          "suffixRetention",
+          "lcsRatio",
+          "leadingDeletionLength",
+          "trailingDeletionLength",
+          "internalDeletionSpans",
+          "deletedPronunciationUnits",
+          "deletedAcousticallySupportedUnits",
+          "completenessStatus",
+          "classification",
+          "selectable",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "lengthAloneBansCandidate": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "rows",
+    "runtimeGoldInputCount",
+    "lengthAloneBansCandidate"
+  ],
+  "additionalProperties": false
+}

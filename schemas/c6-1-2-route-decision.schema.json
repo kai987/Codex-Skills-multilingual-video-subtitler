@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-route-decision.schema.json",
+  "title": "c6-1-2-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-route-decision" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "engineeringPassed": { "type": "boolean" },
+    "strongSupportPassed": { "type": "boolean" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "required": ["name", "passed", "observed", "expected"],
+        "additionalProperties": false
+      }
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_1_3_FROZEN_TOP_K_RERANKER_PROSPECTIVE_SHADOW",
+        "TOP_K_RETRIEVAL_CONFIRMED_RERANKING_NOT_SUPPORTED",
+        "EXISTING_CANDIDATE_POOL_INSUFFICIENT",
+        "EVALUATION_COVERAGE_INSUFFICIENT",
+        "C6_1_2_ENGINEERING_INVALID"
+      ]
+    },
+    "c613": { "type": "string", "enum": ["GO", "HOLD"] },
+    "selectedProfile": { "type": "string", "minLength": 1 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "evaluationOnly",
+    "privacy",
+    "machineFreezeHash",
+    "engineeringPassed",
+    "strongSupportPassed",
+    "checks",
+    "route",
+    "c613",
+    "selectedProfile",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "reasons"
+  ],
+  "additionalProperties": false
+}

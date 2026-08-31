@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-fixed-cue-group-mapping-v2.schema.json",
+  "title": "c6-1-2-fixed-cue-group-mapping-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-fixed-cue-group-mapping-v2"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string", "minLength": 1 },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "eventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "FIXED_ONE_TO_ONE",
+              "FIXED_ONE_TO_MANY",
+              "FIXED_MANY_TO_ONE",
+              "FIXED_MANY_TO_MANY",
+              "AMBIGUOUS",
+              "NO_MAPPING",
+              "STRUCTURE_INCOMPATIBLE"
+            ]
+          },
+          "baselineTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "baselineTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "evidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "groupId",
+          "cueIds",
+          "eventIds",
+          "sourceInterval",
+          "status",
+          "baselineTextHash",
+          "baselineTimingHash",
+          "evidenceHashes",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "baselineCueOrder": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "universeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "goldBinding": {
+      "type": "string",
+      "const": "EVALUATOR_ONLY_AFTER_MACHINE_FREEZE"
+    },
+    "profileRematchingAllowed": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "groups",
+    "baselineCueOrder",
+    "universeHash",
+    "runtimeGoldInputCount",
+    "goldBinding",
+    "profileRematchingAllowed"
+  ],
+  "additionalProperties": false
+}

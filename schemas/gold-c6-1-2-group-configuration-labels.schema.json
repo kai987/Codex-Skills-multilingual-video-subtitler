@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-c6-1-2-group-configuration-labels.schema.json",
+  "title": "gold-c6-1-2-group-configuration-labels",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-c6-1-2-group-configuration-labels"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldBindingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configurationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "configurationId": { "type": "string", "minLength": 1 },
+          "groupId": { "type": "string", "minLength": 1 },
+          "profileId": { "type": "string", "minLength": 1 },
+          "eligible": { "type": "boolean" },
+          "exactGain": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "normalizedGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "materialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletion": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "labelRole": {
+            "type": "string",
+            "const": "GROUP_JOINT_COUNTERFACTUAL"
+          }
+        },
+        "required": [
+          "configurationId",
+          "groupId",
+          "profileId",
+          "eligible",
+          "exactGain",
+          "normalizedGain",
+          "materialDelta",
+          "catastrophicDeletion",
+          "labelRole"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "evaluationOnly",
+    "privacy",
+    "machineFreezeHash",
+    "goldBindingHash",
+    "configurationHash",
+    "rows"
+  ],
+  "additionalProperties": false
+}

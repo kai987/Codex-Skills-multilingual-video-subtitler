@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-top-k-profile-comparison.schema.json",
+  "title": "machine-c6-1-2-top-k-profile-comparison",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-top-k-profile-comparison"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "topKHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "enum": [
+              "T0_H2_TOP4",
+              "T1_RAW_MBR_TOP4",
+              "T2_H2_RAW_UNION_TOP4",
+              "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+            ]
+          },
+          "events": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "current": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "alternatives": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "bothProviders": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "availableBothProviders": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "duplicateObservationSlots": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "profile",
+          "events",
+          "current",
+          "alternatives",
+          "bothProviders",
+          "availableBothProviders",
+          "duplicateObservationSlots"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "topKHash",
+    "profiles",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-candidate-ctc-scores.schema.json",
+  "title": "machine-c6-1-2-candidate-ctc-scores",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-candidate-ctc-scores"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "lowerIsBetter": { "type": "boolean", "const": true },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "audioHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "modelSnapshotHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "runtimeIdentityHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "scoredInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "targetHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "representation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["NORMALIZED_DISPLAY", "PRONUNCIATION"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "rawLoss": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "perTokenLoss": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "tokenCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "vocabularyCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "unknownTokenCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "acousticFrameCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "status": {
+            "type": "string",
+            "enum": ["SCORABLE", "UNSCORABLE", "UNAVAILABLE"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "supportedTokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 },
+                "posterior": { "type": "number", "minimum": 0, "maximum": 1 }
+              },
+              "required": ["index", "start", "end", "posterior"],
+              "additionalProperties": false
+            }
+          },
+          "cacheIdentity": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "audioHash",
+          "modelSnapshotHash",
+          "runtimeIdentityHash",
+          "scoredInterval",
+          "targetHash",
+          "representation",
+          "rawLoss",
+          "perTokenLoss",
+          "tokenCount",
+          "vocabularyCoverage",
+          "unknownTokenCount",
+          "acousticFrameCount",
+          "status",
+          "reasons",
+          "supportedTokens",
+          "cacheIdentity"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "lowerIsBetter",
+    "rows",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

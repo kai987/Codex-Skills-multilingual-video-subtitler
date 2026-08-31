@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-retrieval-evaluation.schema.json",
+  "title": "c6-1-2-retrieval-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-retrieval-evaluation"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "enum": [
+              "T0_H2_TOP4",
+              "T1_RAW_MBR_TOP4",
+              "T2_H2_RAW_UNION_TOP4",
+              "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+            ]
+          },
+          "evaluableEvents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "oracleImprovementEvents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "recall1": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "recall2": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "recall3": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "recall4": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "mrr": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "ndcg4": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "topKOracleGain": { "type": "number" },
+          "fullExistingOracleGain": { "type": "number" },
+          "oracleCapture": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "profile",
+          "evaluableEvents",
+          "oracleImprovementEvents",
+          "recall1",
+          "recall2",
+          "recall3",
+          "recall4",
+          "mrr",
+          "ndcg4",
+          "topKOracleGain",
+          "fullExistingOracleGain",
+          "oracleCapture"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "enum": [
+              "T0_H2_TOP4",
+              "T1_RAW_MBR_TOP4",
+              "T2_H2_RAW_UNION_TOP4",
+              "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+            ]
+          },
+          "eventId": { "type": "string", "minLength": 1 },
+          "oracleCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "h2Rank": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "rawRank": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "retrievedRank": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "currentError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "oracleError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "topKOracleError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "profile",
+          "eventId",
+          "oracleCandidateId",
+          "h2Rank",
+          "rawRank",
+          "retrievedRank",
+          "currentError",
+          "oracleError",
+          "topKOracleError",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "evaluationOnly",
+    "privacy",
+    "machineFreezeHash",
+    "profiles",
+    "rows"
+  ],
+  "additionalProperties": false
+}

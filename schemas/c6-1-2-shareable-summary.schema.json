@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-shareable-summary.schema.json",
+  "title": "c6-1-2-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-shareable-summary" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "benchmark": { "type": "string", "const": "KNOWN_DEVELOPMENT_BENCHMARK" },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_1_3_FROZEN_TOP_K_RERANKER_PROSPECTIVE_SHADOW",
+        "TOP_K_RETRIEVAL_CONFIRMED_RERANKING_NOT_SUPPORTED",
+        "EXISTING_CANDIDATE_POOL_INSUFFICIENT",
+        "EVALUATION_COVERAGE_INSUFFICIENT",
+        "C6_1_2_ENGINEERING_INVALID"
+      ]
+    },
+    "c613": { "type": "string", "enum": ["GO", "HOLD"] },
+    "engineeringPassed": { "type": "boolean" },
+    "strongSupportPassed": { "type": "boolean" },
+    "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "productionCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "productionMutationCount": { "type": "number", "const": 0 },
+    "asrInference": { "type": "number", "const": 0 },
+    "verifierFresh": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "verifierCacheHits": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "foldId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "eligibleEvents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluatedRankings": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "top1Accuracy": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "top1OracleHitRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "mrr": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "ndcg4": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "selectedEvents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedGroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluatedChangedGroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "improved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regressed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutral": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "precision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harm": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "coverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "eventSelectionCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "allGroupEvaluationCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "changedGroupEvaluationCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "selectedGroupEvaluationCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "exactJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "normalizedJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "materialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletions": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "activeFolds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "negativeGainFolds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknownGainFolds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "oracleCapture": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "top1OracleCapture": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "top1FullPoolOracleCapture": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "candidateOracleCapture": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "localTop1PositiveGain": { "type": "number" },
+          "localTopKOracleGain": { "type": "number" },
+          "localFullExistingOracleGain": { "type": "number" },
+          "localOracleUnit": {
+            "type": "string",
+            "const": "EVENT_COUNTERFACTUAL_DIAGNOSTIC_NOT_JOINT"
+          },
+          "eligibleGroupCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "profileId",
+          "foldId",
+          "eligibleEvents",
+          "evaluatedRankings",
+          "top1Accuracy",
+          "top1OracleHitRate",
+          "mrr",
+          "ndcg4",
+          "selectedEvents",
+          "selectedGroups",
+          "evaluatedChangedGroups",
+          "improved",
+          "regressed",
+          "neutral",
+          "unknown",
+          "precision",
+          "harm",
+          "coverage",
+          "eventSelectionCoverage",
+          "allGroupEvaluationCoverage",
+          "changedGroupEvaluationCoverage",
+          "selectedGroupEvaluationCoverage",
+          "exactJointGain",
+          "normalizedJointGain",
+          "materialDelta",
+          "catastrophicDeletions",
+          "activeFolds",
+          "negativeGainFolds",
+          "unknownGainFolds",
+          "oracleCapture",
+          "top1OracleCapture",
+          "top1FullPoolOracleCapture",
+          "candidateOracleCapture",
+          "localTop1PositiveGain",
+          "localTopKOracleGain",
+          "localFullExistingOracleGain",
+          "localOracleUnit",
+          "eligibleGroupCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summaryOnly": { "type": "boolean", "const": true },
+    "candidateTextIncluded": { "type": "boolean", "const": false },
+    "goldTextIncluded": { "type": "boolean", "const": false },
+    "sourceAudioIncluded": { "type": "boolean", "const": false },
+    "packagePrivacy": {
+      "type": "string",
+      "const": "FULL_OUTPUT_IS_LOCAL_RESEARCH_ONLY"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "benchmark",
+    "route",
+    "c613",
+    "engineeringPassed",
+    "strongSupportPassed",
+    "canonicalTextHash",
+    "canonicalTimingHash",
+    "productionCueCount",
+    "productionMutationCount",
+    "asrInference",
+    "verifierFresh",
+    "verifierCacheHits",
+    "profiles",
+    "summaryOnly",
+    "candidateTextIncluded",
+    "goldTextIncluded",
+    "sourceAudioIncluded",
+    "packagePrivacy"
+  ],
+  "additionalProperties": false
+}

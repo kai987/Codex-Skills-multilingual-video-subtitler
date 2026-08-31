@@ -1,5 +1,9 @@
 import path from "node:path";
-import { c61GeneratedSchemas, c611GeneratedSchemas } from "@mvl/shared";
+import {
+  c61GeneratedSchemas,
+  c611GeneratedSchemas,
+  c612GeneratedSchemas,
+} from "@mvl/shared";
 
 import {
   acousticSceneWindowsArtifactSchema,
@@ -1907,13 +1911,15 @@ const schemas = [
 
 const allSchemas = [
   ...schemas,
-  ...[...c61GeneratedSchemas, ...c611GeneratedSchemas].map(
-    ([name, schema]) => ({
-      fileName: `${name}.schema.json`,
-      id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
-      schema,
-    }),
-  ),
+  ...[
+    ...c61GeneratedSchemas,
+    ...c611GeneratedSchemas,
+    ...c612GeneratedSchemas,
+  ].map(([name, schema]) => ({
+    fileName: `${name}.schema.json`,
+    id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
+    schema,
+  })),
 ];
 for (const entry of allSchemas) {
   const generated = z.toJSONSchema(entry.schema, {

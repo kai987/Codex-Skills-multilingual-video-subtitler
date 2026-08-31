@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-same-audio-reconciliation.schema.json",
+  "title": "machine-c6-1-2-same-audio-reconciliation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-same-audio-reconciliation"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "identityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "leftCandidateId": { "type": "string", "minLength": 1 },
+          "rightCandidateId": { "type": "string", "minLength": 1 },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "SAME_ACOUSTIC_OBSERVATION",
+              "SAME_CORE_DIFFERENT_PROVIDER",
+              "SAME_PROVIDER_DIFFERENT_WINDOW",
+              "SAME_PROVIDER_DIFFERENT_DECODE",
+              "OVERLAPPING_AUDIO_OBSERVATION",
+              "DISTINCT_ACOUSTIC_OBSERVATION",
+              "PROVISIONAL_IDENTITY",
+              "UNKNOWN_CORRELATION"
+            ]
+          }
+        },
+        "required": ["leftCandidateId", "rightCandidateId", "relationship"],
+        "additionalProperties": false
+      }
+    },
+    "observationGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "observationIdentity": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "candidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "voteWeight": { "type": "number", "const": 1 }
+        },
+        "required": ["observationIdentity", "candidateIds", "voteWeight"],
+        "additionalProperties": false
+      }
+    },
+    "sameAudioGroupsReconciled": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "duplicateVotesPrevented": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sameCoreCrossProviderCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "doubleCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "identityHash",
+    "pairs",
+    "observationGroups",
+    "sameAudioGroupsReconciled",
+    "duplicateVotesPrevented",
+    "sameCoreCrossProviderCount",
+    "doubleCount"
+  ],
+  "additionalProperties": false
+}

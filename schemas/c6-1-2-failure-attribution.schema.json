@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-failure-attribution.schema.json",
+  "title": "c6-1-2-failure-attribution",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-failure-attribution" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "category": {
+            "type": "string",
+            "enum": [
+              "RETRIEVAL_FAILURE",
+              "RERANKING_FAILURE",
+              "APPLICATION_GATE_FAILURE",
+              "EVALUATION_UNAVAILABLE",
+              "NO_ERROR_TO_RECOVER",
+              "RECOVERED"
+            ]
+          },
+          "oracleCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "proposedCandidateId": { "type": "string", "minLength": 1 },
+          "selectedCandidateId": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "profileId",
+          "eventId",
+          "category",
+          "oracleCandidateId",
+          "proposedCandidateId",
+          "selectedCandidateId",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "evaluationOnly",
+    "privacy",
+    "machineFreezeHash",
+    "rows"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-c6-1-2-contraction-evaluation.schema.json",
+  "title": "gold-c6-1-2-contraction-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-c6-1-2-contraction-evaluation"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "priorStrong": { "type": "boolean" },
+          "strong": { "type": "boolean" },
+          "machineClass": { "type": "string", "minLength": 1 },
+          "goldClass": {
+            "type": "string",
+            "enum": [
+              "TRUE_HALLUCINATION_REMOVAL",
+              "VALID_SHORTENING",
+              "LEADING_DIALOGUE_DELETION",
+              "TRAILING_DIALOGUE_DELETION",
+              "INTERNAL_DIALOGUE_DELETION",
+              "TEXT_SUBSTITUTION_NOT_CONTRACTION",
+              "UNEVALUABLE"
+            ]
+          },
+          "normalizedGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "blocked": { "type": "boolean" },
+          "catastrophic": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "priorStrong",
+          "strong",
+          "machineClass",
+          "goldClass",
+          "normalizedGain",
+          "blocked",
+          "catastrophic"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "utilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "feature": { "type": "string", "minLength": 1 },
+          "scorableCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "positiveCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "negativeCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "correctDirection": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "wrongDirection": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "auc": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "precisionBlocked": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "catastrophicRecall": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "safeFalseBlockRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "feature",
+          "scorableCount",
+          "positiveCount",
+          "negativeCount",
+          "correctDirection",
+          "wrongDirection",
+          "auc",
+          "precisionBlocked",
+          "catastrophicRecall",
+          "safeFalseBlockRate"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "causalClaim": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "evaluationOnly",
+    "privacy",
+    "machineFreezeHash",
+    "rows",
+    "utilities",
+    "causalClaim"
+  ],
+  "additionalProperties": false
+}

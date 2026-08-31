@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-read-only-proof.schema.json",
+  "title": "c6-1-2-read-only-proof",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-read-only-proof" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceMediaHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceMediaHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "goldHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceReadOnly": { "type": "boolean", "const": true },
+    "goldReadOnly": { "type": "boolean", "const": true },
+    "productionFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relativePath": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["relativePath", "sha256", "size"],
+        "additionalProperties": false
+      }
+    },
+    "productionUnchanged": { "type": "boolean", "const": true },
+    "rawGoldOpenedByVerifier": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "sourceMediaHashBefore",
+    "sourceMediaHashAfter",
+    "sourceBytes",
+    "goldHashBefore",
+    "goldHashAfter",
+    "goldBytes",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "productionFiles",
+    "productionUnchanged",
+    "rawGoldOpenedByVerifier"
+  ],
+  "additionalProperties": false
+}

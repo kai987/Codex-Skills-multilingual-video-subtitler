@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-candidate-correlation-identity.schema.json",
+  "title": "machine-c6-1-2-candidate-correlation-identity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-candidate-correlation-identity"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "sourceMediaHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "sourceAudioStreamIdentity": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "requestedInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "extractedInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "coreInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "sourceSampleStart": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "sourceSampleEnd": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "sampleRate": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "channelMixPolicy": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "coreAudioHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "providerFamily": {
+            "type": "string",
+            "enum": ["CURRENT", "WHISPER", "REAZON"]
+          },
+          "modelId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "modelRevision": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "decodeConfigHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "promptHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "requestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "parentRequestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "windowLineage": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "cacheIdentity": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "identityStatus": {
+            "type": "string",
+            "enum": [
+              "VERIFIED_CORE_PCM_IDENTITY",
+              "PROVISIONAL_INTERVAL_IDENTITY",
+              "UNKNOWN_IDENTITY"
+            ]
+          },
+          "observationIdentity": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "coreIdentity": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "evidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "missing": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "sourceMediaHash",
+          "sourceAudioStreamIdentity",
+          "requestedInterval",
+          "extractedInterval",
+          "coreInterval",
+          "sourceSampleStart",
+          "sourceSampleEnd",
+          "sampleRate",
+          "channelMixPolicy",
+          "coreAudioHash",
+          "providerFamily",
+          "modelId",
+          "modelRevision",
+          "decodeConfigHash",
+          "promptHash",
+          "requestId",
+          "parentRequestId",
+          "windowLineage",
+          "cacheIdentity",
+          "identityStatus",
+          "observationIdentity",
+          "coreIdentity",
+          "evidenceHashes",
+          "missing"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "topKScopeCandidateIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "rows",
+    "topKScopeCandidateIds",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

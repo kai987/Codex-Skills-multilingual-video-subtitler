@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-regression-evidence.schema.json",
+  "title": "c6-1-2-regression-evidence",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-regression-evidence" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceCodeAggregateHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceUnchangedDuringChecks": { "type": "boolean", "const": true },
+    "freshModelInferenceAllowed": { "type": "boolean", "const": false },
+    "rawGoldRead": { "type": "boolean", "const": false },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": [
+              "generate:schemas",
+              "typecheck",
+              "lint",
+              "format:check",
+              "build",
+              "unit",
+              "e2e",
+              "c6-1-targeted",
+              "c6-1-1-targeted",
+              "c6-1-2-targeted",
+              "historical-targeted",
+              "python-ctc-unit",
+              "skill",
+              "c6-1-1-independent-acceptance"
+            ]
+          },
+          "command": { "type": "string", "minLength": 1 },
+          "exitCode": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "logRelativePath": { "type": "string", "minLength": 1 },
+          "logSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "tests": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "passed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "failed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "skipped": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["passed", "failed", "skipped"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "skipReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "stage",
+          "command",
+          "exitCode",
+          "durationMs",
+          "logRelativePath",
+          "logSha256",
+          "tests",
+          "skipReasons"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "sourceCodeAggregateHash",
+    "sourceUnchangedDuringChecks",
+    "freshModelInferenceAllowed",
+    "rawGoldRead",
+    "checks"
+  ],
+  "additionalProperties": false
+}

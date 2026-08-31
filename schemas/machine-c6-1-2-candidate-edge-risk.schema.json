@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-candidate-edge-risk.schema.json",
+  "title": "machine-c6-1-2-candidate-edge-risk",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-candidate-edge-risk"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "completenessHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "leftDistance": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "rightDistance": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "risk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "leftDistance",
+          "rightDistance",
+          "risk",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "completenessHash",
+    "rows"
+  ],
+  "additionalProperties": false
+}

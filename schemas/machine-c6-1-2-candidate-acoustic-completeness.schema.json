@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-candidate-acoustic-completeness.schema.json",
+  "title": "machine-c6-1-2-candidate-acoustic-completeness",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-candidate-acoustic-completeness"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "speechActivityCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "speechBeforeFirstSupportedToken": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "speechAfterLastSupportedToken": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "unsupportedInternalSpeechDuration": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "candidateTokenSupportCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "candidatePronunciationCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "candidateCtcLossPerToken": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "candidateCtcScorability": {
+            "type": "string",
+            "enum": ["SCORABLE", "UNSCORABLE", "UNAVAILABLE"]
+          },
+          "firstTokenToSpeechOnsetGap": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "lastTokenToSpeechOffsetGap": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "requestLeftEdgeDistance": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "requestRightEdgeDistance": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "coreLeftEdgeDistance": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "coreRightEdgeDistance": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "leadingDeletionRisk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "trailingDeletionRisk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "internalDeletionRisk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "adjacentUtteranceContaminationRisk": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "acousticCompletenessStatus": {
+            "type": "string",
+            "enum": [
+              "VERIFIED_COMPLETE",
+              "LIKELY_COMPLETE",
+              "PARTIAL_LEADING",
+              "PARTIAL_TRAILING",
+              "PARTIAL_INTERNAL",
+              "EDGE_TRUNCATED",
+              "ADJACENT_CONTAMINATED",
+              "BOTH_TRUNCATED_AND_CONTAMINATED",
+              "INSUFFICIENT_EVIDENCE",
+              "UNSCORABLE"
+            ]
+          },
+          "evidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "missing": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "speechActivityCoverage",
+          "speechBeforeFirstSupportedToken",
+          "speechAfterLastSupportedToken",
+          "unsupportedInternalSpeechDuration",
+          "candidateTokenSupportCoverage",
+          "candidatePronunciationCoverage",
+          "candidateCtcLossPerToken",
+          "candidateCtcScorability",
+          "firstTokenToSpeechOnsetGap",
+          "lastTokenToSpeechOffsetGap",
+          "requestLeftEdgeDistance",
+          "requestRightEdgeDistance",
+          "coreLeftEdgeDistance",
+          "coreRightEdgeDistance",
+          "leadingDeletionRisk",
+          "trailingDeletionRisk",
+          "internalDeletionRisk",
+          "adjacentUtteranceContaminationRisk",
+          "acousticCompletenessStatus",
+          "evidenceHashes",
+          "missing"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "rows",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

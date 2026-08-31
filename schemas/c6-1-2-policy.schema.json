@@ -1,0 +1,415 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-policy.schema.json",
+  "title": "c6-1-2-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-policy" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+        },
+        "mode": {
+          "type": "string",
+          "const": "OFFLINE_SHADOW_ONLY_KNOWN_DEVELOPMENT_BENCHMARK"
+        },
+        "retrieval": {
+          "type": "object",
+          "properties": {
+            "profiles": {
+              "minItems": 4,
+              "maxItems": 4,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "T0_H2_TOP4",
+                  "T1_RAW_MBR_TOP4",
+                  "T2_H2_RAW_UNION_TOP4",
+                  "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+                ]
+              }
+            },
+            "k": { "type": "number", "const": 4 },
+            "currentConsumesSlot": { "type": "boolean", "const": false },
+            "primary": {
+              "type": "string",
+              "enum": [
+                "T0_H2_TOP4",
+                "T1_RAW_MBR_TOP4",
+                "T2_H2_RAW_UNION_TOP4",
+                "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+              ]
+            },
+            "tieBreak": { "type": "string", "minLength": 1 },
+            "unionSeedPerRanker": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "profiles",
+            "k",
+            "currentConsumesSlot",
+            "primary",
+            "tieBreak",
+            "unionSeedPerRanker"
+          ],
+          "additionalProperties": false
+        },
+        "correlation": {
+          "type": "object",
+          "properties": {
+            "verified": { "type": "string", "minLength": 1 },
+            "provisional": { "type": "string", "minLength": 1 },
+            "unknownIsIndependent": { "type": "boolean", "const": false },
+            "currentVote": { "type": "number", "const": 0 },
+            "observationVote": { "type": "number", "const": 1 }
+          },
+          "required": [
+            "verified",
+            "provisional",
+            "unknownIsIndependent",
+            "currentVote",
+            "observationVote"
+          ],
+          "additionalProperties": false
+        },
+        "completeness": {
+          "type": "object",
+          "properties": {
+            "minimumTokenPosterior": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimumSupportedTokenFraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimumSpeechCoverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maximumUncoveredEdgeSeconds": { "type": "number" },
+            "maximumInternalUncoveredSeconds": { "type": "number" },
+            "minimumRequestEdgeDistance": { "type": "number" },
+            "tokenToleranceSeconds": { "type": "number" },
+            "ctcAloneSelectsWinner": { "type": "boolean", "const": false }
+          },
+          "required": [
+            "minimumTokenPosterior",
+            "minimumSupportedTokenFraction",
+            "minimumSpeechCoverage",
+            "maximumUncoveredEdgeSeconds",
+            "maximumInternalUncoveredSeconds",
+            "minimumRequestEdgeDistance",
+            "tokenToleranceSeconds",
+            "ctcAloneSelectsWinner"
+          ],
+          "additionalProperties": false
+        },
+        "verifier": {
+          "type": "object",
+          "properties": {
+            "mode": { "type": "string", "minLength": 1 },
+            "maximumAudioRequests": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "maximumWindowSeconds": { "type": "number" },
+            "sampleRate": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "channels": { "type": "number", "const": 1 },
+            "precision": { "type": "string", "const": "fp32" },
+            "device": { "type": "string", "const": "cpu" },
+            "network": { "type": "boolean", "const": false },
+            "targetGeneration": { "type": "boolean", "const": false }
+          },
+          "required": [
+            "mode",
+            "maximumAudioRequests",
+            "maximumWindowSeconds",
+            "sampleRate",
+            "channels",
+            "precision",
+            "device",
+            "network",
+            "targetGeneration"
+          ],
+          "additionalProperties": false
+        },
+        "contraction": {
+          "type": "object",
+          "properties": {
+            "strongLengthRatio": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "strongDeletionRatio": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "gate": { "type": "string", "minLength": 1 },
+            "unknown": { "type": "string", "const": "ABSTAIN" },
+            "lengthOnlyBan": { "type": "boolean", "const": false }
+          },
+          "required": [
+            "strongLengthRatio",
+            "strongDeletionRatio",
+            "gate",
+            "unknown",
+            "lengthOnlyBan"
+          ],
+          "additionalProperties": false
+        },
+        "mapping": {
+          "type": "object",
+          "properties": {
+            "method": { "type": "string", "minLength": 1 },
+            "maximumGroupSeconds": { "type": "number" },
+            "minimumGoldTemporalCoverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "goldTextForBinding": { "type": "boolean", "const": false },
+            "allProfilesShareBinding": { "type": "boolean", "const": true }
+          },
+          "required": [
+            "method",
+            "maximumGroupSeconds",
+            "minimumGoldTemporalCoverage",
+            "goldTextForBinding",
+            "allProfilesShareBinding"
+          ],
+          "additionalProperties": false
+        },
+        "features": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "folds": {
+          "type": "object",
+          "properties": {
+            "count": { "type": "number", "const": 5 },
+            "method": { "type": "string", "minLength": 1 },
+            "gapSeconds": { "type": "number" },
+            "randomSplit": { "type": "boolean", "const": false }
+          },
+          "required": ["count", "method", "gapSeconds", "randomSplit"],
+          "additionalProperties": false
+        },
+        "rankers": {
+          "type": "object",
+          "properties": {
+            "profiles": {
+              "minItems": 9,
+              "maxItems": 9,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["L0", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"]
+              }
+            },
+            "pairwise": { "type": "string", "minLength": 1 },
+            "listwise": { "type": "string", "minLength": 1 },
+            "regularization": { "type": "number" },
+            "iterations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "learningRate": { "type": "number" },
+            "equalErrorPairs": { "type": "string", "minLength": 1 },
+            "imputation": { "type": "string", "minLength": 1 },
+            "scaling": { "type": "string", "minLength": 1 },
+            "trainOnlyThresholdCandidates": {
+              "type": "array",
+              "items": { "type": "number" }
+            },
+            "innerMinimumImproved": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "innerMinimumPrecision": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "innerMaximumHarm": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": [
+            "profiles",
+            "pairwise",
+            "listwise",
+            "regularization",
+            "iterations",
+            "learningRate",
+            "equalErrorPairs",
+            "imputation",
+            "scaling",
+            "trainOnlyThresholdCandidates",
+            "innerMinimumImproved",
+            "innerMinimumPrecision",
+            "innerMaximumHarm"
+          ],
+          "additionalProperties": false
+        },
+        "groupConfigurations": {
+          "type": "object",
+          "properties": {
+            "maximumConfigurations": { "type": "number", "const": 16 },
+            "maximumChangedEvents": { "type": "number", "const": 2 },
+            "alwaysRetainCurrent": { "type": "boolean", "const": true },
+            "noSplitMerge": { "type": "boolean", "const": true },
+            "noTimingMutation": { "type": "boolean", "const": true }
+          },
+          "required": [
+            "maximumConfigurations",
+            "maximumChangedEvents",
+            "alwaysRetainCurrent",
+            "noSplitMerge",
+            "noTimingMutation"
+          ],
+          "additionalProperties": false
+        },
+        "gates": {
+          "type": "object",
+          "properties": {
+            "minimumConservation": { "type": "number", "const": 1 },
+            "minimumProvenance": { "type": "number", "const": 1 },
+            "minimumCorrelationCoverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimumCompletenessCoverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maximumDoubleCount": { "type": "number", "const": 0 },
+            "maximumLeakage": { "type": "number", "const": 0 },
+            "minimumChangedEvaluationCoverage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimumRecall4": { "type": "number", "minimum": 0, "maximum": 1 },
+            "minimumPrecision": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maximumHarm": { "type": "number", "minimum": 0, "maximum": 1 },
+            "minimumChangedGroups": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "minimumActiveFolds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "maximumNegativeFolds": { "type": "number", "const": 0 },
+            "maximumCatastrophicRegressions": { "type": "number", "const": 0 },
+            "maximumMaterialDelta": { "type": "number", "const": 0 },
+            "minimumOracleCapture": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "minimumConservation",
+            "minimumProvenance",
+            "minimumCorrelationCoverage",
+            "minimumCompletenessCoverage",
+            "maximumDoubleCount",
+            "maximumLeakage",
+            "minimumChangedEvaluationCoverage",
+            "minimumRecall4",
+            "minimumPrecision",
+            "maximumHarm",
+            "minimumChangedGroups",
+            "minimumActiveFolds",
+            "maximumNegativeFolds",
+            "maximumCatastrophicRegressions",
+            "maximumMaterialDelta",
+            "minimumOracleCapture"
+          ],
+          "additionalProperties": false
+        },
+        "chronology": {
+          "type": "object",
+          "properties": {
+            "machineFreezeBeforeLabels": { "type": "boolean", "const": true },
+            "profilesFreezeBeforeLabels": { "type": "boolean", "const": true },
+            "supervisedOofShadowsAfterTrainLabels": {
+              "type": "boolean",
+              "const": true
+            },
+            "outerTestLabelsForInference": { "type": "boolean", "const": false }
+          },
+          "required": [
+            "machineFreezeBeforeLabels",
+            "profilesFreezeBeforeLabels",
+            "supervisedOofShadowsAfterTrainLabels",
+            "outerTestLabelsForInference"
+          ],
+          "additionalProperties": false
+        },
+        "productionMutation": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "version",
+        "mode",
+        "retrieval",
+        "correlation",
+        "completeness",
+        "verifier",
+        "contraction",
+        "mapping",
+        "features",
+        "folds",
+        "rankers",
+        "groupConfigurations",
+        "gates",
+        "chronology",
+        "productionMutation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "policyHash",
+    "policy"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-acoustic-completeness-runtime.schema.json",
+  "title": "machine-c6-1-2-acoustic-completeness-runtime",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-acoustic-completeness-runtime"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "EXACT_CACHE_ONLY",
+        "BOUNDED_NON_GENERATIVE_FRESH",
+        "CACHE_REPLAY"
+      ]
+    },
+    "modelId": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "modelRevision": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "modelSnapshotHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "runtimeIdentityHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "device": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "requestBudget": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "plannedRequests": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "actualRequests": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "freshVerifierInference": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "verifierCacheHits": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "verifierModelLoads": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "candidateScores": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "asrInference": { "type": "number", "const": 0 },
+    "asrModelLoads": { "type": "number", "const": 0 },
+    "newTranscriptCandidates": { "type": "number", "const": 0 },
+    "networkUsed": { "type": "boolean", "const": false },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "mode",
+    "modelId",
+    "modelRevision",
+    "modelSnapshotHash",
+    "runtimeIdentityHash",
+    "device",
+    "requestBudget",
+    "plannedRequests",
+    "actualRequests",
+    "freshVerifierInference",
+    "verifierCacheHits",
+    "verifierModelLoads",
+    "candidateScores",
+    "asrInference",
+    "asrModelLoads",
+    "newTranscriptCandidates",
+    "networkUsed",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

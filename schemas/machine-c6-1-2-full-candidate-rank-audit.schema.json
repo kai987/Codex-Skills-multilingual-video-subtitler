@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-full-candidate-rank-audit.schema.json",
+  "title": "machine-c6-1-2-full-candidate-rank-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-full-candidate-rank-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "universeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineRiskHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "eligibleEventIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "candidateProvider": {
+            "type": "string",
+            "enum": ["CURRENT", "WHISPER", "REAZON"]
+          },
+          "candidateRole": { "type": "string", "minLength": 1 },
+          "rawMbrRank": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "hierarchicalMbrRank": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "rawMbrRisk": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "hierarchicalMbrRisk": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "rawMbrMargin": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "hierarchicalMbrMargin": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "currentCandidate": { "type": "boolean" },
+          "inclusionStatus": { "type": "string", "minLength": 1 },
+          "provenanceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "structuralEligible": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "candidateProvider",
+          "candidateRole",
+          "rawMbrRank",
+          "hierarchicalMbrRank",
+          "rawMbrRisk",
+          "hierarchicalMbrRisk",
+          "rawMbrMargin",
+          "hierarchicalMbrMargin",
+          "currentCandidate",
+          "inclusionStatus",
+          "provenanceHash",
+          "structuralEligible",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "tieBreak": {
+      "type": "string",
+      "const": "RISK_PROVENANCE_HASH_CANDIDATE_ID"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "universeHash",
+    "baselineRiskHash",
+    "eligibleEventIds",
+    "rows",
+    "runtimeGoldInputCount",
+    "tieBreak"
+  ],
+  "additionalProperties": false
+}

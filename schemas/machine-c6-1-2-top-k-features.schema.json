@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-top-k-features.schema.json",
+  "title": "machine-c6-1-2-top-k-features",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-top-k-features"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureNames": {
+      "minItems": 38,
+      "maxItems": 38,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "rawMbrRank",
+          "hierarchicalMbrRank",
+          "rawMbrRisk",
+          "hierarchicalMbrRisk",
+          "rawMbrMargin",
+          "hierarchicalMbrMargin",
+          "normalizedDistanceToCurrent",
+          "pronunciationDistanceToCurrent",
+          "lengthRatio",
+          "lcsRatio",
+          "prefixRetention",
+          "suffixRetention",
+          "insertionRatio",
+          "deletionRatio",
+          "providerWhisper",
+          "providerReazon",
+          "currentControl",
+          "correlationGroupSize",
+          "independentProviderSupport",
+          "sameAudioDuplicateCount",
+          "uniqueAcousticObservationCount",
+          "providerWindowStability",
+          "lexicalStability",
+          "contextExtensionRisk",
+          "hallucinationRisk",
+          "candidateCtcLossPerToken",
+          "relativeCtcMargin",
+          "tokenSupportCoverage",
+          "speechActivityCoverage",
+          "leadingSpeechGap",
+          "trailingSpeechGap",
+          "completenessStatus",
+          "edgeRisk",
+          "contaminationRisk",
+          "finalSpanLineageStatus",
+          "cueGroupMappingStatus",
+          "candidateProvenanceComplete",
+          "candidateEncodingValid"
+        ]
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "values": {
+            "minItems": 38,
+            "maxItems": 38,
+            "type": "array",
+            "items": { "anyOf": [{ "type": "number" }, { "type": "null" }] }
+          },
+          "missing": {
+            "minItems": 38,
+            "maxItems": 38,
+            "type": "array",
+            "items": { "type": "boolean" }
+          },
+          "evidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "values",
+          "missing",
+          "evidenceHashes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rawTextFeatureCount": { "type": "number", "const": 0 },
+    "goldFeatureCount": { "type": "number", "const": 0 },
+    "datasetSpecificFeatureCount": { "type": "number", "const": 0 },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "featureNames",
+    "rows",
+    "rawTextFeatureCount",
+    "goldFeatureCount",
+    "datasetSpecificFeatureCount",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

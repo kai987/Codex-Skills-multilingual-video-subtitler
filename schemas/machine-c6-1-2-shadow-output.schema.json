@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-shadow-output.schema.json",
+  "title": "machine-c6-1-2-shadow-output",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-shadow-output"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decisionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "subtitlePackagePath": { "type": "string", "minLength": 1 },
+          "assPath": { "type": "string", "minLength": 1 },
+          "srtPath": { "type": "string", "minLength": 1 },
+          "vttPath": { "type": "string", "minLength": 1 },
+          "canonicalTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "canonicalTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "cueCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "appliedEventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "localOnly": { "type": "boolean", "const": true },
+          "finalizationMethod": { "type": "string", "const": "none" }
+        },
+        "required": [
+          "profileId",
+          "subtitlePackagePath",
+          "assPath",
+          "srtPath",
+          "vttPath",
+          "canonicalTextHash",
+          "canonicalTimingHash",
+          "presentationHash",
+          "cueCount",
+          "appliedEventIds",
+          "localOnly",
+          "finalizationMethod"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "productionTextMutation": { "type": "number", "const": 0 },
+    "productionTimingMutation": { "type": "number", "const": 0 },
+    "productionCueCountMutation": { "type": "number", "const": 0 },
+    "oofArtifactsCreatedAfterTrainLabels": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "decisionHash",
+    "profiles",
+    "productionTextMutation",
+    "productionTimingMutation",
+    "productionCueCountMutation",
+    "oofArtifactsCreatedAfterTrainLabels"
+  ],
+  "additionalProperties": false
+}

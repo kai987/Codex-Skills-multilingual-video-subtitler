@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-feature-ablations.schema.json",
+  "title": "c6-1-2-feature-ablations",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-feature-ablations" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "foldId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "eligibleEvents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluatedRankings": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "top1Accuracy": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "top1OracleHitRate": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "mrr": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "ndcg4": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "selectedEvents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedGroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evaluatedChangedGroups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "improved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "regressed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "neutral": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "precision": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "harm": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "coverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "eventSelectionCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "allGroupEvaluationCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "changedGroupEvaluationCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "selectedGroupEvaluationCoverage": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "exactJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "normalizedJointGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "materialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletions": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "activeFolds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "negativeGainFolds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknownGainFolds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "oracleCapture": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "top1OracleCapture": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "top1FullPoolOracleCapture": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "candidateOracleCapture": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "localTop1PositiveGain": { "type": "number" },
+          "localTopKOracleGain": { "type": "number" },
+          "localFullExistingOracleGain": { "type": "number" },
+          "localOracleUnit": {
+            "type": "string",
+            "const": "EVENT_COUNTERFACTUAL_DIAGNOSTIC_NOT_JOINT"
+          },
+          "eligibleGroupCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "profileId",
+          "foldId",
+          "eligibleEvents",
+          "evaluatedRankings",
+          "top1Accuracy",
+          "top1OracleHitRate",
+          "mrr",
+          "ndcg4",
+          "selectedEvents",
+          "selectedGroups",
+          "evaluatedChangedGroups",
+          "improved",
+          "regressed",
+          "neutral",
+          "unknown",
+          "precision",
+          "harm",
+          "coverage",
+          "eventSelectionCoverage",
+          "allGroupEvaluationCoverage",
+          "changedGroupEvaluationCoverage",
+          "selectedGroupEvaluationCoverage",
+          "exactJointGain",
+          "normalizedJointGain",
+          "materialDelta",
+          "catastrophicDeletions",
+          "activeFolds",
+          "negativeGainFolds",
+          "unknownGainFolds",
+          "oracleCapture",
+          "top1OracleCapture",
+          "top1FullPoolOracleCapture",
+          "candidateOracleCapture",
+          "localTop1PositiveGain",
+          "localTopKOracleGain",
+          "localFullExistingOracleGain",
+          "localOracleUnit",
+          "eligibleGroupCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "left": { "type": "string", "minLength": 1 },
+          "right": { "type": "string", "minLength": 1 },
+          "changedFamily": { "type": "string", "minLength": 1 },
+          "normalizedJointGainDifference": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "top1AccuracyDifference": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDifference": { "type": "number" },
+          "causal": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "left",
+          "right",
+          "changedFamily",
+          "normalizedJointGainDifference",
+          "top1AccuracyDifference",
+          "catastrophicDifference",
+          "causal"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "evaluationOnly",
+    "privacy",
+    "machineFreezeHash",
+    "profiles",
+    "comparisons"
+  ],
+  "additionalProperties": false
+}

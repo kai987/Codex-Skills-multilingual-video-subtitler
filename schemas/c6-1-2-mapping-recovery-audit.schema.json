@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-mapping-recovery-audit.schema.json",
+  "title": "c6-1-2-mapping-recovery-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-1-2-mapping-recovery-audit"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mappingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "assignedCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "assignedEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "noMappingEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ambiguousEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "goldTextUsed": { "type": "boolean", "const": false },
+    "scope": {
+      "type": "string",
+      "const": "MACHINE_EVENT_TO_PRODUCTION_CUE_LINEAGE_ONLY"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "mappingHash",
+    "assignedCueCount",
+    "assignedEventCount",
+    "noMappingEventCount",
+    "ambiguousEventCount",
+    "goldTextUsed",
+    "scope"
+  ],
+  "additionalProperties": false
+}

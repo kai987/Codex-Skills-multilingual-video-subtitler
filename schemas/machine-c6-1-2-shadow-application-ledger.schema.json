@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-shadow-application-ledger.schema.json",
+  "title": "machine-c6-1-2-shadow-application-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-shadow-application-ledger"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profileId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["APPLIED_SHADOW_ONLY", "KEPT_CURRENT", "BLOCKED"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "profileId",
+          "eventId",
+          "candidateId",
+          "status",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "novelApplicationCount": { "type": "number", "const": 0 },
+    "productionMutationCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "rows",
+    "novelApplicationCount",
+    "productionMutationCount"
+  ],
+  "additionalProperties": false
+}

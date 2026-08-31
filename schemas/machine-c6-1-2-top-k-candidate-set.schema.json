@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-top-k-candidate-set.schema.json",
+  "title": "machine-c6-1-2-top-k-candidate-set",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-top-k-candidate-set"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rankHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "correlationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "k": { "type": "number", "const": 4 },
+    "currentOccupiesAlternativeSlot": { "type": "boolean", "const": false },
+    "sets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "enum": [
+              "T0_H2_TOP4",
+              "T1_RAW_MBR_TOP4",
+              "T2_H2_RAW_UNION_TOP4",
+              "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+            ]
+          },
+          "eventId": { "type": "string", "minLength": 1 },
+          "currentCandidateId": { "type": "string", "minLength": 1 },
+          "alternativeIds": {
+            "maxItems": 4,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "profile",
+          "eventId",
+          "currentCandidateId",
+          "alternativeIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "uniqueCandidateIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "rankHash",
+    "correlationHash",
+    "k",
+    "currentOccupiesAlternativeSlot",
+    "sets",
+    "uniqueCandidateIds",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

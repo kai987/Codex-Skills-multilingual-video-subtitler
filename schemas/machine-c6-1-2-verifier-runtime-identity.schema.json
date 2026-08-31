@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-1-2-verifier-runtime-identity.schema.json",
+  "title": "machine-c6-1-2-verifier-runtime-identity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-1-2-verifier-runtime-identity"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "modelId": { "type": "string", "minLength": 1 },
+    "modelRevision": { "type": "string", "minLength": 1 },
+    "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "modelFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["name", "sha256", "bytes"],
+        "additionalProperties": false
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "python": { "type": "string", "minLength": 1 },
+        "torch": { "type": "string", "minLength": 1 },
+        "transformers": { "type": "string", "minLength": 1 },
+        "numpy": { "type": "string", "minLength": 1 },
+        "scipy": { "type": "string", "minLength": 1 },
+        "device": { "type": "string", "const": "cpu" },
+        "precision": { "type": "string", "const": "fp32" },
+        "threads": { "type": "number", "const": 1 }
+      },
+      "required": [
+        "python",
+        "torch",
+        "transformers",
+        "numpy",
+        "scipy",
+        "device",
+        "precision",
+        "threads"
+      ],
+      "additionalProperties": false
+    },
+    "workerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "importedWorkerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "networkUsed": { "type": "boolean", "const": false },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "modelId",
+    "modelRevision",
+    "modelSnapshotHash",
+    "modelFiles",
+    "runtime",
+    "workerHash",
+    "importedWorkerHash",
+    "runtimeIdentityHash",
+    "networkUsed",
+    "runtimeGoldInputCount"
+  ],
+  "additionalProperties": false
+}

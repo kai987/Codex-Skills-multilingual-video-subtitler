@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-c6-1-2-top-k-candidate-labels.schema.json",
+  "title": "gold-c6-1-2-top-k-candidate-labels",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-c6-1-2-top-k-candidate-labels"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "privacy": { "type": "string", "const": "LOCAL_ONLY" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mappingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldBindingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "groupId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "foldId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "current": { "type": "boolean" },
+          "eligible": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "baselineExactError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "candidateExactError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "baselineNormalizedError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "candidateNormalizedError": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "normalizedGain": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "exactGain": { "anyOf": [{ "type": "number" }, { "type": "null" }] },
+          "materialDelta": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "catastrophicDeletion": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "classification": {
+            "type": "string",
+            "enum": ["IMPROVED", "REGRESSED", "NEUTRAL", "UNEVALUABLE"]
+          },
+          "labelClass": {
+            "type": "string",
+            "enum": [
+              "ORACLE_BEST",
+              "IMPROVES_CURRENT",
+              "EQUIVALENT_TO_CURRENT",
+              "REGRESSES_FROM_CURRENT",
+              "CATASTROPHIC_REGRESSION",
+              "UNEVALUABLE"
+            ]
+          },
+          "labelRole": {
+            "type": "string",
+            "const": "DIAGNOSTIC_LOCAL_COUNTERFACTUAL"
+          },
+          "topKProfiles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "T0_H2_TOP4",
+                "T1_RAW_MBR_TOP4",
+                "T2_H2_RAW_UNION_TOP4",
+                "T3_PROVIDER_DIVERSE_CORRELATION_DEDUP_TOP4"
+              ]
+            }
+          },
+          "oracleRank": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "candidateId",
+          "eventId",
+          "groupId",
+          "foldId",
+          "current",
+          "eligible",
+          "reasons",
+          "baselineExactError",
+          "candidateExactError",
+          "baselineNormalizedError",
+          "candidateNormalizedError",
+          "normalizedGain",
+          "exactGain",
+          "materialDelta",
+          "catastrophicDeletion",
+          "classification",
+          "labelClass",
+          "labelRole",
+          "topKProfiles",
+          "oracleRank"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rawGoldTextIncluded": { "type": "boolean", "const": false },
+    "labelsFedToRuntimeInference": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "evaluationOnly",
+    "privacy",
+    "machineFreezeHash",
+    "mappingHash",
+    "goldBindingHash",
+    "goldIdentityHash",
+    "labels",
+    "rawGoldTextIncluded",
+    "labelsFedToRuntimeInference"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-1-2-feature-freeze.schema.json",
+  "title": "c6-1-2-feature-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-1-2-feature-freeze" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.1.2-top-k-reranking-acoustic-completeness-v1"
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "featureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mappingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "topKHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldRead": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "semanticHash",
+    "featureHash",
+    "mappingHash",
+    "foldHash",
+    "topKHash",
+    "policyHash",
+    "goldRead"
+  ],
+  "additionalProperties": false
+}
