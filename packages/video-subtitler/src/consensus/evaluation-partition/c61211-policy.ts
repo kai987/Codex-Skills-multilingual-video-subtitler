@@ -13,6 +13,11 @@ import {
 export { hash, demand, fraction, counts };
 export const C61211_PARTITION_POLICY = {
   structure: C6121_POLICY.structure,
+  machineNodeOrdering:
+    "MIN_THEN_MAX_ORIGINAL_PRODUCTION_CUE_INDEX_THEN_GROUP_ID",
+  goldNodeOrdering: "START_THEN_END_THEN_CUE_ID",
+  blockMembership:
+    "CONSECUTIVE_ATOMIC_MACHINE_AND_GOLD_RANGES_IN_ONE_E2_COMPONENT",
   modes: {
     D0_NO_CUT: {
       maximumWeakBridge: 0,
@@ -50,6 +55,8 @@ export const C61211_PARTITION_POLICY = {
   residualNodeRetainedRuleEnforced: true,
   machineGroupAtomic: true,
   goldCueAtomic: true,
+  residualHandling:
+    "EXPLICIT_UNEVALUABLE_NODE_CONTAINER_WITH_INTERNAL_EDGES_AND_INCIDENT_CUTS_ACCOUNTED",
 } as const;
 export const C61211_COVERAGE_POLICY = {
   minimumCoverage: 0.8,
@@ -68,6 +75,9 @@ export const C61211_COVERAGE_POLICY = {
     "FROZEN_TOP_K_EVENT_WITH_CURRENT_AND_STRUCTURALLY_LEGAL_EXISTING_ALTERNATIVE",
   profileSelectionUsed: false,
   globalGoldCoverageUsed: false,
+  preTextCoverageSnapshotRequired: true,
+  profileEvidenceCoverage:
+    "SEPARATE_CHANGED_BLOCK_AND_CHANGED_MACHINE_GROUP_COVERAGE_WITH_NULL_ZERO_DENOMINATORS",
 } as const;
 export const C61211_ROUTE_POLICY = {
   safeProfile: {
@@ -99,6 +109,13 @@ export const C61211_ROUTE_POLICY = {
 export const C61211_POLICY = {
   version: C61211_VERSION,
   primaryEvaluator: "E3_CONSTRAINED_MONOTONIC_PARTITIONED_SUPERGROUP",
+  evaluatorDefinitions: {
+    E0: "EXACT_FROZEN_C6_1_2_LEGACY_NUMERIC_REPLAY_DIAGNOSTIC_ONLY",
+    E1: "UNCHANGED_C6_1_1_HISTORICAL_BIPARTITE_POLICY_DIAGNOSTIC_ONLY",
+    E2: "UNCHANGED_C6_1_2_1_STRICT_POSITIVE_OVERLAP_SUPERGROUP_BASELINE",
+    E3: "D1_CONSERVATIVE_MONOTONIC_PARTITIONED_SUPERGROUP_PRIMARY",
+    E4: "WHOLE_BILATERAL_E2_COMPONENT_PROFILE_SCORE_ONLY_NEVER_TRAIN_OR_ROUTE",
+  },
   partition: C61211_PARTITION_POLICY,
   coverage: C61211_COVERAGE_POLICY,
   route: C61211_ROUTE_POLICY,

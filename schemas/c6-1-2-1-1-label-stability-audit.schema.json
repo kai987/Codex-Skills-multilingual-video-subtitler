@@ -70,6 +70,22 @@
       "minimum": 0,
       "maximum": 9007199254740991
     },
+    "disagreementReasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reason": { "type": "string", "minLength": 1 },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["reason", "count"],
+        "additionalProperties": false
+      }
+    },
     "rows": {
       "type": "array",
       "items": {
@@ -101,6 +117,10 @@
           },
           "catastrophicAgreement": {
             "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
           }
         },
         "required": [
@@ -116,7 +136,8 @@
           "normalizedGainDirectionAgreement",
           "exactGainDirectionAgreement",
           "materialDirectionAgreement",
-          "catastrophicAgreement"
+          "catastrophicAgreement",
+          "reasons"
         ],
         "additionalProperties": false
       }
@@ -139,6 +160,7 @@
     "exactGainDirectionAgreementCount",
     "materialDirectionAgreementCount",
     "catastrophicAgreementCount",
+    "disagreementReasons",
     "rows"
   ],
   "additionalProperties": false

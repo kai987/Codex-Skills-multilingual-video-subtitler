@@ -181,6 +181,14 @@ for (const [subdirectory, result] of [
 const primaryIntegrity = auditC61211Conservation(input, d1.map, d1.graph),
   cuts = auditC61211Cuts(d1.map, d1.graph);
 demand(primaryIntegrity.passed, "C61211_PRIMARY_PARTITION_INTEGRITY_FAILED");
+// Freeze the complete structural gate before dialogue decoding. Gold character
+// coverage is still null and is added only to the post-freeze diagnostic copy.
+const preTextCoverage = coverageC61211(frozen, d1.map, scope, timing.rows);
+await writeC61211(path.join(directory, "pre-text"), preTextCoverage);
+await writeC61211(
+  path.join(directory, "pre-text"),
+  coverageC61211Gate(preTextCoverage, primaryIntegrity),
+);
 const freeze = await freezeC61211(directory, prepared.baseline, timing, d1.map);
 await writeC61211(directory, freeze);
 process.stdout.write(

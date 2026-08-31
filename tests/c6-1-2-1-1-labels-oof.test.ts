@@ -135,6 +135,14 @@ describe("C6.1.2.1.1 partition counterfactual labels and unchanged OOF", () => {
     expect(audit.normalizedGainDirectionAgreementCount).toBe(
       audit.commonEvaluableCount,
     );
+    expect(
+      audit.rows.find((r) => r.candidateId === row.candidateId)?.reasons,
+    ).toContain("LABEL_CLASS_OR_CLASSIFICATION_CHANGED");
+    expect(
+      audit.disagreementReasons.some(
+        (r) => r.reason === "MATERIAL_DIRECTION_CHANGED" && r.count === 1,
+      ),
+    ).toBe(true);
   });
   it("replays 45 models deterministically with identical feature/fold/profile/grid hashes", () => {
     const { f, p, labels, gold } = fixture(),

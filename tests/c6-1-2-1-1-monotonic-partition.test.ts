@@ -187,6 +187,22 @@ describe("C6.1.2.1.1 exact constrained monotone partition", () => {
       p.map.mode,
     );
     expect(reversedSolution.component).toEqual(p.map.components[0]);
+    const edgePermutation = {
+      ...p.graph,
+      edgeLedger: {
+        ...p.graph.edgeLedger,
+        rows: [...p.graph.edgeLedger.rows].reverse(),
+      },
+    };
+    expect(
+      solveC61211Component(
+        f.input,
+        edgePermutation,
+        parent,
+        p.candidates.rows.map((r) => r.block).reverse(),
+        p.map.mode,
+      ).component,
+    ).toEqual(p.map.components[0]);
   });
   it("is invariant to Gold text changes by rejecting text at its DTO boundary", () => {
     const f = c61211WeakChain(),

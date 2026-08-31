@@ -24,7 +24,11 @@ import {
 } from "../top-k/fixed-group-evaluation.js";
 import { editDistance, chars } from "../top-k/c612-structural.js";
 import { c612Defined } from "../top-k/c612-policy.js";
-import { c61211Artifact, fraction } from "./c61211-policy.js";
+import {
+  c61211Artifact,
+  fraction,
+  validateC61211Artifact,
+} from "./c61211-policy.js";
 import { unique, type C61211Graph } from "./component-inventory.js";
 const sign = (n: number | null) => (n === null ? null : Math.sign(n));
 export function wholeC61211(input: {
@@ -141,6 +145,9 @@ export function biasC61211(
   cuts: z.infer<typeof c61211CutsSchema>,
   stability: z.infer<typeof c61211StabilitySchema>,
 ) {
+  // Direct callers cannot inject a self-hash-stale E4 payload to alter the
+  // audit denominator. Persisted-run validators also reconstruct E4 in full.
+  validateC61211Artifact(whole);
   // Agreement denominators include changed, wholly evaluated component/profile
   // pairs only; unchanged zeros cannot inflate apparent agreement.
   const changed = whole.rows.filter((r) => r.whole.changed),

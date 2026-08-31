@@ -524,6 +524,7 @@ export const c61211StabilitySchema = art("c6-1-2-1-1-label-stability-audit", {
   exactGainDirectionAgreementCount: count,
   materialDirectionAgreementCount: count,
   catastrophicAgreementCount: count,
+  disagreementReasons: reasonCounts,
   rows: z.array(
     z
       .object({
@@ -540,6 +541,7 @@ export const c61211StabilitySchema = art("c6-1-2-1-1-label-stability-audit", {
         exactGainDirectionAgreement: z.boolean().nullable(),
         materialDirectionAgreement: z.boolean().nullable(),
         catastrophicAgreement: z.boolean().nullable(),
+        reasons: ids,
       })
       .strict(),
   ),

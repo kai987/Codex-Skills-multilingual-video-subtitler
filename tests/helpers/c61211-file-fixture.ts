@@ -28,7 +28,11 @@ import {
   auditC61211Cuts,
   auditC61211Residuals,
 } from "../../packages/video-subtitler/src/consensus/evaluation-partition/partition-audits.js";
-import { reachableC61211Scope } from "../../packages/video-subtitler/src/consensus/evaluation-partition/reachable-coverage.js";
+import {
+  reachableC61211Scope,
+  coverageC61211,
+  coverageC61211Gate,
+} from "../../packages/video-subtitler/src/consensus/evaluation-partition/reachable-coverage.js";
 import { trainingC61211Contract } from "../../packages/video-subtitler/src/consensus/evaluation-partition/same-feature-oof-retrainer.js";
 export async function c61211FileFixture() {
   const root = await mkdtemp(path.join(os.tmpdir(), "c61211-test-")),
@@ -107,6 +111,12 @@ export async function c61211FileFixture() {
     auditC61211Residuals(p.map),
   ])
     await writeC61211(directory, value);
+  const preText = coverageC61211(f.frozen, p.map, scope, timing.rows);
+  await writeC61211(path.join(directory, "pre-text"), preText);
+  await writeC61211(
+    path.join(directory, "pre-text"),
+    coverageC61211Gate(preText, integrity),
+  );
   const freeze = await freezeC61211(directory, baseline, timing, p.map);
   await writeC61211(directory, freeze);
   return {

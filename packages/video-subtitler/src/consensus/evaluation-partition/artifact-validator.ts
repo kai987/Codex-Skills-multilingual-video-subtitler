@@ -335,6 +335,21 @@ export async function validateC61211Run(
     await read("c6-1-2-1-1-reachable-scope", s.c61211ScopeSchema),
     "C61211_FROZEN_REACHABILITY_SCOPE_DRIFT",
   );
+  const preText = coverageC61211(frozen, map, scope, timing.rows);
+  sameC61211(
+    preText,
+    await read(
+      "c6-1-2-1-1-reachable-coverage-audit",
+      s.c61211CoverageSchema,
+      "pre-text",
+    ),
+    "C61211_PRE_TEXT_COVERAGE_DRIFT",
+  );
+  sameC61211(
+    coverageC61211Gate(preText, auditC61211Conservation(input, map, d1.graph)),
+    await read("c6-1-2-1-1-coverage-gate-v2", s.c61211GateSchema, "pre-text"),
+    "C61211_PRE_TEXT_GATE_DRIFT",
+  );
   passed(
     "exact-D0-D1-D2-partitions-cuts-residuals-and-conservation",
     String(d1.map.blocks.length) +

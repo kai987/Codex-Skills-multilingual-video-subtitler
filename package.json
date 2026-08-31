@@ -142,6 +142,7 @@
     "replay:c6-1-2-1-1": "tsx --tsconfig tsconfig.base.json scripts/evaluate-c6-1-2-1-1-partitions.ts",
     "validate:c6-1-2-1-1": "tsx --tsconfig tsconfig.base.json scripts/validate-c6-1-2-1-1.ts",
     "regressions:c6-1-2-1-1": "tsx --tsconfig tsconfig.base.json scripts/run-c6-1-2-1-1-regressions.ts",
+    "report:c6-1-2-1-1": "tsx --tsconfig tsconfig.base.json scripts/report-c6-1-2-1-1.ts",
     "refresh:c6-0-1-1-control": "tsx scripts/refresh-c6-0-1-1-control-artifacts.ts",
     "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
     "verify:c4-persistent-worker": "tsx scripts/verify-c4-persistent-worker.ts",

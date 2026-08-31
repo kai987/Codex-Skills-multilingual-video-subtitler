@@ -9,7 +9,7 @@ import type { C612FrozenInputs } from "../top-k/c612-frozen-inputs.js";
 import type { C612EvaluationCue } from "../top-k/fixed-group-evaluation.js";
 import { rebindC6121CandidateLabels } from "../evaluation-recovery/c6121-label-rebinding.js";
 import { c612Defined } from "../top-k/c612-policy.js";
-import { c61211Artifact, demand } from "./c61211-policy.js";
+import { c61211Artifact, demand, counts } from "./c61211-policy.js";
 import { scoringC61211Adapter } from "./scoring-adapter.js";
 export function rebindC61211Labels(
   frozen: C612FrozenInputs,
@@ -78,6 +78,30 @@ export function stabilityC61211(old: C6121Labels, fresh: C61211Labels) {
       catastrophicAgreement: common
         ? a.catastrophicDeletion === b.catastrophicDeletion
         : null,
+      reasons: common
+        ? [
+            ...(a.labelClass !== b.labelClass ||
+            a.classification !== b.classification
+              ? ["LABEL_CLASS_OR_CLASSIFICATION_CHANGED"]
+              : []),
+            ...(sign(a.normalizedGain) !== sign(b.normalizedGain)
+              ? ["NORMALIZED_GAIN_DIRECTION_CHANGED"]
+              : []),
+            ...(sign(a.exactGain) !== sign(b.exactGain)
+              ? ["EXACT_GAIN_DIRECTION_CHANGED"]
+              : []),
+            ...(sign(a.materialDelta) !== sign(b.materialDelta)
+              ? ["MATERIAL_DIRECTION_CHANGED"]
+              : []),
+            ...(a.catastrophicDeletion !== b.catastrophicDeletion
+              ? ["CATASTROPHIC_FLAG_CHANGED"]
+              : []),
+          ]
+        : !a.eligible && b.eligible
+          ? ["NEWLY_RECOVERED_LABEL"]
+          : a.eligible && !b.eligible
+            ? ["PREVIOUSLY_EVALUABLE_NOW_LOST"]
+            : ["STILL_UNEVALUABLE"],
     };
   });
   return c61211StabilitySchema.parse(
@@ -110,6 +134,11 @@ export function stabilityC61211(old: C6121Labels, fresh: C61211Labels) {
       catastrophicAgreementCount: rows.filter(
         (r) => r.catastrophicAgreement === true,
       ).length,
+      disagreementReasons: counts(
+        rows
+          .filter((r) => r.oldEligible && r.newEligible)
+          .flatMap((r) => r.reasons),
+      ),
       rows,
     }),
   );

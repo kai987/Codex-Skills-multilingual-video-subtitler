@@ -159,7 +159,7 @@ async function flow() {
     bytes,
   };
 }
-describe("C6.1.2.1.1 actual synthetic file-barrier through terminal-route flow", () => {
+describe("C6.1.2.1.1 actual synthetic file-barrier through terminal recovery flow", () => {
   it("executes strict persisted barriers, numeric-only 45-model retrain, joint scoring and offline research shadows", async () => {
     const r = await flow();
     expect(r.trained.models.models).toHaveLength(45);

@@ -88,7 +88,7 @@ const specs: Spec[] = [
   ]),
   targeted("c6-1-2-1-1-targeted", [
     ...names("c6-1-2-1-1-"),
-    "tests/e2e/c6-1-2-1-1-monotonic-partition-flow.test.ts",
+    "tests/e2e/c6-1-2-1-1-monotonic-partition-recovery-flow.test.ts",
   ]),
   targeted("historical-targeted", [
     ...tests
@@ -101,7 +101,7 @@ const specs: Spec[] = [
     "tests/e2e/c6-1-1-selective-mbr-flow.test.ts",
     "tests/e2e/c6-1-2-top-k-reranking-investigation-flow.test.ts",
     "tests/e2e/c6-1-2-1-evaluation-supergroup-recovery-flow.test.ts",
-    "tests/e2e/c6-1-2-1-1-monotonic-partition-flow.test.ts",
+    "tests/e2e/c6-1-2-1-1-monotonic-partition-recovery-flow.test.ts",
   ]),
   {
     stage: "python-ctc-unit",

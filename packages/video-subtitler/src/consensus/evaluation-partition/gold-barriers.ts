@@ -71,6 +71,8 @@ export const C61211_REQUIRED_FREEZE_FILES = [
   "c6-1-2-1-1-partition-conservation-audit.json",
   "c6-1-2-1-1-reachable-scope.json",
   "c6-1-2-1-1-training-contract-parity.json",
+  "pre-text/c6-1-2-1-1-reachable-coverage-audit.json",
+  "pre-text/c6-1-2-1-1-coverage-gate-v2.json",
 ] as const;
 export async function freezeC61211(
   directory: string,

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { c612RankingSchema } from "@mvl/shared";
+import { c612RankingSchema, c61211WholeSchema } from "@mvl/shared";
 import { c61211Fixture, c61211Geometry } from "./helpers/c61211-fixture.js";
 import { SHA } from "./helpers/c612-fixture.js";
+import { c612Defined } from "../packages/video-subtitler/src/consensus/top-k/c612-policy.js";
 import { partitionC61211 } from "../packages/video-subtitler/src/consensus/evaluation-partition/monotonic-partition-solver.js";
 import {
   rebindC61211Labels,
@@ -18,6 +19,8 @@ import {
   auditC61211Cuts,
 } from "../packages/video-subtitler/src/consensus/evaluation-partition/partition-audits.js";
 import {
+  c61211Artifact,
+  c61211Body,
   hash,
   validateC61211Artifact,
 } from "../packages/video-subtitler/src/consensus/evaluation-partition/c61211-policy.js";
@@ -132,5 +135,35 @@ describe("C6.1.2.1.1 whole-component diagnostics do not replace the partition ev
     expect(bias.wholeComponentScoresUsedForRoute).toBe(false);
     for (const value of [whole, bias])
       expect(() => validateC61211Artifact(value)).not.toThrow();
+  });
+  it("reports direction disagreement with explicit component/pair denominators without routing on E4 gains", () => {
+    const r = fixture(),
+      row = c612Defined(r.whole.rows[0]);
+    // A synthetic diagnostic pair, not an observed run or an altered candidate.
+    row.whole.changed = true;
+    row.normalizedDirectionAgreement = false;
+    row.materialDirectionAgreement = false;
+    row.catastrophicAgreement = false;
+    const changedWhole = c61211WholeSchema.parse(
+      c61211Artifact(
+        "c6-1-2-1-1-whole-component-diagnostic-evaluation",
+        c61211Body(r.whole),
+      ),
+    );
+    const bias = biasC61211(
+      r.p.map,
+      changedWhole,
+      auditC61211Conservation(r.f.input, r.p.map, r.p.graph),
+      auditC61211Cuts(r.p.map, r.p.graph),
+      stabilityC61211(
+        rebindC6121CandidateLabels(r.f.frozen, r.p.graph.map, r.gold, SHA),
+        r.labels,
+      ),
+    );
+    expect(bias.comparedProfileComponents).toBe(1);
+    expect(bias.gainDirectionDisagreementCount).toBe(1);
+    expect(bias.disagreementComponentIds).toEqual([row.parentE2SupergroupId]);
+    expect(bias.passed).toBe(true);
+    expect(bias.wholeComponentScoresUsedForRoute).toBe(false);
   });
 });
