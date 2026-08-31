@@ -52,6 +52,7 @@ export interface C60114LocalRuntimeInput {
   outputDirectory: string;
   reazonWorkerPath?: string;
   exactSampleExtraction?: boolean;
+  retryOnFailure?: boolean;
 }
 
 export async function createC60114LocalProbeRuntime(
@@ -245,6 +246,7 @@ export async function createC60114LocalProbeRuntime(
     },
   ];
   const whisper = new WhisperCppWorkerPool({
+    retryOnFailure: input.retryOnFailure,
     mode: "persistent",
     stateIsolation: "require-safe",
   });

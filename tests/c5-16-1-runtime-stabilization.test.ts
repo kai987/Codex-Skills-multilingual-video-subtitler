@@ -391,6 +391,24 @@ async function runMode(
 }
 
 describe("C5.16.1 persistent worker state isolation", () => {
+  it("C601141 honors an explicit no-retry budget without restart or fallback", async () => {
+    const fixture = mockFactory({ failFirstRequest: true });
+    const pool = new WhisperCppWorkerPool({
+      mode: "persistent",
+      stateIsolation: "require-safe",
+      factory: fixture.factory,
+      retryOnFailure: false,
+    });
+    await expect(runMode(pool, "bounded-no-retry", false)).rejects.toThrow(
+      "retry explicitly disabled",
+    );
+    expect(fixture.state.created).toHaveLength(1);
+    expect(pool.metrics().workerRestartCount).toBe(0);
+    expect(pool.metrics().fallbackProcessCount).toBe(0);
+    expect(pool.metrics().requests[0]?.retryCount).toBe(0);
+    expect(fixture.state.created[0]?.closed).toBe(true);
+    await pool.close();
+  });
   it("keeps no-VAD to VAD, VAD to VAD, and no-VAD to no-VAD efficient", async () => {
     const fixture = mockFactory();
     const pool = new WhisperCppWorkerPool({

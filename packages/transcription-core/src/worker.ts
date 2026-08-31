@@ -1073,6 +1073,7 @@ export class WhisperCppWorkerPool {
   readonly requestedStateIsolation: WorkerStateIsolationMode;
   readonly stateIsolationStrategy: WorkerStateIsolationStrategy;
   readonly #factory: WhisperWorkerFactory;
+  readonly #retryOnFailure: boolean;
   readonly #workers = new Map<string, WhisperWorker>();
   readonly #allWorkers: WhisperWorker[] = [];
   readonly #workerStates = new Map<WhisperWorker, ManagedWorkerState>();
@@ -1093,9 +1094,13 @@ export class WhisperCppWorkerPool {
       mode?: WhisperExecutionMode | undefined;
       factory?: WhisperWorkerFactory | undefined;
       stateIsolation?: WorkerStateIsolationMode | undefined;
+      /** Bounded-evidence jobs account for every dispatch; other callers keep
+       * the established retry behavior unless they explicitly opt out. */
+      retryOnFailure?: boolean | undefined;
     } = {},
   ) {
     this.#factory = options.factory ?? defaultWhisperWorkerFactory;
+    this.#retryOnFailure = options.retryOnFailure ?? true;
     this.requestedMode = options.mode ?? "auto";
     this.requestedStateIsolation = options.stateIsolation ?? "require-safe";
     this.stateIsolationStrategy =
@@ -1366,6 +1371,37 @@ export class WhisperCppWorkerPool {
       });
       return result;
     } catch (firstError) {
+      if (!this.#retryOnFailure) {
+        await worker.close();
+        this.#workers.delete(routeKey);
+        this.#requests.push({
+          requestId,
+          batchKey,
+          cacheHit: false,
+          mode,
+          status: "failed",
+          retryCount: 0,
+          fallbackMode: null,
+          durationSeconds: (performance.now() - started) / 1000,
+          error:
+            firstError instanceof Error
+              ? firstError.message
+              : String(firstError),
+          vadMode,
+          profile,
+          workerId: state.workerId,
+          contextGeneration: state.contextGeneration,
+          stateIsolationAction: isolationAction,
+        });
+        throw new AppError(
+          "Whisper request failed; retry explicitly disabled.",
+          {
+            code: "TRANSCRIPTION_FAILED",
+            exitCode: 4,
+            details: { requestId, retryCount: 0, reason: String(firstError) },
+          },
+        );
+      }
       state.restartCount += 1;
       this.#workerRestartCount += 1;
       await worker.close();
