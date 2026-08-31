@@ -26,9 +26,13 @@ import {
   c60113CorrectionInstrumentationSchema,
   type C60113CorrectionInstrumentation,
   type C60113WorkspaceExtension,
+  type C60114WorkspaceExtension,
 } from "@mvl/shared";
 import { assertC60113WorkspaceExtension } from "./c60113-review-workspace.js";
 import { c60113WorkspaceJavascript } from "./c60113-review-workspace-ui.js";
+import { assertC60114WorkspaceExtension } from "./c60114-review-workspace.js";
+import { c60114WorkspaceJavascript } from "./c60114-review-workspace-ui.js";
+import { machineQualitySemanticHash } from "../machine-quality/evidence-correlation.js";
 
 export const C60112_REVIEW_WORKSPACE_VERSION =
   "c6.0.1.12-review-workspace-v1" as const;
@@ -119,6 +123,7 @@ export interface C60112ReviewWorkspaceData {
   regions: C60112WorkspaceRegion[];
   candidateBundles: C60112WorkspaceCandidateBundle[];
   regionReviewV2?: C60113WorkspaceExtension;
+  sourceTargetReviewV3?: C60114WorkspaceExtension;
 }
 
 export interface C60112ReviewDecisionRequest {
@@ -433,6 +438,7 @@ export function assertC60112ReviewWorkspaceData(
   data: C60112ReviewWorkspaceData,
 ): void {
   assertC60113WorkspaceExtension(data);
+  assertC60114WorkspaceExtension(data);
   if (data.workspaceVersion !== C60112_REVIEW_WORKSPACE_VERSION) {
     throw new Error("Unsupported review workspace version.");
   }
@@ -542,7 +548,13 @@ export function assertC60112ReviewWorkspaceData(
     }
   }
   for (const item of data.items) {
-    if (!regionIds.has(item.regionId)) {
+    if (
+      !regionIds.has(item.regionId) &&
+      !(
+        item.regionId === "" &&
+        data.sourceTargetReviewV3?.unresolvedItemIds.includes(item.reviewItemId)
+      )
+    ) {
       throw new Error(
         `${item.reviewItemId} references unknown region ${item.regionId}.`,
       );
@@ -720,7 +732,11 @@ export async function writeC60112ReviewWorkspace(input: {
     atomicWriteText(
       javascriptPath,
       reviewWorkspaceJavascript() +
-        (input.reviewData.regionReviewV2 ? c60113WorkspaceJavascript() : ""),
+        (input.reviewData.sourceTargetReviewV3
+          ? c60114WorkspaceJavascript()
+          : input.reviewData.regionReviewV2
+            ? c60113WorkspaceJavascript()
+            : ""),
     ),
     atomicWriteText(cssPath, reviewWorkspaceCss()),
     atomicWriteText(
@@ -2311,7 +2327,7 @@ export async function startC60112ReviewWorkspaceServer(input: {
   const data = await loadWorkspaceData(paths);
   if (
     input.expectedWorkspaceDataHash !== undefined &&
-    sha256Value(data) !== input.expectedWorkspaceDataHash
+    machineQualitySemanticHash(data) !== input.expectedWorkspaceDataHash
   ) {
     throw new Error("REVIEW_WORKSPACE_DATA_FREEZE_HASH_MISMATCH");
   }

@@ -97,6 +97,7 @@ export async function buildC60112ReviewAudio(input: {
   outputDirectory: string;
   generatedAt: string;
   ffmpegPath?: string;
+  audioStreamIndex?: number;
 }): Promise<C60112ReviewAudioManifest> {
   const sourceStat = await lstat(input.sourcePath);
   if (!sourceStat.isFile() || sourceStat.isSymbolicLink()) {
@@ -150,6 +151,9 @@ export async function buildC60112ReviewAudio(input: {
         bounds.start.toFixed(6),
         "-i",
         input.sourcePath,
+        ...(input.audioStreamIndex === undefined
+          ? []
+          : ["-map", `0:${input.audioStreamIndex}`]),
         "-t",
         (bounds.end - bounds.start).toFixed(6),
         "-vn",
