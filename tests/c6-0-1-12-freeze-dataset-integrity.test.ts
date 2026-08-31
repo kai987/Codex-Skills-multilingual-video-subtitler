@@ -463,6 +463,35 @@ async function actionFixture(input: {
 }
 
 describe("C6.0.1.12 freeze-bound correction dataset", () => {
+  it("uses the freezer hash ordering for mixed-case nested C60114 metadata and still rejects tampering", async () => {
+    const { root, paths, data } = await fixture();
+    data.machineDraftIdentity = {
+      ...data.machineDraftIdentity,
+      rankPosition: 1,
+      rankScore: 2,
+      rankerStatus: "FROZEN_SYNTHETIC_METADATA",
+    };
+    const frozen = freeze(data);
+    await writeFile(paths.reviewData, JSON.stringify(data), "utf8");
+    const server = await startC60112FrozenReviewWorkspaceServer({
+      workspaceDirectory: root,
+      freeze: frozen,
+    });
+    try {
+      expect(server.workspaceDataHash).toBe(machineQualitySemanticHash(data));
+    } finally {
+      await server.close();
+    }
+    data.machineDraftIdentity.rankScore = 3;
+    await writeFile(paths.reviewData, JSON.stringify(data), "utf8");
+    await expect(
+      startC60112FrozenReviewWorkspaceServer({
+        workspaceDirectory: root,
+        freeze: frozen,
+      }),
+    ).rejects.toThrow("REVIEW_WORKSPACE_DATA_FREEZE_HASH_MISMATCH");
+  });
+
   it.each(["apply", "export-corrections", "stats"] as const)(
     "rejects a frozen-registry-disallowed action in %s with otherwise valid session and audit",
     async (command) => {
