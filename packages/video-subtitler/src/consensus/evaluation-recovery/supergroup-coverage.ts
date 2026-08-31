@@ -4,7 +4,6 @@ import {
   c6121ModeComparisonSchema,
   type C6121Map,
   type C6121Coverage,
-  type C6121Labels,
   type C612Label,
   type C612GoldBinding,
   type C6121GoldTimingCue,
@@ -179,7 +178,11 @@ export function compareC6121Modes(input: {
   gold: readonly C6121GoldTimingCue[];
   goldCharacters: ReadonlyMap<string, number>;
   maps: readonly [C6121Map, C6121Map, C6121Map];
-  labels: readonly [readonly C612Label[], C6121Labels, C6121Labels];
+  labels: readonly [
+    readonly C612Label[],
+    readonly C612Label[],
+    readonly C612Label[],
+  ];
   metrics: readonly [
     readonly C6121ProfileMetric[],
     readonly C6121ProfileMetric[],
@@ -200,18 +203,19 @@ export function compareC6121Modes(input: {
         stableCount: map.groups.filter((g) => g.shadowEvaluationEligible)
           .length,
         ambiguousCount: map.groups.filter(
-          (g) => !g.shadowEvaluationEligible && g.goldCueIds.length > 0,
+          (g) =>
+            !g.shadowEvaluationEligible &&
+            g.goldCueIds.length > 0 &&
+            g.machineCueIds.length > 0,
         ).length,
-        noMappingCount: map.groups.filter((g) => !g.goldCueIds.length).length,
+        noMappingCount: map.groups.filter(
+          (g) => !g.goldCueIds.length || !g.machineCueIds.length,
+        ).length,
         coverage: c6121Coverage(
           input.frozen,
           map,
           input.gold,
-          i === 0
-            ? input.labels[0]
-            : c612Defined(input.labels[i] as C6121Labels).labels.map(
-                (l) => l.label,
-              ),
+          c612Defined(input.labels[i]),
           input.goldCharacters,
         ),
         crossFoldCount: map.groups.filter((g) => g.frozenFoldIds.length > 1)
