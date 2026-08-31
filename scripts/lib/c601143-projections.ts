@@ -21,6 +21,14 @@ import {
 } from "../../packages/video-subtitler/src/review/c601141-policy.js";
 import { assertWorkspace143 } from "../../packages/video-subtitler/src/review/c601143-review-delivery.js";
 
+export function coverageAudio143(
+  audio: Workspace143["audio"]["audio"][number],
+) {
+  const { nativeSourceInterval, ...coverageAudio } = audio;
+  void nativeSourceInterval;
+  return coverageAudio;
+}
+
 export function workspaceProjection143(input: {
   baseline: C60114MachineCoverageProjection;
   workspace: C60112ReviewWorkspaceData;
@@ -65,7 +73,7 @@ export function workspaceProjection143(input: {
       contextIntervals: r.contextIntervals,
       sourceIdentity: source,
     })),
-    physicalAudio: current.audio.audio,
+    physicalAudio: current.audio.audio.map(coverageAudio143),
     playbackSegments: current.playback.segments,
     plans: current.playback.plans.map((p) => ({
       planId: p.planId,
