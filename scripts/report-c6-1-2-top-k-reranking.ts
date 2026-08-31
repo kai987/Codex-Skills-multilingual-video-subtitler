@@ -168,7 +168,10 @@ const bruntime = await c612Json(
   );
 if (
   validation.regressionEvidenceHash !== qa.semanticHash ||
-  qa.sourceCodeAggregateHash !== freeze.codeAggregateHash
+  validation.sourceCodeAggregateHash !== freeze.codeAggregateHash ||
+  !validation.checks.some(
+    (c) => c.name === "frozen-generation-vs-acceptance-only-source" && c.passed,
+  )
 )
   throw new Error("C612_REPORT_VALIDATION_BINDING");
 const { stdout: branchText } = await promisify(execFile)(
@@ -693,7 +696,7 @@ const R: Record<number, unknown> = {
   },
   151: "最终推送后用 git ls-remote 独立核对；实际SHA见外部 delivery-git-receipt.json，不在报告内伪造自引用commit SHA。",
   152: outputNames,
-  153: "QA与Machine Freeze证明源码未变；报告是独立文档提交。最终clean状态及remote/local相等检查见delivery-git-receipt.json。",
+  153: "Machine Freeze证明生成源码未变；验收修订另附源码哈希与完整QA。报告是独立文档提交，最终clean状态及remote/local相等检查见delivery-git-receipt.json。",
 };
 const replyTitles =
   `Branch|Baseline|Full Rank Audit Commit|Top-K Commit|Correlation Commit|Acoustic Completeness Commit|Reranker Commit|Evaluation Commit|Acceptance Commit|Remote HEAD|Policy Version|Policy Hash|Baseline Replay Passed|Baseline Cue Count|Canonical Event Count|Eligible Event Count|Input Candidate Count|Included Candidate Count|Whisper Candidate Count|Reazon Candidate Count|Full Rank Records|Top-K Event Count|Top-K Candidate Count|Current Candidate Count|Alternative Candidate Count|Top-K Conservation Passed|Silent Drop Count|T0 Recall@1|T0 Recall@2|T0 Recall@3|T0 Recall@4|T0 MRR|T0 nDCG@4|T1 Recall@4|T2 Recall@4|T3 Recall@4|Best Retrieval Profile|Best Retrieval Recall@1|Best Retrieval Recall@2|Best Retrieval Recall@3|Best Retrieval Recall@4|Best Retrieval MRR|Best Retrieval nDCG@4|Verified Core Identity Count|Provisional Identity Count|Unknown Identity Count|Correlation Identity Coverage|Same-audio Groups Reconciled|Duplicate Votes Prevented|Same-core Cross-provider Count|Completeness Candidate Count|Verified Complete|Likely Complete|Partial Leading|Partial Trailing|Partial Internal|Edge Truncated|Adjacent Contaminated|Insufficient Evidence|Completeness Coverage|CTC Scorable Count|CTC Unscorable Count|Fresh Verifier Inference|Verifier Cache Hits|Verifier Model Loads|Strong Contraction Count|Verified Hallucination Removal|Valid Shortening|Catastrophic Leading|Catastrophic Trailing|Catastrophic Internal|Unknown Contraction|Baseline Fixed Group Count|Mapping V2 Group Count|Mapping V2 One-to-one|Mapping V2 One-to-many|Mapping V2 Many-to-one|Mapping V2 Many-to-many|Mapping V2 Ambiguous|Mapping V2 No Mapping|Changed-group Evaluation Coverage|Feature Count|Raw-text Feature Count|Gold Feature Count|Dataset-specific Feature Count|Fold Count|Fold Freeze Before Gold|Audio Leakage Count|Correlation Leakage Count|L0 Top-1 Accuracy|L0 Normalized Gain|L1 Top-1 Accuracy|L1 Normalized Gain|L2 Top-1 Accuracy|L2 Normalized Gain|L3 Top-1 Accuracy|L3 Normalized Gain|L4 Top-1 Accuracy|L4 Normalized Gain|L5 Top-1 Accuracy|L5 Normalized Gain|L6 Selected Count|L6 Improved|L6 Regressed|L6 Neutral|L6 Unknown|L6 Precision|L6 Harm Rate|L6 Coverage|L6 Normalized Gain|L6 Material Error Delta|L6 Catastrophic Deletion Regressions|Best Gold-free Profile|Best Profile Top-1 Accuracy|Best Profile MRR|Best Profile nDCG@4|Best Profile Selected|Best Profile Improved|Best Profile Regressed|Best Profile Neutral|Best Profile Unknown|Best Profile Precision|Best Profile Harm Rate|Best Profile Selective Coverage|Best Profile Exact Joint Gain|Best Profile Normalized Joint Gain|Best Profile Material Error Delta|Best Profile Catastrophic Deletion Count|Best Profile Top-1 Oracle Capture|Active Fold Count|Negative-gain Fold Count|Unknown-gain Fold Count|Completeness AUC|Edge-risk AUC|Token-support Utility|CTC Utility|Correlation-control Utility|Retrieval Failure Count|Reranking Failure Count|Gate Failure Count|Evaluation-unavailable Count|Engineering Gate|Strong Support Gate|Route Decision|C6.1.3 GO/HOLD|Production Mutation/Parity|Runtime Gold/Hardcoding/Network|Tests/Schemas/Regressions|Report/Output Paths|Worktree Status`.split(
@@ -709,7 +712,7 @@ const F: Record<number, unknown> = {
   7: codeCommit,
   8: codeCommit,
   9: acceptanceCommit,
-  10: acceptanceCommit,
+  10: "待最终文档提交和推送后，以独立 delivery-git-receipt.json 核对；验收代码提交不等于 Remote HEAD。",
   11: s.C612_VERSION,
   12: C612_POLICY_HASH,
   13: baseline.passed,
@@ -954,6 +957,22 @@ const body = [
   "",
   "运行时身份包括Python/torch/transformers版本及worker源码；本次固定本地运行时与历史记录版本不同，已经生成新的runtime identity，未伪称相同。FFmpeg仅重读所选source，CTC不产生转写。",
   "",
+  "生成源码冻结与最终验收源码分开绑定。独立验收发现历史lattice数组容器注册缺失，以及浮点请求区间与实际PCM样本时基的校验口径不一致；仅修复校验器并新增回归测试。使用原始生成源码checkout验证原有A/B Freeze，逐文件证明检索、证据、完整性、阈值、重排、Gold evaluator及全部既有数据未改写。生成前QA与修订后QA均保留并核验，未在Gold后重建候选、重训模型或改调阈值。",
+  "",
+  ...validation.checks
+    .filter(
+      (c) =>
+        c.name === "frozen-generation-vs-acceptance-only-source" ||
+        c.name === "generation-QA-before-acceptance-repair",
+    )
+    .flatMap((c) => [
+      `### ${c.name}`,
+      "",
+      c.observed.startsWith("{")
+        ? `\`\`\`json\n${c.observed}\n\`\`\``
+        : c.observed,
+      "",
+    ]),
   `报告数据校验：\`${data.semanticHash}\`。`,
   "",
 ].join("\n");

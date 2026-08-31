@@ -33,7 +33,10 @@ const keys = [
     "--output",
     "--network",
   ],
-  arg = c612Arguments(keys, keys),
+  arg = c612Arguments(
+    [...keys, "--frozen-repository", "--generation-qa"],
+    keys,
+  ),
   repository = path.resolve(import.meta.dirname, ".."),
   output = path.resolve(arg("--output"));
 for (const root of [repository, arg("--a"), arg("--b")])
@@ -48,6 +51,12 @@ const result = await validateC612Artifacts({
   source: arg("--source"),
   productionDirectory: arg("--production-directory"),
   freshRuntime: arg("--fresh-runtime"),
+  ...(process.argv.includes("--frozen-repository")
+    ? { frozenRepository: arg("--frozen-repository") }
+    : {}),
+  ...(process.argv.includes("--generation-qa")
+    ? { generationQa: arg("--generation-qa") }
+    : {}),
   progress: (v) => process.stdout.write(v + "\n"),
 });
 const routes = [result.a, result.b].map((r) =>

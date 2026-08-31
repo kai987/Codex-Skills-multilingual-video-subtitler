@@ -14,7 +14,9 @@ import {
   safeC612ArtifactPath,
   treeFiles,
   verifyRerankingFreeze,
+  fileManifest,
 } from "./c612-delivery-io.js";
+import { c612RequiredSourceFiles } from "./c612-machine-stage.js";
 import { readC612FrozenInputs } from "./c612-frozen-inputs.js";
 import { fullCandidateRankAudit } from "./full-candidate-rank-audit.js";
 import { buildTopK } from "./top-k-candidate-builder.js";
@@ -68,7 +70,9 @@ export async function validateC612StrictTree(root: string) {
       value && typeof value === "object",
       "C612_JSON_OBJECT_REQUIRED",
     );
-    if (
+    if (relative === "machine/machine-input-lattice-provenance.json") {
+      verifyC612LatticeArray(value);
+    } else if (
       "packageType" in value &&
       value.packageType === "multilingual-subtitle-package"
     )
@@ -95,6 +99,66 @@ export async function validateC612StrictTree(root: string) {
     count++;
   }
   return count;
+}
+/** Historical frozen lattice input is a strict array of row contracts, not an
+ * artifact object. Validate each row and its self-hash without rewriting it. */
+export function verifyC612LatticeArray(value: unknown) {
+  const rows = z.array(s.c61TokenLatticeSchema).min(1).parse(value);
+  for (const row of rows) verifyC612SelfHash(row);
+  c612Require(
+    new Set(rows.map((r) => r.eventId)).size === rows.length,
+    "C612_DUPLICATE_LATTICE_EVENT",
+  );
+  return rows.length;
+}
+/** CTC occupancy is measured on the actual sample-rounded PCM buffer. This is
+ * not an extra time tolerance and never changes any stored token/cue boundary. */
+export function verifyC612CtcOccupancy(row: s.C612CtcScore) {
+  if (!row.supportedTokens.length) return;
+  const interval = c612Defined(row.scoredInterval),
+    samples =
+      Math.round(interval.end * 16000) - Math.round(interval.start * 16000),
+    pcmSeconds = samples / 16000;
+  c612Require(
+    samples > 0 &&
+      row.supportedTokens.every(
+        (t) =>
+          t.index < row.tokenCount &&
+          t.start >= 0 &&
+          t.end > t.start &&
+          t.end <= pcmSeconds + 1e-9,
+      ) &&
+      new Set(row.supportedTokens.map((t) => t.index)).size ===
+        row.supportedTokens.length,
+    "C612_CTC_OCCUPANCY_RANGE",
+  );
+}
+const C612_ACCEPTANCE_ONLY_FILES = new Set([
+  "packages/video-subtitler/src/consensus/top-k/c612-artifact-validator.ts",
+  "scripts/validate-c6-1-2-top-k-reranking.ts",
+  "scripts/report-c6-1-2-top-k-reranking.ts",
+  "tests/c6-1-2-acceptance-contracts.test.ts",
+]);
+/** An acceptance repair may inspect a frozen generation checkout, but cannot
+ * waive changes to retrieval, evidence, thresholds, models, evaluation or data. */
+export function verifyC612AcceptanceOnlySourceChanges(
+  frozen: Awaited<ReturnType<typeof fileManifest>>,
+  current: Awaited<ReturnType<typeof fileManifest>>,
+) {
+  const before = new Map(frozen.map((f) => [f.relativePath, f])),
+    after = new Map(current.map((f) => [f.relativePath, f]));
+  const changedPaths = [...new Set([...before.keys(), ...after.keys()])]
+    .sort()
+    .filter((n) => hash(before.get(n) ?? null) !== hash(after.get(n) ?? null));
+  c612Require(
+    changedPaths.every((n) => C612_ACCEPTANCE_ONLY_FILES.has(n)),
+    "C612_GENERATION_SOURCE_CHANGED_AFTER_FREEZE",
+  );
+  return {
+    frozenCodeHash: hash(frozen),
+    acceptanceCodeHash: hash(current),
+    changedPaths,
+  };
 }
 export function verifyC612OofIsolation(
   folds: s.C612Folds,
@@ -317,6 +381,8 @@ export async function validateC612Artifacts(input: {
   source: string;
   productionDirectory: string;
   freshRuntime: string;
+  frozenRepository?: string;
+  generationQa?: string;
   progress?: (message: string) => void;
 }) {
   const checks: {
@@ -339,17 +405,65 @@ export async function validateC612Artifacts(input: {
       input.progress?.(`FAIL ${name}: ${String(e)}`);
     }
   }
-  const a = await readC612FrozenInputs(input.a, input.repository),
-    b = await readC612FrozenInputs(input.b, input.repository);
+  const generationRepository = input.frozenRepository ?? input.repository;
+  const a = await readC612FrozenInputs(input.a, generationRepository),
+    b = await readC612FrozenInputs(input.b, generationRepository);
   const qa = s.c612RegressionSchema.parse(
     JSON.parse(await readFile(input.qa, "utf8")),
   );
   verifyC612SelfHash(qa);
+  const currentCodeFiles = await fileManifest(
+    input.repository,
+    await c612RequiredSourceFiles(input.repository),
+  );
+  const generationQa = s.c612RegressionSchema.parse(
+    JSON.parse(await readFile(input.generationQa ?? input.qa, "utf8")),
+  );
+  verifyC612SelfHash(generationQa);
   const fresh = s.c612RuntimeSchema.parse(
     JSON.parse(await readFile(input.freshRuntime, "utf8")),
   );
   verifyC612SelfHash(fresh);
   let validatedArtifactCount = 0;
+  await check("frozen-generation-vs-acceptance-only-source", () => {
+    const proof = verifyC612AcceptanceOnlySourceChanges(
+      a.freeze.codeFiles,
+      currentCodeFiles,
+    );
+    c612Require(
+      proof.frozenCodeHash === a.freeze.codeAggregateHash &&
+        proof.acceptanceCodeHash === qa.sourceCodeAggregateHash,
+      "C612_ACCEPTANCE_SOURCE_QA_BINDING",
+    );
+    return JSON.stringify(proof);
+  });
+  await check("generation-QA-before-acceptance-repair", async () => {
+    c612Require(
+      generationQa.sourceCodeAggregateHash === a.freeze.codeAggregateHash,
+      "C612_GENERATION_QA_NOT_FROZEN_SOURCE",
+    );
+    sameC612(
+      generationQa.checks.map((c) => c.stage).sort(),
+      [...s.C612_QA_STAGES].sort(),
+      "C612_GENERATION_QA_STAGE_MISSING",
+    );
+    for (const stage of generationQa.checks) {
+      c612Require(
+        stage.exitCode === 0 && (!stage.tests || stage.tests.failed === 0),
+        "C612_GENERATION_QA_FAILED",
+      );
+      c612Require(
+        (await fileHash(
+          await safeC612ArtifactPath(
+            path.dirname(input.generationQa ?? input.qa),
+            stage.logRelativePath,
+          ),
+        )) === stage.logSha256,
+        "C612_GENERATION_QA_LOG_CHANGED",
+      );
+    }
+    return `14 generation QA stages passed; ${generationQa.semanticHash}`;
+  });
   await check("strict-artifact-schemas-A-B", async () => {
     validatedArtifactCount =
       (await validateC612StrictTree(input.a)) +
@@ -494,20 +608,7 @@ export async function validateC612Artifacts(input: {
           row.eventId === candidate.eventId,
         "C612_CTC_CANDIDATE_PROVENANCE",
       );
-      c612Require(
-        row.supportedTokens.every(
-          (t) =>
-            t.index < row.tokenCount &&
-            t.end > t.start &&
-            t.end <=
-              c612Defined(row.scoredInterval).end -
-                c612Defined(row.scoredInterval).start +
-                1e-6,
-        ) &&
-          new Set(row.supportedTokens.map((t) => t.index)).size ===
-            row.supportedTokens.length,
-        "C612_CTC_OCCUPANCY_RANGE",
-      );
+      verifyC612CtcOccupancy(row);
       c612Require(
         row.modelSnapshotHash === fresh.modelSnapshotHash &&
           row.runtimeIdentityHash === fresh.runtimeIdentityHash,
@@ -894,7 +995,7 @@ export async function validateC612Artifacts(input: {
   });
   await check("full-QA-evidence-and-logs", async () => {
     c612Require(
-      qa.sourceCodeAggregateHash === a.freeze.codeAggregateHash,
+      qa.sourceCodeAggregateHash === hash(currentCodeFiles),
       "C612_QA_SOURCE_BINDING",
     );
     sameC612(
