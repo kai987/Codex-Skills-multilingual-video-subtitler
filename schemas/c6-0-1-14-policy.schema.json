@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-policy.schema.json",
+  "title": "c6-0-1-14-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-localization-playback-integrity-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-missing-localization-policy"
+    },
+    "coverageThresholds": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number", "const": 0.5 },
+        { "type": "number", "const": 0.8 },
+        { "type": "number", "const": 0.95 }
+      ]
+    },
+    "speech": {
+      "type": "object",
+      "properties": {
+        "mergeGapSeconds": { "type": "number", "const": 0.25 },
+        "minSeconds": { "type": "number", "const": 0.2 },
+        "maxSeconds": { "type": "number", "const": 12 },
+        "strongContradictionThreshold": { "type": "number", "const": 0.8 }
+      },
+      "required": [
+        "mergeGapSeconds",
+        "minSeconds",
+        "maxSeconds",
+        "strongContradictionThreshold"
+      ],
+      "additionalProperties": false
+    },
+    "probes": {
+      "type": "object",
+      "properties": {
+        "maxTargets": { "type": "number", "const": 24 },
+        "maxContextTargets": { "type": "number", "const": 8 },
+        "maxRequests": { "type": "number", "const": 64 },
+        "contextMarginSeconds": { "type": "number", "const": 1.5 },
+        "maxContextSeconds": { "type": "number", "const": 15 },
+        "providerCount": { "type": "number", "const": 2 }
+      },
+      "required": [
+        "maxTargets",
+        "maxContextTargets",
+        "maxRequests",
+        "contextMarginSeconds",
+        "maxContextSeconds",
+        "providerCount"
+      ],
+      "additionalProperties": false
+    },
+    "reviewRegion": {
+      "type": "object",
+      "properties": {
+        "maxTargetGapSeconds": { "type": "number", "const": 0.75 },
+        "maxRegionDurationSeconds": { "type": "number", "const": 30 },
+        "contextSeconds": { "type": "number", "const": 2 }
+      },
+      "required": [
+        "maxTargetGapSeconds",
+        "maxRegionDurationSeconds",
+        "contextSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "exactGuardSeconds": { "type": "number", "const": 0.05 },
+    "cueCoverageToleranceSeconds": { "type": "number", "const": 0.05 },
+    "orphanCoverageThreshold": { "type": "number", "const": 0.8 },
+    "parentGapIsSearchEnvelopeOnly": { "type": "boolean", "const": true },
+    "disjointTargetsRemainSeparate": { "type": "boolean", "const": true },
+    "sharedRootIsCorrelated": { "type": "boolean", "const": true },
+    "goldBarrier": {
+      "type": "object",
+      "properties": {
+        "runtimeGoldInputAllowed": { "type": "boolean", "const": false },
+        "freezeBeforeLabels": { "type": "boolean", "const": true },
+        "sameVersionRetuneAllowed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "runtimeGoldInputAllowed",
+        "freezeBeforeLabels",
+        "sameVersionRetuneAllowed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "coverageThresholds",
+    "speech",
+    "probes",
+    "reviewRegion",
+    "exactGuardSeconds",
+    "cueCoverageToleranceSeconds",
+    "orphanCoverageThreshold",
+    "parentGapIsSearchEnvelopeOnly",
+    "disjointTargetsRemainSeparate",
+    "sharedRootIsCorrelated",
+    "goldBarrier",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

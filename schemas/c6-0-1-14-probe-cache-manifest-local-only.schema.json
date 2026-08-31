@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-probe-cache-manifest-local-only.schema.json",
+  "title": "c6-0-1-14-probe-cache-manifest-local-only",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-probe-cache-manifest-local-only"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "selectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "probeSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "cacheNamespace": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-local-probes-v1"
+    },
+    "cacheDirectory": { "type": "string", "minLength": 1 },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "resultCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "persistedSuccessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "requestId": { "type": "string", "minLength": 1 },
+              "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "provider": {
+                "type": "string",
+                "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "SUCCESS",
+                  "EMPTY_OUTPUT",
+                  "PROVIDER_ERROR",
+                  "EXTRACTION_ERROR",
+                  "CACHE_MISS",
+                  "CACHE_INVALID"
+                ]
+              },
+              "requestSemanticHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "rawOutputHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "cacheByteSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "requestId",
+              "cacheKey",
+              "provider",
+              "status",
+              "requestSemanticHash",
+              "rawOutputHash",
+              "cacheByteSha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "resultCount",
+        "persistedSuccessCount",
+        "entries",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "policyHash",
+    "selectionHash",
+    "probeSemanticHash",
+    "cacheNamespace",
+    "cacheDirectory",
+    "persistence"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-completion-policy.schema.json",
+  "title": "c6-0-1-14-completion-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-completion-policy"
+    },
+    "policyVersion": { "type": "string", "const": "c6.0.1.14-completion-v1" },
+    "maximumNewInferenceCount": { "type": "number", "const": 0 },
+    "maximumNewProviderProcessCount": { "type": "number", "const": 0 },
+    "maximumModelLoadCount": { "type": "number", "const": 0 },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "cacheMode": {
+      "type": "string",
+      "const": "FROZEN_REQUEST_SET_READ_ONLY_NO_FALLBACK"
+    },
+    "guardContactMaximumSeconds": { "type": "number", "const": 0.05 },
+    "boundaryRoundingToleranceSeconds": { "type": "number", "const": 0.001 },
+    "shadowTimeBinCount": { "type": "number", "const": 8 },
+    "shadowExecutionAllowed": { "type": "boolean", "const": false },
+    "lexicalCompletenessIsAdvisoryWhenAudible": {
+      "type": "boolean",
+      "const": true
+    },
+    "mandatorySubsetRecallIsReleaseGate": { "type": "boolean", "const": false },
+    "rankerRecalibrationAllowed": { "type": "boolean", "const": false },
+    "canonicalMutationAllowed": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "maximumNewInferenceCount",
+    "maximumNewProviderProcessCount",
+    "maximumModelLoadCount",
+    "runtimeGoldInputCount",
+    "cacheMode",
+    "guardContactMaximumSeconds",
+    "boundaryRoundingToleranceSeconds",
+    "shadowTimeBinCount",
+    "shadowExecutionAllowed",
+    "lexicalCompletenessIsAdvisoryWhenAudible",
+    "mandatorySubsetRecallIsReleaseGate",
+    "rankerRecalibrationAllowed",
+    "canonicalMutationAllowed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

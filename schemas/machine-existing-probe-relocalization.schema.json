@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-existing-probe-relocalization.schema.json",
+  "title": "machine-existing-probe-relocalization",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-localization-playback-integrity-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-existing-probe-relocalization"
+    },
+    "completionPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "originalProbeSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "originalSelectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "targetId": { "type": "string", "minLength": 1 },
+          "sourceIslandId": { "type": "string", "minLength": 1 },
+          "provider": {
+            "type": "string",
+            "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+          },
+          "windowType": {
+            "type": "string",
+            "enum": ["CORE_EXACT", "CORE_CONTEXT"]
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "extractionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "originalRequestSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "originalRawOutputHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CORE_EXACT_ISLAND_LOCALIZED",
+              "TRUSTED_GLOBAL_TOKEN_PROJECTION",
+              "CORE_CLEAN_GUARD_CONTACT_ONLY",
+              "CORE_CONTAMINATED_BY_NEIGHBOR",
+              "CONTEXT_TEXT_UNPROJECTABLE",
+              "CORE_LOCALIZATION_UNRESOLVED",
+              "EMPTY",
+              "FAILED"
+            ]
+          },
+          "localizedText": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "candidateText": { "type": "string" },
+          "coreNeighborOverlapSeconds": { "type": "number", "minimum": 0 },
+          "guardNeighborOverlapSeconds": { "type": "number", "minimum": 0 },
+          "coreBoundaryCrossingTokenCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "trustedProjectedTokenCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "projectedSourceIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "wholeTokenChainVerified": { "type": "boolean" },
+          "eligibleForCrossModelReconciliation": { "type": "boolean" },
+          "localizationVerified": { "type": "boolean" },
+          "guardContactCaution": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "requestId",
+          "targetId",
+          "sourceIslandId",
+          "provider",
+          "windowType",
+          "sourceInterval",
+          "extractionInterval",
+          "originalRequestSemanticHash",
+          "originalRawOutputHash",
+          "status",
+          "localizedText",
+          "candidateText",
+          "coreNeighborOverlapSeconds",
+          "guardNeighborOverlapSeconds",
+          "coreBoundaryCrossingTokenCount",
+          "trustedProjectedTokenCount",
+          "projectedSourceIntervals",
+          "wholeTokenChainVerified",
+          "eligibleForCrossModelReconciliation",
+          "localizationVerified",
+          "guardContactCaution",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "newInferenceCount": { "type": "number", "const": 0 },
+    "originalResultsModified": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "completionPolicyHash",
+    "originalProbeSemanticHash",
+    "originalSelectionHash",
+    "requests",
+    "newInferenceCount",
+    "originalResultsModified",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

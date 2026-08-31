@@ -1,0 +1,526 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-source-global-speech-islands.schema.json",
+  "title": "machine-source-global-speech-islands",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-localization-playback-integrity-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "source-global-speech-islands"
+    },
+    "parentGaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "gapId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "searchEnvelopeOnly": { "type": "boolean", "const": true }
+        },
+        "required": [
+          "gapId",
+          "sourceInterval",
+          "itemIds",
+          "searchEnvelopeOnly"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "islands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "islandId": { "type": "string", "minLength": 1 },
+          "parentGapIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "evidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rootLineageIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "correlationGroups": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentSourceCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "lexicalEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reliableLocalizedLexical": { "type": "boolean" },
+          "speechPositive": { "type": "boolean" },
+          "strongContradiction": { "type": "boolean" },
+          "localizationStatus": {
+            "type": "string",
+            "enum": ["VERIFIED", "UNRESOLVED"]
+          },
+          "durationStatus": {
+            "type": "string",
+            "enum": ["BOUNDED", "TOO_SHORT", "TOO_LONG"]
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "splitBoundaryIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "islandId",
+          "parentGapIds",
+          "itemIds",
+          "sourceInterval",
+          "evidenceIds",
+          "rootLineageIds",
+          "correlationGroups",
+          "independentSourceCount",
+          "lexicalEvidenceIds",
+          "reliableLocalizedLexical",
+          "speechPositive",
+          "strongContradiction",
+          "localizationStatus",
+          "durationStatus",
+          "sceneIds",
+          "speakerIds",
+          "splitBoundaryIds",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "globalIslands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "islandId": { "type": "string", "minLength": 1 },
+          "parentGapIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "evidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rootLineageIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "correlationGroups": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentSourceCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "lexicalEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reliableLocalizedLexical": { "type": "boolean" },
+          "speechPositive": { "type": "boolean" },
+          "strongContradiction": { "type": "boolean" },
+          "localizationStatus": {
+            "type": "string",
+            "enum": ["VERIFIED", "UNRESOLVED"]
+          },
+          "durationStatus": {
+            "type": "string",
+            "enum": ["BOUNDED", "TOO_SHORT", "TOO_LONG"]
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "splitBoundaryIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "islandId",
+          "parentGapIds",
+          "itemIds",
+          "sourceInterval",
+          "evidenceIds",
+          "rootLineageIds",
+          "correlationGroups",
+          "independentSourceCount",
+          "lexicalEvidenceIds",
+          "reliableLocalizedLexical",
+          "speechPositive",
+          "strongContradiction",
+          "localizationStatus",
+          "durationStatus",
+          "sceneIds",
+          "speakerIds",
+          "splitBoundaryIds",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "boundaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "boundaryId": { "type": "string", "minLength": 1 },
+          "at": { "type": "number", "minimum": 0 },
+          "kind": {
+            "type": "string",
+            "enum": ["SILENCE", "CUE", "SCENE", "SPEAKER"]
+          },
+          "sourceIdentity": {
+            "type": "object",
+            "properties": {
+              "sourceMediaSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+              "sampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioStreamIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioTimebase": {
+                "type": "string",
+                "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+              },
+              "sourceTimebase": {
+                "type": "string",
+                "const": "SOURCE_GLOBAL_SECONDS"
+              }
+            },
+            "required": [
+              "sourceMediaSha256",
+              "durationSeconds",
+              "sampleRate",
+              "audioStreamIndex",
+              "audioTimebase",
+              "sourceTimebase"
+            ],
+            "additionalProperties": false
+          },
+          "verified": { "type": "boolean", "const": true }
+        },
+        "required": ["boundaryId", "at", "kind", "sourceIdentity", "verified"],
+        "additionalProperties": false
+      }
+    },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "evidenceId": { "type": "string", "minLength": 1 },
+              "family": {
+                "type": "string",
+                "enum": [
+                  "MAPPED_VAD",
+                  "DECODED_SEGMENT",
+                  "TRUSTED_MAPPED_TOKEN",
+                  "RAW_ASR_SEGMENT",
+                  "SPEAKER_ACTIVITY",
+                  "ACOUSTIC_SCENE",
+                  "CANDIDATE_PROVENANCE",
+                  "SILENCE"
+                ]
+              },
+              "sourceInterval": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "number", "minimum": 0 },
+                      "end": { "type": "number", "exclusiveMinimum": 0 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "mappingStatus": {
+                "type": "string",
+                "enum": ["VERIFIED", "QUARANTINED"]
+              },
+              "speechPositive": { "type": "boolean" },
+              "lexicalPositive": { "type": "boolean" },
+              "reliableLocalizedLexical": { "type": "boolean" },
+              "contradiction": { "type": "boolean" },
+              "strength": { "type": "number", "minimum": 0, "maximum": 1 },
+              "rootLineageIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "correlationGroup": { "type": "string", "minLength": 1 },
+              "providerFamily": { "type": "string", "minLength": 1 },
+              "artifactId": { "type": "string", "minLength": 1 },
+              "artifactSemanticHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sourceIdentityHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "sceneIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "speakerIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "reasons": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "evidenceId",
+              "family",
+              "sourceInterval",
+              "mappingStatus",
+              "speechPositive",
+              "lexicalPositive",
+              "reliableLocalizedLexical",
+              "contradiction",
+              "strength",
+              "rootLineageIds",
+              "correlationGroup",
+              "providerFamily",
+              "artifactId",
+              "artifactSemanticHash",
+              "sourceIdentityHash",
+              "sceneIds",
+              "speakerIds",
+              "reasons",
+              "semanticHash"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "verifiedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "quarantinedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailableArtifactIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "required": [
+        "evidence",
+        "verifiedCount",
+        "quarantinedCount",
+        "duplicateInputCount",
+        "unavailableArtifactIds"
+      ],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "islandCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "globalIslandCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedParentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tooShortCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tooLongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "parentGapSpeechEvidenceCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "islandCount",
+        "globalIslandCount",
+        "unresolvedParentCount",
+        "tooShortCount",
+        "tooLongCount",
+        "parentGapSpeechEvidenceCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "parentGaps",
+    "islands",
+    "globalIslands",
+    "boundaries",
+    "audit",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

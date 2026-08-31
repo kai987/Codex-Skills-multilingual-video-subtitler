@@ -1,5 +1,6 @@
 import path from "node:path";
 import * as c60113 from "@mvl/shared";
+import * as c60114 from "@mvl/shared";
 
 import {
   acousticSceneWindowsArtifactSchema,
@@ -387,7 +388,111 @@ const c60113Schemas = [
   ],
 ] as const;
 
+const c60114Schemas = [
+  ["c6-0-1-14-completion-policy", c60114.c60114CompletionPolicySchema],
+  [
+    "machine-existing-probe-relocalization",
+    c60114.c60114ProbeRelocalizationSchema,
+  ],
+  [
+    "machine-source-global-lineage-reconciliation",
+    c60114.c60114LineageReconciliationSchema,
+  ],
+  [
+    "machine-probe-selection-v2-shadow",
+    c60114.c60114ProbeSelectionV2ShadowSchema,
+  ],
+  [
+    "c6-0-1-14-existing-probe-replay-receipt",
+    c60114.c60114ExistingProbeReplaySchema,
+  ],
+  ["c6-0-1-14-route-decision", c60114.c60114RouteDecisionSchema],
+  [
+    "c6-0-1-14-post-freeze-evaluation-audit",
+    c60114.c60114PostFreezeEvaluationAuditSchema,
+  ],
+  ["c6-0-1-14-source-identity", c60114.c60114SourceIdentitySchema],
+  ["c6-0-1-14-policy", c60114.c60114PolicySchema],
+  ["machine-review-target-intervals-v2", c60114.c60114ReviewTargetsSchema],
+  ["machine-source-global-speech-islands", c60114.c60114SpeechIslandsSchema],
+  ["machine-orphan-speech-sweep", c60114.c60114OrphanSpeechSweepSchema],
+  [
+    "machine-missing-dialogue-probe-selection",
+    c60114.c60114ProbeSelectionSchema,
+  ],
+  ["c6-0-1-14-pre-probe-freeze", c60114.c60114PreProbeFreezeSchema],
+  ["c6-0-1-14-probe-budget-exception", c60114.c60114ProbeBudgetExceptionSchema],
+  [
+    "c6-0-1-14-probe-cache-manifest-local-only",
+    c60114.c60114ProbeCacheManifestSchema,
+  ],
+  [
+    "c6-0-1-14-probe-completion-checkpoint",
+    c60114.c60114ProbeCompletionCheckpointSchema,
+  ],
+  [
+    "c6-0-1-14-probe-bounded-failure-audit",
+    c60114.c60114ProbeFailureAuditSchema,
+  ],
+  ["c6-0-1-14-probe-request-journal", c60114.c60114ProbeJournalSchema],
+  ["c6-0-1-14-probe-persistence", c60114.c60114ProbePersistenceSchema],
+  ["missing-dialogue-local-probe", c60114.c60114ProbeExecutionSchema],
+  [
+    "localized-missing-lexical-evidence",
+    c60114.c60114LocalizedLexicalEvidenceSchema,
+  ],
+  ["missing-speech-evidence-v3", c60114.c60114MissingSpeechEvidenceV3Schema],
+  ["machine-review-items-v4", c60114.c60114ReviewItemsV4Schema],
+  ["machine-review-regions-v3", c60114.c60114ReviewRegionsV3Schema],
+  [
+    "machine-review-audio-manifest-v3",
+    c60114.c60114ReviewAudioManifestV3Schema,
+  ],
+  [
+    "machine-review-playback-timeline-v2",
+    c60114.c60114PlaybackTimelineV2Schema,
+  ],
+  ["c6-0-1-14-machine-localization-freeze", c60114.c60114MachineFreezeSchema],
+  ["c6-0-1-14-workspace-extension", c60114.c60114WorkspaceExtensionSchema],
+  [
+    "c6-0-1-14-playback-coverage-input",
+    c60114.c60114PlaybackCoverageInputSchema,
+  ],
+  [
+    "c6-0-1-14-playback-coverage-evaluation",
+    c60114.c60114PlaybackCoverageEvaluationSchema,
+  ],
+  [
+    "c6-0-1-14-machine-coverage-projection",
+    c60114.c60114MachineCoverageProjectionSchema,
+  ],
+  [
+    "c6-0-1-14-coverage-projection-variant",
+    c60114.c60114CoverageProjectionVariantSchema,
+  ],
+  [
+    "c6-0-1-14-machine-coverage-projections",
+    c60114.c60114CoverageProjectionsSchema,
+  ],
+  ["c6-0-1-14-code-validation", c60114.c60114CodeValidationSchema],
+  [
+    "c6-0-1-14-acceptance-manual-checks",
+    c60114.c60114AcceptanceManualChecksSchema,
+  ],
+  ["c6-0-1-14-acceptance-probe-audit", c60114.c60114AcceptanceProbeAuditSchema],
+  ["c6-0-1-14-run-validation", c60114.c60114AcceptanceSummarySchema],
+  [
+    "c6-0-1-14-shareable-validation-summary",
+    c60114.c60114AcceptanceShareableSchema,
+  ],
+] as const;
+
 const schemas = [
+  ...c60114Schemas.map(([name, schema]) => ({
+    fileName: `${name}.schema.json`,
+    id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
+    schema,
+  })),
   ...c60113Schemas.map(([name, schema]) => ({
     fileName: `${name}.schema.json`,
     id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,

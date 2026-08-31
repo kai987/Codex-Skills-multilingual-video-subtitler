@@ -38,6 +38,7 @@ export * from "./c6-0-1-13-review-rank-schemas.js";
 export * from "./c6-0-1-13-ranker-calibration-schemas.js";
 export * from "./c6-0-1-13-review-workspace-schemas.js";
 export * from "./c6-0-1-13-acceptance-schemas.js";
+export * from "./c6-0-1-14-missing-localization-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

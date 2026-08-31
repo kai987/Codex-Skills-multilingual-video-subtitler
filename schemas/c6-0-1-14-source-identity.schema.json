@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-source-identity.schema.json",
+  "title": "c6-0-1-14-source-identity",
+  "type": "object",
+  "properties": {
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "sampleRate": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioStreamIndex": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioTimebase": { "type": "string", "pattern": "^[1-9]\\d*\\/[1-9]\\d*$" },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+  },
+  "required": [
+    "sourceMediaSha256",
+    "durationSeconds",
+    "sampleRate",
+    "audioStreamIndex",
+    "audioTimebase",
+    "sourceTimebase"
+  ],
+  "additionalProperties": false
+}
