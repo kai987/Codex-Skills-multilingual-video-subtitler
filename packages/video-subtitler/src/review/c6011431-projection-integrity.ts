@@ -552,7 +552,7 @@ export function preflightNestedSemanticIntegrity1431(
           continue;
         }
         knownPaths.add(rowPath);
-        const expected = expectedHash1431(record);
+        const expected = expectedHash1431(required141(record));
         if (expected === actual) verified[group.rowType]++;
         else {
           failed[group.rowType]++;
