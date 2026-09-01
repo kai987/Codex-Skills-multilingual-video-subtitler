@@ -157,6 +157,8 @@
     "validate:c6-0-1-14-3-code": "tsx scripts/validate-c6-0-1-14-3-code.ts",
     "record:c6-0-1-14-3-browser-audit": "tsx scripts/record-c6-0-1-14-3-browser-audit.ts",
     "validate:c6-0-1-14-3-runs": "tsx scripts/validate-c6-0-1-14-3-runs.ts",
+    "run:c6-0-1-14-3-1-machine": "tsx scripts/run-c6-0-1-14-3-1-machine.ts",
+    "evaluate:c6-0-1-14-3-1": "tsx scripts/evaluate-c6-0-1-14-3-1.ts",
     "review:trial": "tsx scripts/c6-0-1-13-review-trial-cli.ts",
     "refresh:c6-0-1-1-control": "tsx scripts/refresh-c6-0-1-1-control-artifacts.ts",
     "targeted:c4-coverage": "tsx scripts/run-c4-coverage-recovery-asr.ts",
