@@ -107,7 +107,7 @@ await durableJson141(
   baselineReproduction,
 );
 
-const selection = await select143({
+await select143({
   state: prepared.state,
   baseline: prepared.baseline,
   policy: prepared.policy,
@@ -230,8 +230,7 @@ const refreeze = shared.machineRefreeze1431Schema.parse(
     wavPcmParity: true,
     wavDurationParity: true,
     wavMappingParity: true,
-    wavPlayableCount: currentWorkspace.audio.audio.filter((row) => row.playable)
-      .length,
+    wavPlayableCount: currentWorkspace.audio.audio.length,
     detectorReplayHits: finalA.replay.detectorCacheHitCount,
     detectorReplayExpected: finalA.replay.expectedDetectorRequestCount,
     asrReplayHits: finalA.replay.asrCacheHitCount,

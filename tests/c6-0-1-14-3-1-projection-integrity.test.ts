@@ -13,6 +13,7 @@ import {
 import {
   hash141,
   hashed141,
+  required141,
 } from "../packages/video-subtitler/src/review/c601141-policy.js";
 
 const sourceIdentity = {
@@ -168,16 +169,17 @@ describe("C6.0.1.14.3.1 projection hash integrity", () => {
       true,
     );
     const unknown = structuredClone(fixed) as unknown as {
-      variants: Array<{
+      variants: {
         projection: Record<string, unknown>;
         semanticHash: string;
-      }>;
+      }[];
       semanticHash: string;
     };
-    unknown.variants[7]!.projection.unexpected = {
+    const unknownVariant = required141(unknown.variants[7]);
+    unknownVariant.projection.unexpected = {
       semanticHash: "d".repeat(64),
     };
-    unknown.variants[7] = hashed141(unknown.variants[7]!);
+    unknown.variants[7] = hashed141(unknownVariant);
     unknown.semanticHash = hash141(
       Object.fromEntries(
         Object.entries(unknown).filter(([key]) => key !== "semanticHash"),
@@ -215,12 +217,12 @@ describe("C6.0.1.14.3.1 projection hash integrity", () => {
   it("fails the change audit on a playback interval mutation", () => {
     const before = projections(rebindCoverageAudio1431(sourceAudio()));
     const after = structuredClone(before);
-    after.variants[7]!.projection.playbackSegments[0]!.sourceInterval.end = 3;
-    after.variants[7]!.projection.playbackSegments[0] = hashed141(
-      after.variants[7]!.projection.playbackSegments[0]!,
-    );
-    after.variants[7] = hashed141(after.variants[7]!);
-    const rebuilt = hashed141(after) as Projections143;
+    const variant = required141(after.variants[7]);
+    const segment = required141(variant.projection.playbackSegments[0]);
+    segment.sourceInterval.end = 3;
+    variant.projection.playbackSegments[0] = hashed141(segment);
+    after.variants[7] = hashed141(variant);
+    const rebuilt = hashed141(after);
     const audit = auditProjectionChanges1431({
       before,
       after: rebuilt,

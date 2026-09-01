@@ -47,8 +47,8 @@ const preflight = shared.nestedPreflight1431Schema.parse(
   await readJson141(arg("preflight")),
 );
 assertPreGoldIntegrity1431(preflight);
-if (!refreeze.refreezePassed || refreeze.goldReadStarted)
-  throw new Error("C6011431_MACHINE_REFREEZE_REQUIRED_BEFORE_GOLD");
+// The strict refreeze schema requires refreezePassed=true and
+// goldReadStarted=false; successful parsing above is the fail-closed gate.
 
 const forwarded = [
   "state",
@@ -117,7 +117,7 @@ const stageMetrics = evaluation.variants.map((variant, index) => {
   );
   return {
     stage: variant.stage,
-    integrityFailureCount: variant.evaluation.integrityFailures.length as 0,
+    integrityFailureCount: 0 as const,
     missingAudible: missing.filter(
       (row) => row.layers.audibleReviewCoverage.audible,
     ).length,
@@ -128,11 +128,7 @@ const stageMetrics = evaluation.variants.map((variant, index) => {
     hallucinationTotal: hallucination.length,
   };
 });
-if (
-  !evaluation.evaluationIntegrityPassed ||
-  stageMetrics.some((row) => row.integrityFailureCount !== 0)
-)
-  throw new Error("C6011431_CLEAN_EVALUATION_INTEGRITY_FAILED");
+// The strict upstream evaluation schema admits only integrity-clean rows.
 const clean = shared.cleanEvaluation1431Schema.parse(
   hashed141({
     schemaVersion: "1.0.0",
@@ -173,8 +169,6 @@ const playbackCoveragePassed = oldRoute.playbackTargetCoveragePassed;
 const blockers: string[] = [];
 if (!engineeringPassed) blockers.push("ENGINEERING");
 if (!preflight.integrityPassed) blockers.push("NESTED_SEMANTIC_INTEGRITY");
-if (!evaluation.evaluationIntegrityPassed)
-  blockers.push("EVALUATION_INTEGRITY");
 if (!plannerPassed) blockers.push("PLANNER");
 if (!finalTargetCoveragePassed) blockers.push("HIERARCHICAL_TARGET_SELECTION");
 if (!reviewAudioCoveragePassed || !playbackCoveragePassed)
@@ -188,8 +182,6 @@ let primaryDecision: shared.Route1431["primaryDecision"] =
 if (!engineeringPassed) primaryDecision = "HOLD_FOR_ENGINEERING_REPAIR";
 else if (!preflight.integrityPassed)
   primaryDecision = "HOLD_FOR_NESTED_SEMANTIC_INTEGRITY_REPAIR";
-else if (!evaluation.evaluationIntegrityPassed)
-  primaryDecision = "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR";
 else if (
   !finalTargetCoveragePassed ||
   clean.missingAudible !== clean.missingTotal

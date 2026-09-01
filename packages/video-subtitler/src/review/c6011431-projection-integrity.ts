@@ -115,6 +115,19 @@ export function buildProjectionRebindingLedger1431(input: {
       throw new Error(
         `C6011431_PROJECTED_AUDIO_CONTENT_CHANGED:${source.audioId}`,
       );
+    if (source.sha256 !== projected.sha256)
+      throw new Error(
+        `C6011431_PROJECTED_AUDIO_BYTES_CHANGED:${source.audioId}`,
+      );
+    if (
+      source.frameCount !== projected.frameCount ||
+      source.sampleRate !== projected.sampleRate ||
+      source.channels !== projected.channels ||
+      source.actualDuration !== projected.actualDuration
+    )
+      throw new Error(
+        `C6011431_PROJECTED_PHYSICAL_METADATA_CHANGED:${source.audioId}`,
+      );
     return {
       audioId: source.audioId,
       sourceDomain: "SOURCE_WORKSPACE_AUDIO_ROW" as const,
@@ -126,19 +139,10 @@ export function buildProjectionRebindingLedger1431(input: {
       projectedSchemaValid: true as const,
       hashDomainRebound: true as const,
       removedFields: ["nativeSourceInterval"] as const,
-      audioByteHashPreserved: (source.sha256 === projected.sha256) as true,
-      physicalMetadataPreserved: (source.frameCount === projected.frameCount &&
-        source.sampleRate === projected.sampleRate &&
-        source.channels === projected.channels &&
-        source.actualDuration === projected.actualDuration) as true,
+      audioByteHashPreserved: true as const,
+      physicalMetadataPreserved: true as const,
     };
   });
-  if (
-    entries.some(
-      (row) => !row.audioByteHashPreserved || !row.physicalMetadataPreserved,
-    )
-  )
-    throw new Error("C6011431_PROJECTED_PHYSICAL_METADATA_CHANGED");
   return projectionRebindingLedger1431Schema.parse(
     hashed141({
       schemaVersion: "1.0.0",
@@ -469,7 +473,7 @@ export function assertPreGoldIntegrity1431(preflight: NestedPreflight1431) {
 }
 
 function stripAllowedProjectionHashes1431(value: Projections143) {
-  const copy = structuredClone(value) as Projections143;
+  const copy = structuredClone(value);
   copy.semanticHash = "<allowed-projection-set-hash>";
   for (const variant of copy.variants) {
     variant.semanticHash = "<allowed-variant-hash>";
@@ -503,9 +507,17 @@ export function auditProjectionChanges1431(input: {
     forbiddenChanges.push("NON_HASH_PROJECTION_CONTENT_CHANGED");
   const audioBytesEquivalent =
     hash141(
-      before.physicalAudio.map(({ semanticHash: _hash, ...row }) => row),
+      before.physicalAudio.map(({ semanticHash, ...row }) => {
+        void semanticHash;
+        return row;
+      }),
     ) ===
-    hash141(after.physicalAudio.map(({ semanticHash: _hash, ...row }) => row));
+    hash141(
+      after.physicalAudio.map(({ semanticHash, ...row }) => {
+        void semanticHash;
+        return row;
+      }),
+    );
   const playbackRowsByteEquivalent =
     hash141(before.playbackSegments) === hash141(after.playbackSegments);
   const targetEquivalent = hash141(before.targets) === hash141(after.targets);
