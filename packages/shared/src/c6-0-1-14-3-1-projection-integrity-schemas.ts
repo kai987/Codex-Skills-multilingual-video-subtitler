@@ -26,6 +26,40 @@ export const integrityFailureCode1431Schema = z.enum([
   "HASH_DOMAIN_NOT_REBOUND",
   "UNKNOWN_HASHABLE_ROW_TYPE",
 ]);
+export const nestedRowType1431Schema = z.enum([
+  "PROJECTION_ARTIFACT",
+  "PROJECTION_VARIANT",
+  "PHYSICAL_AUDIO_ROW",
+  "PLAYBACK_SEGMENT_ROW",
+  "REVIEW_TARGET_ROW",
+  "REVIEW_REGION_ROW",
+  "SAFETY_TARGET_ROW",
+  "SELECTABLE_CHILD_UNIT_ROW",
+  "TARGET_BUNDLE_ROW",
+  "CONTINUITY_LEDGER_ROW",
+  "PHASE_A_OBLIGATION_ROW",
+  "PLANNER_CERTIFICATE",
+  "PROJECTION_REBINDING_LEDGER_ROW",
+  "HIERARCHICAL_ATOM_ROW",
+]);
+const nestedRowCounts1431Schema = z
+  .object({
+    PROJECTION_ARTIFACT: count,
+    PROJECTION_VARIANT: count,
+    PHYSICAL_AUDIO_ROW: count,
+    PLAYBACK_SEGMENT_ROW: count,
+    REVIEW_TARGET_ROW: count,
+    REVIEW_REGION_ROW: count,
+    SAFETY_TARGET_ROW: count,
+    SELECTABLE_CHILD_UNIT_ROW: count,
+    TARGET_BUNDLE_ROW: count,
+    CONTINUITY_LEDGER_ROW: count,
+    PHASE_A_OBLIGATION_ROW: count,
+    PLANNER_CERTIFICATE: count,
+    PROJECTION_REBINDING_LEDGER_ROW: count,
+    HIERARCHICAL_ATOM_ROW: count,
+  })
+  .strict();
 
 const header = {
   schemaVersion: z.literal("1.0.0"),
@@ -61,7 +95,10 @@ export const projectionIntegrityPolicy1431Schema = z
 export const integrityFailure1431Schema = z
   .object({
     code: integrityFailureCode1431Schema,
+    rowType: nestedRowType1431Schema,
+    rowId: id,
     path: id,
+    pathWithinArtifact: id,
     domain: hashDomain1431Schema.nullable(),
     expectedHash: hash.nullable(),
     actualHash: hash.nullable(),
@@ -99,18 +136,32 @@ export const baselineHashFailure1431Schema = z
 
 export const projectionRebindingLedgerEntry1431Schema = z
   .object({
-    audioId: id,
-    sourceDomain: z.literal("SOURCE_WORKSPACE_AUDIO_ROW"),
-    projectedDomain: z.literal("STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW"),
-    sourceSemanticHash: hash,
-    projectedSemanticHash: hash,
-    sourceHashValid: z.literal(true),
-    projectedHashValid: z.literal(true),
+    ledgerEntryId: id,
+    projectionId: id,
+    projectionStage: z.enum(["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"]),
+    rowType: z.literal("PHYSICAL_AUDIO_ROW"),
+    rowId: id,
+    sourceArtifactType: id,
+    sourceSchemaVersion: id,
+    projectedSchemaVersion: id,
+    sourceHashDomain: z.literal("SOURCE_WORKSPACE_AUDIO_ROW"),
+    projectedHashDomain: z.literal(
+      "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW",
+    ),
+    sourceRowSemanticHash: hash,
+    projectedRowSemanticHash: hash,
+    sourceHashVerified: z.literal(true),
+    projectedHashVerified: z.literal(true),
     projectedSchemaValid: z.literal(true),
-    hashDomainRebound: z.literal(true),
+    hashDomainChanged: z.literal(true),
+    sourceAndProjectedHashEqual: z.boolean(),
     removedFields: z.tuple([z.literal("nativeSourceInterval")]),
+    addedFields: z.array(id).length(0),
+    transformedFields: z.tuple([z.literal("semanticHash")]),
+    reasons: z.tuple([z.literal("HASH_DOMAIN_CHANGED_WITHOUT_REHASH")]),
     audioByteHashPreserved: z.literal(true),
     physicalMetadataPreserved: z.literal(true),
+    semanticHash: hash,
   })
   .strict();
 export const projectionRebindingLedger1431Schema = z
@@ -125,6 +176,10 @@ export const projectionRebindingLedger1431Schema = z
     sourceHashesValid: count,
     projectedHashesValid: count,
     projectedSchemasValid: count,
+    ledgerEntryHashesValid: count,
+    hashDomainChangeCount: count,
+    removedNativeSourceIntervalCount: count,
+    sourceAndProjectedHashEqualCount: count,
     failureCount: z.literal(0),
     inferenceCount: z.literal(0),
     goldInputCount: z.literal(0),
@@ -137,7 +192,13 @@ export const projectionRebindingLedger1431Schema = z
       value.projectedRowCount === value.reboundRowCount &&
       value.reboundRowCount === value.sourceHashesValid &&
       value.sourceHashesValid === value.projectedHashesValid &&
-      value.projectedHashesValid === value.projectedSchemasValid,
+      value.projectedHashesValid === value.projectedSchemasValid &&
+      value.projectedSchemasValid === value.ledgerEntryHashesValid &&
+      value.ledgerEntryHashesValid === value.hashDomainChangeCount &&
+      value.hashDomainChangeCount === value.removedNativeSourceIntervalCount &&
+      value.sourceAndProjectedHashEqualCount ===
+        value.entries.filter((entry) => entry.sourceAndProjectedHashEqual)
+          .length,
     "Every source row must be validated and rebound exactly once",
   );
 
@@ -150,6 +211,24 @@ export const nestedPreflight1431Schema = z
     scope: z.literal("PRE_GOLD_MACHINE_FREEZE"),
     projectionSetHash: hash,
     sourceIdentity: c60114SourceIdentitySchema,
+    artifactCount: count,
+    artifacts: z.array(
+      z
+        .object({
+          artifactType: id,
+          artifactPathRelative: id,
+          artifactSemanticHash: hash,
+          artifactHashValid: z.boolean(),
+        })
+        .strict(),
+    ),
+    nestedRowTypeCounts: nestedRowCounts1431Schema,
+    nestedRowVerifiedCounts: nestedRowCounts1431Schema,
+    nestedRowFailureCounts: nestedRowCounts1431Schema,
+    nestedRowNotApplicableNoRowHashCounts: nestedRowCounts1431Schema,
+    verificationOrder: z.array(nestedRowType1431Schema).length(14),
+    hashHelperIdentity: z.literal("hashed141/assertHash141"),
+    canonicalSerializerIdentity: z.literal("stableMachineQualityJson+SHA-256"),
     projectionVariantCount: count,
     inspectedOuterHashCount: count,
     validOuterHashCount: count,
@@ -160,20 +239,32 @@ export const nestedPreflight1431Schema = z
     unknownHashableRowCount: count,
     failures: z.array(integrityFailure1431Schema),
     integrityPassed: z.boolean(),
+    validationPassed: z.boolean(),
     goldReadAttempted: z.literal(false),
     inferenceCount: z.literal(0),
   })
   .strict()
-  .refine(
-    (value) =>
-      value.integrityPassed ===
-      (value.failures.length === 0 &&
-        value.inspectedOuterHashCount === value.validOuterHashCount &&
-        value.projectedAudioRowCount === value.validProjectedAudioHashCount &&
-        value.playbackRowCount === value.validPlaybackHashCount &&
-        value.unknownHashableRowCount === 0),
-    "Nested integrity pass must reflect every recursively validated hash",
-  );
+  .refine((value) => {
+    const rowAccountingPassed = value.verificationOrder.every(
+      (rowType) =>
+        value.nestedRowTypeCounts[rowType] ===
+        value.nestedRowVerifiedCounts[rowType] +
+          value.nestedRowFailureCounts[rowType] +
+          value.nestedRowNotApplicableNoRowHashCounts[rowType],
+    );
+    const passed =
+      value.failures.length === 0 &&
+      value.artifactCount === value.artifacts.length &&
+      value.artifacts.every((artifact) => artifact.artifactHashValid) &&
+      value.inspectedOuterHashCount === value.validOuterHashCount &&
+      value.projectedAudioRowCount === value.validProjectedAudioHashCount &&
+      value.playbackRowCount === value.validPlaybackHashCount &&
+      value.unknownHashableRowCount === 0 &&
+      rowAccountingPassed;
+    return (
+      value.integrityPassed === passed && value.validationPassed === passed
+    );
+  }, "Nested integrity pass must reflect every recursively validated hash");
 
 export const projectionChangeAudit1431Schema = z
   .object({
@@ -231,8 +322,13 @@ export const machineRefreeze1431Schema = z
     finalAProjectionHash: hash,
     finalBProjectionHash: hash,
     rebindingLedgerHash: hash,
+    finalARebindingLedgerHash: hash,
+    finalBRebindingLedgerHash: hash,
     changeAuditHash: hash,
     nestedPreflightHash: hash,
+    finalANestedPreflightHash: hash,
+    finalBNestedPreflightHash: hash,
+    preFreezePreflightCount: z.literal(2),
     finalABByteParity: z.literal(true),
     finalABSemanticParity: z.literal(true),
     wavHashParity: z.literal(true),
@@ -411,6 +507,7 @@ export type BaselineHashFailure1431 = z.infer<
 export type ProjectionRebindingLedger1431 = z.infer<
   typeof projectionRebindingLedger1431Schema
 >;
+export type NestedRowType1431 = z.infer<typeof nestedRowType1431Schema>;
 export type NestedPreflight1431 = z.infer<typeof nestedPreflight1431Schema>;
 export type ProjectionChangeAudit1431 = z.infer<
   typeof projectionChangeAudit1431Schema

@@ -51,8 +51,25 @@
     "finalAProjectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "finalBProjectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "rebindingLedgerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalARebindingLedgerHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "finalBRebindingLedgerHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
     "changeAuditHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "nestedPreflightHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalANestedPreflightHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "finalBNestedPreflightHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "preFreezePreflightCount": { "type": "number", "const": 2 },
     "finalABByteParity": { "type": "boolean", "const": true },
     "finalABSemanticParity": { "type": "boolean", "const": true },
     "wavHashParity": { "type": "boolean", "const": true },
@@ -109,8 +126,13 @@
     "finalAProjectionHash",
     "finalBProjectionHash",
     "rebindingLedgerHash",
+    "finalARebindingLedgerHash",
+    "finalBRebindingLedgerHash",
     "changeAuditHash",
     "nestedPreflightHash",
+    "finalANestedPreflightHash",
+    "finalBNestedPreflightHash",
+    "preFreezePreflightCount",
     "finalABByteParity",
     "finalABSemanticParity",
     "wavHashParity",

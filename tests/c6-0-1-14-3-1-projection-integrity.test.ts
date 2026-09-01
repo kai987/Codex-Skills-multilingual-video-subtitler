@@ -140,12 +140,99 @@ describe("C6.0.1.14.3.1 projection hash integrity", () => {
       sourceRows: [source],
       projectedRows: [projected],
       sourceIdentity,
+      projectionId: "C601143_FINAL_REVIEW_DELIVERY",
+      projectionStage: "A7",
+      sourceArtifactType: "machine-review-audio-manifest-v6",
+      sourceSchemaVersion: "1.0.0",
+      projectedSchemaVersion: "1.0.0",
     });
     expect(ledger.reboundRowCount).toBe(1);
-    expect(ledger.entries[0]?.sourceSemanticHash).not.toBe(
-      ledger.entries[0]?.projectedSemanticHash,
+    expect(ledger.entries[0]?.sourceRowSemanticHash).not.toBe(
+      ledger.entries[0]?.projectedRowSemanticHash,
     );
     expect(ledger.entries[0]?.audioByteHashPreserved).toBe(true);
+    expect(ledger.entries[0]?.hashDomainChanged).toBe(true);
+    expect(ledger.entries[0]?.removedFields).toEqual(["nativeSourceInterval"]);
+    expect(ledger.ledgerEntryHashesValid).toBe(1);
+    expect(ledger.entries[0]?.semanticHash).toBe(
+      hash141(
+        Object.fromEntries(
+          Object.entries(required141(ledger.entries[0])).filter(
+            ([key]) => key !== "semanticHash",
+          ),
+        ),
+      ),
+    );
+  });
+
+  it("accounts for hashed, required-missing, and explicit N/A nested rows", () => {
+    const fixed = projections(rebindCoverageAudio1431(sourceAudio()));
+    const target = hashed141({ reviewTargetId: "target-1" });
+    const continuity = { obligationId: "obligation-1" };
+    const artifact = hashed141({
+      artifactType: "synthetic-nested-artifact",
+      targets: [target],
+      continuity: [continuity],
+    });
+    const preflight = preflightNestedSemanticIntegrity1431(fixed, [
+      {
+        artifactPathRelative: "synthetic-nested-artifact.json",
+        artifact,
+        artifactRowType: "REVIEW_TARGET_ROW",
+        rowGroups: [
+          {
+            rowType: "REVIEW_TARGET_ROW",
+            rows: artifact.targets,
+            rowPath: (index) => `$.targets[${index}]`,
+            rowHashExpected: true,
+          },
+          {
+            rowType: "CONTINUITY_LEDGER_ROW",
+            rows: artifact.continuity,
+            rowPath: (index) => `$.continuity[${index}]`,
+            rowHashExpected: false,
+          },
+        ],
+      },
+    ]);
+    expect(preflight.integrityPassed).toBe(true);
+    expect(preflight.nestedRowVerifiedCounts.REVIEW_TARGET_ROW).toBe(1);
+    expect(
+      preflight.nestedRowNotApplicableNoRowHashCounts.CONTINUITY_LEDGER_ROW,
+    ).toBe(1);
+  });
+
+  it("fails when a required nested row omits its semantic hash", () => {
+    const fixed = projections(rebindCoverageAudio1431(sourceAudio()));
+    const artifact = hashed141({
+      artifactType: "synthetic-required-row",
+      targets: [{ reviewTargetId: "target-1" }],
+    });
+    const preflight = preflightNestedSemanticIntegrity1431(fixed, [
+      {
+        artifactPathRelative: "synthetic-required-row.json",
+        artifact,
+        artifactRowType: "REVIEW_TARGET_ROW",
+        rowGroups: [
+          {
+            rowType: "REVIEW_TARGET_ROW",
+            rows: artifact.targets,
+            rowPath: (index) => `$.targets[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      },
+    ]);
+    expect(preflight.integrityPassed).toBe(false);
+    expect(preflight.failures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "PROJECTED_ROW_HASH_MISSING",
+          rowType: "REVIEW_TARGET_ROW",
+          pathWithinArtifact: "$.targets[0]",
+        }),
+      ]),
+    );
   });
 
   it("detects nested stale hashes even when every outer hash is valid", () => {

@@ -10,6 +10,7 @@ import {
   type BaselineHashFailure1431,
   type C60114MachineCoverageProjection,
   type NestedPreflight1431,
+  type NestedRowType1431,
   type ProjectionChangeAudit1431,
   type ProjectionRebindingLedger1431,
   type Projections143,
@@ -93,6 +94,11 @@ export function buildProjectionRebindingLedger1431(input: {
   sourceRows: readonly ParsedSourceAudioRow[];
   projectedRows: readonly ProjectedAudioRow[];
   sourceIdentity: ParsedSourceAudioRow["sourceIdentity"];
+  projectionId: string;
+  projectionStage: "A0" | "A1" | "A2" | "A3" | "A4" | "A5" | "A6" | "A7";
+  sourceArtifactType: string;
+  sourceSchemaVersion: string;
+  projectedSchemaVersion: string;
 }): ProjectionRebindingLedger1431 {
   const projectedById = new Map(
     input.projectedRows.map((row) => [row.audioId, row] as const),
@@ -108,8 +114,6 @@ export function buildProjectionRebindingLedger1431(input: {
     );
     c60114CoveragePhysicalAudioSchema.parse(projected);
     assertHash141(projected);
-    if (source.semanticHash === projected.semanticHash)
-      throw new Error(`C6011431_HASH_DOMAIN_NOT_REBOUND:${source.audioId}`);
     const rebuilt = rebindCoverageAudio1431(source);
     if (hash141(rebuilt) !== hash141(projected))
       throw new Error(
@@ -128,20 +132,33 @@ export function buildProjectionRebindingLedger1431(input: {
       throw new Error(
         `C6011431_PROJECTED_PHYSICAL_METADATA_CHANGED:${source.audioId}`,
       );
-    return {
-      audioId: source.audioId,
-      sourceDomain: "SOURCE_WORKSPACE_AUDIO_ROW" as const,
-      projectedDomain: "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW" as const,
-      sourceSemanticHash: source.semanticHash,
-      projectedSemanticHash: projected.semanticHash,
-      sourceHashValid: true as const,
-      projectedHashValid: true as const,
+    return hashed141({
+      ledgerEntryId: `${input.projectionStage}:${source.audioId}`,
+      projectionId: input.projectionId,
+      projectionStage: input.projectionStage,
+      rowType: "PHYSICAL_AUDIO_ROW" as const,
+      rowId: source.audioId,
+      sourceArtifactType: input.sourceArtifactType,
+      sourceSchemaVersion: input.sourceSchemaVersion,
+      projectedSchemaVersion: input.projectedSchemaVersion,
+      sourceHashDomain: "SOURCE_WORKSPACE_AUDIO_ROW" as const,
+      projectedHashDomain:
+        "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW" as const,
+      sourceRowSemanticHash: source.semanticHash,
+      projectedRowSemanticHash: projected.semanticHash,
+      sourceHashVerified: true as const,
+      projectedHashVerified: true as const,
       projectedSchemaValid: true as const,
-      hashDomainRebound: true as const,
+      hashDomainChanged: true as const,
+      sourceAndProjectedHashEqual:
+        source.semanticHash === projected.semanticHash,
       removedFields: ["nativeSourceInterval"] as const,
+      addedFields: [] as const,
+      transformedFields: ["semanticHash"] as const,
+      reasons: ["HASH_DOMAIN_CHANGED_WITHOUT_REHASH"] as const,
       audioByteHashPreserved: true as const,
       physicalMetadataPreserved: true as const,
-    };
+    });
   });
   return projectionRebindingLedger1431Schema.parse(
     hashed141({
@@ -157,6 +174,12 @@ export function buildProjectionRebindingLedger1431(input: {
       sourceHashesValid: entries.length,
       projectedHashesValid: entries.length,
       projectedSchemasValid: entries.length,
+      ledgerEntryHashesValid: entries.length,
+      hashDomainChangeCount: entries.length,
+      removedNativeSourceIntervalCount: entries.length,
+      sourceAndProjectedHashEqualCount: entries.filter(
+        (entry) => entry.sourceAndProjectedHashEqual,
+      ).length,
       failureCount: 0,
       inferenceCount: 0,
       goldInputCount: 0,
@@ -166,6 +189,8 @@ export function buildProjectionRebindingLedger1431(input: {
 
 function failure1431(input: {
   code: NestedPreflight1431["failures"][number]["code"];
+  rowType: NestedRowType1431;
+  rowId: string;
   path: string;
   domain: NestedPreflight1431["failures"][number]["domain"];
   expectedHash?: string | null;
@@ -173,6 +198,7 @@ function failure1431(input: {
 }) {
   return {
     ...input,
+    pathWithinArtifact: input.path,
     expectedHash: input.expectedHash ?? null,
     actualHash: input.actualHash ?? null,
   };
@@ -211,6 +237,8 @@ export function reproduceBaselineHashFailure1431(input: {
             source?.semanticHash === row.semanticHash
               ? "PROJECTED_ROW_HASH_STALE"
               : "NESTED_ROW_HASH_INVALID",
+          rowType: "PHYSICAL_AUDIO_ROW",
+          rowId: row.audioId,
           path: `variants.A7.projection.physicalAudio[${index}]`,
           domain: "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW",
           expectedHash: expected,
@@ -279,168 +307,301 @@ function unknownHashableRows1431(
   );
 }
 
+export const nestedVerificationOrder1431 = [
+  "PROJECTION_ARTIFACT",
+  "PROJECTION_VARIANT",
+  "PHYSICAL_AUDIO_ROW",
+  "PLAYBACK_SEGMENT_ROW",
+  "REVIEW_TARGET_ROW",
+  "REVIEW_REGION_ROW",
+  "SAFETY_TARGET_ROW",
+  "SELECTABLE_CHILD_UNIT_ROW",
+  "TARGET_BUNDLE_ROW",
+  "CONTINUITY_LEDGER_ROW",
+  "PHASE_A_OBLIGATION_ROW",
+  "PLANNER_CERTIFICATE",
+  "PROJECTION_REBINDING_LEDGER_ROW",
+  "HIERARCHICAL_ATOM_ROW",
+] as const satisfies readonly NestedRowType1431[];
+
+export interface NestedArtifactRowGroup1431 {
+  rowType: NestedRowType1431;
+  rows: readonly unknown[];
+  rowPath: (index: number) => string;
+  rowHashExpected: boolean;
+}
+
+export interface NestedArtifact1431Input {
+  artifactPathRelative: string;
+  artifact: { semanticHash: string; artifactType?: string };
+  artifactRowType: NestedRowType1431;
+  rowGroups: readonly NestedArtifactRowGroup1431[];
+}
+
+const emptyNestedCounts1431 = (): Record<NestedRowType1431, number> =>
+  Object.fromEntries(
+    nestedVerificationOrder1431.map((type) => [type, 0]),
+  ) as Record<NestedRowType1431, number>;
+
+function nestedRowId1431(row: unknown, index: number): string {
+  if (row && typeof row === "object") {
+    const value = row as Record<string, unknown>;
+    for (const key of [
+      "audioId",
+      "playbackSegmentId",
+      "reviewTargetId",
+      "regionId",
+      "targetId",
+      "childUnitId",
+      "bundleId",
+      "obligationId",
+      "artifactType",
+    ])
+      if (typeof value[key] === "string") return value[key];
+  }
+  return `row-${index}`;
+}
+
 export function preflightNestedSemanticIntegrity1431(
   projections: Projections143,
+  additionalArtifacts: readonly NestedArtifact1431Input[] = [],
 ): NestedPreflight1431 {
-  const failures: NestedPreflight1431["failures"] = [];
-  let validOuter = 0;
-  const expectedRoot = expectedHash1431(projections);
-  if (expectedRoot === projections.semanticHash) validOuter++;
-  else
-    failures.push(
-      failure1431({
-        code: "NESTED_ROW_HASH_INVALID",
-        path: "$",
-        domain: "C601143_PROJECTION_SET",
-        expectedHash: expectedRoot,
-        actualHash: projections.semanticHash,
-      }),
-    );
-  for (let index = 0; index < projections.variants.length; index++) {
-    const variant = required141(projections.variants[index]);
-    const expected = expectedHash1431(variant);
-    if (expected === variant.semanticHash) validOuter++;
+  const failures: NestedPreflight1431["failures"] = [],
+    counts = emptyNestedCounts1431(),
+    verified = emptyNestedCounts1431(),
+    failed = emptyNestedCounts1431(),
+    notApplicable = emptyNestedCounts1431(),
+    artifacts: NestedPreflight1431["artifacts"] = [];
+  let inspectedOuter = 0,
+    validOuter = 0,
+    validOfficialAudio = 0,
+    validOfficialPlayback = 0;
+
+  const inspectArtifact = (
+    artifact: { semanticHash: string; artifactType?: string },
+    artifactPathRelative: string,
+    rowType: NestedRowType1431,
+  ) => {
+    inspectedOuter++;
+    const expected = expectedHash1431(artifact),
+      valid = expected === artifact.semanticHash;
+    if (valid) validOuter++;
     else
       failures.push(
         failure1431({
           code: "NESTED_ROW_HASH_INVALID",
-          path: `$.variants[${index}]`,
-          domain: "C601143_PROJECTION_VARIANT",
+          rowType,
+          rowId: artifact.artifactType ?? artifactPathRelative,
+          path: "$",
+          domain:
+            rowType === "PROJECTION_ARTIFACT" ? "C601143_PROJECTION_SET" : null,
           expectedHash: expected,
-          actualHash: variant.semanticHash,
+          actualHash: artifact.semanticHash,
         }),
       );
-  }
+    artifacts.push({
+      artifactType: artifact.artifactType ?? rowType,
+      artifactPathRelative,
+      artifactSemanticHash: artifact.semanticHash,
+      artifactHashValid: valid,
+    });
+    return valid;
+  };
+
+  counts.PROJECTION_ARTIFACT = 1;
+  const rootValid = inspectArtifact(
+    projections,
+    "machine-coverage-projections.json",
+    "PROJECTION_ARTIFACT",
+  );
+  if (rootValid) verified.PROJECTION_ARTIFACT = 1;
+  else failed.PROJECTION_ARTIFACT = 1;
+
+  const projectionKnownPaths = new Set<string>(["$"]);
   const officialIndex = projections.variants.findIndex(
     (variant) => variant.stage === projections.officialStage,
   );
   const official = required141(projections.variants[officialIndex]);
-  let validAudio = 0;
+  counts.PROJECTION_VARIANT = projections.variants.length;
   for (
-    let index = 0;
-    index < official.projection.physicalAudio.length;
-    index++
+    let variantIndex = 0;
+    variantIndex < projections.variants.length;
+    variantIndex++
   ) {
-    const row = required141(official.projection.physicalAudio[index]);
-    const path = `$.variants[${officialIndex}].projection.physicalAudio[${index}]`;
-    const parsed = c60114CoveragePhysicalAudioSchema.safeParse(row);
-    if (!parsed.success) {
-      failures.push(
-        failure1431({
-          code: "PROJECTED_ROW_SCHEMA_INVALID",
-          path,
-          domain: "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW",
-          actualHash: row.semanticHash,
-        }),
-      );
-      continue;
-    }
-    const expected = expectedHash1431(row);
-    if (!row.semanticHash)
-      failures.push(
-        failure1431({
-          code: "PROJECTED_ROW_HASH_MISSING",
-          path,
-          domain: "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW",
-          expectedHash: expected,
-        }),
-      );
-    else if (expected !== row.semanticHash)
+    const variant = required141(projections.variants[variantIndex]),
+      variantPath = `$.variants[${variantIndex}]`,
+      expectedVariant = expectedHash1431(variant);
+    inspectedOuter++;
+    projectionKnownPaths.add(variantPath);
+    if (expectedVariant === variant.semanticHash) {
+      validOuter++;
+      verified.PROJECTION_VARIANT++;
+    } else {
+      failed.PROJECTION_VARIANT++;
       failures.push(
         failure1431({
           code: "NESTED_ROW_HASH_INVALID",
-          path,
-          domain: "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW",
-          expectedHash: expected,
-          actualHash: row.semanticHash,
+          rowType: "PROJECTION_VARIANT",
+          rowId: variant.stage,
+          path: variantPath,
+          domain: "C601143_PROJECTION_VARIANT",
+          expectedHash: expectedVariant,
+          actualHash: variant.semanticHash,
         }),
       );
-    else validAudio++;
+    }
+    counts.PHYSICAL_AUDIO_ROW += variant.projection.physicalAudio.length;
+    for (
+      let index = 0;
+      index < variant.projection.physicalAudio.length;
+      index++
+    ) {
+      const row = required141(variant.projection.physicalAudio[index]),
+        rowPath = `${variantPath}.projection.physicalAudio[${index}]`,
+        parsed = c60114CoveragePhysicalAudioSchema.safeParse(row),
+        expected = expectedHash1431(row),
+        valid = parsed.success && expected === row.semanticHash;
+      projectionKnownPaths.add(rowPath);
+      if (valid) {
+        verified.PHYSICAL_AUDIO_ROW++;
+        if (variantIndex === officialIndex) validOfficialAudio++;
+      } else {
+        failed.PHYSICAL_AUDIO_ROW++;
+        failures.push(
+          failure1431({
+            code: !parsed.success
+              ? "PROJECTED_ROW_SCHEMA_INVALID"
+              : row.semanticHash
+                ? "NESTED_ROW_HASH_INVALID"
+                : "PROJECTED_ROW_HASH_MISSING",
+            rowType: "PHYSICAL_AUDIO_ROW",
+            rowId: row.audioId,
+            path: rowPath,
+            domain: "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW",
+            expectedHash: expected,
+            actualHash: row.semanticHash,
+          }),
+        );
+      }
+    }
+    counts.PLAYBACK_SEGMENT_ROW += variant.projection.playbackSegments.length;
+    for (
+      let index = 0;
+      index < variant.projection.playbackSegments.length;
+      index++
+    ) {
+      const row = required141(variant.projection.playbackSegments[index]),
+        rowPath = `${variantPath}.projection.playbackSegments[${index}]`,
+        parsed = c60114CoveragePlaybackSegmentSchema.safeParse(row),
+        expected = expectedHash1431(row),
+        valid = parsed.success && expected === row.semanticHash;
+      projectionKnownPaths.add(rowPath);
+      if (valid) {
+        verified.PLAYBACK_SEGMENT_ROW++;
+        if (variantIndex === officialIndex) validOfficialPlayback++;
+      } else {
+        failed.PLAYBACK_SEGMENT_ROW++;
+        failures.push(
+          failure1431({
+            code: !parsed.success
+              ? "PROJECTED_ROW_SCHEMA_INVALID"
+              : "NESTED_ROW_HASH_INVALID",
+            rowType: "PLAYBACK_SEGMENT_ROW",
+            rowId: row.playbackSegmentId,
+            path: rowPath,
+            domain: "STRICT_C601143_COVERAGE_PLAYBACK_PROJECTION_ROW",
+            expectedHash: expected,
+            actualHash: row.semanticHash,
+          }),
+        );
+      }
+    }
   }
-  let validPlayback = 0;
-  for (
-    let index = 0;
-    index < official.projection.playbackSegments.length;
-    index++
-  ) {
-    const row = required141(official.projection.playbackSegments[index]);
-    const path = `$.variants[${officialIndex}].projection.playbackSegments[${index}]`;
-    const parsed = c60114CoveragePlaybackSegmentSchema.safeParse(row);
-    const expected = expectedHash1431(row);
-    if (!parsed.success || expected !== row.semanticHash)
-      failures.push(
-        failure1431({
-          code: !parsed.success
-            ? "PROJECTED_ROW_SCHEMA_INVALID"
-            : "NESTED_ROW_HASH_INVALID",
-          path,
-          domain: "STRICT_C601143_COVERAGE_PLAYBACK_PROJECTION_ROW",
-          expectedHash: expected,
-          actualHash: row.semanticHash,
-        }),
-      );
-    else validPlayback++;
+
+  let unknown = unknownHashableRows1431(projections, projectionKnownPaths);
+  for (const input of additionalArtifacts) {
+    inspectArtifact(
+      input.artifact,
+      input.artifactPathRelative,
+      input.artifactRowType,
+    );
+    const knownPaths = new Set<string>(["$"]);
+    for (const group of input.rowGroups) {
+      counts[group.rowType] += group.rows.length;
+      for (let index = 0; index < group.rows.length; index++) {
+        const row = required141(group.rows[index]),
+          rowPath = group.rowPath(index),
+          record =
+            row && typeof row === "object"
+              ? (row as Record<string, unknown>)
+              : null,
+          actual = record?.semanticHash;
+        if (typeof actual !== "string") {
+          if (group.rowHashExpected) {
+            failed[group.rowType]++;
+            failures.push(
+              failure1431({
+                code: "PROJECTED_ROW_HASH_MISSING",
+                rowType: group.rowType,
+                rowId: nestedRowId1431(row, index),
+                path: rowPath,
+                domain: null,
+              }),
+            );
+          } else notApplicable[group.rowType]++;
+          continue;
+        }
+        knownPaths.add(rowPath);
+        const expected = expectedHash1431(record);
+        if (expected === actual) verified[group.rowType]++;
+        else {
+          failed[group.rowType]++;
+          failures.push(
+            failure1431({
+              code: "NESTED_ROW_HASH_INVALID",
+              rowType: group.rowType,
+              rowId: nestedRowId1431(row, index),
+              path: rowPath,
+              domain: null,
+              expectedHash: expected,
+              actualHash: actual,
+            }),
+          );
+        }
+      }
+    }
+    const artifactUnknown = unknownHashableRows1431(input.artifact, knownPaths);
+    unknown = [
+      ...unknown,
+      ...artifactUnknown.map((path) => `${input.artifactPathRelative}:${path}`),
+    ];
   }
-  const knownPaths = new Set<string>([
-    "$",
-    ...projections.variants.map((_, index) => `$.variants[${index}]`),
-    ...official.projection.physicalAudio.map(
-      (_, index) =>
-        `$.variants[${officialIndex}].projection.physicalAudio[${index}]`,
-    ),
-    ...official.projection.playbackSegments.map(
-      (_, index) =>
-        `$.variants[${officialIndex}].projection.playbackSegments[${index}]`,
-    ),
-  ]);
-  // Unknown-row discovery is scoped to the official strict projection plus
-  // its containing envelopes. Other variants are checked through their outer
-  // hashes and use the same A4-A7 final row instances.
-  const unknown = unknownHashableRows1431(
-    {
-      semanticHash: projections.semanticHash,
-      variant: {
-        semanticHash: official.semanticHash,
-        projection: official.projection,
-      },
-    },
-    new Set([
-      "$",
-      "$.variant",
-      ...official.projection.physicalAudio.map(
-        (_, index) => `$.variant.projection.physicalAudio[${index}]`,
-      ),
-      ...official.projection.playbackSegments.map(
-        (_, index) => `$.variant.projection.playbackSegments[${index}]`,
-      ),
-    ]),
-  );
-  void knownPaths;
   for (const path of unknown)
     failures.push(
       failure1431({
         code: "UNKNOWN_HASHABLE_ROW_TYPE",
+        rowType: "PROJECTION_ARTIFACT",
+        rowId: path,
         path,
         domain: null,
       }),
     );
-  const nestedFailures = failures.some((row) =>
-    [
-      "NESTED_ROW_HASH_INVALID",
-      "PROJECTED_ROW_HASH_MISSING",
-      "PROJECTED_ROW_SCHEMA_INVALID",
-    ].includes(row.code),
+  const nestedFailures = failures.some(
+    (row) => row.path !== "$" || row.rowType !== "PROJECTION_ARTIFACT",
   );
-  if (expectedRoot === projections.semanticHash && nestedFailures)
+  if (rootValid && nestedFailures)
     failures.push(
       failure1431({
         code: "OUTER_HASH_VALID_NESTED_HASH_INVALID",
+        rowType: "PROJECTION_ARTIFACT",
+        rowId: "machine-coverage-projections",
         path: "$",
         domain: "C601143_PROJECTION_SET",
-        expectedHash: expectedRoot,
+        expectedHash: expectedHash1431(projections),
         actualHash: projections.semanticHash,
       }),
     );
+  const passed = failures.length === 0;
   return nestedPreflight1431Schema.parse(
     hashed141({
       schemaVersion: "1.0.0",
@@ -450,16 +611,26 @@ export function preflightNestedSemanticIntegrity1431(
       scope: "PRE_GOLD_MACHINE_FREEZE",
       projectionSetHash: projections.semanticHash,
       sourceIdentity: projections.sourceIdentity,
+      artifactCount: artifacts.length,
+      artifacts,
+      nestedRowTypeCounts: counts,
+      nestedRowVerifiedCounts: verified,
+      nestedRowFailureCounts: failed,
+      nestedRowNotApplicableNoRowHashCounts: notApplicable,
+      verificationOrder: nestedVerificationOrder1431,
+      hashHelperIdentity: "hashed141/assertHash141",
+      canonicalSerializerIdentity: "stableMachineQualityJson+SHA-256",
       projectionVariantCount: projections.variants.length,
-      inspectedOuterHashCount: projections.variants.length + 1,
+      inspectedOuterHashCount: inspectedOuter,
       validOuterHashCount: validOuter,
       projectedAudioRowCount: official.projection.physicalAudio.length,
-      validProjectedAudioHashCount: validAudio,
+      validProjectedAudioHashCount: validOfficialAudio,
       playbackRowCount: official.projection.playbackSegments.length,
-      validPlaybackHashCount: validPlayback,
+      validPlaybackHashCount: validOfficialPlayback,
       unknownHashableRowCount: unknown.length,
       failures,
-      integrityPassed: failures.length === 0,
+      integrityPassed: passed,
+      validationPassed: passed,
       goldReadAttempted: false,
       inferenceCount: 0,
     }),

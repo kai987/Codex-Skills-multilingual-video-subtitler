@@ -21,10 +21,13 @@ import {
   projectionIntegrityPolicy1431,
   reproduceBaselineHashFailure1431,
   assertPreGoldIntegrity1431,
+  type NestedArtifact1431Input,
+  type NestedArtifactRowGroup1431,
 } from "../packages/video-subtitler/src/review/c6011431-projection-integrity.js";
 import {
   durableJson141,
   readJson141,
+  safeRelative141,
 } from "../packages/video-subtitler/src/review/c601141-io.js";
 import {
   hash141,
@@ -124,12 +127,207 @@ await buildWorkspace143({
   generatedAt: prepared.state.createdAt,
 });
 const code = await machineCodeSnapshot143(process.cwd());
+let finalALedger: shared.ProjectionRebindingLedger1431 | undefined,
+  finalBLedger: shared.ProjectionRebindingLedger1431 | undefined,
+  finalAPreflight: shared.NestedPreflight1431 | undefined,
+  finalBPreflight: shared.NestedPreflight1431 | undefined;
+const preFreezeValidate =
+  (role: "A" | "B") =>
+  async (input: {
+    root: string;
+    projections: shared.Projections143;
+    built: Awaited<ReturnType<typeof buildWorkspace143>>;
+    selection: Awaited<ReturnType<typeof loadSelection143>>;
+  }) => {
+    const workspace = shared.workspace143Schema.parse(
+        required141(input.built.workspaceData.monotonicSafetyReviewV3),
+      ),
+      official = required141(
+        input.projections.variants.find(
+          (variant) => variant.stage === input.projections.officialStage,
+        ),
+      ),
+      ledger = buildProjectionRebindingLedger1431({
+        sourceRows: workspace.audio.audio,
+        projectedRows: official.projection.physicalAudio,
+        sourceIdentity: workspace.sourceIdentity,
+        projectionId: official.officialPlanId,
+        projectionStage: official.stage,
+        sourceArtifactType: workspace.audio.artifactType,
+        sourceSchemaVersion: workspace.audio.schemaVersion,
+        projectedSchemaVersion: "1.0.0",
+      }),
+      ledgerPath = path.join(
+        input.root,
+        "machine-projection-hash-rebinding-ledger.json",
+      );
+    await durableJson141(ledgerPath, ledger);
+    const artifact = (
+      relativePath: string,
+      value: { semanticHash: string; artifactType?: string },
+      artifactRowType: shared.NestedRowType1431,
+      rowGroups: NestedArtifactRowGroup1431[],
+    ): NestedArtifact1431Input => ({
+      artifactPathRelative: safeRelative141(
+        input.root,
+        path.join(input.root, relativePath),
+      ),
+      artifact: value,
+      artifactRowType,
+      rowGroups,
+    });
+    const nestedArtifacts: NestedArtifact1431Input[] = [
+      artifact(
+        "review-workspace/machine-review-target-intervals-v5.json",
+        workspace.targets,
+        "REVIEW_TARGET_ROW",
+        [
+          {
+            rowType: "REVIEW_TARGET_ROW",
+            rows: workspace.targets.targets,
+            rowPath: (index) => `$.targets[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      ),
+      artifact(
+        "review-workspace/machine-review-regions-v6.json",
+        workspace.regions,
+        "REVIEW_REGION_ROW",
+        [
+          {
+            rowType: "REVIEW_REGION_ROW",
+            rows: workspace.regions.regions,
+            rowPath: (index) => `$.regions[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      ),
+      artifact(
+        "machine-artifacts/machine-missing-safety-reserve-targets-v3.json",
+        input.selection.safety,
+        "SAFETY_TARGET_ROW",
+        [
+          {
+            rowType: "SAFETY_TARGET_ROW",
+            rows: input.selection.safety.targets,
+            rowPath: (index) => `$.targets[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      ),
+      artifact(
+        "machine-artifacts/machine-selectable-speech-child-units-v1.json",
+        input.selection.hierarchy,
+        "SELECTABLE_CHILD_UNIT_ROW",
+        [
+          {
+            rowType: "HIERARCHICAL_ATOM_ROW",
+            rows: input.selection.hierarchy.atoms,
+            rowPath: (index) => `$.atoms[${index}]`,
+            rowHashExpected: true,
+          },
+          {
+            rowType: "SELECTABLE_CHILD_UNIT_ROW",
+            rows: input.selection.hierarchy.children,
+            rowPath: (index) => `$.children[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      ),
+      artifact(
+        "machine-artifacts/machine-review-target-bundle-candidates-v1.json",
+        input.selection.bundles,
+        "TARGET_BUNDLE_ROW",
+        [
+          {
+            rowType: "TARGET_BUNDLE_ROW",
+            rows: input.selection.bundles.candidates,
+            rowPath: (index) => `$.candidates[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      ),
+      artifact(
+        "machine-artifacts/machine-cross-stage-selection-continuity-ledger.json",
+        input.selection.continuity,
+        "CONTINUITY_LEDGER_ROW",
+        [
+          {
+            rowType: "CONTINUITY_LEDGER_ROW",
+            rows: input.selection.continuity.entries,
+            rowPath: (index) => `$.entries[${index}]`,
+            rowHashExpected: false,
+          },
+        ],
+      ),
+      artifact(
+        "machine-artifacts/machine-phase-a-coverage-obligations.json",
+        input.selection.obligations,
+        "PHASE_A_OBLIGATION_ROW",
+        [
+          {
+            rowType: "PHASE_A_OBLIGATION_ROW",
+            rows: input.selection.obligations.obligations,
+            rowPath: (index) => `$.obligations[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      ),
+      artifact(
+        "machine-artifacts/machine-final-safety-planner-certificate.json",
+        input.selection.planner,
+        "PLANNER_CERTIFICATE",
+        [
+          {
+            rowType: "PLANNER_CERTIFICATE",
+            rows: [input.selection.planner],
+            rowPath: () => "$",
+            rowHashExpected: true,
+          },
+        ],
+      ),
+      artifact(
+        "machine-projection-hash-rebinding-ledger.json",
+        ledger,
+        "PROJECTION_REBINDING_LEDGER_ROW",
+        [
+          {
+            rowType: "PROJECTION_REBINDING_LEDGER_ROW",
+            rows: ledger.entries,
+            rowPath: (index) => `$.entries[${index}]`,
+            rowHashExpected: true,
+          },
+        ],
+      ),
+    ];
+    const preflight = preflightNestedSemanticIntegrity1431(
+      input.projections,
+      nestedArtifacts,
+    );
+    assertPreGoldIntegrity1431(preflight);
+    await durableJson141(
+      path.join(
+        input.root,
+        "c6-0-1-14-3-1-nested-semantic-integrity-preflight.json",
+      ),
+      preflight,
+    );
+    if (role === "A") {
+      finalALedger = ledger;
+      finalAPreflight = preflight;
+    } else {
+      finalBLedger = ledger;
+      finalBPreflight = preflight;
+    }
+  };
 const finalA = await buildFinal143({
   role: "A",
   state: prepared.state,
   baseline: prepared.baseline,
   policy: prepared.policy,
   code,
+  preFreezeValidate: preFreezeValidate("A"),
 });
 const finalB = await buildFinal143({
   role: "B",
@@ -137,6 +335,7 @@ const finalB = await buildFinal143({
   baseline: prepared.baseline,
   policy: prepared.policy,
   code,
+  preFreezeValidate: preFreezeValidate("B"),
 });
 const parity = await compareFinals143({
   state: prepared.state,
@@ -158,14 +357,20 @@ const currentReviewData = (await readJson141(
 const currentWorkspace = shared.workspace143Schema.parse(
   required141(currentReviewData.monotonicSafetyReviewV3),
 );
-const official = required141(
-  finalA.projections.variants.find((variant) => variant.stage === "A7"),
-);
-const ledger = buildProjectionRebindingLedger1431({
-  sourceRows: currentWorkspace.audio.audio,
-  projectedRows: official.projection.physicalAudio,
-  sourceIdentity: currentWorkspace.sourceIdentity,
-});
+const ledger = required141(finalALedger, "C6011431_FINAL_A_LEDGER_MISSING"),
+  ledgerB = required141(finalBLedger, "C6011431_FINAL_B_LEDGER_MISSING"),
+  preflight = required141(
+    finalAPreflight,
+    "C6011431_FINAL_A_PREFLIGHT_MISSING",
+  ),
+  preflightB = required141(
+    finalBPreflight,
+    "C6011431_FINAL_B_PREFLIGHT_MISSING",
+  );
+if (ledger.semanticHash !== ledgerB.semanticHash)
+  throw new Error("C6011431_FINAL_AB_LEDGER_PARITY_FAILED");
+if (preflight.semanticHash !== preflightB.semanticHash)
+  throw new Error("C6011431_FINAL_AB_PREFLIGHT_PARITY_FAILED");
 const changeAudit = auditProjectionChanges1431({
   before: previousProjections,
   after: finalA.projections,
@@ -183,14 +388,19 @@ if (!changeAudit.passed)
   throw new Error(
     `C6011431_FORBIDDEN_PROJECTION_CHANGE:${changeAudit.forbiddenChanges.join(",")}`,
   );
-const preflight = preflightNestedSemanticIntegrity1431(finalA.projections);
-assertPreGoldIntegrity1431(preflight);
 await durableJson141(
   path.join(
     required141(prepared.state.outputs["hash-rebinding"]),
     "machine-projection-hash-rebinding-ledger.json",
   ),
   ledger,
+);
+await durableJson141(
+  path.join(
+    required141(prepared.state.outputs["hash-rebinding"]),
+    "machine-projection-hash-rebinding-ledger-final-b.json",
+  ),
+  ledgerB,
 );
 await durableJson141(
   path.join(
@@ -205,6 +415,13 @@ await durableJson141(
     "c6-0-1-14-3-1-nested-semantic-integrity-preflight.json",
   ),
   preflight,
+);
+await durableJson141(
+  path.join(
+    required141(prepared.state.outputs["nested-preflight"]),
+    "c6-0-1-14-3-1-nested-semantic-integrity-preflight-final-b.json",
+  ),
+  preflightB,
 );
 
 const wavFiles = finalA.freeze.artifacts.filter((row) =>
@@ -222,8 +439,13 @@ const refreeze = shared.machineRefreeze1431Schema.parse(
     finalAProjectionHash: finalA.projections.semanticHash,
     finalBProjectionHash: finalB.projections.semanticHash,
     rebindingLedgerHash: ledger.semanticHash,
+    finalARebindingLedgerHash: ledger.semanticHash,
+    finalBRebindingLedgerHash: ledgerB.semanticHash,
     changeAuditHash: changeAudit.semanticHash,
     nestedPreflightHash: preflight.semanticHash,
+    finalANestedPreflightHash: preflight.semanticHash,
+    finalBNestedPreflightHash: preflightB.semanticHash,
+    preFreezePreflightCount: 2,
     finalABByteParity: true,
     finalABSemanticParity: true,
     wavHashParity: true,
@@ -279,6 +501,9 @@ console.log(
         audio: `${preflight.validProjectedAudioHashCount}/${preflight.projectedAudioRowCount}`,
         playback: `${preflight.validPlaybackHashCount}/${preflight.playbackRowCount}`,
         failures: preflight.failures.length,
+        artifacts: preflight.artifactCount,
+        rowTypes: preflight.nestedRowTypeCounts,
+        preFreezeRuns: refreeze.preFreezePreflightCount,
       },
       replay: {
         detector: `${refreeze.detectorReplayHits}/${refreeze.detectorReplayExpected}`,

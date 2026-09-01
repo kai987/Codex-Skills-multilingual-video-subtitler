@@ -228,6 +228,13 @@ export async function buildFinal143(input: {
   baseline: Baseline143;
   policy: Policy143;
   code: Awaited<ReturnType<typeof machineCodeSnapshot143>>;
+  preFreezeValidate?: (value: {
+    root: string;
+    projections: Awaited<ReturnType<typeof materializeProjections143>>;
+    built: Awaited<ReturnType<typeof buildWorkspace143>>;
+    replay: Awaited<ReturnType<typeof exactReplay143>>;
+    selection: Awaited<ReturnType<typeof loadSelection143>>;
+  }) => Promise<void>;
 }) {
   const root = required141(
     input.state.outputs[`final-${input.role.toLowerCase()}`],
@@ -342,6 +349,13 @@ export async function buildFinal143(input: {
     path.join(root, "machine-coverage-projections.json"),
     projections,
   );
+  await input.preFreezeValidate?.({
+    root,
+    projections,
+    built,
+    replay,
+    selection,
+  });
   const freeze = await freezeFinal143({
     root,
     role: input.role,

@@ -107,7 +107,28 @@
               "UNKNOWN_HASHABLE_ROW_TYPE"
             ]
           },
+          "rowType": {
+            "type": "string",
+            "enum": [
+              "PROJECTION_ARTIFACT",
+              "PROJECTION_VARIANT",
+              "PHYSICAL_AUDIO_ROW",
+              "PLAYBACK_SEGMENT_ROW",
+              "REVIEW_TARGET_ROW",
+              "REVIEW_REGION_ROW",
+              "SAFETY_TARGET_ROW",
+              "SELECTABLE_CHILD_UNIT_ROW",
+              "TARGET_BUNDLE_ROW",
+              "CONTINUITY_LEDGER_ROW",
+              "PHASE_A_OBLIGATION_ROW",
+              "PLANNER_CERTIFICATE",
+              "PROJECTION_REBINDING_LEDGER_ROW",
+              "HIERARCHICAL_ATOM_ROW"
+            ]
+          },
+          "rowId": { "type": "string", "minLength": 1 },
           "path": { "type": "string", "minLength": 1 },
+          "pathWithinArtifact": { "type": "string", "minLength": 1 },
           "domain": {
             "anyOf": [
               {
@@ -136,7 +157,16 @@
             ]
           }
         },
-        "required": ["code", "path", "domain", "expectedHash", "actualHash"],
+        "required": [
+          "code",
+          "rowType",
+          "rowId",
+          "path",
+          "pathWithinArtifact",
+          "domain",
+          "expectedHash",
+          "actualHash"
+        ],
         "additionalProperties": false
       }
     },
