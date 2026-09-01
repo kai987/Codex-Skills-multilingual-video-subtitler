@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { planner145Schema, policy145Schema, route145Schema } from "@mvl/shared";
 import { fixture145 } from "./fixtures/c601145-fixture.js";
 import { hashed141 } from "../packages/video-subtitler/src/review/c601141-policy.js";
+import { c601145WorkspaceJavascript } from "../packages/video-subtitler/src/review/c601145-review-workspace-ui.js";
 
 describe("C6.0.1.14.5 safety coverage units and review contract", () => {
   it("freezes a replay-only, Gold-free product contract", () => {
@@ -142,5 +143,22 @@ describe("C6.0.1.14.5 safety coverage units and review contract", () => {
       );
     expect(route.route).toBe("GO_C6_0_1_15_REGION_RANKER_RECALIBRATION");
     expect(route.individuallyFeasibleUnselectedChildCount).toBe(99);
+  });
+
+  it("adds the Unit contract fields to the existing read-only review UI", () => {
+    const javascript = c601145WorkspaceJavascript();
+    for (const label of [
+      "Coverage Unit Core",
+      "Selected Machine Anchor",
+      "Review Audio Envelope",
+      "Contract Type",
+      "Detector/Evidence Families",
+      "Existing Text Candidate",
+      "ADD_NEW_CUE",
+    ])
+      expect(javascript).toContain(label);
+    expect(javascript).toContain("assets/c601145/");
+    expect(javascript).not.toContain("Gold");
+    expect(javascript).not.toContain("decide(");
   });
 });

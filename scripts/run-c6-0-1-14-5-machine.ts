@@ -1,5 +1,5 @@
 import path from "node:path";
-import { cp, mkdir } from "node:fs/promises";
+import { appendFile, cp, mkdir } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import * as shared from "@mvl/shared";
 import { allocateC60114Output } from "./lib/c60114-output.js";
@@ -24,6 +24,7 @@ import {
   required141,
 } from "../packages/video-subtitler/src/review/c601141-policy.js";
 import { header145 } from "../packages/video-subtitler/src/review/c601145-policy.js";
+import { c601145WorkspaceJavascript } from "../packages/video-subtitler/src/review/c601145-review-workspace-ui.js";
 
 const { values } = parseArgs({
   strict: true,
@@ -314,9 +315,26 @@ const writeDelivery = async (root: string, workspace: shared.Workspace143) => {
     "machine-review-regions-v8.json": delivery.regions,
     "machine-review-audio-manifest-v8.json": delivery.audio,
     "machine-review-playback-timeline-v7.json": delivery.playback,
+    "machine-missing-safety-reserve-targets-v5.json": machine.safety,
+    "machine-speech-safety-coverage-units-v1.json": machine.units,
   };
   for (const [name, value] of Object.entries(values))
     await durableJson141(path.join(root, name), value);
+  for (const name of [
+    "machine-review-items-v9.json",
+    "machine-review-target-intervals-v7.json",
+    "machine-missing-safety-reserve-targets-v5.json",
+    "machine-speech-safety-coverage-units-v1.json",
+  ] as const)
+    await durableJson141(
+      path.join(root, "assets", "c601145", name),
+      values[name],
+    );
+  await appendFile(
+    path.join(root, "assets", "review.js"),
+    c601145WorkspaceJavascript(),
+    "utf8",
+  );
   return delivery;
 };
 
