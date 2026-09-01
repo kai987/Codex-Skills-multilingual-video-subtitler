@@ -92,7 +92,6 @@ for (const role of extraRoles)
     prepared.state.config.outputRoot,
     `${prepared.state.config.prefix}-${role}-${prepared.state.config.date}`,
   );
-await durableJson141(prepared.statePath, prepared.state);
 await durableJson141(
   path.join(
     required141(prepared.state.outputs.baseline),
