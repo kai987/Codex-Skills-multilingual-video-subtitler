@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-validation.schema.json",
+  "title": "c6-0-1-14-5-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5-safety-coverage-unit-contract-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-0-1-14-5-validation" },
+    "runtimeGoldInputCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "routeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "parityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "schemaValidationPassed": { "type": "boolean", "const": true },
+    "nestedIntegrityPassed": { "type": "boolean", "const": true },
+    "replayOnlyPassed": { "type": "boolean", "const": true },
+    "detectorCacheMissCount": { "type": "number", "const": 0 },
+    "asrCacheMissCount": { "type": "number", "const": 0 },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "canonicalTextMutationCount": { "type": "number", "const": 0 },
+    "canonicalTimingMutationCount": { "type": "number", "const": 0 },
+    "presentationMutationCount": { "type": "number", "const": 0 },
+    "datasetHardcodingCount": { "type": "number", "const": 0 },
+    "testResults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "detail": { "type": "string" }
+        },
+        "required": ["name", "passed", "detail"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "runtimeGoldInputCount",
+    "machineFreezeHash",
+    "evaluationHash",
+    "routeHash",
+    "parityHash",
+    "schemaValidationPassed",
+    "nestedIntegrityPassed",
+    "replayOnlyPassed",
+    "detectorCacheMissCount",
+    "asrCacheMissCount",
+    "inferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "canonicalTextMutationCount",
+    "canonicalTimingMutationCount",
+    "presentationMutationCount",
+    "datasetHardcodingCount",
+    "testResults",
+    "passed"
+  ],
+  "additionalProperties": false
+}

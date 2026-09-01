@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-speech-safety-coverage-unit-utility-v1.schema.json",
+  "title": "machine-speech-safety-coverage-unit-utility-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5-safety-coverage-unit-contract-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-speech-safety-coverage-unit-utility-v1"
+    },
+    "coverageUnitsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "coverageUnitId": { "type": "string", "minLength": 1 },
+          "sourceUnitHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "speechTier": {
+            "type": "string",
+            "enum": [
+              "UNIT_TIER_5_MULTI_FAMILY_VERIFIED",
+              "UNIT_TIER_4_INDEPENDENT_EXCLUSIVE_VERIFIED",
+              "UNIT_TIER_3_SINGLE_FAMILY_VERIFIED",
+              "UNIT_TIER_2_MASKED_OR_SUBTHRESHOLD",
+              "UNIT_TIER_1_AUDIT_ONLY",
+              "UNIT_TIER_0_INELIGIBLE_OR_CONTRADICTED"
+            ]
+          },
+          "independentDetectorFamilies": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceStrata": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MULTI_DETECTOR",
+                "PYANNOTE_EXCLUSIVE",
+                "SILERO_EXCLUSIVE",
+                "WEBRTC_EXCLUSIVE",
+                "LEGACY_FINGERPRINT_EXCLUSIVE",
+                "MULTI_VIEW_SAME_DETECTOR",
+                "EXISTING_VERIFIED",
+                "MASKED_SUBTHRESHOLD",
+                "AUDIT_ONLY"
+              ]
+            }
+          },
+          "posteriorSupportClass": {
+            "type": "string",
+            "enum": [
+              "POSTERIOR_UNAVAILABLE",
+              "POSTERIOR_LOW",
+              "POSTERIOR_MEDIUM",
+              "POSTERIOR_HIGH"
+            ]
+          },
+          "detectorExclusiveNovelty": { "type": "boolean" },
+          "cappedDurationBucket": {
+            "type": "string",
+            "enum": [
+              "LT_020",
+              "FROM_020_TO_050",
+              "FROM_050_TO_100",
+              "FROM_100_TO_200",
+              "FROM_200_TO_400",
+              "GTE_400_CAPPED"
+            ]
+          },
+          "cappedDurationUtility": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "textCandidateAvailability": { "type": "boolean" },
+          "speechEvidenceUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "textCandidateUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "reviewSafetyUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "utilityEligibility": { "type": "boolean" },
+          "utilityReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "featureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "coverageUnitId",
+          "sourceUnitHash",
+          "speechTier",
+          "independentDetectorFamilies",
+          "evidenceStrata",
+          "posteriorSupportClass",
+          "detectorExclusiveNovelty",
+          "cappedDurationBucket",
+          "cappedDurationUtility",
+          "textCandidateAvailability",
+          "speechEvidenceUtilityVector",
+          "textCandidateUtilityVector",
+          "reviewSafetyUtilityVector",
+          "utilityEligibility",
+          "utilityReasons",
+          "featureHash",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "tierCounts": {
+      "type": "object",
+      "properties": {
+        "UNIT_TIER_5_MULTI_FAMILY_VERIFIED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "UNIT_TIER_4_INDEPENDENT_EXCLUSIVE_VERIFIED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "UNIT_TIER_3_SINGLE_FAMILY_VERIFIED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "UNIT_TIER_2_MASKED_OR_SUBTHRESHOLD": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "UNIT_TIER_1_AUDIT_ONLY": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "UNIT_TIER_0_INELIGIBLE_OR_CONTRADICTED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "UNIT_TIER_5_MULTI_FAMILY_VERIFIED",
+        "UNIT_TIER_4_INDEPENDENT_EXCLUSIVE_VERIFIED",
+        "UNIT_TIER_3_SINGLE_FAMILY_VERIFIED",
+        "UNIT_TIER_2_MASKED_OR_SUBTHRESHOLD",
+        "UNIT_TIER_1_AUDIT_ONLY",
+        "UNIT_TIER_0_INELIGIBLE_OR_CONTRADICTED"
+      ],
+      "additionalProperties": false
+    },
+    "segmentationDependentUnitUtilityCount": { "type": "number", "const": 0 },
+    "atomCountFeatureCount": { "type": "number", "const": 0 },
+    "childCountFeatureCount": { "type": "number", "const": 0 },
+    "bundleCountFeatureCount": { "type": "number", "const": 0 },
+    "goldFeatureCount": { "type": "number", "const": 0 },
+    "utilityGatePassed": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "coverageUnitsHash",
+    "rows",
+    "rowCount",
+    "eligibleUnitCount",
+    "tierCounts",
+    "segmentationDependentUnitUtilityCount",
+    "atomCountFeatureCount",
+    "childCountFeatureCount",
+    "bundleCountFeatureCount",
+    "goldFeatureCount",
+    "utilityGatePassed"
+  ],
+  "additionalProperties": false
+}

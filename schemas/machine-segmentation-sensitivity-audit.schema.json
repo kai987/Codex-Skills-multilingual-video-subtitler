@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-segmentation-sensitivity-audit.schema.json",
+  "title": "machine-segmentation-sensitivity-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5-safety-coverage-unit-contract-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-segmentation-sensitivity-audit"
+    },
+    "hierarchyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "atomUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "childUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "bundleUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "plannerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "atomCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "childCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bundleCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "atomCountPerChildDistribution": {
+      "type": "object",
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 },
+        "mean": { "type": "number", "minimum": 0 },
+        "median": { "type": "number", "minimum": 0 },
+        "p90": { "type": "number", "minimum": 0 }
+      },
+      "required": ["minimum", "maximum", "mean", "median", "p90"],
+      "additionalProperties": false
+    },
+    "childCountPerContinuousSpeechRegion": {
+      "type": "object",
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 },
+        "mean": { "type": "number", "minimum": 0 },
+        "median": { "type": "number", "minimum": 0 },
+        "p90": { "type": "number", "minimum": 0 }
+      },
+      "required": ["minimum", "maximum", "mean", "median", "p90"],
+      "additionalProperties": false
+    },
+    "utilityPerAtomCountCorrelation": {
+      "type": "number",
+      "minimum": -1,
+      "maximum": 1
+    },
+    "utilityPerChildCountCorrelation": {
+      "type": "number",
+      "minimum": -1,
+      "maximum": 1
+    },
+    "utilityPerCoreSecondCorrelation": {
+      "type": "number",
+      "minimum": -1,
+      "maximum": 1
+    },
+    "selectedChildDurationDistribution": {
+      "type": "object",
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 },
+        "mean": { "type": "number", "minimum": 0 },
+        "median": { "type": "number", "minimum": 0 },
+        "p90": { "type": "number", "minimum": 0 }
+      },
+      "required": ["minimum", "maximum", "mean", "median", "p90"],
+      "additionalProperties": false
+    },
+    "selectedChildAtomCountDistribution": {
+      "type": "object",
+      "properties": {
+        "minimum": { "type": "number", "minimum": 0 },
+        "maximum": { "type": "number", "minimum": 0 },
+        "mean": { "type": "number", "minimum": 0 },
+        "median": { "type": "number", "minimum": 0 },
+        "p90": { "type": "number", "minimum": 0 }
+      },
+      "required": ["minimum", "maximum", "mean", "median", "p90"],
+      "additionalProperties": false
+    },
+    "selectedOptionalCoreUnionSeconds": { "type": "number", "minimum": 0 },
+    "selectedOptionalChildCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "averageSelectedOptionalChildSeconds": { "type": "number", "minimum": 0 },
+    "sameCoreDifferentSegmentationUtilityDelta": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "syntheticProbe": {
+      "type": "object",
+      "properties": {
+        "childPartitionCounts": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "number", "const": 1 },
+            { "type": "number", "const": 3 },
+            { "type": "number", "const": 10 }
+          ]
+        },
+        "legacyContributionVectors": {
+          "minItems": 3,
+          "maxItems": 3,
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "coverageUnitIds": {
+          "minItems": 3,
+          "maxItems": 3,
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "unitUtilityVectors": {
+          "minItems": 3,
+          "maxItems": 3,
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "plannerContributionVectors": {
+          "minItems": 3,
+          "maxItems": 3,
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "newUnitIdInvariant": { "type": "boolean", "const": true },
+        "newUnitUtilityInvariant": { "type": "boolean", "const": true },
+        "newPlannerContributionInvariant": { "type": "boolean", "const": true }
+      },
+      "required": [
+        "childPartitionCounts",
+        "legacyContributionVectors",
+        "coverageUnitIds",
+        "unitUtilityVectors",
+        "plannerContributionVectors",
+        "newUnitIdInvariant",
+        "newUnitUtilityInvariant",
+        "newPlannerContributionInvariant"
+      ],
+      "additionalProperties": false
+    },
+    "segmentationSensitivityDetected": { "type": "boolean" },
+    "newSegmentationInvariancePassed": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "hierarchyHash",
+    "atomUtilityHash",
+    "childUtilityHash",
+    "bundleUtilityHash",
+    "plannerHash",
+    "atomCount",
+    "childCount",
+    "bundleCount",
+    "atomCountPerChildDistribution",
+    "childCountPerContinuousSpeechRegion",
+    "utilityPerAtomCountCorrelation",
+    "utilityPerChildCountCorrelation",
+    "utilityPerCoreSecondCorrelation",
+    "selectedChildDurationDistribution",
+    "selectedChildAtomCountDistribution",
+    "selectedOptionalCoreUnionSeconds",
+    "selectedOptionalChildCount",
+    "averageSelectedOptionalChildSeconds",
+    "sameCoreDifferentSegmentationUtilityDelta",
+    "syntheticProbe",
+    "segmentationSensitivityDetected",
+    "newSegmentationInvariancePassed"
+  ],
+  "additionalProperties": false
+}

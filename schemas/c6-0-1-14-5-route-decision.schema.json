@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-route-decision.schema.json",
+  "title": "c6-0-1-14-5-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5-safety-coverage-unit-contract-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-0-1-14-5-route-decision" },
+    "runtimeGoldInputCount": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "evaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "productGoContract": {
+      "type": "string",
+      "const": "MACHINE_ANCHORED_PLAYBACK_AUDIBILITY_CONTRACT_V1"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_COVERAGE_UNIT_SEGMENTATION_REPAIR",
+        "HOLD_FOR_COVERAGE_UNIT_REALIZATION_REPAIR",
+        "HOLD_FOR_COVERAGE_UNIT_SELECTION_REPAIR",
+        "HOLD_FOR_SAFETY_BUDGET_MODEL_REDESIGN",
+        "HOLD_FOR_PLANNER_SEARCH_COMPLETENESS",
+        "HOLD_FOR_REVIEW_SAFETY_CONTRACT_DECISION",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_ENGINEERING_REPAIR"
+      ]
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" }
+        },
+        "required": ["name", "passed"],
+        "additionalProperties": false
+      }
+    },
+    "advisories": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blockingReasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "individuallyFeasibleUnselectedChildCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "individuallyFeasibleChildDiagnosticOnly": {
+      "type": "boolean",
+      "const": true
+    },
+    "forcedFeasibleUnselectedGateRemoved": { "type": "boolean", "const": true },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "c602Status": { "type": "string", "const": "HOLD" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "runtimeGoldInputCount",
+    "evaluationHash",
+    "productGoContract",
+    "route",
+    "gates",
+    "advisories",
+    "blockingReasons",
+    "individuallyFeasibleUnselectedChildCount",
+    "individuallyFeasibleChildDiagnosticOnly",
+    "forcedFeasibleUnselectedGateRemoved",
+    "machineOnlyReleaseAuthorized",
+    "productionStatus",
+    "finalizationMethod",
+    "c602Status"
+  ],
+  "additionalProperties": false
+}

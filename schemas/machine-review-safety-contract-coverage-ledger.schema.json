@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-review-safety-contract-coverage-ledger.schema.json",
+  "title": "machine-review-safety-contract-coverage-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5-safety-coverage-unit-contract-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-review-safety-contract-coverage-ledger"
+    },
+    "plannerCertificateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "unitUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "contractPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "realizationCandidatesHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "coverageUnitId": { "type": "string", "minLength": 1 },
+          "unitTier": {
+            "type": "string",
+            "enum": [
+              "UNIT_TIER_5_MULTI_FAMILY_VERIFIED",
+              "UNIT_TIER_4_INDEPENDENT_EXCLUSIVE_VERIFIED",
+              "UNIT_TIER_3_SINGLE_FAMILY_VERIFIED",
+              "UNIT_TIER_2_MASKED_OR_SUBTHRESHOLD",
+              "UNIT_TIER_1_AUDIT_ONLY",
+              "UNIT_TIER_0_INELIGIBLE_OR_CONTRADICTED"
+            ]
+          },
+          "productionSelected": { "type": "boolean" },
+          "selectedRealizationId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "targetCoreContractMachineStatus": {
+            "type": "string",
+            "enum": ["SATISFIED", "NOT_SATISFIED"]
+          },
+          "anchoredPlaybackContractMachineStatus": {
+            "type": "string",
+            "enum": ["SATISFIED", "NOT_SATISFIED"]
+          },
+          "targetCoreCoverageOfUnit": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "anchorOverlapSeconds": { "type": "number", "minimum": 0 },
+          "anchorCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "predictedPlaybackCoverageOfUnit": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reviewEnvelopeSeconds": { "type": "number", "minimum": 0 },
+          "leftContextSeconds": { "type": "number", "minimum": 0 },
+          "rightContextSeconds": { "type": "number", "minimum": 0 },
+          "contractViolations": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "coverageUnitId",
+          "unitTier",
+          "productionSelected",
+          "selectedRealizationId",
+          "targetCoreContractMachineStatus",
+          "anchoredPlaybackContractMachineStatus",
+          "targetCoreCoverageOfUnit",
+          "anchorOverlapSeconds",
+          "anchorCoverageRatio",
+          "predictedPlaybackCoverageOfUnit",
+          "reviewEnvelopeSeconds",
+          "leftContextSeconds",
+          "rightContextSeconds",
+          "contractViolations",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "selectedUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetCoreSatisfiedUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "anchoredPlaybackSatisfiedUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "productMachinePreconditionsPassed": { "type": "boolean" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "plannerCertificateHash",
+    "unitUtilityHash",
+    "contractPolicyHash",
+    "realizationCandidatesHash",
+    "rows",
+    "selectedUnitCount",
+    "targetCoreSatisfiedUnitCount",
+    "anchoredPlaybackSatisfiedUnitCount",
+    "productMachinePreconditionsPassed"
+  ],
+  "additionalProperties": false
+}
