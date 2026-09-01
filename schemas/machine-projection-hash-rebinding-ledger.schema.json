@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-projection-hash-rebinding-ledger.schema.json",
+  "title": "machine-projection-hash-rebinding-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-projection-hash-rebinding-ledger"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "audioId": { "type": "string", "minLength": 1 },
+          "sourceDomain": {
+            "type": "string",
+            "const": "SOURCE_WORKSPACE_AUDIO_ROW"
+          },
+          "projectedDomain": {
+            "type": "string",
+            "const": "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW"
+          },
+          "sourceSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "projectedSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceHashValid": { "type": "boolean", "const": true },
+          "projectedHashValid": { "type": "boolean", "const": true },
+          "projectedSchemaValid": { "type": "boolean", "const": true },
+          "hashDomainRebound": { "type": "boolean", "const": true },
+          "removedFields": {
+            "type": "array",
+            "prefixItems": [
+              { "type": "string", "const": "nativeSourceInterval" }
+            ]
+          },
+          "audioByteHashPreserved": { "type": "boolean", "const": true },
+          "physicalMetadataPreserved": { "type": "boolean", "const": true }
+        },
+        "required": [
+          "audioId",
+          "sourceDomain",
+          "projectedDomain",
+          "sourceSemanticHash",
+          "projectedSemanticHash",
+          "sourceHashValid",
+          "projectedHashValid",
+          "projectedSchemaValid",
+          "hashDomainRebound",
+          "removedFields",
+          "audioByteHashPreserved",
+          "physicalMetadataPreserved"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sourceRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reboundRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceHashesValid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedHashesValid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedSchemasValid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "failureCount": { "type": "number", "const": 0 },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "goldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "sourceIdentity",
+    "entries",
+    "sourceRowCount",
+    "projectedRowCount",
+    "reboundRowCount",
+    "sourceHashesValid",
+    "projectedHashesValid",
+    "projectedSchemasValid",
+    "failureCount",
+    "inferenceCount",
+    "goldInputCount"
+  ],
+  "additionalProperties": false
+}

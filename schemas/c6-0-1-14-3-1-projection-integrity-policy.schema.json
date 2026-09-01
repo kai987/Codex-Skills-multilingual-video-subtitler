@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-1-projection-integrity-policy.schema.json",
+  "title": "c6-0-1-14-3-1-projection-integrity-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-1-projection-integrity-policy"
+    },
+    "executionPolicy": { "type": "string", "const": "replay-only" },
+    "sourceDomain": { "type": "string", "const": "SOURCE_WORKSPACE_AUDIO_ROW" },
+    "projectedDomain": {
+      "type": "string",
+      "const": "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW"
+    },
+    "requiredOperationOrder": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "string", "const": "ASSERT_SOURCE_HASH" },
+        { "type": "string", "const": "PROJECT_FIELDS" },
+        { "type": "string", "const": "REMOVE_OLD_SEMANTIC_HASH" },
+        { "type": "string", "const": "COMPUTE_CANONICAL_PROJECTED_HASH" },
+        { "type": "string", "const": "STRICT_SCHEMA_PARSE" },
+        { "type": "string", "const": "ASSERT_PROJECTED_HASH" }
+      ]
+    },
+    "canonicalHashHelper": { "type": "string", "const": "hashed141" },
+    "preGoldNestedPreflightRequired": { "type": "boolean", "const": true },
+    "unknownHashableRowFailsClosed": { "type": "boolean", "const": true },
+    "maximumInferenceCount": { "type": "number", "const": 0 },
+    "maximumModelLoadCount": { "type": "number", "const": 0 },
+    "maximumProviderProcessStartCount": { "type": "number", "const": 0 },
+    "canonicalMutationAllowed": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "executionPolicy",
+    "sourceDomain",
+    "projectedDomain",
+    "requiredOperationOrder",
+    "canonicalHashHelper",
+    "preGoldNestedPreflightRequired",
+    "unknownHashableRowFailsClosed",
+    "maximumInferenceCount",
+    "maximumModelLoadCount",
+    "maximumProviderProcessStartCount",
+    "canonicalMutationAllowed"
+  ],
+  "additionalProperties": false
+}

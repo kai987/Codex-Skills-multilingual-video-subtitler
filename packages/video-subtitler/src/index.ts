@@ -105,6 +105,7 @@ export * from "./review/review-audio-manifest-v3.js";
 export * from "./review/review-playback-timeline-v2.js";
 export * from "./review/playback-grounded-coverage-evaluator.js";
 export * from "./review/c60114-review-workspace.js";
+export * from "./review/c6011431-projection-integrity.js";
 export * from "./speaker-runtime.js";
 export * from "./speaker-evidence.js";
 export * from "./speaker-cache.js";

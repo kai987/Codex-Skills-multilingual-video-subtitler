@@ -51,6 +51,7 @@ export * from "./c6-0-1-14-2-local-artifact-schemas.js";
 export * from "./c6-0-1-14-3-monotonic-selection-schemas.js";
 export * from "./c6-0-1-14-3-acceptance-schemas.js";
 export * from "./c6-0-1-14-3-review-schemas.js";
+export * from "./c6-0-1-14-3-1-projection-integrity-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-c6-0-1-14-3-1-clean-evaluation.schema.json",
+  "title": "gold-c6-0-1-14-3-1-clean-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-c6-0-1-14-3-1-clean-evaluation"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "machineRefreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nestedPreflightHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceEvaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "firstGoldReadIntentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "integrityFailureCount": { "type": "number", "const": 0 },
+    "evaluationIntegrityPassed": { "type": "boolean", "const": true },
+    "stageMetrics": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"]
+          },
+          "integrityFailureCount": { "type": "number", "const": 0 },
+          "missingAudible": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "missingTotal": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "hallucinationAudible": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "hallucinationTotal": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "stage",
+          "integrityFailureCount",
+          "missingAudible",
+          "missingTotal",
+          "hallucinationAudible",
+          "hallucinationTotal"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "officialStage": { "type": "string", "const": "A7" },
+    "missingAudible": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "missingTotal": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "hallucinationAudible": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "hallucinationTotal": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "matchingRulesChanged": { "type": "boolean", "const": false },
+    "evaluatorInferenceCount": { "type": "number", "const": 0 },
+    "canonicalMutationCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "generatedAt",
+    "machineRefreezeHash",
+    "nestedPreflightHash",
+    "sourceEvaluationHash",
+    "firstGoldReadIntentHash",
+    "integrityFailureCount",
+    "evaluationIntegrityPassed",
+    "stageMetrics",
+    "officialStage",
+    "missingAudible",
+    "missingTotal",
+    "hallucinationAudible",
+    "hallucinationTotal",
+    "matchingRulesChanged",
+    "evaluatorInferenceCount",
+    "canonicalMutationCount"
+  ],
+  "additionalProperties": false
+}

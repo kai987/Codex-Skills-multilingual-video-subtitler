@@ -20,13 +20,12 @@ import {
   required141,
 } from "../../packages/video-subtitler/src/review/c601141-policy.js";
 import { assertWorkspace143 } from "../../packages/video-subtitler/src/review/c601143-review-delivery.js";
+import { rebindCoverageAudio1431 } from "../../packages/video-subtitler/src/review/c6011431-projection-integrity.js";
 
 export function coverageAudio143(
   audio: Workspace143["audio"]["audio"][number],
 ) {
-  const { nativeSourceInterval, ...coverageAudio } = audio;
-  void nativeSourceInterval;
-  return coverageAudio;
+  return rebindCoverageAudio1431(audio);
 }
 
 export function workspaceProjection143(input: {

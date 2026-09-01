@@ -23,6 +23,10 @@ import {
   required141,
   assertHash141,
 } from "../packages/video-subtitler/src/review/c601141-policy.js";
+import {
+  assertPreGoldIntegrity1431,
+  preflightNestedSemanticIntegrity1431,
+} from "../packages/video-subtitler/src/review/c6011431-projection-integrity.js";
 
 const { values } = parseArgs({
   strict: true,
@@ -99,6 +103,15 @@ const projections = shared.projections143Schema.parse(
   await readJson141(path.join(finalA, "machine-coverage-projections.json")),
 );
 assertHash141(projections);
+const nestedPreflight = preflightNestedSemanticIntegrity1431(projections);
+await durableJson141(
+  path.join(
+    evaluationRoot,
+    "c6-0-1-14-3-1-nested-semantic-integrity-preflight.json",
+  ),
+  nestedPreflight,
+);
+assertPreGoldIntegrity1431(nestedPreflight);
 for (const root of [finalA, finalB])
   for (const row of projections.variants)
     await verifyProjectionAudio142(
