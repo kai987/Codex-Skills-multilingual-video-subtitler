@@ -40,3 +40,9 @@ Active review time requires a visible, focused page and recent interaction or ac
 ## Acceptance
 
 Validate strict schemas and semantic hashes; compare independently rebuilt A/B machine artifacts, audio hashes, and unchanged ASS/SRT/VTT bytes. Recheck source and Gold size/hash/mtime. Run full regression, browser workflow/security checks, and a synthetic unseen-fixture trial. Keep engineering acceptance, ranking effectiveness, burden safety, and prospective readiness as separate conclusions. Shareable summaries contain only aggregates, hashes, and sanitized status, not full dialogue, audio, local paths, credentials, or reviewer events.
+
+## Coverage-unit contract handoff
+
+When C6.0.1.14.5 is explicitly selected, the production objective uses source-native Speech Safety Coverage Units and the frozen machine-anchored Playback contract. Do not lower queue scores, delete Review Items, or reinterpret a selected Unit as a resolved subtitle. Targets V7, Items V9, Regions V8, Audio V8, and Playback V7 are additive delivery projections over the same human transaction model.
+
+The planner may optimize coverage under 24 bundles, 60 seconds of machine speech core, and 95% episode playback burden, but it does not recalibrate the region ranker. A successful 6/6 Missing and 1/1 Hallucination playback evaluation authorizes only a recommendation to begin a separate C6.0.1.15 ranking task. `needs-review`, `finalizationMethod: none`, `machineOnlyReleaseAuthorized: false`, and C6.0.2 `HOLD` remain mandatory.
