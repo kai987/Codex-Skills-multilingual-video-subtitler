@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-4-route-decision.schema.json",
+  "title": "c6-0-1-14-4-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "artifactType": { "type": "string", "const": "c6-0-1-14-4-route-decision" },
+    "evaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "plannerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "freezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_MACHINE_EVIDENCE_UTILITY_PROPAGATION_REPAIR",
+        "HOLD_FOR_MACHINE_EVIDENCE_UTILITY_SELECTION_REPAIR",
+        "HOLD_FOR_SAFETY_BUDGET_MODEL_REDESIGN",
+        "HOLD_FOR_PLANNER_SEARCH_COMPLETENESS",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_ENGINEERING_REPAIR"
+      ]
+    },
+    "engineeringGate": { "type": "boolean" },
+    "integrityGate": { "type": "boolean" },
+    "utilityPropagationGate": { "type": "boolean" },
+    "monotonicityGate": { "type": "boolean" },
+    "plannerGate": { "type": "boolean" },
+    "safetyBudgetGate": { "type": "boolean" },
+    "finalTargetSelectionGate": { "type": "boolean" },
+    "reviewDeliveryGate": { "type": "boolean" },
+    "playbackGate": { "type": "boolean" },
+    "fullQueueCoverageGate": { "type": "boolean" },
+    "fullQueueQualityGate": { "type": "boolean" },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "artifactType",
+    "evaluationHash",
+    "plannerHash",
+    "freezeHash",
+    "route",
+    "engineeringGate",
+    "integrityGate",
+    "utilityPropagationGate",
+    "monotonicityGate",
+    "plannerGate",
+    "safetyBudgetGate",
+    "finalTargetSelectionGate",
+    "reviewDeliveryGate",
+    "playbackGate",
+    "fullQueueCoverageGate",
+    "fullQueueQualityGate",
+    "reasons",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

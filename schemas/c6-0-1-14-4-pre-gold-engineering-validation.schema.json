@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-4-pre-gold-engineering-validation.schema.json",
+  "title": "c6-0-1-14-4-pre-gold-engineering-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-4-pre-gold-engineering-validation"
+    },
+    "codeSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "command": { "type": "string", "minLength": 1 },
+          "logRelativePath": { "type": "string", "minLength": 1 },
+          "logSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "name",
+          "passed",
+          "command",
+          "logRelativePath",
+          "logSha256"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean", "const": true },
+    "networkUsed": { "type": "boolean", "const": false },
+    "modelInferenceCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "artifactType",
+    "codeSnapshotHash",
+    "checks",
+    "passed",
+    "networkUsed",
+    "modelInferenceCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

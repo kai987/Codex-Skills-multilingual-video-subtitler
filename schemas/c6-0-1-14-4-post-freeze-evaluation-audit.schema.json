@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-4-post-freeze-evaluation-audit.schema.json",
+  "title": "c6-0-1-14-4-post-freeze-evaluation-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY_GOLD_EVALUATION" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-4-post-freeze-evaluation-audit"
+    },
+    "firstGoldReadAuditHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalAFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalBFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalABParityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "sourceIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "goldIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "goldIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "qualityEvaluationIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "qualityEvaluationIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "regionLabelsIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "regionLabelsIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "upstreamEvaluationIdentityBefore": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "upstreamEvaluationIdentityAfter": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "sourceReadOnly": { "type": "boolean", "const": true },
+    "goldReadOnly": { "type": "boolean", "const": true },
+    "freezeBeforeGold": { "type": "boolean", "const": true },
+    "machineStageGoldPathReadCount": { "type": "number", "const": 0 },
+    "machineStageGoldDerivedArtifactReadCount": {
+      "type": "number",
+      "const": 0
+    },
+    "evaluatorGoldInputCount": { "type": "number", "const": 1 },
+    "newInferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "matchingRulesChanged": { "type": "boolean", "const": false },
+    "canonicalMutationCount": { "type": "number", "const": 0 },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "newOofRun": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "artifactType",
+    "firstGoldReadAuditHash",
+    "finalAFreezeHash",
+    "finalBFreezeHash",
+    "finalABParityHash",
+    "sourceIdentityBefore",
+    "sourceIdentityAfter",
+    "goldIdentityBefore",
+    "goldIdentityAfter",
+    "qualityEvaluationIdentityBefore",
+    "qualityEvaluationIdentityAfter",
+    "regionLabelsIdentityBefore",
+    "regionLabelsIdentityAfter",
+    "upstreamEvaluationIdentityBefore",
+    "upstreamEvaluationIdentityAfter",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "freezeBeforeGold",
+    "machineStageGoldPathReadCount",
+    "machineStageGoldDerivedArtifactReadCount",
+    "evaluatorGoldInputCount",
+    "newInferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "matchingRulesChanged",
+    "canonicalMutationCount",
+    "rankerRetrained",
+    "newOofRun",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

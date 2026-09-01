@@ -502,6 +502,7 @@ const schemas = [
     ...c60114.c601143AcceptanceSchemas,
     ...c60114.c601143ReviewSchemas,
     ...c60114.c6011431IntegritySchemas,
+    ...c60114.c601144UtilitySchemas,
   }).map(([name, schema]) => ({
     fileName: `${name}.schema.json`,
     id: `https://schemas.local/multilingual-video-learning/${name}.schema.json`,
@@ -2099,6 +2100,21 @@ const schemas = [
   },
 ] as const;
 
+const closeExportedTuples = (value: unknown): void => {
+  if (Array.isArray(value)) {
+    for (const child of value) closeExportedTuples(child);
+    return;
+  }
+  if (value === null || typeof value !== "object") return;
+  const record = value as Record<string, unknown>;
+  if (Array.isArray(record.prefixItems)) {
+    record.minItems = record.prefixItems.length;
+    record.maxItems = record.prefixItems.length;
+    record.items = false;
+  }
+  for (const child of Object.values(record)) closeExportedTuples(child);
+};
+
 for (const entry of schemas) {
   const generated = z.toJSONSchema(entry.schema, {
     target: "draft-2020-12",
@@ -2124,6 +2140,10 @@ for (const entry of schemas) {
     providers.minItems = providers.prefixItems.length;
     providers.maxItems = providers.prefixItems.length;
   }
+  if (
+    entry.fileName === "c6-0-1-14-4-machine-evidence-utility-policy.schema.json"
+  )
+    closeExportedTuples(generated);
   const output = {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     $id: entry.id,
