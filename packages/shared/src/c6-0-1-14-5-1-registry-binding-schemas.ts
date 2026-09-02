@@ -861,6 +861,7 @@ export const freeze1451Schema = z
     scorabilityPolicyHash: hash,
     projectionHashes: z.record(id, hash),
     nestedPreflightHash: hash,
+    reviewJavascriptHash: hash,
     detectorReplaySummary: z
       .object({ expected: count, hits: count, misses: z.literal(0) })
       .strict(),

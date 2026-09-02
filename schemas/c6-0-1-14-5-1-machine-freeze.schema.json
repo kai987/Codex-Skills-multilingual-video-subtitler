@@ -83,6 +83,7 @@
       "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
     },
     "nestedPreflightHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewJavascriptHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "detectorReplaySummary": {
       "type": "object",
       "properties": {
@@ -157,6 +158,7 @@
     "scorabilityPolicyHash",
     "projectionHashes",
     "nestedPreflightHash",
+    "reviewJavascriptHash",
     "detectorReplaySummary",
     "asrReplaySummary",
     "runtimeGoldInputBeforeFreeze",

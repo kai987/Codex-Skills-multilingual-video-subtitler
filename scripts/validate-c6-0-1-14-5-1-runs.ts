@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- Validation intentionally reasserts schema-constrained literals and cross-artifact runtime invariants. */
 import path from "node:path";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import * as shared from "@mvl/shared";
 import {
@@ -30,6 +30,7 @@ assertHash141(state);
 const output = (role: string) => path.resolve(required141(state.outputs[role])),
   finalA = output("final-a"),
   finalB = output("final-b"),
+  reviewPackage = output("review-package"),
   evaluationRoot = output("evaluation"),
   validationRoot = output("validation"),
   readMachine = async <T>(
@@ -393,6 +394,31 @@ check(
     parity.geometryParity &&
     parity.wavHashParity &&
     parity.subtitleParity,
+);
+const reviewJavascriptPaths = [finalA, finalB, reviewPackage].map((root) =>
+    path.join(root, "review-workspace", "assets", "review.js"),
+  ),
+  reviewJavascriptHashes = await Promise.all(
+    reviewJavascriptPaths.map(fileHash141),
+  ),
+  reviewJavascriptSources = await Promise.all(
+    reviewJavascriptPaths.map((file) => readFile(file, "utf8")),
+  ),
+  guardedReviewHydration =
+    "]).then(([items,targets,safety,units])=>{c601145Data={items,targets,safety,units};if(state.data)render()}).catch(error=>showStatus(error.message,true));",
+  legacyReviewHydration =
+    "]).then(([items,targets,safety,units])=>{c601145Data={items,targets,safety,units};render()}).catch(error=>showStatus(error.message,true));";
+check(
+  "REVIEW_UI_HYDRATION_AND_AB_PARITY",
+  new Set(reviewJavascriptHashes).size === 1 &&
+    reviewJavascriptHashes[0] === freezeA.reviewJavascriptHash &&
+    reviewJavascriptHashes[1] === freezeB.reviewJavascriptHash &&
+    reviewJavascriptSources.every(
+      (source) =>
+        source.split(guardedReviewHydration).length - 1 === 1 &&
+        !source.includes(legacyReviewHydration),
+    ),
+  [`reviewJavascript=${reviewJavascriptHashes[0]}`],
 );
 check(
   "GEOMETRY_PARITY",

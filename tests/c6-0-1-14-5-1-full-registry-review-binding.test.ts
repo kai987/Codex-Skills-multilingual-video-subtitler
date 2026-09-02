@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type * as shared from "@mvl/shared";
 import { shareableAudit1451Schema } from "@mvl/shared";
@@ -123,6 +125,16 @@ function productFixture() {
 }
 
 describe("C6.0.1.14.5.1 full registry and product contract", () => {
+  it("refreshes and freeze-binds the guarded review workspace asset", async () => {
+    const runner = await readFile(
+      path.resolve("scripts/run-c6-0-1-14-5-1-machine.ts"),
+      "utf8",
+    );
+    expect(runner).toContain("refreshGuardedReviewJavascript");
+    expect(runner).toContain("reviewJavascriptHash");
+    expect(runner).toContain("if(state.data)render()");
+  });
+
   it("keeps verified observations in the Full Registry even without an island row", () => {
     const fixture = fixture145(),
       emptyTargets = hashed141({

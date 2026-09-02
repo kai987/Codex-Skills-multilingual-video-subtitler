@@ -1,5 +1,5 @@
 import path from "node:path";
-import { cp, mkdir } from "node:fs/promises";
+import { cp, mkdir, readFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import * as shared from "@mvl/shared";
 import { allocateC60114Output } from "./lib/c60114-output.js";
@@ -38,6 +38,40 @@ const { values } = parseArgs({
     "execution-policy": { type: "string", default: "replay-only" },
   },
 });
+
+const legacyReviewHydration =
+    "]).then(([items,targets,safety,units])=>{c601145Data={items,targets,safety,units};render()}).catch(error=>showStatus(error.message,true));",
+  guardedReviewHydration =
+    "]).then(([items,targets,safety,units])=>{c601145Data={items,targets,safety,units};if(state.data)render()}).catch(error=>showStatus(error.message,true));";
+
+async function refreshGuardedReviewJavascript(root: string) {
+  const javascriptPath = path.join(
+      root,
+      "review-workspace",
+      "assets",
+      "review.js",
+    ),
+    source = await readFile(javascriptPath, "utf8"),
+    legacyCount = source.split(legacyReviewHydration).length - 1,
+    guardedCount = source.split(guardedReviewHydration).length - 1;
+  if (legacyCount === 0 && guardedCount === 1) return javascriptPath;
+  if (legacyCount !== 1 || guardedCount !== 0)
+    throw new Error(
+      `C6011451_REVIEW_HYDRATION_GUARD_SOURCE_INVALID:${legacyCount}:${guardedCount}`,
+    );
+  const refreshed = source.replace(
+    legacyReviewHydration,
+    guardedReviewHydration,
+  );
+  if (
+    refreshed.includes(legacyReviewHydration) ||
+    refreshed.split(guardedReviewHydration).length - 1 !== 1
+  )
+    throw new Error("C6011451_REVIEW_HYDRATION_GUARD_REFRESH_FAILED");
+  await shared.atomicWriteFile(javascriptPath, refreshed, { overwrite: true });
+  return javascriptPath;
+}
+
 if (values["execution-policy"] !== "replay-only")
   throw new Error("C6011451_ONLY_REPLAY_ONLY_IS_AUTHORIZED");
 const baseStatePath = path.resolve(
@@ -90,6 +124,18 @@ await Promise.all([
     },
   ),
 ]);
+
+const reviewJavascriptPaths = await Promise.all([
+    refreshGuardedReviewJavascript(dir("final-a")),
+    refreshGuardedReviewJavascript(dir("final-b")),
+    refreshGuardedReviewJavascript(dir("review-package")),
+  ]),
+  reviewJavascriptHashes = await Promise.all(
+    reviewJavascriptPaths.map(fileHash141),
+  );
+if (new Set(reviewJavascriptHashes).size !== 1)
+  throw new Error("C6011451_REVIEW_JAVASCRIPT_PARITY_FAILED");
+const reviewJavascriptHash = required141(reviewJavascriptHashes[0]);
 
 const readMachine = async <T>(
     root: string,
@@ -505,6 +551,7 @@ const buildFreeze = (role: "A" | "B", oldFreeze: shared.Freeze145) =>
           rebinding: projectionLedger.semanticHash,
         },
         nestedPreflightHash: nestedPreflight.semanticHash,
+        reviewJavascriptHash,
         detectorReplaySummary: oldFreeze.detectorReplaySummary,
         asrReplaySummary: oldFreeze.asrReplaySummary,
         runtimeGoldInputBeforeFreeze: 0,
@@ -544,7 +591,8 @@ const parity = shared.parity1451Schema.parse(
     finalBFreezeHash: freezeB.semanticHash,
     comparedArtifactCount:
       Object.keys(extensionArtifacts).length +
-      Object.keys(deliveryArtifacts).length,
+      Object.keys(deliveryArtifacts).length +
+      1,
     semanticParity: true,
     geometryParity: true,
     wavHashParity: true,
