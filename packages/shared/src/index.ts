@@ -55,6 +55,7 @@ export * from "./c6-0-1-14-3-1-projection-integrity-schemas.js";
 export * from "./c6-0-1-14-4-machine-evidence-utility-schemas.js";
 export * from "./c6-0-1-14-5-safety-coverage-unit-schemas.js";
 export * from "./c6-0-1-14-5-1-registry-binding-schemas.js";
+export * from "./c6-0-1-14-5-2-scorability-playback-schemas.js";
 export * from "./timing.js";
 export * from "./timestamp-evidence-integrity-schemas.js";
 export * from "./transcription-schemas.js";

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-product-outcome-determinacy-preflight.schema.json",
+  "title": "machine-product-outcome-determinacy-preflight",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-product-outcome-determinacy-preflight"
+    },
+    "determinacyPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "globalCompletenessFlags": {
+      "type": "object",
+      "properties": {
+        "fullRegistryComplete": { "type": "boolean" },
+        "sourceReconciliationComplete": { "type": "boolean" },
+        "targetBindingEnumerationComplete": { "type": "boolean" },
+        "audioBindingEnumerationComplete": { "type": "boolean" },
+        "playbackBindingEnumerationComplete": { "type": "boolean" },
+        "inheritedCandidateEnumerationComplete": { "type": "boolean" },
+        "inheritedCandidateSearchComplete": { "type": "boolean" },
+        "effectiveRealizationRegistryComplete": { "type": "boolean" },
+        "witnessGroupBuildComplete": { "type": "boolean" },
+        "witnessSearchComplete": { "type": "boolean" },
+        "physicalManifestComplete": { "type": "boolean" },
+        "playbackManifestComplete": { "type": "boolean" },
+        "nestedIntegrityComplete": { "type": "boolean" }
+      },
+      "required": [
+        "fullRegistryComplete",
+        "sourceReconciliationComplete",
+        "targetBindingEnumerationComplete",
+        "audioBindingEnumerationComplete",
+        "playbackBindingEnumerationComplete",
+        "inheritedCandidateEnumerationComplete",
+        "inheritedCandidateSearchComplete",
+        "effectiveRealizationRegistryComplete",
+        "witnessGroupBuildComplete",
+        "witnessSearchComplete",
+        "physicalManifestComplete",
+        "playbackManifestComplete",
+        "nestedIntegrityComplete"
+      ],
+      "additionalProperties": false
+    },
+    "componentPrerequisiteMatrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "prerequisite": { "type": "string", "minLength": 1 },
+          "complete": { "type": "boolean" }
+        },
+        "required": ["prerequisite", "complete"],
+        "additionalProperties": false
+      }
+    },
+    "determinateComponentCountBeforeGold": { "type": "number", "const": 0 },
+    "indeterminateComponentCountBeforeGold": { "type": "number", "const": 0 },
+    "indeterminateReasons": {
+      "minItems": 0,
+      "maxItems": 0,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "integrityFailureCount": { "type": "number", "const": 0 },
+    "formalRecallEligibleAfterGoldMapping": {
+      "type": "boolean",
+      "const": true
+    },
+    "passed": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "determinacyPolicyHash",
+    "globalCompletenessFlags",
+    "componentPrerequisiteMatrix",
+    "determinateComponentCountBeforeGold",
+    "indeterminateComponentCountBeforeGold",
+    "indeterminateReasons",
+    "integrityFailureCount",
+    "formalRecallEligibleAfterGoldMapping",
+    "passed"
+  ],
+  "additionalProperties": false
+}

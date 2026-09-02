@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-product-outcome-determinacy-policy-v1.schema.json",
+  "title": "machine-product-outcome-determinacy-policy-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-product-outcome-determinacy-policy-v1"
+    },
+    "passOutcome": {
+      "type": "string",
+      "const": "SCORABLE_PASS_PRODUCT_CONTRACT"
+    },
+    "determinateFailOutcomes": {
+      "minItems": 6,
+      "maxItems": 6,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "infrastructureIncompleteOutcomes": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "integrityOutcome": { "type": "string", "const": "INTEGRITY_FAILED" },
+    "completeGraphAbsenceIsScorableFail": { "type": "boolean", "const": true },
+    "formalRecallIncludesDeterminateFailures": {
+      "type": "boolean",
+      "const": true
+    },
+    "formalRecallNullOnlyForIndeterminateOrIntegrity": {
+      "type": "boolean",
+      "const": true
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "passOutcome",
+    "determinateFailOutcomes",
+    "infrastructureIncompleteOutcomes",
+    "integrityOutcome",
+    "completeGraphAbsenceIsScorableFail",
+    "formalRecallIncludesDeterminateFailures",
+    "formalRecallNullOnlyForIndeterminateOrIntegrity"
+  ],
+  "additionalProperties": false
+}

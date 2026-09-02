@@ -1,0 +1,421 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-c6-0-1-14-5-2-all-mandatory-evaluation.schema.json",
+  "title": "gold-c6-0-1-14-5-2-all-mandatory-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-c6-0-1-14-5-2-all-mandatory-evaluation"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 1 },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "planId": { "type": "string", "const": "ALL_MANDATORY" },
+    "itemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "regionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackSegmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "uniqueAudioSeconds": { "type": "number", "minimum": 0 },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "componentId": { "type": "string", "minLength": 1 },
+          "matchingFullCoverageUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "targetBindingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "targetEligibilityStatuses": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "inheritedRealizationV1Ids": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "inheritedRealizationV2Ids": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "effectiveRealizationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "witnessGroupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedWitnessRealizationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedPlaybackSegmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "physicalAudioContainerIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "reviewPlaybackEnvelopes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "machineAnchorCoverage": {
+            "type": "object",
+            "propertyNames": { "type": "string", "minLength": 1 },
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "unitPlaybackCoverage": {
+            "type": "object",
+            "propertyNames": { "type": "string", "minLength": 1 },
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "unitToGoldCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "targetCoreGoldCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "physicalAudioGoldCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "goldPlaybackCoverage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "globalCompletenessPrerequisites": {
+            "type": "object",
+            "properties": {
+              "fullRegistryComplete": { "type": "boolean" },
+              "sourceReconciliationComplete": { "type": "boolean" },
+              "targetBindingEnumerationComplete": { "type": "boolean" },
+              "audioBindingEnumerationComplete": { "type": "boolean" },
+              "playbackBindingEnumerationComplete": { "type": "boolean" },
+              "inheritedCandidateEnumerationComplete": { "type": "boolean" },
+              "inheritedCandidateSearchComplete": { "type": "boolean" },
+              "effectiveRealizationRegistryComplete": { "type": "boolean" },
+              "witnessGroupBuildComplete": { "type": "boolean" },
+              "witnessSearchComplete": { "type": "boolean" },
+              "physicalManifestComplete": { "type": "boolean" },
+              "playbackManifestComplete": { "type": "boolean" },
+              "nestedIntegrityComplete": { "type": "boolean" }
+            },
+            "required": [
+              "fullRegistryComplete",
+              "sourceReconciliationComplete",
+              "targetBindingEnumerationComplete",
+              "audioBindingEnumerationComplete",
+              "playbackBindingEnumerationComplete",
+              "inheritedCandidateEnumerationComplete",
+              "inheritedCandidateSearchComplete",
+              "effectiveRealizationRegistryComplete",
+              "witnessGroupBuildComplete",
+              "witnessSearchComplete",
+              "physicalManifestComplete",
+              "playbackManifestComplete",
+              "nestedIntegrityComplete"
+            ],
+            "additionalProperties": false
+          },
+          "outcomeDeterminacyStatus": {
+            "type": "string",
+            "enum": ["DETERMINATE", "INDETERMINATE", "INTEGRITY_FAILED"]
+          },
+          "scorabilityStatus": {
+            "type": "string",
+            "enum": ["SCORABLE", "NOT_SCORABLE", "INTEGRITY_FAILED"]
+          },
+          "productContractStatus": {
+            "type": "string",
+            "enum": [
+              "SCORABLE_PASS_PRODUCT_CONTRACT",
+              "SCORABLE_FAIL_INVENTORY_ABSENT",
+              "SCORABLE_FAIL_TARGET_ABSENT",
+              "SCORABLE_FAIL_REALIZATION_ABSENT",
+              "SCORABLE_FAIL_AUDIO_ABSENT",
+              "SCORABLE_FAIL_PLAYBACK_ABSENT",
+              "SCORABLE_FAIL_CONTRACT_THRESHOLD",
+              "NOT_SCORABLE_REGISTRY_RECONCILIATION_INCOMPLETE",
+              "NOT_SCORABLE_TARGET_BINDING_ENUMERATION_INCOMPLETE",
+              "NOT_SCORABLE_REALIZATION_ENUMERATION_INCOMPLETE",
+              "NOT_SCORABLE_WITNESS_GROUP_BUILD_INCOMPLETE",
+              "NOT_SCORABLE_WITNESS_SEARCH_INCOMPLETE",
+              "NOT_SCORABLE_SOURCE_IDENTITY_UNRESOLVED",
+              "NOT_SCORABLE_AMBIGUOUS_MACHINE_MAPPING",
+              "NOT_SCORABLE_REQUIRED_ARTIFACT_MISSING",
+              "INTEGRITY_FAILED"
+            ]
+          },
+          "productContractPassed": { "type": "boolean" },
+          "finalBlockingReason": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "finalDiagnosis": { "type": "string", "minLength": 1 },
+          "rejectionReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "componentId",
+          "matchingFullCoverageUnitIds",
+          "targetBindingIds",
+          "targetEligibilityStatuses",
+          "inheritedRealizationV1Ids",
+          "inheritedRealizationV2Ids",
+          "effectiveRealizationIds",
+          "witnessGroupIds",
+          "selectedWitnessRealizationIds",
+          "selectedPlaybackSegmentIds",
+          "physicalAudioContainerIntervals",
+          "reviewPlaybackEnvelopes",
+          "machineAnchorCoverage",
+          "unitPlaybackCoverage",
+          "unitToGoldCoverageRatio",
+          "targetCoreGoldCoverageRatio",
+          "physicalAudioGoldCoverageRatio",
+          "goldPlaybackCoverage",
+          "globalCompletenessPrerequisites",
+          "outcomeDeterminacyStatus",
+          "scorabilityStatus",
+          "productContractStatus",
+          "productContractPassed",
+          "finalBlockingReason",
+          "finalDiagnosis",
+          "rejectionReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "formalProductStatus": {
+      "type": "string",
+      "enum": ["SCORABLE", "NOT_SCORABLE", "INTEGRITY_FAILED"]
+    },
+    "formalProductRecall": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "numerator": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "denominator": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "targetCoreRecall": {
+      "type": "object",
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "ordinaryMissingAudibleRecall": {
+      "type": "object",
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "hallucinationRecall": {
+      "type": "object",
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "fullQueueCopy": { "type": "boolean", "const": false },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "visibility",
+    "artifactType",
+    "runtimeGoldInputCount",
+    "machineFreezeHash",
+    "planId",
+    "itemCount",
+    "regionCount",
+    "targetCount",
+    "audioCount",
+    "playbackSegmentCount",
+    "uniqueAudioSeconds",
+    "components",
+    "formalProductStatus",
+    "formalProductRecall",
+    "targetCoreRecall",
+    "ordinaryMissingAudibleRecall",
+    "hallucinationRecall",
+    "fullQueueCopy",
+    "rankerRetrained",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

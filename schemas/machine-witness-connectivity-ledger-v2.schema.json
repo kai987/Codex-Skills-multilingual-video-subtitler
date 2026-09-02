@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-witness-connectivity-ledger-v2.schema.json",
+  "title": "machine-witness-connectivity-ledger-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-witness-connectivity-ledger-v2"
+    },
+    "effectiveRealizationRegistryHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "connectivityId": { "type": "string", "minLength": 1 },
+          "realizationA": { "type": "string", "minLength": 1 },
+          "realizationB": { "type": "string", "minLength": 1 },
+          "connectionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SHARED_PHYSICAL_AUDIO",
+                "SHARED_REVIEW_REGION",
+                "CONTINUOUS_PLAYBACK_CHAIN",
+                "SOURCE_ADJACENT_UNITS",
+                "SHARED_PARENT_SPEECH_ISLAND",
+                "SHARED_MACHINE_EVIDENCE_LINEAGE"
+              ]
+            }
+          },
+          "sharedRegionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sharedAudioIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sharedPlaybackChainIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "unitGapSamples": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "sharedParentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sharedEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceIdentityMatch": { "type": "boolean" },
+          "hardBoundaryCrossed": { "type": "boolean" },
+          "connected": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "connectivityId",
+          "realizationA",
+          "realizationB",
+          "connectionTypes",
+          "sharedRegionIds",
+          "sharedAudioIds",
+          "sharedPlaybackChainIds",
+          "unitGapSamples",
+          "sharedParentIds",
+          "sharedEvidenceIds",
+          "sourceIdentityMatch",
+          "hardBoundaryCrossed",
+          "connected",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "pairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "connectedPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "disconnectedPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sharedAudioConnectionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sharedRegionConnectionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "continuousPlaybackConnectionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceAdjacentConnectionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sharedParentOrLineageConnectionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "timeProximityOnlyConnectionCount": { "type": "number", "const": 0 },
+    "complete": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "effectiveRealizationRegistryHash",
+    "rows",
+    "pairCount",
+    "connectedPairCount",
+    "disconnectedPairCount",
+    "sharedAudioConnectionCount",
+    "sharedRegionConnectionCount",
+    "continuousPlaybackConnectionCount",
+    "sourceAdjacentConnectionCount",
+    "sharedParentOrLineageConnectionCount",
+    "timeProximityOnlyConnectionCount",
+    "complete"
+  ],
+  "additionalProperties": false
+}

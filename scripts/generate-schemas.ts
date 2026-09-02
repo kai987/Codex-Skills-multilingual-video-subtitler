@@ -2234,6 +2234,146 @@ const schemas = [
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-validation.schema.json",
     schema: c60114.validation1451Schema,
   },
+  {
+    fileName: "c6-0-1-14-5-2-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-policy.schema.json",
+    schema: c60114.policy1452Schema,
+  },
+  {
+    fileName: "machine-degenerate-orphan-target-baseline-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-degenerate-orphan-target-baseline-audit.schema.json",
+    schema: c60114.degenerateAudit1452Schema,
+  },
+  {
+    fileName: "machine-degenerate-orphan-target-eligibility-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-degenerate-orphan-target-eligibility-v1.schema.json",
+    schema: c60114.degenerateEligibility1452Schema,
+  },
+  {
+    fileName: "machine-inherited-realization-candidate-ledger-v2.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-inherited-realization-candidate-ledger-v2.schema.json",
+    schema: c60114.realizationCandidateLedger1452Schema,
+  },
+  {
+    fileName: "machine-existing-review-delivery-realizations-v2.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-existing-review-delivery-realizations-v2.schema.json",
+    schema: c60114.inheritedRealizations1452Schema,
+  },
+  {
+    fileName: "machine-inherited-realization-v1-v2-comparison.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-inherited-realization-v1-v2-comparison.schema.json",
+    schema: c60114.realizationComparison1452Schema,
+  },
+  {
+    fileName: "machine-effective-product-realization-registry-v2.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-effective-product-realization-registry-v2.schema.json",
+    schema: c60114.effectiveRealizations1452Schema,
+  },
+  {
+    fileName: "machine-witness-connectivity-ledger-v2.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-witness-connectivity-ledger-v2.schema.json",
+    schema: c60114.witnessConnectivity1452Schema,
+  },
+  {
+    fileName: "machine-product-contract-witness-groups-v2.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-product-contract-witness-groups-v2.schema.json",
+    schema: c60114.witnessGroups1452Schema,
+  },
+  {
+    fileName: "machine-product-outcome-determinacy-policy-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-product-outcome-determinacy-policy-v1.schema.json",
+    schema: c60114.determinacyPolicy1452Schema,
+  },
+  {
+    fileName: "machine-product-outcome-determinacy-preflight.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-product-outcome-determinacy-preflight.schema.json",
+    schema: c60114.determinacyPreflight1452Schema,
+  },
+  {
+    fileName: "machine-review-target-intervals-v9.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-target-intervals-v9.schema.json",
+    schema: c60114.reviewTargets1452Schema,
+  },
+  {
+    fileName: "machine-review-items-v11.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-items-v11.schema.json",
+    schema: c60114.reviewItems1452Schema,
+  },
+  {
+    fileName: "machine-review-regions-v10.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-regions-v10.schema.json",
+    schema: c60114.reviewRegions1452Schema,
+  },
+  {
+    fileName: "machine-review-audio-manifest-v10.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-audio-manifest-v10.schema.json",
+    schema: c60114.reviewAudio1452Schema,
+  },
+  {
+    fileName: "machine-review-playback-timeline-v9.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-playback-timeline-v9.schema.json",
+    schema: c60114.reviewPlayback1452Schema,
+  },
+  {
+    fileName: "machine-projection-hash-rebinding-ledger-v1452.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-projection-hash-rebinding-ledger-v1452.schema.json",
+    schema: c60114.projectionLedger1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-nested-preflight.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-nested-preflight.schema.json",
+    schema: c60114.nestedPreflight1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-machine-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-machine-freeze.schema.json",
+    schema: c60114.freeze1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-final-ab-parity.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-final-ab-parity.schema.json",
+    schema: c60114.parity1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-first-gold-read.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-first-gold-read.schema.json",
+    schema: c60114.firstGoldRead1452Schema,
+  },
+  {
+    fileName: "gold-c6-0-1-14-5-2-product-outcome-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-c6-0-1-14-5-2-product-outcome-evaluation.schema.json",
+    schema: c60114.evaluation1452Schema,
+  },
+  {
+    fileName: "gold-c6-0-1-14-5-2-all-mandatory-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-c6-0-1-14-5-2-all-mandatory-evaluation.schema.json",
+    schema: c60114.mandatoryEvaluation1452Schema,
+  },
+  {
+    fileName: "unexpected-product-vs-ordinary-audibility-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/unexpected-product-vs-ordinary-audibility-audit.schema.json",
+    schema: c60114.unexpectedProductAudit1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-route-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-route-decision.schema.json",
+    schema: c60114.route1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-aggregate-shareable-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-aggregate-shareable-summary.schema.json",
+    schema: c60114.shareableSummary1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-shareable-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-shareable-audit.schema.json",
+    schema: c60114.shareableAudit1452Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-2-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-validation.schema.json",
+    schema: c60114.validation1452Schema,
+  },
 ] as const;
 
 const closeExportedTuples = (value: unknown): void => {

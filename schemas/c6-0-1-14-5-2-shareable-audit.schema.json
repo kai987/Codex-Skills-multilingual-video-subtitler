@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-shareable-audit.schema.json",
+  "title": "c6-0-1-14-5-2-shareable-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-2-shareable-audit"
+    },
+    "auditedFileCount": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "absolutePathLeakCount": { "type": "number", "const": 0 },
+    "secretLeakCount": { "type": "number", "const": 0 },
+    "goldLeakCount": { "type": "number", "const": 0 },
+    "brokenRelativeReferenceCount": { "type": "number", "const": 0 },
+    "passed": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "auditedFileCount",
+    "absolutePathLeakCount",
+    "secretLeakCount",
+    "goldLeakCount",
+    "brokenRelativeReferenceCount",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-degenerate-orphan-target-eligibility-v1.schema.json",
+  "title": "machine-degenerate-orphan-target-eligibility-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-degenerate-orphan-target-eligibility-v1"
+    },
+    "auditHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetId": { "type": "string", "minLength": 1 },
+          "previousBindingRequirement": { "type": "string", "minLength": 1 },
+          "finalBindingRequirement": {
+            "type": "string",
+            "enum": [
+              "UNIT_BINDING_REQUIRED",
+              "UNIT_BINDING_OPTIONAL",
+              "UNIT_BINDING_NOT_APPLICABLE",
+              "UNIT_BINDING_OPTIONAL_AUDIT_ONLY"
+            ]
+          },
+          "previousProductEligibility": { "type": "boolean" },
+          "finalProductEligibility": { "type": "boolean" },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "DEGENERATE_ORPHAN_BOUNDARY_SLIVER",
+              "AUDIT_ONLY_ORPHAN_BOUNDARY_RESIDUE",
+              "NOT_DEGENERATE"
+            ]
+          },
+          "productOutcomeRole": {
+            "type": "string",
+            "enum": [
+              "AUDIT_ONLY_BOUNDARY_RESIDUE",
+              "PRODUCT_CONTRACT_TARGET",
+              "NON_SPEECH_AUDIT_TARGET"
+            ]
+          },
+          "durationPolicyVersion": { "type": "string", "minLength": 1 },
+          "minimumDurationSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "positiveOverlapSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "boundaryContactOnly": { "type": "boolean" },
+          "auditRetention": { "type": "boolean", "const": true },
+          "geometryChanged": { "type": "boolean", "const": false },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "targetId",
+          "previousBindingRequirement",
+          "finalBindingRequirement",
+          "previousProductEligibility",
+          "finalProductEligibility",
+          "classification",
+          "productOutcomeRole",
+          "durationPolicyVersion",
+          "minimumDurationSamples",
+          "positiveOverlapSamples",
+          "boundaryContactOnly",
+          "auditRetention",
+          "geometryChanged",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "degenerateSliverClassifiedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "degenerateSliverAuditRetainedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "degenerateSliverGeometryMutationCount": { "type": "number", "const": 0 },
+    "degenerateSliverDeletedCount": { "type": "number", "const": 0 },
+    "degenerateSliverFakeBindingCount": { "type": "number", "const": 0 },
+    "productRequiredDegenerateSliverCountBefore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "productRequiredDegenerateSliverCountAfter": {
+      "type": "number",
+      "const": 0
+    },
+    "bindingRequiredTargetCountBefore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bindingRequiredTargetCountAfter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredTargetBoundCountAfter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredTargetUnboundCountAfter": { "type": "number", "const": 0 },
+    "reviewTargetCountBefore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reviewTargetCountAfter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetIntervalMutationCount": { "type": "number", "const": 0 },
+    "passed": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "auditHash",
+    "rows",
+    "degenerateSliverClassifiedCount",
+    "degenerateSliverAuditRetainedCount",
+    "degenerateSliverGeometryMutationCount",
+    "degenerateSliverDeletedCount",
+    "degenerateSliverFakeBindingCount",
+    "productRequiredDegenerateSliverCountBefore",
+    "productRequiredDegenerateSliverCountAfter",
+    "bindingRequiredTargetCountBefore",
+    "bindingRequiredTargetCountAfter",
+    "requiredTargetBoundCountAfter",
+    "requiredTargetUnboundCountAfter",
+    "reviewTargetCountBefore",
+    "reviewTargetCountAfter",
+    "targetIntervalMutationCount",
+    "passed"
+  ],
+  "additionalProperties": false
+}

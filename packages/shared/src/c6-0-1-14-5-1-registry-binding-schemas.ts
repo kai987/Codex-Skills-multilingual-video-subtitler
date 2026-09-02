@@ -1225,6 +1225,11 @@ export type EffectiveRealizations1451 = z.infer<
   typeof effectiveRealizations1451Schema
 >;
 export type WitnessGroups1451 = z.infer<typeof witnessGroups1451Schema>;
+export type ReviewTargets1451 = z.infer<typeof reviewTargets1451Schema>;
+export type ReviewItems1451 = z.infer<typeof reviewItems1451Schema>;
+export type ReviewRegions1451 = z.infer<typeof reviewRegions1451Schema>;
+export type ReviewAudio1451 = z.infer<typeof reviewAudio1451Schema>;
+export type ReviewPlayback1451 = z.infer<typeof reviewPlayback1451Schema>;
 export type Evaluation1451 = z.infer<typeof evaluation1451Schema>;
 export type Route1451 = z.infer<typeof route1451Schema>;
 export type ShareableSummary1451 = z.infer<typeof shareableSummary1451Schema>;
