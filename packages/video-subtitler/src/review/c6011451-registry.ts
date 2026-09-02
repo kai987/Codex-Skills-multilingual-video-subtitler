@@ -6,7 +6,6 @@ import {
   type CompatibilityMap1451,
   type CoverageUnits145,
   type FullRegistry1451,
-  type FullRegistryUnit1451,
   type Hierarchy143,
   type Inventory142,
   type Planner145,
@@ -244,8 +243,7 @@ export function buildFullRegistry1451(input: {
     const previous = groups.at(-1),
       last = previous?.at(-1),
       sameIdentity =
-        last &&
-        last.interval.endSample === cell.interval.startSample &&
+        last?.interval.endSample === cell.interval.startSample &&
         stateKey(last.states.states) === stateKey(cell.states.states) &&
         last.detectorFamilies.join("|") === cell.detectorFamilies.join("|") &&
         last.independentFamilies.join("|") ===

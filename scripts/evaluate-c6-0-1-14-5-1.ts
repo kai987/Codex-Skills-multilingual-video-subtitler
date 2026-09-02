@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition -- Strict artifact schemas intentionally narrow several fields to literals; this evaluator still rechecks their runtime relationships across independently loaded files. */
 import path from "node:path";
 import { parseArgs } from "node:util";
 import * as shared from "@mvl/shared";
@@ -25,7 +26,11 @@ import { loadInputs145 } from "./lib/c601145-input.js";
 import { c60114GoldErrorComponents } from "./lib/c60114-post-freeze-evaluation.js";
 
 type Component = shared.Evaluation1451["components"][number];
-type Recall = { numerator: number; denominator: number; ratio: number };
+interface Recall {
+  numerator: number;
+  denominator: number;
+  ratio: number;
+}
 
 const { values } = parseArgs({
   strict: true,
@@ -759,7 +764,9 @@ const planner = await readMachine(
       fullOrdinary.hallucinationPlayback.ratio === 1,
   },
   routeName = routeFromGates1451(routeGates),
-  gateRows = Object.entries(routeGates).map(([name, passed]) => ({
+  gateRows = (
+    Object.entries(routeGates) as [keyof RouteGates1451, boolean][]
+  ).map(([name, passed]) => ({
     name: name.toUpperCase(),
     passed,
   })),

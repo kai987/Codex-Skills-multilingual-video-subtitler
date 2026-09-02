@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type * as shared from "@mvl/shared";
+import { shareableAudit1451Schema } from "@mvl/shared";
 import { fixture145 } from "./fixtures/c601145-fixture.js";
 import {
   hash141,
@@ -178,7 +179,7 @@ describe("C6.0.1.14.5.1 full registry and product contract", () => {
         binding: {
           ...fixture.binding,
           targetBindings: [],
-        } as shared.ReviewBinding1451,
+        },
         mode: "FULL",
       });
     expect(result.status).toBe("NOT_SCORABLE_NO_TARGET_BINDING");
@@ -231,7 +232,7 @@ describe("C6.0.1.14.5.1 full registry and product contract", () => {
         units: fixture.units145,
         unitUtility: fixture.unitUtility145,
         realizations: fixture.realizations145,
-        planner: planner as shared.Planner145,
+        planner,
         selected: fixture.selected145,
         contractLedgerHash: fixture.ledger145.semanticHash,
         sourceSafetyTargetsHash: hash141([]),
@@ -283,5 +284,37 @@ describe("C6.0.1.14.5.1 full registry and product contract", () => {
     expect(routeFromGates1451(gates)).toBe(
       "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
     );
+  });
+
+  it("keeps the shareable audit aggregate-only and fail-closed", () => {
+    const safe = hashed141({
+      schemaVersion: "1.0.0",
+      artifactType: "c6-0-1-14-5-1-shareable-audit",
+      visibility: "SHAREABLE_AUDIT",
+      summaryHash: "b".repeat(64),
+      pathPolicy: "NO_ABSOLUTE_OR_LOCAL_PATHS",
+      aggregateOnly: true,
+      absolutePathLeakCount: 0,
+      secretFindingCount: 0,
+      rawAudioReferenceCount: 0,
+      dialogueTextFindingCount: 0,
+      goldContentFindingCount: 0,
+      credentialFindingCount: 0,
+      passed: true,
+    });
+    expect(shareableAudit1451Schema.parse(safe).passed).toBe(true);
+    expect(() =>
+      shareableAudit1451Schema.parse({
+        ...safe,
+        sourcePath: "/Users/example/private.wav",
+      }),
+    ).toThrow();
+    expect(() =>
+      shareableAudit1451Schema.parse({
+        ...safe,
+        absolutePathLeakCount: 1,
+        passed: false,
+      }),
+    ).toThrow();
   });
 });

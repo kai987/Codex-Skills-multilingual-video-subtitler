@@ -58,9 +58,6 @@ export function buildInheritedRealizations1451(input: {
   playback: ReviewPlayback145;
 }): InheritedRealizations1451 {
   const rate = input.registry.sourceIdentity.sampleRate,
-    targetMap = new Map(
-      input.targets.targets.map((row) => [row.reviewTargetId, row]),
-    ),
     regionByTarget = new Map<string, string[]>();
   for (const region of input.regions.regions)
     for (const targetId of region.reviewTargetIds) {
@@ -132,9 +129,6 @@ export function buildInheritedRealizations1451(input: {
             : []),
           ...(rightContextSeconds > input.policy.maximumOneSideContextSeconds
             ? ["RIGHT_CONTEXT_EXCEEDS_3_SECONDS"]
-            : []),
-          ...(!audio.playable || !audio.hashVerified
-            ? ["PHYSICAL_AUDIO_NOT_VERIFIED"]
             : []),
         ];
       if (violations.length) {
@@ -343,10 +337,7 @@ export function buildEffectiveRealizations1451(input: {
   targets: ReviewTargets145;
   audio: ReviewAudio145;
 }): EffectiveRealizations1451 {
-  const targetById = new Map(
-      input.targets.targets.map((row) => [row.reviewTargetId, row]),
-    ),
-    audioById = new Map(input.audio.audio.map((row) => [row.audioId, row])),
+  const audioById = new Map(input.audio.audio.map((row) => [row.audioId, row])),
     plannerSeeds: EffectiveSeed[] = [];
   for (const realizationId of input.planner.selectedRealizationIds) {
     const realization = required141(

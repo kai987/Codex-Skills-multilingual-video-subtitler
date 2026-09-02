@@ -874,7 +874,7 @@ export const freeze1451Schema = z
     canonicalTextHash: hash,
     canonicalTimingHash: hash,
     presentationHash: hash,
-    freezeCompletedAt: z.string().datetime(),
+    freezeCompletedAt: z.iso.datetime(),
     finalRole: z.enum(["A", "B"]),
   })
   .strict();
@@ -890,8 +890,8 @@ export const firstGoldRead1451Schema = z
     artifactType: z.literal("c6-0-1-14-5-1-first-gold-read-audit"),
     runtimeGoldInputCount: z.literal(1),
     machineFreezeHash: hash,
-    machineFreezeCompletedAt: z.string().datetime(),
-    goldFirstReadAt: z.string().datetime(),
+    machineFreezeCompletedAt: z.iso.datetime(),
+    goldFirstReadAt: z.iso.datetime(),
     freezeBeforeGold: z.literal(true),
     machineStageGoldPathReadCount: z.literal(0),
     machineStageGoldDerivedArtifactReadCount: z.literal(0),
@@ -1106,6 +1106,90 @@ export const route1451Schema = z
   })
   .strict();
 
+export const shareableSummary1451Schema = z
+  .object({
+    schemaVersion: z.literal("1.0.0"),
+    artifactType: z.literal("c6-0-1-14-5-1-aggregate-shareable-summary"),
+    visibility: z.literal("SHAREABLE_AGGREGATE_ONLY"),
+    policyVersion: version1451Schema,
+    policyHash: hash,
+    fullRegistryUnitCount: count,
+    registeredVerifiedSpeechUnionSeconds: nonnegative,
+    registeredVerifiedSpeechCoverageRatio: ratio,
+    unregisteredVerifiedSpeechSamples: count,
+    planningUnitCount: count,
+    targetCount: count,
+    requiredTargetCount: count,
+    requiredTargetBoundCount: count,
+    requiredTargetUnboundCount: count,
+    targetUnitPairCount: count,
+    audioUnitPairCount: count,
+    playbackUnitPairCount: count,
+    inheritedRealizationCount: count,
+    effectiveProductRealizationCount: count,
+    witnessGroupCount: count,
+    singleUnitWitnessCount: count,
+    multiUnitWitnessCount: count,
+    scorableComponentCount: count,
+    scorablePassCount: count,
+    scorableFailCount: count,
+    unscorableComponentCount: count,
+    formalRecallStatus: z.enum([
+      "SCORABLE",
+      "NOT_SCORABLE",
+      "INTEGRITY_FAILED",
+    ]),
+    formalRecall: recall1451Schema.nullable(),
+    targetCoreRecall: recall1451Schema,
+    ordinaryPhysicalAudioRecall: recall1451Schema,
+    ordinaryPlaybackAudibleRecall: recall1451Schema,
+    hallucinationPlaybackAudibleRecall: recall1451Schema,
+    mandatory: z
+      .object({
+        itemCount: count,
+        regionCount: count,
+        targetCount: count,
+        audioCount: count,
+        playbackSegmentCount: count,
+        uniqueAudioSeconds: nonnegative,
+        productScorability: z.enum([
+          "SCORABLE",
+          "NOT_SCORABLE",
+          "INTEGRITY_FAILED",
+        ]),
+        productRecall: recall1451Schema.nullable(),
+      })
+      .strict(),
+    machineFreezeHash: hash,
+    evaluationHash: hash,
+    routeHash: hash,
+    route: route1451Schema.shape.route,
+    productionStatus: z.literal("needs-review"),
+    finalizationMethod: z.literal("none"),
+    c602Status: z.literal("HOLD"),
+    semanticHash: hash,
+  })
+  .strict();
+
+export const shareableAudit1451Schema = z
+  .object({
+    schemaVersion: z.literal("1.0.0"),
+    artifactType: z.literal("c6-0-1-14-5-1-shareable-audit"),
+    visibility: z.literal("SHAREABLE_AUDIT"),
+    summaryHash: hash,
+    pathPolicy: z.literal("NO_ABSOLUTE_OR_LOCAL_PATHS"),
+    aggregateOnly: z.literal(true),
+    absolutePathLeakCount: z.literal(0),
+    secretFindingCount: z.literal(0),
+    rawAudioReferenceCount: z.literal(0),
+    dialogueTextFindingCount: z.literal(0),
+    goldContentFindingCount: z.literal(0),
+    credentialFindingCount: z.literal(0),
+    passed: z.literal(true),
+    semanticHash: hash,
+  })
+  .strict();
+
 export const validation1451Schema = z
   .object({
     ...header1451Shape,
@@ -1142,3 +1226,5 @@ export type EffectiveRealizations1451 = z.infer<
 export type WitnessGroups1451 = z.infer<typeof witnessGroups1451Schema>;
 export type Evaluation1451 = z.infer<typeof evaluation1451Schema>;
 export type Route1451 = z.infer<typeof route1451Schema>;
+export type ShareableSummary1451 = z.infer<typeof shareableSummary1451Schema>;
+export type ShareableAudit1451 = z.infer<typeof shareableAudit1451Schema>;

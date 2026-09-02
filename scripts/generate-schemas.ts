@@ -2220,6 +2220,16 @@ const schemas = [
     schema: c60114.route1451Schema,
   },
   {
+    fileName: "c6-0-1-14-5-1-aggregate-shareable-summary.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-aggregate-shareable-summary.schema.json",
+    schema: c60114.shareableSummary1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-shareable-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-shareable-audit.schema.json",
+    schema: c60114.shareableAudit1451Schema,
+  },
+  {
     fileName: "c6-0-1-14-5-1-validation.schema.json",
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-validation.schema.json",
     schema: c60114.validation1451Schema,

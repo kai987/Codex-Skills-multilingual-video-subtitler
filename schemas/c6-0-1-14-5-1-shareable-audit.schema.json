@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-shareable-audit.schema.json",
+  "title": "c6-0-1-14-5-1-shareable-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-1-shareable-audit"
+    },
+    "visibility": { "type": "string", "const": "SHAREABLE_AUDIT" },
+    "summaryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "pathPolicy": { "type": "string", "const": "NO_ABSOLUTE_OR_LOCAL_PATHS" },
+    "aggregateOnly": { "type": "boolean", "const": true },
+    "absolutePathLeakCount": { "type": "number", "const": 0 },
+    "secretFindingCount": { "type": "number", "const": 0 },
+    "rawAudioReferenceCount": { "type": "number", "const": 0 },
+    "dialogueTextFindingCount": { "type": "number", "const": 0 },
+    "goldContentFindingCount": { "type": "number", "const": 0 },
+    "credentialFindingCount": { "type": "number", "const": 0 },
+    "passed": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "summaryHash",
+    "pathPolicy",
+    "aggregateOnly",
+    "absolutePathLeakCount",
+    "secretFindingCount",
+    "rawAudioReferenceCount",
+    "dialogueTextFindingCount",
+    "goldContentFindingCount",
+    "credentialFindingCount",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

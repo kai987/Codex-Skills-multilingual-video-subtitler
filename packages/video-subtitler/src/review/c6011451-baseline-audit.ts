@@ -47,9 +47,6 @@ export function buildBaselineAudit1451(input: {
     ),
     verifiedSamples = sampleCount143(verifiedUnion),
     unitSamples = sampleCount143(unitUnion),
-    targetById = new Map(
-      input.targets.targets.map((row) => [row.reviewTargetId, row]),
-    ),
     unitById = new Map(
       input.units.units.map((row) => [row.coverageUnitId, row]),
     ),
@@ -87,7 +84,6 @@ export function buildBaselineAudit1451(input: {
       })),
     ),
     selectedRealizations = new Set(input.planner.selectedRealizationIds),
-    selectedUnitIds = new Set(input.planner.selectedCoverageUnitIds),
     safetyFallbacks = input.safety.targets.filter(
       (target) => !selectedRealizations.has(target.realizationId),
     ),

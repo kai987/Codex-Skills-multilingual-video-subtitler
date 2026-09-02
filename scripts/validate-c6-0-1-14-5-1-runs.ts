@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition -- Validation intentionally reasserts schema-constrained literals and cross-artifact runtime invariants. */
 import path from "node:path";
+import { mkdir } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import * as shared from "@mvl/shared";
 import {
@@ -437,6 +439,124 @@ check(
   !policy.rankerRetrained &&
     !policy.machineOnlyReleaseAuthorized &&
     route.c602Status === "HOLD",
+);
+
+const shareableSummary = shared.shareableSummary1451Schema.parse(
+  hashed141({
+    schemaVersion: "1.0.0",
+    artifactType: "c6-0-1-14-5-1-aggregate-shareable-summary",
+    visibility: "SHAREABLE_AGGREGATE_ONLY",
+    policyVersion: policy.policyVersion,
+    policyHash: policy.semanticHash,
+    fullRegistryUnitCount: registry.fullRegistryUnitCount,
+    registeredVerifiedSpeechUnionSeconds:
+      registry.registeredVerifiedSpeechUnionSeconds,
+    registeredVerifiedSpeechCoverageRatio:
+      registry.registeredVerifiedSpeechCoverageRatio,
+    unregisteredVerifiedSpeechSamples:
+      registry.unregisteredVerifiedSpeechSamples,
+    planningUnitCount: planning.planningUnitCount,
+    targetCount: targets.targets.length,
+    requiredTargetCount: binding.unitBindingRequiredTargetCount,
+    requiredTargetBoundCount: binding.requiredTargetBoundCount,
+    requiredTargetUnboundCount: binding.requiredTargetUnboundCount,
+    targetUnitPairCount: binding.targetUnitPairCount,
+    audioUnitPairCount: binding.audioUnitPairCount,
+    playbackUnitPairCount: binding.playbackUnitPairCount,
+    inheritedRealizationCount: inherited.realizations.length,
+    effectiveProductRealizationCount:
+      effective.effectiveProductRealizationCount,
+    witnessGroupCount: witnesses.witnessGroupCount,
+    singleUnitWitnessCount: witnesses.singleUnitWitnessCandidateCount,
+    multiUnitWitnessCount: witnesses.multiUnitWitnessCandidateCount,
+    scorableComponentCount: evaluation.scorableComponentCount,
+    scorablePassCount: evaluation.scorablePassCount,
+    scorableFailCount: evaluation.scorableFailCount,
+    unscorableComponentCount: evaluation.unscorableComponentCount,
+    formalRecallStatus: evaluation.formalRecallStatus,
+    formalRecall: evaluation.formalRecall,
+    targetCoreRecall: evaluation.targetCoreRecall,
+    ordinaryPhysicalAudioRecall: evaluation.ordinaryPhysicalAudioRecall,
+    ordinaryPlaybackAudibleRecall: evaluation.ordinaryPlaybackAudibleRecall,
+    hallucinationPlaybackAudibleRecall:
+      evaluation.hallucinationPlaybackAudibleRecall,
+    mandatory: {
+      itemCount: evaluation.allMandatory.itemCount,
+      regionCount: evaluation.allMandatory.regionCount,
+      targetCount: evaluation.allMandatory.targetCount,
+      audioCount: evaluation.allMandatory.audioCount,
+      playbackSegmentCount: evaluation.allMandatory.playbackSegmentCount,
+      uniqueAudioSeconds: evaluation.allMandatory.uniqueAudioSeconds,
+      productScorability: evaluation.allMandatory.productScorability,
+      productRecall: evaluation.allMandatory.productRecall,
+    },
+    machineFreezeHash: freezeA.semanticHash,
+    evaluationHash: evaluation.semanticHash,
+    routeHash: route.semanticHash,
+    route: route.route,
+    productionStatus: route.productionStatus,
+    finalizationMethod: route.finalizationMethod,
+    c602Status: route.c602Status,
+  }),
+);
+const shareableText = JSON.stringify(shareableSummary);
+const matchCount = (pattern: RegExp) =>
+  shareableText.match(pattern)?.length ?? 0;
+const absolutePathLeakCount = matchCount(
+    /(?:file:\/\/|\/Users\/|\/home\/|[A-Za-z]:\\\\|\/private\/var\/|\/tmp\/)/gu,
+  ),
+  secretFindingCount = matchCount(
+    /(?:sk-[A-Za-z0-9_-]{12,}|AKIA[A-Z0-9]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/gu,
+  ),
+  rawAudioReferenceCount = matchCount(/(?:\.wav\b|\/audio\/)/giu),
+  dialogueTextFindingCount = matchCount(/[\u3040-\u30ff\u3400-\u9fff]/gu),
+  goldContentFindingCount = matchCount(
+    /(?:goldText|goldTranscript|goldInterval|goldCue)/giu,
+  ),
+  credentialFindingCount = matchCount(
+    /(?:password|passwd|authorization|bearer\s+[A-Za-z0-9._-]+)/giu,
+  );
+const shareableAudit = shared.shareableAudit1451Schema.parse(
+  hashed141({
+    schemaVersion: "1.0.0",
+    artifactType: "c6-0-1-14-5-1-shareable-audit",
+    visibility: "SHAREABLE_AUDIT",
+    summaryHash: shareableSummary.semanticHash,
+    pathPolicy: "NO_ABSOLUTE_OR_LOCAL_PATHS",
+    aggregateOnly: true,
+    absolutePathLeakCount,
+    secretFindingCount,
+    rawAudioReferenceCount,
+    dialogueTextFindingCount,
+    goldContentFindingCount,
+    credentialFindingCount,
+    passed:
+      absolutePathLeakCount === 0 &&
+      secretFindingCount === 0 &&
+      rawAudioReferenceCount === 0 &&
+      dialogueTextFindingCount === 0 &&
+      goldContentFindingCount === 0 &&
+      credentialFindingCount === 0,
+  }),
+);
+check("SHAREABLE_AGGREGATE_ONLY", shareableAudit.passed, [
+  `summary=${shareableSummary.semanticHash}`,
+  `absolutePathLeaks=${shareableAudit.absolutePathLeakCount}`,
+  `secrets=${shareableAudit.secretFindingCount}`,
+  `rawAudio=${shareableAudit.rawAudioReferenceCount}`,
+  `dialogueText=${shareableAudit.dialogueTextFindingCount}`,
+  `goldContent=${shareableAudit.goldContentFindingCount}`,
+  `credentials=${shareableAudit.credentialFindingCount}`,
+]);
+const shareableRoot = path.join(validationRoot, "shareable");
+await mkdir(shareableRoot, { recursive: true });
+await durableJson141(
+  path.join(shareableRoot, "c6-0-1-14-5-1-aggregate-shareable-summary.json"),
+  shareableSummary,
+);
+await durableJson141(
+  path.join(shareableRoot, "c6-0-1-14-5-1-shareable-audit.json"),
+  shareableAudit,
 );
 
 const validation = shared.validation1451Schema.parse(

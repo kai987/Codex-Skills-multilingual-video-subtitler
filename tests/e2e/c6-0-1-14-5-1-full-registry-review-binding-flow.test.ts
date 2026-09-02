@@ -150,7 +150,7 @@ describe("C6.0.1.14.5.1 replay-only Full Registry flow", () => {
           errorIntervals: unit.atomicSourceIntervals,
           mappingStatus: "RESOLVED",
           mappingReasons: [],
-        } as shared.C60114ErrorComponent,
+        },
         mode: "FULL",
       });
 
