@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-baseline-audit.schema.json",
+  "title": "c6-0-1-14-5-1-baseline-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-0-1-14-5-1-registry-binding-baseline-audit"
+    },
+    "inventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "planningUnitsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewTargetsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewAudioHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewPlaybackHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "verifiedSpeechRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "verifiedSpeechAtomicIntervalCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "verifiedSpeechUnionSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "verifiedSpeechUnionSeconds": { "type": "number", "minimum": 0 },
+    "currentCoverageUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "currentCoverageUnitUnionSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "currentCoverageUnitUnionSeconds": { "type": "number", "minimum": 0 },
+    "currentRegistryCoverageRatio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "cueCoveredSpeechSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "immutableTargetCoveredSpeechSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "existingReviewTargetCoveredSpeechSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "uncoveredPlanningSpeechSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reviewTargetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetWithPositiveMachineSpeechEvidenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetUnitBoundCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredTargetUnitUnboundCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "optionalNonSpeechTargetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioUnitBoundCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackSegmentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackUnitBoundCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetUnitPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetUnitZeroOverlapCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioUnitPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioUnitZeroOverlapCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackUnitPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackUnitZeroOverlapCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "plannerSelectedRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "safetyTargetFallbackRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetBoundToUnselectedRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "productComponentScorableCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "productComponentUnscorableCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "allMandatoryPlanFound": { "type": "boolean" },
+    "allMandatoryResultCopiedFromFullQueue": { "type": "boolean" },
+    "rootCauseClassifications": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "inventoryHash",
+    "planningUnitsHash",
+    "reviewTargetsHash",
+    "reviewAudioHash",
+    "reviewPlaybackHash",
+    "verifiedSpeechRowCount",
+    "verifiedSpeechAtomicIntervalCount",
+    "verifiedSpeechUnionSamples",
+    "verifiedSpeechUnionSeconds",
+    "currentCoverageUnitCount",
+    "currentCoverageUnitUnionSamples",
+    "currentCoverageUnitUnionSeconds",
+    "currentRegistryCoverageRatio",
+    "cueCoveredSpeechSamples",
+    "immutableTargetCoveredSpeechSamples",
+    "existingReviewTargetCoveredSpeechSamples",
+    "uncoveredPlanningSpeechSamples",
+    "reviewTargetCount",
+    "targetWithPositiveMachineSpeechEvidenceCount",
+    "targetUnitBoundCount",
+    "requiredTargetUnitUnboundCount",
+    "optionalNonSpeechTargetCount",
+    "audioCount",
+    "audioUnitBoundCount",
+    "playbackSegmentCount",
+    "playbackUnitBoundCount",
+    "targetUnitPairCount",
+    "targetUnitZeroOverlapCount",
+    "audioUnitPairCount",
+    "audioUnitZeroOverlapCount",
+    "playbackUnitPairCount",
+    "playbackUnitZeroOverlapCount",
+    "plannerSelectedRealizationCount",
+    "safetyTargetFallbackRealizationCount",
+    "targetBoundToUnselectedRealizationCount",
+    "productComponentScorableCount",
+    "productComponentUnscorableCount",
+    "allMandatoryPlanFound",
+    "allMandatoryResultCopiedFromFullQueue",
+    "rootCauseClassifications"
+  ],
+  "additionalProperties": false
+}

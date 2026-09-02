@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-c6-0-1-14-5-1-multi-unit-witness-evaluation.schema.json",
+  "title": "gold-c6-0-1-14-5-1-multi-unit-witness-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "artifactType": {
+      "type": "string",
+      "const": "gold-c6-0-1-14-5-1-multi-unit-witness-evaluation"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 1 },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "witnessGroupHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "witnessSearchComplete": { "type": "boolean" },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "componentId": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCORABLE_SINGLE_UNIT_PASS",
+              "SCORABLE_MULTI_UNIT_PASS",
+              "SCORABLE_FAIL",
+              "NOT_SCORABLE_NO_REGISTRY_UNIT",
+              "NOT_SCORABLE_NO_TARGET_BINDING",
+              "NOT_SCORABLE_NO_EFFECTIVE_REALIZATION",
+              "NOT_SCORABLE_NO_PHYSICAL_AUDIO",
+              "NOT_SCORABLE_NO_PLAYBACK",
+              "NOT_SCORABLE_WITNESS_SEARCH_INCOMPLETE",
+              "INTEGRITY_FAILED"
+            ]
+          },
+          "matchingFullCoverageUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "matchingPlanningCoverageUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "targetBindingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "realizationOrigins": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PLANNER_SELECTED_REALIZATION",
+                "INHERITED_EXISTING_REVIEW_DELIVERY_REALIZATION",
+                "PHASE_A_OBLIGATION_REALIZATION",
+                "AUDIT_ONLY_UNBOUND_REALIZATION"
+              ]
+            }
+          },
+          "witnessGroupIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "witnessGroupId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "fullCoverageUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "effectiveRealizationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "targetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "audioIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "playbackSegmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "singleUnitWitnessStatus": {
+            "type": "string",
+            "enum": [
+              "SCORABLE_SINGLE_UNIT_PASS",
+              "SCORABLE_MULTI_UNIT_PASS",
+              "SCORABLE_FAIL",
+              "NOT_SCORABLE_NO_REGISTRY_UNIT",
+              "NOT_SCORABLE_NO_TARGET_BINDING",
+              "NOT_SCORABLE_NO_EFFECTIVE_REALIZATION",
+              "NOT_SCORABLE_NO_PHYSICAL_AUDIO",
+              "NOT_SCORABLE_NO_PLAYBACK",
+              "NOT_SCORABLE_WITNESS_SEARCH_INCOMPLETE",
+              "INTEGRITY_FAILED"
+            ]
+          },
+          "multiUnitWitnessStatus": {
+            "type": "string",
+            "enum": [
+              "SCORABLE_SINGLE_UNIT_PASS",
+              "SCORABLE_MULTI_UNIT_PASS",
+              "SCORABLE_FAIL",
+              "NOT_SCORABLE_NO_REGISTRY_UNIT",
+              "NOT_SCORABLE_NO_TARGET_BINDING",
+              "NOT_SCORABLE_NO_EFFECTIVE_REALIZATION",
+              "NOT_SCORABLE_NO_PHYSICAL_AUDIO",
+              "NOT_SCORABLE_NO_PLAYBACK",
+              "NOT_SCORABLE_WITNESS_SEARCH_INCOMPLETE",
+              "INTEGRITY_FAILED"
+            ]
+          },
+          "unitToGoldCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "targetCoreGoldCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "physicalAudioGoldCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "playbackToGoldCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minimumUnitAnchorOverlapSeconds": { "type": "number", "minimum": 0 },
+          "minimumUnitAnchorCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minimumPlaybackCoverageOfUnitRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "playbackCoverageByUnit": {
+            "type": "object",
+            "propertyNames": { "type": "string", "minLength": 1 },
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "anchorCoverageByUnit": {
+            "type": "object",
+            "propertyNames": { "type": "string", "minLength": 1 },
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "targetCorePassed": { "type": "boolean" },
+          "physicalAudioPassed": { "type": "boolean" },
+          "ordinaryPlaybackAudiblePassed": { "type": "boolean" },
+          "productContractPassed": { "type": "boolean" },
+          "finalBlockingReason": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "finalDiagnosis": { "type": "string", "minLength": 1 },
+          "rejectionReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "componentId",
+          "status",
+          "matchingFullCoverageUnitIds",
+          "matchingPlanningCoverageUnitIds",
+          "targetBindingIds",
+          "realizationOrigins",
+          "witnessGroupIds",
+          "witnessGroupId",
+          "fullCoverageUnitIds",
+          "effectiveRealizationIds",
+          "targetIds",
+          "audioIds",
+          "playbackSegmentIds",
+          "singleUnitWitnessStatus",
+          "multiUnitWitnessStatus",
+          "unitToGoldCoverageRatio",
+          "targetCoreGoldCoverageRatio",
+          "physicalAudioGoldCoverageRatio",
+          "playbackToGoldCoverageRatio",
+          "minimumUnitAnchorOverlapSeconds",
+          "minimumUnitAnchorCoverageRatio",
+          "minimumPlaybackCoverageOfUnitRatio",
+          "playbackCoverageByUnit",
+          "anchorCoverageByUnit",
+          "targetCorePassed",
+          "physicalAudioPassed",
+          "ordinaryPlaybackAudiblePassed",
+          "productContractPassed",
+          "finalBlockingReason",
+          "finalDiagnosis",
+          "rejectionReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "singleUnitPassCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "multiUnitPassCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "scorableFailCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unscorableCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "visibility",
+    "artifactType",
+    "runtimeGoldInputCount",
+    "machineFreezeHash",
+    "witnessGroupHash",
+    "witnessSearchComplete",
+    "components",
+    "singleUnitPassCount",
+    "multiUnitPassCount",
+    "scorableFailCount",
+    "unscorableCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-route-decision.schema.json",
+  "title": "c6-0-1-14-5-1-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-1-route-decision"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 1 },
+    "evaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_FULL_SPEECH_UNIT_REGISTRY_REPAIR",
+        "HOLD_FOR_REVIEW_DELIVERY_UNIT_BINDING_REPAIR",
+        "HOLD_FOR_INHERITED_REALIZATION_REPAIR",
+        "HOLD_FOR_MULTI_UNIT_PRODUCT_WITNESS_REPAIR",
+        "HOLD_FOR_CONTRACT_SCORABILITY_REPAIR",
+        "HOLD_FOR_REMAINING_INVENTORY_TO_TARGET_COVERAGE_REPAIR",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_SAFETY_BUDGET_MODEL_REDESIGN",
+        "HOLD_FOR_ENGINEERING_REPAIR"
+      ]
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" }
+        },
+        "required": ["name", "passed"],
+        "additionalProperties": false
+      }
+    },
+    "blockingReasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "advisories": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "visibility",
+    "artifactType",
+    "runtimeGoldInputCount",
+    "evaluationHash",
+    "route",
+    "gates",
+    "blockingReasons",
+    "advisories",
+    "machineOnlyReleaseAuthorized",
+    "productionStatus",
+    "finalizationMethod",
+    "c602Status",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

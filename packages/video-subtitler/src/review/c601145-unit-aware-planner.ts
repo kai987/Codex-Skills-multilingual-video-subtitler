@@ -1277,25 +1277,13 @@ export function buildSafetyTargetsV5(input: {
     const realizations = [...selectedRealizationMap.values()].filter((row) =>
         row.bundleIds.includes(bundle.bundleId),
       ),
-      realization =
-        realizations.sort(realizationCostCompare145)[0] ??
-        input.realizations.candidates
-          .filter(
-            (row) =>
-              row.eligibility &&
-              row.bundleIds.includes(bundle.bundleId) &&
-              row.contractType ===
-                "MACHINE_ANCHORED_PLAYBACK_AUDIBILITY_CONTRACT_V1",
-          )
-          .sort(realizationCostCompare145)[0];
+      realization = realizations.sort(realizationCostCompare145)[0];
     if (!realization)
       throw new Error(
-        `C601145_SELECTED_BUNDLE_NO_UNIT_REALIZATION:${bundle.bundleId}`,
+        `PLANNER_SELECTED_BUNDLE_WITHOUT_SELECTED_REALIZATION:${bundle.bundleId}`,
       );
     const coveredUnitIds = sortedUnique145(
-        realizations.length
-          ? realizations.map((row) => row.coverageUnitId)
-          : [realization.coverageUnitId],
+        realizations.map((row) => row.coverageUnitId),
       ),
       unit = required141(unitMap.get(realization.coverageUnitId)),
       utilities = coveredUnitIds.map((unitId) =>

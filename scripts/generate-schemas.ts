@@ -2099,6 +2099,131 @@ const schemas = [
     id: "https://schemas.local/multilingual-video-learning/c6-0-1-12-shareable-summary.schema.json",
     schema: c60112ShareableSummarySchema,
   },
+  {
+    fileName: "c6-0-1-14-5-1-policy.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-policy.schema.json",
+    schema: c60114.policy1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-baseline-audit.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-baseline-audit.schema.json",
+    schema: c60114.baselineAudit1451Schema,
+  },
+  {
+    fileName: "machine-full-speech-evidence-unit-registry-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-full-speech-evidence-unit-registry-v1.schema.json",
+    schema: c60114.fullRegistry1451Schema,
+  },
+  {
+    fileName: "machine-full-registry-source-reconciliation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-full-registry-source-reconciliation.schema.json",
+    schema: c60114.sourceReconciliation1451Schema,
+  },
+  {
+    fileName: "machine-uncovered-safety-unit-projection-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-uncovered-safety-unit-projection-v1.schema.json",
+    schema: c60114.planningProjection1451Schema,
+  },
+  {
+    fileName: "machine-coverage-unit-registry-compatibility-map-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-coverage-unit-registry-compatibility-map-v1.schema.json",
+    schema: c60114.compatibilityMap1451Schema,
+  },
+  {
+    fileName: "machine-review-delivery-coverage-unit-binding-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-delivery-coverage-unit-binding-v1.schema.json",
+    schema: c60114.reviewBinding1451Schema,
+  },
+  {
+    fileName: "machine-existing-review-delivery-realizations-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-existing-review-delivery-realizations-v1.schema.json",
+    schema: c60114.inheritedRealizations1451Schema,
+  },
+  {
+    fileName: "machine-effective-product-realization-registry-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-effective-product-realization-registry-v1.schema.json",
+    schema: c60114.effectiveRealizations1451Schema,
+  },
+  {
+    fileName: "machine-product-contract-witness-groups-v1.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-product-contract-witness-groups-v1.schema.json",
+    schema: c60114.witnessGroups1451Schema,
+  },
+  {
+    fileName: "machine-review-target-intervals-v8.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-target-intervals-v8.schema.json",
+    schema: c60114.reviewTargets1451Schema,
+  },
+  {
+    fileName: "machine-review-items-v10.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-items-v10.schema.json",
+    schema: c60114.reviewItems1451Schema,
+  },
+  {
+    fileName: "machine-review-regions-v9.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-regions-v9.schema.json",
+    schema: c60114.reviewRegions1451Schema,
+  },
+  {
+    fileName: "machine-review-audio-manifest-v9.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-audio-manifest-v9.schema.json",
+    schema: c60114.reviewAudio1451Schema,
+  },
+  {
+    fileName: "machine-review-playback-timeline-v8.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-review-playback-timeline-v8.schema.json",
+    schema: c60114.reviewPlayback1451Schema,
+  },
+  {
+    fileName: "machine-c6-0-1-14-5-1-geometry-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-c6-0-1-14-5-1-geometry-freeze.schema.json",
+    schema: c60114.geometryFreeze1451Schema,
+  },
+  {
+    fileName: "machine-projection-hash-rebinding-ledger-v1451.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/machine-projection-hash-rebinding-ledger-v1451.schema.json",
+    schema: c60114.projectionLedger1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-nested-preflight.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-nested-preflight.schema.json",
+    schema: c60114.nestedPreflight1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-machine-freeze.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-machine-freeze.schema.json",
+    schema: c60114.freeze1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-final-ab-parity.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-final-ab-parity.schema.json",
+    schema: c60114.parity1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-first-gold-read.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-first-gold-read.schema.json",
+    schema: c60114.firstGoldRead1451Schema,
+  },
+  {
+    fileName: "gold-c6-0-1-14-5-1-contract-re-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-c6-0-1-14-5-1-contract-re-evaluation.schema.json",
+    schema: c60114.evaluation1451Schema,
+  },
+  {
+    fileName: "gold-c6-0-1-14-5-1-multi-unit-witness-evaluation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/gold-c6-0-1-14-5-1-multi-unit-witness-evaluation.schema.json",
+    schema: c60114.witnessEvaluation1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-route-decision.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-route-decision.schema.json",
+    schema: c60114.route1451Schema,
+  },
+  {
+    fileName: "c6-0-1-14-5-1-validation.schema.json",
+    id: "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-validation.schema.json",
+    schema: c60114.validation1451Schema,
+  },
 ] as const;
 
 const closeExportedTuples = (value: unknown): void => {

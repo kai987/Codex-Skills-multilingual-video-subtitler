@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-c6-0-1-14-5-1-geometry-freeze.schema.json",
+  "title": "machine-c6-0-1-14-5-1-geometry-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-c6-0-1-14-5-1-geometry-freeze"
+    },
+    "inventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "hierarchyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "planningUnitsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "plannerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "selectedBundleIdsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "selectedChildIdsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "selectedRealizationIdsHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewTargetGeometryHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewRegionGeometryHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewAudioGeometryHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewAudioBytesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "playbackGeometryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "protectedSubtitleFileHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "plannerGeometryParity": { "type": "boolean", "const": true },
+    "targetIntervalParity": { "type": "boolean", "const": true },
+    "regionIntervalParity": { "type": "boolean", "const": true },
+    "audioByteParity": { "type": "boolean", "const": true },
+    "playbackIntervalParity": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "inventoryHash",
+    "hierarchyHash",
+    "planningUnitsHash",
+    "plannerHash",
+    "selectedBundleIdsHash",
+    "selectedChildIdsHash",
+    "selectedRealizationIdsHash",
+    "reviewTargetGeometryHash",
+    "reviewRegionGeometryHash",
+    "reviewAudioGeometryHash",
+    "reviewAudioBytesHash",
+    "playbackGeometryHash",
+    "protectedSubtitleFileHashes",
+    "plannerGeometryParity",
+    "targetIntervalParity",
+    "regionIntervalParity",
+    "audioByteParity",
+    "playbackIntervalParity"
+  ],
+  "additionalProperties": false
+}
