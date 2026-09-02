@@ -26,6 +26,6 @@ fetch('assets/c601145/machine-review-items-v9.json',{cache:'no-store'}).then(res
 fetch('assets/c601145/machine-review-target-intervals-v7.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('machine-review-target-intervals-v7.json unavailable');return response.json()}),
 fetch('assets/c601145/machine-missing-safety-reserve-targets-v5.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('machine-missing-safety-reserve-targets-v5.json unavailable');return response.json()}),
 fetch('assets/c601145/machine-speech-safety-coverage-units-v1.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('machine-speech-safety-coverage-units-v1.json unavailable');return response.json()})
-]).then(([items,targets,safety,units])=>{c601145Data={items,targets,safety,units};render()}).catch(error=>showStatus(error.message,true));
+]).then(([items,targets,safety,units])=>{c601145Data={items,targets,safety,units};if(state.data)render()}).catch(error=>showStatus(error.message,true));
 `;
 }

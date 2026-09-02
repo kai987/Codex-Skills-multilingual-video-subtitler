@@ -158,6 +158,7 @@ describe("C6.0.1.14.5 safety coverage units and review contract", () => {
     ])
       expect(javascript).toContain(label);
     expect(javascript).toContain("assets/c601145/");
+    expect(javascript).toContain("if(state.data)render()");
     expect(javascript).not.toContain("Gold");
     expect(javascript).not.toContain("decide(");
   });
