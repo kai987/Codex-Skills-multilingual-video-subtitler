@@ -13,6 +13,8 @@
     "npm": ">=11"
   },
   "scripts": {
+    "audit:acoustic:capability": "node scripts/audit-c6011621.mjs",
+    "test:c6011621": "vitest run tests/c6011621-timestamp-capability.test.ts tests/e2e/c6011621-zero-inference.test.ts",
     "quality:acoustic:prepare": "node scripts/run-c601162-acoustic.mjs prepare",
     "quality:acoustic:execute": "node scripts/run-c601162-acoustic.mjs execute",
     "quality:acoustic:replay": "node scripts/replay-c601162.mjs",
