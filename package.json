@@ -13,6 +13,10 @@
     "npm": ">=11"
   },
   "scripts": {
+    "quality:prepare": "node scripts/prepare-c60116-evidence.mjs",
+    "quality:generate": "node scripts/run-c60116-experiment.mjs",
+    "quality:evaluate": "node scripts/evaluate-c60116-experiment.mjs",
+    "test:c60116": "vitest run tests/c60116-quality-metrics.test.ts tests/c60116-primary-recovery.test.ts tests/e2e/c60116-machine-quality-flow.test.ts",
     "build": "tsc -b && npm run build -w @mvl/grammar-learning-site-template",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
