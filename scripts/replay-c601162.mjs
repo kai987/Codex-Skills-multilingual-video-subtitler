@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { observationSchema } from "../packages/video-subtitler/dist/machine-quality/bounded-acoustic.js";
 import {
   sha256,
   objectHash,
@@ -26,7 +27,7 @@ for (const req of plan.requests) {
     result.observationHash !== objectHash(result.observation) ||
     result.observation.resultHash !== objectHash(result.raw) ||
     objectHash(bundle.observations.find((o) => o.requestId === req.id)) !==
-      objectHash(result.observation)
+      objectHash(observationSchema.parse(result.observation))
   )
     throw Error("Request persistence mismatch");
 }
