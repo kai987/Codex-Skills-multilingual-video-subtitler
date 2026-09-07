@@ -13,6 +13,11 @@
     "npm": ">=11"
   },
   "scripts": {
+    "quality:source-group:prepare": "node scripts/run-c601164.mjs prepare",
+    "quality:source-group:align": "node scripts/run-c601164.mjs execute-alignment",
+    "quality:source-group:generate": "node scripts/run-c601164.mjs generate",
+    "quality:source-group:evaluate": "node scripts/evaluate-c601164.mjs",
+    "test:c601164": "vitest run tests/c601164-source-bound-group.test.ts tests/e2e/c601164-group-export.test.ts",
     "quality:stored-token:replay": "node scripts/replay-c601163.mjs",
     "quality:stored-token:evaluate": "node scripts/evaluate-c601163.mjs",
     "test:c601163": "vitest run tests/c601163-stored-token-span.test.ts tests/e2e/c601163-stored-token-export.test.ts",

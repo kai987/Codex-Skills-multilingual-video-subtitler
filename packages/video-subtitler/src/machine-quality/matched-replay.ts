@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { applySourceGroups, type GroupPatch } from "./source-bound-group.js";
 import { applyStoredSpans, type StoredDecision } from "./stored-token-span.js";
 import {
   applyAcousticDecisions,
@@ -108,6 +109,7 @@ export function replayPrimaryAssembly(
   implementationHashes: Record<string, string> = {},
   acoustic?: { mode: "observe" | "apply"; decisions: AcousticDecision[] },
   stored?: { mode: "observe" | "apply"; decisions: StoredDecision[] },
+  groups?: { mode: "observe" | "apply"; patches: GroupPatch[] },
 ) {
   const e = matchedEvidenceSchema.parse(value);
   const trace: StageTrace[] = [];
@@ -226,10 +228,40 @@ export function replayPrimaryAssembly(
           .join(";") || "kept-primary-winner",
     })),
   );
+  if (groups && (!repair || acoustic || stored))
+    throw Error("Group experiment requires exclusive source-preserving hook");
+  const groupResult = groups
+    ? applySourceGroups(dedup.cues, groups.patches, groups.mode === "apply")
+    : { cues: dedup.cues, applied: [], blocked: [] };
+  const protectedIds = new Set(
+    groupResult.applied.flatMap((p) => p.newCues.map((c) => c.id)),
+  );
+  if (groups)
+    record(
+      "REPLACE_SOURCE_BOUND_UTTERANCE_GROUP",
+      dedup.cues,
+      groupResult.cues,
+      groupResult.applied.length ? "REPLACE" : "ABSTAIN",
+      {
+        ...groups,
+        applied: groupResult.applied.map((p) => p.id),
+        blocked: groupResult.blocked,
+      },
+      groupResult.applied.map((p) => ({
+        inputIds: p.oldCues.map((b) => b.cue.id),
+        outputIds: p.newCues.map((c) => c.id),
+        reason: p.action,
+      })),
+    );
   const repetition = repairIntraCueHypothesisRepetition({
-    cues: dedup.cues,
+    cues: groupResult.cues.filter((c) => !protectedIds.has(c.id)),
     repetitionPolicy: repair ? "source-preserving" : "legacy",
   });
+  if (protectedIds.size)
+    repetition.cues = [
+      ...repetition.cues,
+      ...groupResult.cues.filter((c) => protectedIds.has(c.id)),
+    ].sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
   if (acoustic) {
     if (!repair)
       throw new Error("Acoustic experiment requires source-preserving profile");
@@ -254,7 +286,7 @@ export function replayPrimaryAssembly(
   }
   record(
     "repairIntraCueHypothesisRepetition",
-    dedup.cues,
+    groupResult.cues,
     repetition.cues,
     stored?.mode === "apply" ? "REPLACE" : repair ? "ABSTAIN" : "REPLACE",
     stored
@@ -276,13 +308,52 @@ export function replayPrimaryAssembly(
           : r.selectedReason,
     })),
   );
-  const segmentation = buildAcousticSemanticCueSegments(repetition.cues, {
-    mode: "acoustic-semantic",
-    japaneseTextAnalyzer: "intl-segmenter",
-  });
+  const segmentation = buildAcousticSemanticCueSegments(
+    protectedIds.size ? [] : repetition.cues,
+    {
+      mode: "acoustic-semantic",
+      japaneseTextAnalyzer: "intl-segmenter",
+    },
+  );
+  // Applied groups are hard barriers only in this opt-in replay. Existing cues
+  // run through the unchanged segmenter in contiguous blocks; approved groups
+  // bypass semantic merge/split and retain their frozen source boundaries.
+  if (protectedIds.size) {
+    let block: SubtitleCue[] = [];
+    const flush = () => {
+      if (!block.length) return;
+      const r = buildAcousticSemanticCueSegments(block, {
+        mode: "acoustic-semantic",
+        japaneseTextAnalyzer: "intl-segmenter",
+      });
+      segmentation.cues.push(...r.cues);
+      segmentation.plan.entries.push(...r.plan.entries);
+      block = [];
+    };
+    for (const c of repetition.cues) {
+      if (!protectedIds.has(c.id)) {
+        block.push(c);
+        continue;
+      }
+      flush();
+      // Build the ordinary plan shape using a one-cue pass, but never consume
+      // that pass's semantic changes. The identity adapter below handles these
+      // explicit protected bindings separately.
+      segmentation.cues.push(c);
+    }
+    flush();
+  }
   // Legacy semantic-merge IDs can collide. Bind the ACTUAL output by ID + exact
   // interval to the freshly executed plan, never by array index or text similarity.
   const identityBindings = segmentation.cues.map((c) => {
+    if (protectedIds.has(c.id))
+      return {
+        legacyId: c.id,
+        sourceIds: [c.id],
+        start: c.start,
+        end: c.end,
+        id: c.id,
+      };
     const entries = segmentation.plan.entries.filter((r) =>
       r.outputCueIds.some((id, i) => {
         const t = r.outputIntervals[i];

@@ -156,6 +156,29 @@ Freeze machine features and contiguous audio-isolated folds before opening Gold 
 
 ## Apply the source priority
 
+### C6.0.1.16.4 source-bound group experiment
+
+Only when explicitly authorized, use `quality:source-group:prepare`,
+`quality:source-group:align`, `quality:source-group:generate`, and the separate
+post-freeze `quality:source-group:evaluate` command. This opt-in matched-Primary
+experiment replaces an atomic group after cross-cue dedup and before intra-cue
+repair; it does not change the default pipeline. Old occurrence cores select
+complete stored Whisper parent units, while the original W2 physical WAV and
+frozen protected neighbors bound editing. W2 is always the representative;
+W1/Reazon disagreement remains diagnostic, never a forced agreement gate.
+
+Use only the installed pinned Japanese CTC runtime, six complete window-text/WAV
+tasks, zero added padding, at most eight attempts and 180 seconds including any
+explicitly recorded execution-failure retries. The runner performs no automatic
+retry or ASR decode. Persist startup, forward and request events before advancing.
+An existing execution directory requires inspection, not a hidden rerun. Real
+symbol intervals are `ALIGNER_ESTIMATED_INTERVAL`, conditional on machine text,
+not independent lexical verification. Complete mapping, group closure, physical
+bounds, word-safe layout and protected neighbors are hard requirements. Freeze
+requests and positive provider-shaped tests before loading the aligner; independently
+generate T0, native, aligned and application-disabled controls A/B before Gold.
+All outputs remain needs-review, with no default promotion or finalization.
+
 Use evidence in this order:
 
 1. Validate a text-based embedded subtitle in the original dialogue language.
