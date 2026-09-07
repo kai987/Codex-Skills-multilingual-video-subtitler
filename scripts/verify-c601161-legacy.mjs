@@ -29,6 +29,7 @@ const {
   formatAss,
   formatSrt,
   formatVtt,
+  parseVtt,
 } = await module("packages/subtitle-core/dist/index.js");
 const e = JSON.parse(fs.readFileSync(inputArg));
 const d = deduplicateTopScoreWinners(primaryMinimal(e), "pre-normalization");
@@ -53,15 +54,44 @@ const files = {
   srt: formatSrt(html),
   vtt: formatVtt(html),
 };
-for (const [ext, bytes] of Object.entries(files))
-  if (
-    bytes !==
-    fs.readFileSync(
-      path.join(runArg, "R1-legacy-replay/machine-candidate." + ext),
-      "utf8",
-    )
-  )
+const formatByteParity = {};
+const legacyDir = path.join(
+  path.dirname(destArg),
+  "framework-control",
+  "legacy-unbound",
+);
+fs.mkdirSync(legacyDir, { recursive: true });
+for (const [ext, bytes] of Object.entries(files)) {
+  const current = fs.readFileSync(
+    path.join(runArg, "R1-legacy-replay/machine-candidate." + ext),
+    "utf8",
+  );
+  formatByteParity[ext] = bytes === current;
+  if (ext !== "vtt" && !formatByteParity[ext])
     throw new Error("Framework changed legacy subtitle " + ext);
+  if (ext === "vtt") {
+    const sem = (b) =>
+      parseVtt(b).map((c) => ({ text: c.text, start: c.start, end: c.end }));
+    if (JSON.stringify(sem(bytes)) !== JSON.stringify(sem(current)))
+      throw new Error("Framework changed VTT semantics");
+    // Require the complete VTT serialization to match after changing only IDs.
+    const pkg = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          runArg,
+          "R1-legacy-replay/subtitle-package.needs-review.json",
+        ),
+      ),
+    );
+    if (
+      formatVtt(html.map((c, i) => ({ ...c, id: pkg.cues[i].id }))) !== current
+    )
+      throw new Error("Non-ID VTT difference");
+  }
+  fs.writeFileSync(path.join(legacyDir, "machine-candidate." + ext), bytes, {
+    flag: "wx",
+  });
+}
 const modulePaths = [
   "packages/transcription-core/dist/intra-cue-repetition.js",
   "packages/transcription-core/src/intra-cue-repetition.ts",
@@ -87,10 +117,11 @@ fs.writeFileSync(
         file: p,
         sha256: hash(fs.readFileSync(path.join(old, p))),
       })),
-      threeFormatByteParity: true,
+      formatByteParity,
+      threeFormatSemanticParity: true,
       cueCount: p.cues.length,
       adapterEffect:
-        "unique internal IDs only; no exported text, timing or style changes",
+        "unique IDs change VTT identifiers only; ASS/SRT bytes and all text/timing/style unchanged; legacy-unbound exports retained",
       historicalH1Reproduction: false,
       scope: "PRIMARY_ONLY_MATCHED_PROFILE",
     },
@@ -100,5 +131,5 @@ fs.writeFileSync(
   { flag: "wx" },
 );
 console.log(
-  "Independent old-worktree business replay matches R1 exported bytes",
+  "Independent old-worktree replay matches R1 semantics; explicit VTT-ID-only framework control passed",
 );
