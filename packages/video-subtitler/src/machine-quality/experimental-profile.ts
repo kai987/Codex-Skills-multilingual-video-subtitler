@@ -96,7 +96,9 @@ export type MachineQualityEvidence = z.infer<
   typeof machineQualityEvidenceSchema
 >;
 
-export function primaryMinimal(e: MachineQualityEvidence) {
+export function primaryMinimal(
+  e: Pick<MachineQualityEvidence, "source" | "primaryRequests">,
+) {
   const seen = new Map<string, string>();
   const cues = e.primaryRequests
     .flatMap((request) => {

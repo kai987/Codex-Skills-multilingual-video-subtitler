@@ -13,6 +13,10 @@
     "npm": ">=11"
   },
   "scripts": {
+    "quality:matched:prepare": "node scripts/prepare-c601161-evidence.mjs",
+    "quality:matched:generate": "node scripts/run-c601161-replay.mjs",
+    "quality:matched:evaluate": "node scripts/evaluate-c601161-replay.mjs",
+    "test:c601161": "vitest run tests/c601161-source-preserving.test.ts tests/e2e/c601161-matched-replay.test.ts",
     "quality:prepare": "node scripts/prepare-c60116-evidence.mjs",
     "quality:generate": "node scripts/run-c60116-experiment.mjs",
     "quality:evaluate": "node scripts/evaluate-c60116-experiment.mjs",

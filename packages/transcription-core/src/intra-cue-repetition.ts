@@ -640,6 +640,8 @@ export function repairIntraCueHypothesisRepetition(input: {
   cues: readonly SubtitleCue[];
   sourceCues?: readonly SubtitleCue[];
   terminologyEntries?: readonly JapaneseTerminologyEntry[];
+  /** Experimental only: missing occurrence evidence cannot justify lexical deletion. */
+  repetitionPolicy?: "legacy" | "source-preserving";
 }): { cues: SubtitleCue[]; artifact: IntraCueRepetitionRepairArtifact } {
   const sourceCues = input.sourceCues ?? input.cues;
   const sourceById = new Map(sourceCues.map((cue) => [cue.id, cue] as const));
@@ -691,6 +693,30 @@ export function repairIntraCueHypothesisRepetition(input: {
         terminology: input.terminologyEntries ?? [],
       });
       if (expansion === null) return [cue];
+      if (input.repetitionPolicy === "source-preserving") {
+        records.push({
+          cueId: cue.id,
+          sourceCueIds: cue.textAudit?.sourceWinnerCueIds ?? [cue.id],
+          detectedRepeatedSpans: [
+            expansion.selected.span,
+            ...expansion.omitted.map((u) => u.span),
+          ],
+          normalizedSpans: [
+            expansion.selected.span.normalizedText,
+            ...expansion.omitted.map((u) => u.span.normalizedText),
+          ],
+          readingEvidence: [],
+          relationship: "containment-alternative",
+          keptSpan: spanFromCue(cue),
+          removedSpans: [],
+          preservedTail: [],
+          selectedReason: "ABSTAIN_UNPROVEN_MERGED_EXPANSION",
+          audioRepetitionEvidence: ["overlap-is-not-same-occurrence-proof"],
+          reviewRecommended: true,
+          outputCueIds: [cue.id],
+        });
+        return [cue];
+      }
       const timing = mergeTiming(cue, [expansion.selected]);
       const selectedText = normalizeJapaneseSubtitleWhitespace(
         expansion.selected.span.text,
@@ -768,6 +794,29 @@ export function repairIntraCueHypothesisRepetition(input: {
           "independent-audio-timestamps-preserve-spoken-repetition",
         audioRepetitionEvidence: detected.audioRepetitionEvidence,
         reviewRecommended: false,
+        outputCueIds: [cue.id],
+      });
+      return [cue];
+    }
+    if (input.repetitionPolicy === "source-preserving") {
+      // Lexical spans, even inside one request, are not duplicate-import identities.
+      // Keep THIS stage input: restoring rawAsrText would undo earlier legitimate edits.
+      records.push({
+        cueId: cue.id,
+        sourceCueIds: cue.textAudit?.sourceWinnerCueIds ?? [cue.id],
+        detectedRepeatedSpans: detected.units.map((u) => u.span),
+        normalizedSpans: detected.units.map((u) => u.span.normalizedText),
+        readingEvidence: detected.readingEvidence,
+        relationship: detected.relationship,
+        keptSpan: spanFromCue(cue),
+        removedSpans: [],
+        preservedTail: [],
+        selectedReason: "ABSTAIN_UNRESOLVED_REPETITION_POSSIBLE_DECODER_LOOP",
+        audioRepetitionEvidence: [
+          ...detected.audioRepetitionEvidence,
+          "source-preservation-is-not-acoustic-confirmation",
+        ],
+        reviewRecommended: true,
         outputCueIds: [cue.id],
       });
       return [cue];
@@ -887,7 +936,9 @@ export function repairIntraCueHypothesisRepetition(input: {
     (left, right) => left.start - right.start || left.end - right.end,
   );
   const repairedRecords = records.filter(
-    (record) => record.relationship !== "true-spoken-repetition",
+    (record) =>
+      record.relationship !== "true-spoken-repetition" &&
+      !record.selectedReason.startsWith("ABSTAIN_"),
   );
   return {
     cues,
