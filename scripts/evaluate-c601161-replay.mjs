@@ -251,8 +251,11 @@ const result = {
   },
   mutations: {
     operations: changes.length,
-    removedCueCount: changes.reduce((n, c) => n + c.input.length, 0),
-    addedCueCount: changes.reduce((n, c) => n + c.output.length, 0),
+    stageInputCueObservations: changes.reduce((n, c) => n + c.input.length, 0),
+    stageOutputCueObservations: changes.reduce(
+      (n, c) => n + c.output.length,
+      0,
+    ),
     textChangedOperations: changes.filter(
       (c) =>
         c.input.map((x) => x.text).join("") !==

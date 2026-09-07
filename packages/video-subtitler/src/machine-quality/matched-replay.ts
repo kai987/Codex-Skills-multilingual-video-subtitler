@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  applyAcousticDecisions,
+  type AcousticDecision,
+} from "./bounded-acoustic.js";
 import type { SubtitleCue } from "@mvl/shared";
 import {
   deduplicateTopScoreWinners,
@@ -101,6 +105,7 @@ export function replayPrimaryAssembly(
   value: unknown,
   repair: boolean,
   implementationHashes: Record<string, string> = {},
+  acoustic?: { mode: "observe" | "apply"; decisions: AcousticDecision[] },
 ) {
   const e = matchedEvidenceSchema.parse(value);
   const trace: StageTrace[] = [];
@@ -223,12 +228,24 @@ export function replayPrimaryAssembly(
     cues: dedup.cues,
     repetitionPolicy: repair ? "source-preserving" : "legacy",
   });
+  if (acoustic) {
+    if (!repair)
+      throw new Error("Acoustic experiment requires source-preserving profile");
+    repetition.cues = applyAcousticDecisions(
+      dedup.cues,
+      repetition.cues,
+      acoustic.decisions,
+      acoustic.mode === "apply",
+    );
+  }
   record(
     "repairIntraCueHypothesisRepetition",
     dedup.cues,
     repetition.cues,
     repair ? "ABSTAIN" : "REPLACE",
-    repetition.artifact,
+    acoustic
+      ? { repetition: repetition.artifact, acoustic }
+      : repetition.artifact,
     repetition.artifact.records.map((r) => ({
       inputIds: [r.cueId],
       outputIds: r.outputCueIds,
