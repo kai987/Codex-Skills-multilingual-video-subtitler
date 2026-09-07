@@ -182,7 +182,7 @@ describe("bounded acoustic evidence", () => {
     expect(d.audioConfirmed).toBe(false);
     expect(d.utteranceStructure).toBe("UNKNOWN");
   });
-  it("uses one complete source, never a cross-model word splice", () => {
+  it("ABSTRACT_FULL_INTERVAL_DECISION_UNIT_TEST: uses one complete source, not actual Reazon capability", () => {
     const d = decideAcoustic(c, four());
     expect(d.action).toBe("REPLACE_WITH_LOCALIZED_FRESH_CANDIDATE");
     expect(d.after.text).toBe("帰ります。");
