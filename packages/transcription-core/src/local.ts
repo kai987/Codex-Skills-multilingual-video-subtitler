@@ -249,7 +249,7 @@ function jsonOffsetSeconds(value: unknown): number | null {
     : null;
 }
 
-function parseWhisperFullJson(value: unknown): {
+export function parseWhisperFullJson(value: unknown): {
   tokensBySegment: WhisperJsonToken[][];
 } {
   if (typeof value !== "object" || value === null) {

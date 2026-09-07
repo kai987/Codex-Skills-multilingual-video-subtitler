@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { applyStoredSpans, type StoredDecision } from "./stored-token-span.js";
 import {
   applyAcousticDecisions,
   type AcousticDecision,
@@ -106,6 +107,7 @@ export function replayPrimaryAssembly(
   repair: boolean,
   implementationHashes: Record<string, string> = {},
   acoustic?: { mode: "observe" | "apply"; decisions: AcousticDecision[] },
+  stored?: { mode: "observe" | "apply"; decisions: StoredDecision[] },
 ) {
   const e = matchedEvidenceSchema.parse(value);
   const trace: StageTrace[] = [];
@@ -238,18 +240,40 @@ export function replayPrimaryAssembly(
       acoustic.mode === "apply",
     );
   }
+  if (stored) {
+    if (!repair || acoustic)
+      throw Error(
+        "Stored strategy requires an exclusive source-preserving hook",
+      );
+    repetition.cues = applyStoredSpans(
+      dedup.cues,
+      repetition.cues,
+      stored.decisions,
+      stored.mode === "apply",
+    );
+  }
   record(
     "repairIntraCueHypothesisRepetition",
     dedup.cues,
     repetition.cues,
-    repair ? "ABSTAIN" : "REPLACE",
-    acoustic
-      ? { repetition: repetition.artifact, acoustic }
-      : repetition.artifact,
+    stored?.mode === "apply" ? "REPLACE" : repair ? "ABSTAIN" : "REPLACE",
+    stored
+      ? { repetition: repetition.artifact, stored }
+      : acoustic
+        ? { repetition: repetition.artifact, acoustic }
+        : repetition.artifact,
     repetition.artifact.records.map((r) => ({
       inputIds: [r.cueId],
       outputIds: r.outputCueIds,
-      reason: r.selectedReason,
+      reason:
+        stored?.mode === "apply" &&
+        stored.decisions.some(
+          (d) =>
+            d.before.id === r.cueId &&
+            d.action === "REPLACE_BOUND_SOURCE_TEXT_SPAN",
+        )
+          ? "REPLACE_BOUND_SOURCE_TEXT_SPAN"
+          : r.selectedReason,
     })),
   );
   const segmentation = buildAcousticSemanticCueSegments(repetition.cues, {
