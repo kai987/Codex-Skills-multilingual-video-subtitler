@@ -13,6 +13,9 @@
     "npm": ">=11"
   },
   "scripts": {
+    "quality:stored-token:replay": "node scripts/replay-c601163.mjs",
+    "quality:stored-token:evaluate": "node scripts/evaluate-c601163.mjs",
+    "test:c601163": "vitest run tests/c601163-stored-token-span.test.ts tests/e2e/c601163-stored-token-export.test.ts",
     "audit:acoustic:capability": "node scripts/audit-c6011621.mjs",
     "test:c6011621": "vitest run tests/c6011621-timestamp-capability.test.ts tests/e2e/c6011621-zero-inference.test.ts",
     "quality:acoustic:prepare": "node scripts/run-c601162-acoustic.mjs prepare",
