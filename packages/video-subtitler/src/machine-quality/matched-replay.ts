@@ -28,6 +28,14 @@ export const matchedEvidenceSchema = machineQualityEvidenceSchema
   })
   .strict();
 export type MatchedEvidence = z.infer<typeof matchedEvidenceSchema>;
+/** Fresh, prompt-free clips cannot claim the historical title-prompt contract. */
+export const freshMatchedEvidenceSchema = matchedEvidenceSchema
+  .omit({ version: true, promptStatus: true })
+  .extend({
+    version: z.literal("c60117-fresh-primary-v1"),
+    promptStatus: z.literal("FRESH_PROMPT_FREE"),
+  })
+  .strict();
 export const REPLAY_SCOPE = {
   replayScope: "PRIMARY_ONLY_MATCHED_PROFILE",
   historicalReproductionVerified: false,
@@ -110,8 +118,14 @@ export function replayPrimaryAssembly(
   acoustic?: { mode: "observe" | "apply"; decisions: AcousticDecision[] },
   stored?: { mode: "observe" | "apply"; decisions: StoredDecision[] },
   groups?: { mode: "observe" | "apply"; patches: GroupPatch[] },
+  freshProfile?: { deduplication: "legacy" | "overlap-required" },
 ) {
-  const e = matchedEvidenceSchema.parse(value);
+  const e = z
+    .union([matchedEvidenceSchema, freshMatchedEvidenceSchema])
+    .parse(value);
+  if (freshProfile && e.version !== "c60117-fresh-primary-v1") {
+    throw new Error("Fresh profile requires fresh prompt-free evidence");
+  }
   const trace: StageTrace[] = [];
   const record = (
     stageName: string,
@@ -199,7 +213,9 @@ export function replayPrimaryAssembly(
     independentAcousticTruth: false,
   });
   // This is the existing business deduplicator, not a snapshot of its old result.
-  const dedup = deduplicateTopScoreWinners(primary, "pre-normalization");
+  const dedup = deduplicateTopScoreWinners(primary, "pre-normalization", {
+    requireTemporalOverlap: freshProfile?.deduplication === "overlap-required",
+  });
   const retained = (id: string): string => {
     const seen = new Set<string>();
     while (!seen.has(id)) {

@@ -13,6 +13,15 @@
     "npm": ">=11"
   },
   "scripts": {
+    "c60117:prepare-dataset": "node scripts/run-c60117.mjs prepare-dataset",
+    "c60117:prepare-clip": "node scripts/run-c60117.mjs prepare-clip",
+    "c60117:generate-evidence": "node scripts/run-c60117.mjs generate-evidence",
+    "c60117:generate-subtitles": "node scripts/run-c60117.mjs generate-subtitles",
+    "c60117:prepare-reference": "node scripts/evaluate-c60117.mjs prepare-reference",
+    "c60117:evaluate-development": "node scripts/evaluate-c60117.mjs evaluate-development",
+    "c60117:evaluate-confirmation": "node scripts/evaluate-c60117.mjs evaluate-confirmation",
+    "c60117:validate": "node scripts/validate-c60117.mjs",
+    "test:c60117": "vitest run tests/c60117-representative-clips.test.ts tests/e2e/c60117-fresh-profile.test.ts tests/e2e/c60117-generator-isolation.test.ts",
     "quality:source-group:prepare": "node scripts/run-c601164.mjs prepare",
     "quality:source-group:align": "node scripts/run-c601164.mjs execute-alignment",
     "quality:source-group:generate": "node scripts/run-c601164.mjs generate",
