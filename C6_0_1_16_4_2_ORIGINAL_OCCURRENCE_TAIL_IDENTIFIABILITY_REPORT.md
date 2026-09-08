@@ -53,7 +53,8 @@ regressions. Its scientific POLICY object is byte-equivalent after JSON
 serialization to experiment-01. No hypothesis, threshold, PCM feature or
 evaluation parameter was tuned on the real result. Two earlier neutral-fixture
 failures (uninformative label/blank support and length-biased ranking) had been
-fixed before the first formal freeze; their test logs are also retained locally.
+fixed before the first formal freeze. Full validation logs, including the
+subsequent lint-only failure and corrected passing runs, are retained locally.
 
 Existing evidence only:
 
