@@ -1,0 +1,134 @@
+{
+  "version": "c601181-static-contract-v1",
+  "scope": "Pinned source expectations, NOT proof of the installed native execution",
+  "sherpaTag": "v1.13.6",
+  "sherpaCommit": "1cb484af5e69d3c7803c1eb0b3b5ab8041e0e911",
+  "rows": [
+    {
+      "layer": "PCM -> Python reader",
+      "explicit": "mono PCM16 LE 16000; float32 /32768; whole readframes(nframes)",
+      "fixedDefault": null,
+      "modelRequired": "normalized float samples per Python binding documentation",
+      "observed": "saved waveform hashes; deterministically recomputed separately",
+      "status": "CONSISTENT_AT_RECORDED_BOUNDARY",
+      "level": "OBSERVED_IN_SAVED_ARTIFACT",
+      "source": "scripts/runtime/reazonspeech_k2_worker.py:read_wav; binding-offline-stream.cc:accept_waveform"
+    },
+    {
+      "layer": "padding and length",
+      "explicit": "14400 zero samples each side; raw<=30; padded<=32",
+      "fixedDefault": "official Reazon wrapper warns above 30 padded seconds for memory; does not truncate",
+      "modelRequired": null,
+      "observed": "full padded counts and hashes in old forward-start events",
+      "status": "NO_EXPLICIT_CROP_FOUND; backend quality limit unknown",
+      "level": "STATICALLY_DERIVED_FROM_PINNED_CODE",
+      "source": "c60118_reazon_worker.py; reazon-transcribe.py; reazon-audio.py"
+    },
+    {
+      "layer": "feature setup",
+      "explicit": { "sampleRate": 16000, "featureDim": 80 },
+      "fixedDefault": {
+        "dither": 0,
+        "normalize_samples": true,
+        "snip_edges": false,
+        "frameLengthMs": 25,
+        "frameShiftMs": 10,
+        "lowFreq": 20,
+        "highFreq": -400,
+        "removeDcOffset": true,
+        "window": "povey",
+        "preemphasis": 0.97,
+        "roundToPowerOfTwo": true
+      },
+      "modelRequired": null,
+      "observed": null,
+      "status": "EXPECTED_CONFIG_ONLY; model graph not parsed",
+      "level": "STATICALLY_DERIVED_FROM_PINNED_CODE",
+      "source": "offline_recognizer.py:from_transducer; features.h; offline-stream.cc; fbank-feature-window.h"
+    },
+    {
+      "layer": "amplitude",
+      "explicit": "int16 /32768 exactly once",
+      "fixedDefault": "normalize_samples=true passes samples without another scaling; false would multiply 32768",
+      "modelRequired": "official Reazon norm_audio resamples/mixes only, not peak normalization",
+      "observed": null,
+      "status": "NO_STATIC_AMPLITUDE_CONFLICT_FOUND",
+      "level": "STATICALLY_DERIVED_FROM_PINNED_CODE",
+      "source": "offline-stream.cc:AcceptWaveform; reazon-audio.py:norm_audio"
+    },
+    {
+      "layer": "feature length",
+      "explicit": "one complete array to one newly-created OfflineStream",
+      "fixedDefault": "AcceptWaveform then InputFinished; GetFrames copies all NumFramesReady; length=f.size()/featureDim",
+      "modelRequired": "encoder receives features and integral feature-frame length",
+      "observed": null,
+      "status": "EXPECTED_BUT_NOT_OBSERVED",
+      "level": "EXPECTED_BUT_NOT_OBSERVED",
+      "source": "offline-stream.cc; offline-recognizer-transducer-impl.h:DecodeStreams; fbank-feature-window.cc:NumFrames"
+    },
+    {
+      "layer": "encoder I/O",
+      "explicit": null,
+      "fixedDefault": "feature tensor [batch,featureFrames,dim]; length [batch] int64 converted to declared int32/int64; encoder output[0] plus output[1] length converted int64",
+      "modelRequired": null,
+      "observed": null,
+      "status": "UNKNOWN_GRAPH_SIGNATURE_AND_ACTUAL_LENGTH",
+      "level": "UNVERIFIED_OR_UNAVAILABLE",
+      "source": "offline-transducer-model.cc:RunEncoder/InitEncoder; no actual ONNX signature available"
+    },
+    {
+      "layer": "decoder and vocabulary",
+      "explicit": "greedy_search",
+      "fixedDefault": "context_size and vocab_size read from decoder metadata; integer input cast to declared int32/int64; initial context [-1,...,0]; blank=0; unk from token table",
+      "modelRequired": null,
+      "observed": null,
+      "status": "UNKNOWN_METADATA; token-table checks separate",
+      "level": "UNVERIFIED_OR_UNAVAILABLE",
+      "source": "offline-transducer-model.cc:InitDecoder; offline-transducer-greedy-search-decoder.cc"
+    },
+    {
+      "layer": "decoder frame traversal",
+      "explicit": "one stream per request, singleton decode_stream",
+      "fixedDefault": "PackPaddedSequence uses encoder effective lengths; one argmax per packed frame; blank/unk emit nothing; positive blank penalty subtracted, default zero; emitted context updates; removes initial context only",
+      "modelRequired": null,
+      "observed": null,
+      "status": "EXPECTED_BUT_NOT_OBSERVED; not a demonstrated cause",
+      "level": "STATICALLY_DERIVED_FROM_PINNED_CODE",
+      "source": "packed-sequence.cc; offline-transducer-greedy-search-decoder.cc; offline_recognizer.py"
+    },
+    {
+      "layer": "emission coordinates",
+      "explicit": "raw point arrays preserved without clamping",
+      "fixedDefault": "emission frame index * 10ms * hardcoded transducer subsampling factor 4; native Convert applies CJK space handling",
+      "modelRequired": null,
+      "observed": "saved point arrays only, not actual traversed frames",
+      "status": "POINT_ONLY_NOT_WORD_INTERVALS",
+      "level": "STATICALLY_DERIVED_FROM_PINNED_CODE",
+      "source": "offline-recognizer-transducer-impl.h:Convert; offline-transducer-model.cc:SubsamplingFactor"
+    },
+    {
+      "layer": "result.text -> exported R0",
+      "explicit": "text property retained, separate tokens/timestamps, no strip/zip/filter",
+      "fixedDefault": "JSON Unicode serialization; completeCandidate preserves text; raw UTF8 export",
+      "modelRequired": null,
+      "observed": "all twelve original raw-response/text chains, A/B checked by audit",
+      "status": "CHECKED_FROM_ARTIFACTS",
+      "level": "OBSERVED_IN_SAVED_ARTIFACT",
+      "source": "c60118_reazon_worker.py; generate-c60118.mjs; same-unit-candidate.ts"
+    }
+  ],
+  "nativeEquivalence": "Installed Python wrapper byte-match can be checked. Matching version strings and file hashes do not establish a reproducible native build from the tag. No native API was invoked in this audit.",
+  "futureTrace": {
+    "kind": "FUTURE_TEMPLATE_NOT_EXECUTED",
+    "requestId": "neutral-template",
+    "actualFeatureShape": null,
+    "actualFeatureLength": null,
+    "actualEncoderShape": null,
+    "actualEncoderLength": null,
+    "traversedFrames": null,
+    "blankCount": null,
+    "unkCount": null,
+    "emittedCount": null,
+    "emissionFrameIndices": null
+  }
+}
