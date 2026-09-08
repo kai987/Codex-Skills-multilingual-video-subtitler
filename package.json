@@ -13,6 +13,12 @@
     "npm": ">=11"
   },
   "scripts": {
+    "c60118:prepare-preflight": "node scripts/prepare-c60118.mjs",
+    "c60118:execute-second-asr": "node scripts/execute-c60118.mjs",
+    "c60118:replay-frozen-assembly": "node scripts/replay-c60118.mjs",
+    "c60118:evaluate-candidates": "node scripts/evaluate-c60118.mjs",
+    "c60118:validate-delivery": "node scripts/validate-c60118.mjs",
+    "test:c60118": "vitest run tests/c60118-same-unit-candidate.test.ts tests/e2e/c60118-candidate-export.test.ts",
     "c601172:replay": "node scripts/replay-c601172.mjs",
     "c601172:evaluate": "node scripts/evaluate-c601172.mjs",
     "c601172:validate": "node scripts/validate-c601172.mjs",
