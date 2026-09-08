@@ -13,6 +13,10 @@
     "npm": ">=11"
   },
   "scripts": {
+    "c601172:replay": "node scripts/replay-c601172.mjs",
+    "c601172:evaluate": "node scripts/evaluate-c601172.mjs",
+    "c601172:validate": "node scripts/validate-c601172.mjs",
+    "test:c601172": "vitest run tests/c601172-composed-profile.test.ts tests/e2e/c601172-matrix-export.test.ts",
     "c601171:prepare-reference-complete-units": "node scripts/prepare-c601171.mjs prepare-reference-complete-units",
     "c601171:validate-dataset": "node scripts/prepare-c601171.mjs validate-dataset unused",
     "c601171:generate-primary": "node scripts/run-c601171.mjs generate-primary",
