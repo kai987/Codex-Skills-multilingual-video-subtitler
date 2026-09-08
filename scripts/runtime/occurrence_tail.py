@@ -6,6 +6,28 @@ not every latent CTC path. Onsets are never pruned by another onset's score.
 import math
 import numpy as np
 
+
+def pcm_prefix_integrity(previous, current, covered_samples, previous_start, current_start):
+    """Compare the shared, frame-covered PCM; keep independent crop-tail facts.
+
+    Each full WAV is separately hash-bound. Independently resampled cuts need
+    not have identical trailing filter samples beyond the last observed frame.
+    No waveform is altered or substituted for another window.
+    """
+    if previous_start != current_start or len(current) < len(previous):
+        raise ValueError('SOURCE_PCM_TIMEBASE_MISMATCH')
+    if not 0 < covered_samples <= len(previous):
+        raise ValueError('SOURCE_PCM_COVERAGE_INVALID')
+    difference = current[:len(previous)] - previous
+    if np.any(difference[:covered_samples] != 0):
+        raise ValueError('SOURCE_FRAME_COVERED_PCM_MISMATCH')
+    indices = np.flatnonzero(difference)
+    return {'frameCoveredSamples': covered_samples, 'frameCoveredPrefixIdentical': True,
+            'fullPrefixIdentical': not len(indices), 'differentSamples': int(len(indices)),
+            'differenceIndexRange': [int(indices[0]), int(indices[-1])] if len(indices) else None,
+            'maximumAbsoluteDifference': float(np.abs(difference).max()),
+            'interpretation': 'INDEPENDENT_HASH_BOUND_CROP_TAILS_NOT_SUBSTITUTED'}
+
 POLICY = {
     'version': 'c6011642-exact-onset-tail-v1',
     'originalBandSeconds': .5, 'wideBandSeconds': 1.,

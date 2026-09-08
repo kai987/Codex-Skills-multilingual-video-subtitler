@@ -6,7 +6,7 @@ import sys
 import wave
 import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'runtime'))
-from occurrence_tail import POLICY, onset_paths, support, hypothesis, prior_dependence, pcm_candidates
+from occurrence_tail import POLICY, onset_paths, support, hypothesis, prior_dependence, pcm_candidates, pcm_prefix_integrity
 from boundary_support import open_suffix
 
 
@@ -36,7 +36,7 @@ def main(root):
     if plan['protocol']!=POLICY:raise ValueError('PROTOCOL_MISMATCH')
     for p,h in plan['inputs'].items():
         if digest(os.path.join(root,p))!=h:raise ValueError('FROZEN_INPUT_MISMATCH')
-    target=plan['target'];windows=[];rawpaths=[];dpcount=0;pcmcount=0;previous_pcm=None;previous_offset=None
+    target=plan['target'];windows=[];rawpaths=[];dpcount=0;pcmcount=0;previous_pcm=None;previous_offset=None;previous_covered=None
     vocab=read(os.path.join(root,'inputs/vocab.json'))
     config=read(os.path.join(root,'inputs/config.json'))
     for req in plan['requests']:
@@ -45,9 +45,7 @@ def main(root):
             rate=w.getframerate();count=w.getnframes()
             if rate!=req['sampleRate'] or count!=req['sampleCount'] or w.getnchannels()!=1 or w.getsampwidth()!=2:raise ValueError('PCM_IDENTITY_MISMATCH')
             pcm=np.frombuffer(w.readframes(count),dtype='<i2').astype(np.float64)/32768
-        if previous_pcm is not None and (req['window']['start']!=previous_offset or not np.array_equal(previous_pcm,pcm[:len(previous_pcm)])):
-            raise ValueError('SOURCE_PCM_PREFIX_MISMATCH')
-        previous_pcm=pcm;previous_offset=req['window']['start']
+        prefix_integrity=pcm_prefix_integrity(previous_pcm,pcm,previous_covered,previous_offset,req['window']['start']) if previous_pcm is not None else None
         with np.load(os.path.join(root,req['npzFile']),allow_pickle=False) as f:
             logp=f['logProbabilities'];ids=f['targetIds'].tolist()
             if logp.dtype!=np.float64 or not np.isfinite(logp).all() or list(logp.shape)!=meta['shape']:raise ValueError('FRAME_ARRAY_INVALID')
@@ -58,6 +56,7 @@ def main(root):
         for k,s in zip(meta['convKernel'],meta['convStride']):
             n=(n-k)//s+1;receptive+=(k-1)*stride;stride*=s
         if n!=len(logp) or stride!=meta['strideSamples'] or receptive!=meta['receptiveFieldSamples']:raise ValueError('FRAME_GEOMETRY_MISMATCH')
+        previous_pcm=pcm;previous_offset=req['window']['start'];previous_covered=(n-1)*stride+receptive
         dt=stride/rate;offset=req['window']['start'];prefix=req['prefixTokenCount']
         if dt!=meta['frameCellSeconds'] or abs(req['window']['end']-offset-count/rate)>1e-8:raise ValueError('TIMEBASE_INVALID')
         if ''.join(raw['pieces'])!=req['targetText'] or [vocab.get(piece) for piece in raw['pieces']]!=ids or meta['modelSnapshotHash']!=plan['modelSnapshotHash'] or meta['audioHash']!=req['audioHash']:raise ValueError('MODEL_AUDIO_TEXT_BINDING_INVALID')
@@ -91,7 +90,7 @@ def main(root):
             # Each exact-onset path and every completion score remains in the
             # separate path payload; summary holds the chosen full path too.
         windows.append({'windowId':req['windowId'],'sourceRange':req['window'],'frameShape':list(logp.shape),
-                        'evidenceIntegrity':'PASSED','legacyPathParity':True,'searchStatus':result['status'],
+                        'evidenceIntegrity':'PASSED','pcmPrefixIntegrity':prefix_integrity,'legacyPathParity':True,'searchStatus':result['status'],
                         'originalIdentityAnchor':'OLD_SOURCE_LINEAGE_UNCERTAIN_ONSET_NOT_END_TRUTH',
                         'priorDominated':dominated,'hypotheses':hypotheses,
                         'H_UNSUPPORTED':{'original':original['supportedPathCount']==0,'displaced':displaced['supportedPathCount']==0},

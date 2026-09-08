@@ -5,6 +5,14 @@ It is opt-in, development-known, not a default subtitle strategy or release.
 The old boundary implementation is immutable. All six new-model/audio counters
 must remain zero. Reading NPZ is offline evidence use, not a model cache hit.
 
+Full saved WAVs are individually hash-bound and are never rewritten. Compare
+the common prefix through the last CTC receptive field exactly; record any
+differences in independently cropped trailing samples outside that coverage.
+Those samples remain the original per-window PCM, not a fabricated common tail.
+This corrects an input-check implementation error in preserved experiment-01,
+which demanded equality even beyond observed frame coverage. No path/PCM
+strategy, threshold, sensitivity or evaluation rule changes with this fix.
+
 ## Identity and exact-onset search
 
 Select the first source-ordered terminal target with the old machine risk

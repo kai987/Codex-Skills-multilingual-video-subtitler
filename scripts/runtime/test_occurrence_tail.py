@@ -1,7 +1,7 @@
 """Neutral behavior fixtures only: no model, real audio, or Gold."""
 import unittest
 import numpy as np
-from occurrence_tail import onset_paths, support, hypothesis, prior_dependence, pcm_candidates
+from occurrence_tail import onset_paths, support, hypothesis, prior_dependence, pcm_candidates, pcm_prefix_integrity
 
 
 def fixture(early=True, late=True):
@@ -29,6 +29,19 @@ def tone(end=1.5, duration=3, frequency=300):
 
 
 class OccurrenceTests(unittest.TestCase):
+    def test_independent_crop_tail_is_recorded_without_rewriting_pcm(self):
+        a=np.zeros(100);b=np.zeros(120);b[99]=1/32768
+        result=pcm_prefix_integrity(a,b,80,0,0)
+        self.assertTrue(result['frameCoveredPrefixIdentical']);self.assertFalse(result['fullPrefixIdentical'])
+        self.assertEqual(result['differenceIndexRange'],[99,99]);self.assertEqual(b[99],1/32768)
+
+    def test_shared_observed_pcm_difference_fails_closed(self):
+        a=np.zeros(100);b=np.zeros(120);b[79]=1/32768
+        with self.assertRaisesRegex(ValueError,'SOURCE_FRAME_COVERED_PCM_MISMATCH'):
+            pcm_prefix_integrity(a,b,80,0,0)
+        with self.assertRaisesRegex(ValueError,'SOURCE_PCM_TIMEBASE_MISMATCH'):
+            pcm_prefix_integrity(a,a,80,0,1)
+
     def test_weaker_early_is_preserved_beside_stronger_late(self):
         rows=solve()['paths']
         a=hypothesis(rows,15,30,1,.02);b=hypothesis(rows,55,80,1,.02)
