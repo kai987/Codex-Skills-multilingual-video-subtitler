@@ -13,6 +13,13 @@
     "npm": ">=11"
   },
   "scripts": {
+    "c601171:prepare-reference-complete-units": "node scripts/prepare-c601171.mjs prepare-reference-complete-units",
+    "c601171:validate-dataset": "node scripts/prepare-c601171.mjs validate-dataset unused",
+    "c601171:generate-primary": "node scripts/run-c601171.mjs generate-primary",
+    "c601171:generate-frozen-variants": "node scripts/run-c601171.mjs generate-frozen-variants",
+    "c601171:evaluate": "node scripts/evaluate-c601171.mjs",
+    "c601171:validate-delivery": "node scripts/validate-c601171.mjs",
+    "test:c601171": "vitest run tests/c601171-reference-complete.test.ts tests/e2e/c601171-preflight-gate.test.ts",
     "c60117:prepare-dataset": "node scripts/run-c60117.mjs prepare-dataset",
     "c60117:prepare-clip": "node scripts/run-c60117.mjs prepare-clip",
     "c60117:generate-evidence": "node scripts/run-c60117.mjs generate-evidence",
