@@ -1,0 +1,245 @@
+diff --git a/sherpa-onnx/csrc/c601182-trace.h b/sherpa-onnx/csrc/c601182-trace.h
+new file mode 100644
+index 0000000..5af57f9
+--- /dev/null
++++ b/sherpa-onnx/csrc/c601182-trace.h
+@@ -0,0 +1,71 @@
++// Opt-in, single-stream diagnostic observation only. No model calls here.
++#ifndef SHERPA_ONNX_CSRC_C601182_TRACE_H_
++#define SHERPA_ONNX_CSRC_C601182_TRACE_H_
++#include <CommonCrypto/CommonDigest.h>
++#include <cmath>
++#include <cstdint>
++#include <fstream>
++#include <iomanip>
++#include <sstream>
++#include <stdexcept>
++#include <nlohmann/json.hpp>
++#include "onnxruntime_cxx_api.h"
++namespace sherpa_onnx { namespace c601182 {
++using J = nlohmann::json;
++inline constexpr const char *build = "c601182-native-probe-v1-1cb484af";
++struct State { bool active=false; bool overflow=false; J binding; J events=J::array(); std::string file; };
++extern thread_local State state;
++inline std::string Hash(const void *p, size_t n) {
++  unsigned char digest[CC_SHA256_DIGEST_LENGTH]; CC_SHA256(p, static_cast<CC_LONG>(n), digest);
++  std::ostringstream os; for(auto b:digest) os<<std::hex<<std::setw(2)<<std::setfill('0')<<int(b); return os.str();
++}
++inline void Event(const char *kind, J fields, const char *source) {
++  if(!state.active)return;
++  if(state.events.size()>=4096){state.overflow=true;return;}
++  J row=state.binding; row["kind"]=kind; row["source"]=source;
++  row["eventSequence"]=state.events.size(); row["observed"]=std::move(fields);
++  state.events.push_back(std::move(row));
++}
++inline void Begin(const std::string &binding, const std::string &file) {
++  if(state.active)throw std::runtime_error("TRACE_REQUEST_ALREADY_ACTIVE");
++  state=State{}; state.binding=J::parse(binding); state.file=file; state.active=true;
++  state.binding["runtimeBuildId"]=build; state.binding["probeSchema"]="c601182-v1";
++  Event("request-start",{{"native",true}},"c601182-trace.h:Begin");
++}
++inline void End(bool success) {
++  if(!state.active)return;
++  Event("request-end",{{"success",success},{"overflow",state.overflow}},"c601182-trace.h:End");
++  std::ofstream f(state.file,std::ios::out|std::ios::binary);
++  if(!f)throw std::runtime_error("TRACE_FLUSH_FAILED");
++  f<<J({{"schema","c601182-v1"},{"runtimeBuildId",build},{"overflow",state.overflow},{"events",state.events}}).dump(2);
++  f.flush(); if(!f)throw std::runtime_error("TRACE_FLUSH_FAILED"); state.active=false;
++}
++inline J Summary(const float *p, size_t frames, size_t dim) {
++  J thirds=J::array(); size_t finite=0,nan=0,inf=0;
++  for(int section=0;section<3;++section){
++    size_t a=frames*section/3,b=frames*(section+1)/3,count=0,zero=0;
++    double sum=0,sq=0,lo=INFINITY,hi=-INFINITY;
++    for(size_t i=a*dim;i<b*dim;++i){double v=p[i];if(std::isnan(v)){++nan;continue;}if(!std::isfinite(v)){++inf;continue;}
++      ++finite;++count;if(v==0)++zero;sum+=v;sq+=v*v;lo=std::min(lo,v);hi=std::max(hi,v);}
++    J s={{"startFrame",a},{"endFrameExclusive",b},{"finite",count},{"zeroCount",zero}};
++    if(count){double mean=sum/count;s["min"]=lo;s["max"]=hi;s["mean"]=mean;s["std"]=std::sqrt(std::max(0.0,sq/count-mean*mean));s["zeroRatio"]=double(zero)/count;}
++    thirds.push_back(s);
++  }
++  return {{"frames",frames},{"dim",dim},{"elements",frames*dim},{"dtype","float32"},{"byteOrder","little-endian"},{"sha256",Hash(p,frames*dim*sizeof(float))},{"finite",finite},{"nan",nan},{"inf",inf},{"thirds",thirds}};
++}
++inline J Tensor(const Ort::Value &v) {
++  auto info=v.GetTensorTypeAndShapeInfo();auto type=info.GetElementType();J j={{"shape",info.GetShape()},{"dtype",int(type)},{"elements",info.GetElementCount()}};
++  if(type==ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64)j["values"]=std::vector<int64_t>(v.GetTensorData<int64_t>(),v.GetTensorData<int64_t>()+info.GetElementCount());
++  if(type==ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32)j["values"]=std::vector<int32_t>(v.GetTensorData<int32_t>(),v.GetTensorData<int32_t>()+info.GetElementCount());
++  if(type==ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT)j["sha256"]=Hash(v.GetTensorData<float>(),info.GetElementCount()*4);
++  return j;
++}
++inline J Ptr(const void *p){std::ostringstream s;s<<p;return s.str();}
++inline J Graph(const Ort::Session &session){
++  Ort::AllocatorWithDefaultOptions a;J j={{"inputs",J::array()},{"outputs",J::array()},{"metadata",J::object()}};
++  for(size_t i=0;i<session.GetInputCount();++i){auto ti=session.GetInputTypeInfo(i);auto t=ti.GetTensorTypeAndShapeInfo();j["inputs"].push_back({{"name",session.GetInputNameAllocated(i,a).get()},{"shape",t.GetShape()},{"dtype",int(t.GetElementType())}});}
++  for(size_t i=0;i<session.GetOutputCount();++i){auto ti=session.GetOutputTypeInfo(i);auto t=ti.GetTensorTypeAndShapeInfo();j["outputs"].push_back({{"name",session.GetOutputNameAllocated(i,a).get()},{"shape",t.GetShape()},{"dtype",int(t.GetElementType())}});}
++  auto m=session.GetModelMetadata();for(auto &key:m.GetCustomMetadataMapKeysAllocated(a)){auto value=m.LookupCustomMetadataMapAllocated(key.get(),a);j["metadata"][key.get()]=value.get();}return j;
++}
++}}
++#endif
+diff --git a/sherpa-onnx/csrc/offline-recognizer-transducer-impl.h b/sherpa-onnx/csrc/offline-recognizer-transducer-impl.h
+index 3ef9674..49f5e12 100644
+--- a/sherpa-onnx/csrc/offline-recognizer-transducer-impl.h
++++ b/sherpa-onnx/csrc/offline-recognizer-transducer-impl.h
+@@ -29,6 +29,7 @@
+ #include "sherpa-onnx/csrc/utils.h"
+ #include "ssentencepiece/csrc/ssentencepiece.h"
+ 
++#include "sherpa-onnx/csrc/c601182-trace.h"
+ namespace sherpa_onnx {
+ 
+ static OfflineRecognitionResult Convert(
+@@ -203,6 +204,7 @@ class OfflineRecognizerTransducerImpl : public OfflineRecognizerImpl {
+   }
+ 
+   void DecodeStreams(OfflineStream **ss, int32_t n) const override {
++    if(c601182::state.active){if(n!=1)throw std::runtime_error("TRACE_SINGLE_STREAM_REQUIRED");c601182::Event("decode-start",{{"nativeStream",c601182::Ptr(ss[0])},{"nativeModelInstance",c601182::Ptr(model_.get())},{"batchSize",n},{"config",config_.ToString()}},"offline-recognizer-transducer-impl.h:DecodeStreams");}
+     auto memory_info =
+         Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeDefault);
+ 
+@@ -217,6 +219,7 @@ class OfflineRecognizerTransducerImpl : public OfflineRecognizerImpl {
+     for (int32_t i = 0; i != n; ++i) {
+       auto f = ss[i]->GetFrames();
+       int32_t num_frames = f.size() / feat_dim;
++      if(c601182::state.active)c601182::Event("features",c601182::Summary(f.data(),num_frames,feat_dim),"offline-recognizer-transducer-impl.h:GetFrames-return");
+ 
+       features_length_vec[i] = num_frames;
+       features_vec[i] = std::move(f);
+@@ -243,6 +246,7 @@ class OfflineRecognizerTransducerImpl : public OfflineRecognizerImpl {
+                                -23.025850929940457f);
+ 
+     auto t = model_->RunEncoder(std::move(x), std::move(x_length));
++    if(c601182::state.active)c601182::Event("decoder-input",{{"tensor",c601182::Tensor(t.first)},{"effectiveLength",c601182::Tensor(t.second)}},"offline-recognizer-transducer-impl.h:RunEncoder-return");
+     auto results =
+         decoder_->Decode(std::move(t.first), std::move(t.second), ss, n);
+ 
+@@ -254,6 +258,7 @@ class OfflineRecognizerTransducerImpl : public OfflineRecognizerImpl {
+       r.text = ApplyHomophoneReplacer(std::move(r.text));
+ 
+       ss[i]->SetResult(r);
++      if(c601182::state.active){c601182::Event("native-result",{{"text",r.text},{"tokens",r.tokens},{"timestamps",r.timestamps},{"nativeJson",r.AsJsonString()}},"offline-recognizer-transducer-impl.h:SetResult");c601182::End(true);}
+     }
+   }
+ 
+diff --git a/sherpa-onnx/csrc/offline-stream.cc b/sherpa-onnx/csrc/offline-stream.cc
+index 196b571..1e421a7 100644
+--- a/sherpa-onnx/csrc/offline-stream.cc
++++ b/sherpa-onnx/csrc/offline-stream.cc
+@@ -22,7 +22,9 @@
+ #include "sherpa-onnx/csrc/resample.h"
+ #include "sherpa-onnx/csrc/text-utils.h"
+ 
++#include "sherpa-onnx/csrc/c601182-trace.h"
+ namespace sherpa_onnx {
++namespace c601182 { thread_local State state; }
+ 
+ class OfflineStream::Impl {
+  public:
+@@ -113,6 +115,7 @@ class OfflineStream::Impl {
+   }
+ 
+   void AcceptWaveform(int32_t sampling_rate, const float *waveform, int32_t n) {
++    if(c601182::state.active)c601182::Event("native-waveform",{{"sampleRate",sampling_rate},{"sampleCount",n},{"sha256",c601182::Hash(waveform,n*sizeof(float))},{"streamImpl",c601182::Ptr(this)},{"config",config_.ToString()},{"preemphasis",opts_.frame_opts.preemph_coeff},{"roundToPowerOfTwo",opts_.frame_opts.round_to_power_of_two}},"offline-stream.cc:Impl::AcceptWaveform");
+     if (config_.normalize_samples) {
+       AcceptWaveformImpl(sampling_rate, waveform, n);
+     } else {
+diff --git a/sherpa-onnx/csrc/offline-transducer-greedy-search-decoder.cc b/sherpa-onnx/csrc/offline-transducer-greedy-search-decoder.cc
+index 8cb3934..90471b3 100644
+--- a/sherpa-onnx/csrc/offline-transducer-greedy-search-decoder.cc
++++ b/sherpa-onnx/csrc/offline-transducer-greedy-search-decoder.cc
+@@ -14,6 +14,7 @@
+ #include "sherpa-onnx/csrc/packed-sequence.h"
+ #include "sherpa-onnx/csrc/slice.h"
+ 
++#include "sherpa-onnx/csrc/c601182-trace.h"
+ namespace sherpa_onnx {
+ 
+ std::vector<OfflineTransducerDecoderResult>
+@@ -29,12 +30,14 @@ OfflineTransducerGreedySearchDecoder::Decode(Ort::Value encoder_out,
+ 
+   int32_t vocab_size = model_->VocabSize();
+   int32_t context_size = model_->ContextSize();
++  if(c601182::state.active)c601182::Event("decoder-init",{{"effectiveLength",c601182::Tensor(encoder_out_length)},{"sortedIndexes",packed_encoder_out.sorted_indexes},{"batchSizes",packed_encoder_out.batch_sizes},{"blankId",0},{"unkId",unk_id_},{"contextSize",context_size},{"vocabSize",vocab_size},{"blankPenalty",blank_penalty_}},"offline-transducer-greedy-search-decoder.cc:Decode");
+ 
+   std::vector<OfflineTransducerDecoderResult> ans(batch_size);
+   for (auto &r : ans) {
+     r.tokens.resize(context_size, -1);
+     // 0 is the ID of the blank token
+     r.tokens.back() = 0;
++    if(c601182::state.active)c601182::Event("initial-context",{{"tokens",r.tokens}},"offline-transducer-greedy-search-decoder.cc:context-initialized");
+   }
+ 
+   auto decoder_input = model_->BuildDecoderInput(ans, ans.size());
+@@ -71,16 +74,20 @@ OfflineTransducerGreedySearchDecoder::Decode(Ort::Value encoder_out,
+         ans[i].ys_log_probs.push_back(log_prob);
+         emitted = true;
+       }
++      if(c601182::state.active)c601182::Event("decoder-step",{{"frameIndex",t},{"batchLocalIndex",i},{"originalIndex",packed_encoder_out.sorted_indexes[i]},{"argmax",y},{"classification",y==0?"blank":(y==unk_id_?"unk":"lexical")},{"appended",y!=0&&y!=unk_id_},{"lexicalCount",ans[i].tokens.size()-context_size},{"contextUpdated",y!=0&&y!=unk_id_},{"selectedLogProbability",log_prob}},"offline-transducer-greedy-search-decoder.cc:existing-argmax-branch");
+     }
+     if (emitted) {
+       Ort::Value decoder_input = model_->BuildDecoderInput(ans, n);
+       decoder_out = model_->RunDecoder(std::move(decoder_input));
++      if(c601182::state.active)c601182::Event("decoder-context-updated",{{"frameIndex",t},{"decoderOutput",c601182::Tensor(decoder_out)}},"offline-transducer-greedy-search-decoder.cc:RunDecoder-return");
+     }
+     ++t;
+   }
+ 
+   for (auto &r : ans) {
++    if(c601182::state.active)c601182::Event("tokens-before-context-removal",{{"tokens",r.tokens},{"timestamps",r.timestamps}},"offline-transducer-greedy-search-decoder.cc:before-context-removal");
+     r.tokens = {r.tokens.begin() + context_size, r.tokens.end()};
++    if(c601182::state.active)c601182::Event("tokens-after-context-removal",{{"tokens",r.tokens},{"timestamps",r.timestamps}},"offline-transducer-greedy-search-decoder.cc:after-context-removal");
+   }
+ 
+   std::vector<OfflineTransducerDecoderResult> unsorted_ans(batch_size);
+diff --git a/sherpa-onnx/csrc/offline-transducer-model.cc b/sherpa-onnx/csrc/offline-transducer-model.cc
+index b7fff5a..9c77e87 100644
+--- a/sherpa-onnx/csrc/offline-transducer-model.cc
++++ b/sherpa-onnx/csrc/offline-transducer-model.cc
+@@ -26,6 +26,7 @@
+ #include "sherpa-onnx/csrc/session.h"
+ #include "sherpa-onnx/csrc/text-utils.h"
+ 
++#include "sherpa-onnx/csrc/c601182-trace.h"
+ namespace sherpa_onnx {
+ 
+ namespace {
+@@ -138,9 +139,11 @@ class OfflineTransducerModel::Impl {
+ 
+   std::pair<Ort::Value, Ort::Value> RunEncoder(Ort::Value features,
+                                                Ort::Value features_length) {
++    if(c601182::state.active){c601182::Event("model-graphs",{{"encoder",c601182::Graph(*encoder_sess_)},{"decoder",c601182::Graph(*decoder_sess_)},{"joiner",c601182::Graph(*joiner_sess_)}},"offline-transducer-model.cc:existing-sessions");c601182::Event("encoder-input-before-cast",{{"tensor",c601182::Tensor(features)},{"length",c601182::Tensor(features_length)}},"offline-transducer-model.cc:RunEncoder");}
+     features_length =
+         CastIntTensor(std::move(features_length), encoder_input_length_type_,
+                       Allocator());
++    if(c601182::state.active)c601182::Event("encoder-input-after-cast",{{"tensor",c601182::Tensor(features)},{"length",c601182::Tensor(features_length)}},"offline-transducer-model.cc:RunEncoder-after-cast");
+     std::array<Ort::Value, 2> encoder_inputs = {std::move(features),
+                                                 std::move(features_length)};
+ 
+@@ -148,6 +151,7 @@ class OfflineTransducerModel::Impl {
+         {}, encoder_input_names_ptr_.data(), encoder_inputs.data(),
+         encoder_inputs.size(), encoder_output_names_ptr_.data(),
+         encoder_output_names_ptr_.size());
++    if(c601182::state.active){auto shape=encoder_out[0].GetTensorTypeAndShapeInfo().GetShape();auto length=c601182::Tensor(encoder_out[1]);c601182::J j={{"tensor",c601182::Tensor(encoder_out[0])},{"length",length}};int64_t valid=length["values"][0];if(shape.size()==3&&shape[0]==1&&valid>=0&&valid<=shape[1]&&encoder_out[0].GetTensorTypeAndShapeInfo().GetElementType()==ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT)j["validSummary"]=c601182::Summary(encoder_out[0].GetTensorData<float>(),valid,shape[2]);c601182::Event("encoder-output",j,"offline-transducer-model.cc:encoder_sess-Run-return");}
+     return {std::move(encoder_out[0]),
+             CastIntTensor(std::move(encoder_out[1]),
+                           ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64, Allocator())};
+diff --git a/sherpa-onnx/python/csrc/offline-stream.cc b/sherpa-onnx/python/csrc/offline-stream.cc
+index 8a5848c..325a0e8 100644
+--- a/sherpa-onnx/python/csrc/offline-stream.cc
++++ b/sherpa-onnx/python/csrc/offline-stream.cc
+@@ -7,6 +7,7 @@
+ #include <vector>
+ 
+ #include "sherpa-onnx/csrc/offline-stream.h"
++#include "sherpa-onnx/csrc/c601182-trace.h"
+ 
+ namespace sherpa_onnx {
+ 
+@@ -69,6 +70,9 @@ Return:
+ )doc";
+ 
+ static void PybindOfflineRecognitionResult(py::module *m) {  // NOLINT
++  m->def("c601182_probe_identity", [](){return std::string(c601182::build);});
++  m->def("c601182_trace_begin", &c601182::Begin);
++  m->def("c601182_trace_end", &c601182::End);
+   using PyClass = OfflineRecognitionResult;
+   py::class_<PyClass>(*m, "OfflineRecognitionResult",
+                       kOfflineRecognitionResultDoc)
