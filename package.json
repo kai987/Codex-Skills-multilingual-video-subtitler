@@ -13,6 +13,7 @@
     "npm": ">=11"
   },
   "scripts": {
+    "experiment:subtitle-tool:bounded-content-review": "node scripts/subtitle-tool-bounded-content-review.mjs",
     "experiment:subtitle-tool:bounded-asr-ab": "node scripts/subtitle-tool-bounded-asr-ab.mjs",
     "test:bounded-asr-ab:e2e": "node --test tests/bounded-longform-flow.mjs",
     "subtitle-tool": "node scripts/subtitle-tool.mjs",
