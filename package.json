@@ -13,6 +13,8 @@
     "npm": ">=11"
   },
   "scripts": {
+    "experiment:subtitle-tool:bounded-asr-ab": "node scripts/subtitle-tool-bounded-asr-ab.mjs",
+    "test:bounded-asr-ab:e2e": "node --test tests/bounded-longform-flow.mjs",
     "subtitle-tool": "node scripts/subtitle-tool.mjs",
     "package:subtitle-tool": "node scripts/package-subtitle-tool.mjs",
     "build:subtitle-tool": "tsc -b packages/video-subtitler/tsconfig.json --pretty false",
