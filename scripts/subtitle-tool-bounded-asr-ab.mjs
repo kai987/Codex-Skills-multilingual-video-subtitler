@@ -62,13 +62,17 @@ cli
   .command("report")
   .requiredOption("--manifest <path>")
   .option(
+    "--output-root <path>",
+    "Required disjoint output tree; never overwrite the original run",
+  )
+  .option(
     "--export-partial",
     "Explicitly export only legal timed subset, preserve all other raw records",
   )
   .action(async (o) => {
     const result = await report(o.manifest, o);
     console.log(JSON.stringify(result, null, 2));
-    if (result.B.delivery !== "machine-draft") process.exitCode = 2;
+    process.exitCode = result.exitCode;
   });
 try {
   await cli.parseAsync();

@@ -1,4 +1,5 @@
 /* global AbortController */
+import { legacyFixtureReport } from "./helpers/legacy-bounded-fixture.mjs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
@@ -9,7 +10,7 @@ import { execFileSync } from "node:child_process";
 import {
   plan,
   runB,
-  report,
+  report as revisedReport,
   slicePcm,
   readPcm,
   ledger,
@@ -25,7 +26,7 @@ import {
 } from "../packages/video-subtitler/dist/standalone/tool.js";
 import { digest } from "../packages/video-subtitler/dist/standalone/assembly.js";
 
-async function fixture() {
+export async function fixture() {
   const root = await fs.realpath(
     await fs.mkdtemp(path.join(os.tmpdir(), "bounded-ab-synthetic-")),
   );
@@ -146,7 +147,7 @@ async function fixture() {
   );
   return { ...result, original: root, pcm };
 }
-function stub(output, fail = 0) {
+export function stub(output, fail = 0) {
   let calls = 0;
   return {
     get calls() {
@@ -173,6 +174,13 @@ function stub(output, fail = 0) {
     },
   };
 }
+async function report(manifest, options = {}) {
+  await legacyFixtureReport(manifest, { exportPartial: true });
+  return revisedReport(manifest, {
+    outputRoot: path.join(path.dirname(path.dirname(manifest)), "revisions"),
+    ...options,
+  });
+}
 test("sample slices exactly match source and reject invalid indexes", () => {
   const p = { frames: 100, sampleRate: 44100, data: Buffer.alloc(200, 17) };
   const s = readPcm(slicePcm(p, 20, 70));
@@ -196,12 +204,12 @@ test("complete synthetic B, same-process and fresh ledger resume reuse all succe
   const resumed = await runB(f.manifest, { runner: noCall });
   assert.equal(resumed.checkpointHits, f.chunks);
   const c = await report(f.manifest, { exportPartial: true });
-  assert.equal(c.B.delivery, "machine-draft");
-  assert.equal(c.A.delivery, "partial");
+  assert.equal(c.B.partial, "generated");
+  assert.equal(c.A.partial, "generated");
   assert.equal(c.A.rawRecords, 2);
-  assert.equal(c.A.zeroDuration, 1);
-  assert.equal(c.counts.ANewRequests, 0);
-  assert.equal(c.counts.BRequests, f.chunks);
+  assert.equal(c.A.stages.raw.tags.ZERO_DURATION, 1);
+  assert.equal(c.historical.counts.ANewRequests, 0);
+  assert.equal(c.historical.counts.BRequests, f.chunks);
   assert.equal(
     await fileHash(path.join(f.original, "task.json")),
     originalHash,
@@ -223,7 +231,7 @@ test("successful bad timing and empty chunks are never retried; report preserves
   assert.equal(c.B.emptySuccessfulChunks, 1);
   assert.equal(c.B.rawRecords, f.chunks - 1);
   assert.equal(c.B.unresolvedRecords, f.chunks - 1);
-  assert.notEqual(c.B.delivery, "machine-draft");
+  assert.notEqual(c.B.partial, "generated");
 });
 test("one technical retry is cumulative; second failure leaves incomplete B", async () => {
   const f = await fixture(),
@@ -233,7 +241,7 @@ test("one technical retry is cumulative; second failure leaves incomplete B", as
   assert.equal(attemptsFrom(await ledger(f.root)).length, 2);
   const c = await report(f.manifest);
   assert.equal(c.B.completeRequests, false);
-  assert.equal(c.counts.BRetries, 1);
+  assert.equal(c.historical.counts.BRetries, 1);
   await assert.rejects(runB(f.manifest, { runner }), /BUDGET/u);
   assert.equal(runner.calls, 2);
 });
@@ -288,13 +296,28 @@ test("fresh CLI process resumes with zero launches, report works without histori
     path.join(f.original, "audio.wav"),
     path.join(f.original, "audio-away.wav"),
   );
-  const output = JSON.parse(
-    execFileSync(process.execPath, [cli, "report", "--manifest", f.manifest], {
-      encoding: "utf8",
-    }),
-  );
-  assert.equal(output.B.delivery, "machine-draft");
-  assert.equal(output.counts.BRequests, f.chunks);
+  await legacyFixtureReport(f.manifest, { exportPartial: true });
+  let stdout;
+  try {
+    execFileSync(
+      process.execPath,
+      [
+        cli,
+        "report",
+        "--manifest",
+        f.manifest,
+        "--output-root",
+        path.join(f.original, "reports"),
+      ],
+      { encoding: "utf8" },
+    );
+  } catch (e) {
+    assert.equal(e.status, 2);
+    stdout = e.stdout;
+  }
+  const output = JSON.parse(stdout);
+  assert.equal(output.B.subtitleExport, "not-requested");
+  assert.equal(output.historical.counts.BRequests, f.chunks);
 });
 test("cancellation consumes reservation, does not auto retry; symlink output is rejected", async () => {
   const f = await fixture(),
