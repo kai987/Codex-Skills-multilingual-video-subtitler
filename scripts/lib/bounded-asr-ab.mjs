@@ -14,7 +14,6 @@ import { WhisperCppTranscriptionAdapter } from "../../packages/transcription-cor
 import {
   fileHash,
   atomic,
-  OwnedRunner,
   manifestSchema,
 } from "../../packages/video-subtitler/dist/standalone/tool.js";
 import { safePath } from "../../packages/video-subtitler/dist/standalone/recovery.js";
@@ -373,7 +372,8 @@ export function attemptsFrom(entries) {
   }
   return attempts;
 }
-export async function plan(o, runner = new OwnedRunner()) {
+export async function plan(o, runner = new EvidenceRunner()) {
+  const planStarted = Date.now();
   await safePath(o.outputRoot, true);
   await fs.mkdir(o.outputRoot, { recursive: true });
   const root = await fs.mkdtemp(
@@ -536,6 +536,7 @@ export async function plan(o, runner = new OwnedRunner()) {
         audioPath: baseline.audio.path,
         model: o.vadModel,
         library: o.vadLibrary,
+        receiptPath: path.join(root, "vad-phases.jsonl"),
         profile: m.vadProfile,
       },
       true,
@@ -554,10 +555,14 @@ export async function plan(o, runner = new OwnedRunner()) {
         "--request",
         path.join(root, "vad-request.json"),
       ],
-      { timeoutMs: 300000 },
+      { timeoutMs: 300000, cwd: root },
     );
     await fs.writeFile(path.join(root, "vad.stdout.log"), vadResult.stdout);
     await fs.writeFile(path.join(root, "vad.stderr.log"), vadResult.stderr);
+    if (vadResult.exitCode !== 0)
+      throw Error(
+        `VAD_PROCESS_FAILED: ${vadResult.exitCode}/${vadResult.signal ?? "none"}`,
+      );
     const vad = JSON.parse(vadResult.stdout);
     if (
       vad.inputFrames !== pcm.frames ||
@@ -570,11 +575,13 @@ export async function plan(o, runner = new OwnedRunner()) {
       wallMs: Date.now() - started,
     });
     m.vadHash = await fileHash(path.join(root, "vad.json"));
+    const cutStarted = Date.now();
     m.chunks = planChunks(
       pcm.frames,
       pcm.sampleRate,
       silenceFromScores(vad.probabilities, pcm.frames, pcm.sampleRate),
     );
+    const cutPlanningMs = Date.now() - cutStarted;
     m.manualReview.push(
       ...m.chunks.slice(0, -1).map((c) => ({
         kind: "seam",
@@ -600,6 +607,12 @@ export async function plan(o, runner = new OwnedRunner()) {
       audioOffset: m.audioOffset,
       sourceEnd: m.sourceEnd,
       fullAudioExtractions: 0,
+    });
+    await durable(path.join(root, "planning-cost.json"), {
+      planWallMs: Date.now() - planStarted,
+      cutPlanningMs,
+      peakMemoryBytes: "UNKNOWN",
+      energyJoules: "UNKNOWN",
     });
     return {
       root,
@@ -678,6 +691,7 @@ export async function runB(manifest, { runner, signal } = {}) {
   return locked(root, async () => {
     const m = await loadExperiment(manifest);
     const runStarted = Date.now();
+    let pcmSliceMs = 0;
     validateJournal(m, await ledger(root));
     await verifyFiles([
       ...Object.values(m.baseline),
@@ -716,9 +730,11 @@ export async function runB(manifest, { runner, signal } = {}) {
           dir = path.join(root, relative);
         await safePath(dir, true);
         await fs.mkdir(dir, { recursive: true });
+        const sliceStarted = Date.now();
         const audio = path.join(dir, "input.wav"),
           wav = slicePcm(pcm, c.inputStart, c.inputEnd);
         await fs.writeFile(audio, wav, { flag: "wx" });
+        pcmSliceMs += Date.now() - sliceStarted;
         const inputHash = await fileHash(audio);
         if (
           contentHash(wav.subarray(44)) !==
@@ -869,6 +885,7 @@ export async function runB(manifest, { runner, signal } = {}) {
       attempts: attemptsFrom(await ledger(root)).length,
       newAudioExtractions: 0,
       wallMs: Date.now() - runStarted,
+      pcmSliceMs,
     };
     await append(root, { kind: "run-finished", ...result });
     return result;
@@ -986,6 +1003,19 @@ async function group(root, name, records, chunks, m, complete, exportPartial) {
     (r, i) => r.text && records.slice(0, i).some((x) => x.text === r.text),
   ).length;
   const metrics = {
+    issueCounts: Object.fromEntries(
+      [
+        "ZERO_DURATION",
+        "REVERSED_INTERVAL",
+        "NEGATIVE_TIME",
+        "NONFINITE_OR_UNPARSED_TIME",
+        "OUT_OF_REQUEST_RANGE",
+        "OUT_OF_SOURCE_RANGE",
+        "EMPTY_OR_UNPARSED_TEXT",
+        "SERIALIZATION_COLLAPSE",
+        "SERIALIZATION_TEXT_OR_TIMING_LOSS",
+      ].map((code) => [code, count(code)]),
+    ),
     rawRecords: records.length,
     parseableCodepoints: records.reduce(
       (n, r) => n + Array.from(r.text ?? "").length,
@@ -996,6 +1026,22 @@ async function group(root, name, records, chunks, m, complete, exportPartial) {
         (c) => !c.startsWith("SERIALIZATION") && c !== "OUT_OF_SOURCE_RANGE",
       ),
     ).length,
+    mappedInvalidRecords: records.filter((r) => r.issues.length).length,
+    finalInvalidRatio: records.length
+      ? d.unresolved.length / records.length
+      : null,
+    chunkEdgeRiskRecords: records.filter((r) => {
+      const c = chunks.find((v) => v.id === r.chunkId);
+      return (
+        c &&
+        r.localStart !== null &&
+        r.localEnd !== null &&
+        (r.localStart < POLICY.contextSeconds ||
+          r.localEnd >
+            (c.inputEnd - c.inputStart) / m.pcm.sampleRate -
+              POLICY.contextSeconds)
+      );
+    }).length,
     unresolvedRecords: d.unresolved.length,
     zeroDuration: count("ZERO_DURATION"),
     zeroDurationRatio: records.length
@@ -1022,6 +1068,7 @@ async function group(root, name, records, chunks, m, complete, exportPartial) {
   return metrics;
 }
 export async function report(manifest, { exportPartial = false } = {}) {
+  const reportStarted = Date.now();
   const root = path.dirname(manifest);
   return locked(root, async () => {
     const m = await loadExperiment(manifest); // Offline: do not follow historical model/media paths.
@@ -1129,6 +1176,11 @@ export async function report(manifest, { exportPartial = false } = {}) {
         fullAudioExtractions: 0,
       },
       timing: {
+        planning: await json(path.join(root, "planning-cost.json")),
+        pcmSliceMs: entries
+          .filter((e) => e.kind === "run-finished")
+          .reduce((n, e) => n + (e.pcmSliceMs ?? 0), 0),
+        offlineAssemblyAndReportMs: Date.now() - reportStarted,
         vadMs: (await json(path.join(root, "vad.json"))).wallMs,
         asrMs: attempts.reduce((n, x) => n + (x.durationMs ?? 0), 0),
         runWallMs: entries
