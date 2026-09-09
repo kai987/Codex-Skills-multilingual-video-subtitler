@@ -11,7 +11,7 @@ if (!outputRoot)
   throw Error("用法：node scripts/package-subtitle-tool.mjs /path/output-root");
 await fs.mkdir(outputRoot, { recursive: true });
 const container = await fs.mkdtemp(
-  path.join(path.resolve(outputRoot), "subtitle-tool-v1-candidate-"),
+  path.join(path.resolve(outputRoot), "subtitle-tool-v1-0-1-candidate-"),
 );
 const stage = path.join(container, "subtitle-tool-v1");
 await fs.mkdir(stage);
@@ -38,10 +38,12 @@ for (const pkg of packages)
     await copy(`packages/${pkg}/${name}`);
 for (const file of [
   "tsconfig.base.json",
+  "LICENSE",
   ".nvmrc",
   "package-lock.json",
   "STANDALONE_SUBTITLE_TOOL_V1.md",
   "SUBTITLE_TOOL_V1_DELIVERY_REPORT.md",
+  "SUBTITLE_TOOL_V1_0_1_PARTIAL_RECOVERY_REPORT.md",
   "scripts/subtitle-tool.mjs",
   "schemas/subtitle-tool-v1",
 ])
@@ -91,7 +93,7 @@ await fs.writeFile(
   path.join(stage, "PACKAGE_CONTENTS.json"),
   JSON.stringify(
     {
-      version: "subtitle-tool-v1-candidate",
+      version: "subtitle-tool-v1.0.1-candidate",
       sourceCommit,
       sourceStatus: (
         await exec("git", ["status", "--porcelain"], { cwd: repository })

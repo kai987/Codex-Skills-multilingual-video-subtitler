@@ -1,5 +1,7 @@
 # Multilingual Video Subtitler
 
+v1.0.1 候选新增离线 `subtitle-tool recover` 与 `validate-edited`。见[部分结果恢复说明](STANDALONE_SUBTITLE_TOOL_V1.md)及[v1.0.1 报告](SUBTITLE_TOOL_V1_0_1_PARTIAL_RECOVERY_REPORT.md)。部分交付不代表完整字幕或正式发布通过。
+
 ## 独立字幕工具 v1 候选版
 
 完整本地视频/音频 → 本地 Whisper → ASS/SRT/VTT 机器字幕草稿。首次配置后，仅需输入文件和输出目录；默认不搜索参考字幕、不调用云端。

@@ -1,5 +1,32 @@
 # 独立字幕工具 v1 候选版
 
+## v1.0.1：全文、部分字幕与外部修订
+
+成功请求的时间异常不再只返回失败。新任务保存完整原始记录、全文、时间异常及索引，状态为 partial；旧失败任务只产生独立恢复视图，旧 task.json 和错误不变。
+
+```sh
+npm run subtitle-tool -- recover --task "/path/task"
+npm run subtitle-tool -- recover --task "/path/task" --export-partial
+npm run subtitle-tool -- recover --task "/readonly/task" --output-root "/writable/recovered"
+npm run subtitle-tool -- validate-edited --task "/path/task" --input "/path/edited.srt" --timebase source
+```
+
+命令直接返回恢复目录和 OUTPUT_INDEX.md。默认只交付 transcript.full.txt、raw-records.json、timing-issues.json 和 TIMING_ISSUES.md。无法提取正文的原块保留在 unparsed-blocks.json（如有）；不将异常说明混入识别正文。
+
+只有 `--export-partial` 才写出 `subtitles/primary-minimal.partial.ass/srt/vtt` 和 export-map.json。这些文件没有包含未解决记录，因此不完整；未解决正文仍在全文和原始记录中。没有合法条目就不创建空字幕。合法重叠/重复/长行不自动删除；文字或时间不能安全往返的条目保留为未解决。既有百分之一秒精度可能使极短区间坍缩，本工具不补时长。
+
+重复 recover 按 task/raw 哈希及恢复版本、导出策略复用经过重新验证的目录。目录被改动则拒绝覆盖，请另存用户副本；如需新修订可指定新的 output-root。并发命令使用独立排他锁，取消只清理本次未提交临时目录；异常断电残留锁需要用户确认没有运行中的恢复操作后手动处理，不自动抢锁。
+
+成功 raw checkpoint 的确定性时间阻塞走纯离线恢复，不进入模型预检、ffprobe 或转写。再次 resume 只提示实际异常数和恢复索引，不会产生新时间。恢复不要求旧视频/模型/可执行程序存在，不跟随 task.json 中的历史绝对路径；现场再核验为 NOT_RUN_SOURCE_UNAVAILABLE（没有探测可用性），只使用已保存并绑定成功请求的时长/offset/hash。原始文件或任务绑定损坏是技术错误，不以新识别掩盖。
+
+partial 副本的时间已是 source；从 raw-primary.srt 另存的文件使用 `--timebase audio`，只加一次 offset。默认 source，无法猜测用户声明错误；只有可观测的越界/非法区间会拒绝，范围内的错误时间基不能被当作已验证声学对齐。
+
+validate-edited 支持 SRT/VTT/ASS；原文件只读，合法输出另放 `user-edited-*/subtitles/subtitle.user-edited.*`。ASS 样式按已有 parser 的可见文字投影转换，不承诺样式无损；不读取相邻字幕。逐条、同顺序、同正文（只允许显示换行差异）的全量对应，才报告 ALL_RECORDS_IN_ORDER_TEXT_PRESERVED。删词、改标点/宽度、合并或拆分报告 USER_CONTENT_CHANGED / SOURCE_COMPLETENESS_UNPROVEN，但仍可交付格式合法的用户副本。把 partial 另存一次不能证明遗漏内容已恢复。
+
+退出码：0 是该完整操作/检查成功（例如格式且全量文字对账通过的修订检查）；2 是已交付可取回记录，但完整定时交付或源文字对账仍未完成；1 是身份、编码、权限或 I/O 技术故障。status 是只读查询，查询成功退出 0；它分别显示历史 task 和可信恢复视图，外部 output-root 结果由恢复命令直接返回，不修改只读归档建立索引。
+
+无论修订检查是否退出 0，acousticCorrectness=NOT_VERIFIED、humanValidated=false、finalizationMethod=none、machineOnlyReleaseAuthorized=false。原始机器文字可能有幻觉，保全记录不代表文字正确或发话真实。恢复成功不改变完整机器字幕验收失败的历史结论。
+
 这是本地字幕草稿工具，不是识别准确率认证或正式公开 Release。输出始终需要复核；正常导出不要求 Gold、人工参考稿或历史实验目录。
 
 ## 安装
