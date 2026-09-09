@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "subtitle-tool-v1.0.1-recovery-2"
+    },
+    "taskHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rawHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "inputHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "timebase": {
+      "type": "string",
+      "enum": ["audio", "source"]
+    },
+    "formatIntegrity": {
+      "type": "string",
+      "enum": ["passed", "failed"]
+    },
+    "sourceTextAccounting": {
+      "type": "string",
+      "enum": [
+        "ALL_RECORDS_IN_ORDER_TEXT_PRESERVED",
+        "SOURCE_COMPLETENESS_UNPROVEN"
+      ]
+    },
+    "contentChange": {
+      "type": "string",
+      "enum": ["TIMING_OR_DISPLAY_ONLY", "USER_CONTENT_CHANGED"]
+    },
+    "originalRecords": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "editedRecords": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "userEdited": {
+      "type": "boolean",
+      "const": true
+    },
+    "acousticCorrectness": {
+      "type": "string",
+      "const": "NOT_VERIFIED"
+    },
+    "humanValidated": {
+      "type": "boolean",
+      "const": false
+    },
+    "machineOnlyReleaseAuthorized": {
+      "type": "boolean",
+      "const": false
+    },
+    "finalizationMethod": {
+      "type": "string",
+      "const": "none"
+    },
+    "qualityStatus": {
+      "type": "string",
+      "const": "needs-review"
+    },
+    "styleConversion": {
+      "type": "string"
+    },
+    "textComparison": {
+      "type": "string"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "recordId": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "displayId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "firstLine": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "lastLine": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rawBlock": {
+            "type": "string"
+          },
+          "rawStart": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rawEnd": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "localStart": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "localEnd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sourceStart": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sourceEnd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parseStatus": {
+            "type": "string",
+            "enum": ["PARSED", "UNPARSED"]
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "recordId",
+          "order",
+          "displayId",
+          "firstLine",
+          "lastLine",
+          "rawBlock",
+          "rawStart",
+          "rawEnd",
+          "localStart",
+          "localEnd",
+          "sourceStart",
+          "sourceEnd",
+          "text",
+          "parseStatus",
+          "issues"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "newASRRequests": {
+      "type": "number",
+      "const": 0
+    },
+    "newModelInference": {
+      "type": "number",
+      "const": 0
+    },
+    "newModelLoads": {
+      "type": "number",
+      "const": 0
+    },
+    "newProviderStarts": {
+      "type": "number",
+      "const": 0
+    },
+    "newAudioExtractions": {
+      "type": "number",
+      "const": 0
+    },
+    "newAudioWindows": {
+      "type": "number",
+      "const": 0
+    },
+    "files": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    }
+  },
+  "required": [
+    "version",
+    "taskHash",
+    "rawHash",
+    "inputHash",
+    "timebase",
+    "formatIntegrity",
+    "sourceTextAccounting",
+    "contentChange",
+    "originalRecords",
+    "editedRecords",
+    "userEdited",
+    "acousticCorrectness",
+    "humanValidated",
+    "machineOnlyReleaseAuthorized",
+    "finalizationMethod",
+    "qualityStatus",
+    "styleConversion",
+    "textComparison",
+    "issues",
+    "newASRRequests",
+    "newModelInference",
+    "newModelLoads",
+    "newProviderStarts",
+    "newAudioExtractions",
+    "newAudioWindows"
+  ],
+  "additionalProperties": false
+}

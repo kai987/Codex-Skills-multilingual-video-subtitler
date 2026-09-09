@@ -6,12 +6,20 @@ import {
   manifestSchema,
   evidenceSchema,
 } from "../packages/video-subtitler/dist/standalone/tool.js";
+import {
+  recoverySchema,
+  rawRecordSchema,
+  editedValidationSchema,
+} from "../packages/video-subtitler/dist/standalone/recovery.js";
 const root = path.resolve(import.meta.dirname, "../schemas/subtitle-tool-v1");
 await fs.mkdir(root, { recursive: true });
 for (const [name, schema] of Object.entries({
   configuration: configSchema,
   task: manifestSchema,
   "primary-evidence": evidenceSchema,
+  recovery: recoverySchema,
+  "raw-record": rawRecordSchema,
+  "edited-validation": editedValidationSchema,
 }))
   await fs.writeFile(
     path.join(root, name + ".schema.json"),

@@ -13,6 +13,11 @@ import {
   recoverLock,
   checkWriteTarget,
 } from "../packages/video-subtitler/dist/standalone/tool.js";
+import {
+  recoverTask,
+  validateEdited,
+  recoveryStatus,
+} from "../packages/video-subtitler/dist/standalone/recovery.js";
 
 const cli = new Command()
   .name("subtitle-tool")
@@ -97,11 +102,13 @@ async function execute(task, profile) {
           qualityStatus: result.qualityStatus,
           outputs: result.outputs,
           warnings: result.warnings,
+          phase: result.phase,
         },
         null,
         2,
       ),
     );
+    if (result.executionStatus === "partial") process.exitCode = 2;
   } catch (error) {
     console.error(
       `查看失败阶段：npm run subtitle-tool -- status --task ${JSON.stringify(task)}\n复用检查点：npm run subtitle-tool -- resume --task ${JSON.stringify(task)}`,
@@ -135,9 +142,54 @@ cli
   .command("status")
   .description("读取任务状态；不加载模型")
   .requiredOption("--task <path>", "任务目录")
-  .action(async (o) =>
-    console.log(JSON.stringify(await readTask(o.task), null, 2)),
-  );
+  .action(async (o) => {
+    const m = await readTask(o.task);
+    console.log(
+      JSON.stringify(m.rawHash ? await recoveryStatus(o.task) : m, null, 2),
+    );
+  });
+async function offlineOperation(fn) {
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  process.once("SIGINT", cancel);
+  process.once("SIGTERM", cancel);
+  try {
+    const result = await fn(controller.signal);
+    console.log(JSON.stringify(result, null, 2));
+    process.exitCode = result.exitCode;
+  } finally {
+    process.removeListener("SIGINT", cancel);
+    process.removeListener("SIGTERM", cancel);
+  }
+}
+cli
+  .command("recover")
+  .description("纯离线取回全文与异常；不会查找模型或重新识别")
+  .requiredOption("--task <path>", "已有成功原始响应的任务")
+  .option("--export-partial", "明确导出 primary-minimal 合法子集（不完整）")
+  .option("--output-root <path>", "独立可写恢复目录；不修改旧任务")
+  .action(async (o) => {
+    await offlineOperation((signal) => recoverTask(o.task, { ...o, signal }));
+  });
+cli
+  .command("validate-edited")
+  .description("只检查显式修订副本；不代表人工质量认证")
+  .requiredOption("--task <path>", "原任务")
+  .requiredOption("--input <path>", "用户指定 SRT/ASS/VTT 副本")
+  .addOption(
+    new Option(
+      "--timebase <base>",
+      "source（默认）：partial 副本；audio：raw 副本，映射一次",
+    )
+      .choices(["source", "audio"])
+      .default("source"),
+  )
+  .option("--output-root <path>", "独立可写修订输出目录")
+  .action(async (o) => {
+    await offlineOperation((signal) =>
+      validateEdited(o.task, o.input, o.timebase, { ...o, signal }),
+    );
+  });
 cli
   .command("resume")
   .description("恢复未完成任务或从完整证据重新导出；校验所有输入身份")

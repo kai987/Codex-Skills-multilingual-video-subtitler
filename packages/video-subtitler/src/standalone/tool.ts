@@ -15,6 +15,7 @@ import {
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
 import os from "node:os";
+import { TextDecoder } from "node:util";
 import { spawn } from "node:child_process";
 import { z } from "zod";
 import type { ProcessRunner, RunProcessOptions } from "@mvl/shared";
@@ -121,7 +122,9 @@ export async function atomic(file: string, value: unknown) {
   const temp = file + ".partial-" + randomUUID();
   await writeFile(
     temp,
-    typeof value === "string" ? value : JSON.stringify(value, null, 2) + "\n",
+    typeof value === "string" || value instanceof Uint8Array
+      ? value
+      : JSON.stringify(value, null, 2) + "\n",
     { flag: "wx" },
   );
   await rename(temp, file);
@@ -478,6 +481,26 @@ export async function runTask(
   } = {},
 ) {
   task = path.resolve(task);
+  // Deterministic raw-timing recovery precedes live identity/ffprobe/provider paths.
+  // Archived manifests remain byte-identical; this return value is a recovery view.
+  const prior = await readTask(task);
+  if (prior.rawHash && prior.attempts.some((a) => a.state === "completed")) {
+    const { readRecoverySource, recoverTask } = await import("./recovery.js");
+    const source = await readRecoverySource(task);
+    if (source.analysis.unresolved.length || !source.analysis.records.length) {
+      const result = await recoverTask(task, {
+        ...(options.signal ? { signal: options.signal } : {}),
+      });
+      const message = `识别已完成，但 ${source.analysis.unresolved.length} 条记录无法形成合法定时字幕。全文和异常清单：${result.outputIndex}。再次 resume 不会产生新时间；使用 recover --export-partial 显式导出合法子集。`;
+      options.progress?.(message);
+      return {
+        ...prior,
+        executionStatus: "partial" as const,
+        phase: message,
+        error: message,
+      };
+    }
+  }
   const lock = path.join(task, ".run-lock");
   try {
     const fd = await open(lock, "wx");
@@ -629,9 +652,9 @@ export async function runTask(
             if (exe === m.config.runtime) {
               const prefix = args[args.indexOf("--output-file") + 1];
               if (!prefix) throw Error("缺少原始输出路径");
-              raw = await readFile(prefix + ".srt", "utf8");
+              const rawBytes = await readFile(prefix + ".srt");
               await put(`attempt-${n + 1}.log`, result.stderr);
-              await put("raw-primary.srt", raw);
+              await put("raw-primary.srt", rawBytes);
               await chmod(path.join(task, "raw-primary.srt"), 0o444);
               m.rawHash = await fileHash(path.join(task, "raw-primary.srt"));
               const observedLoads = (
@@ -645,6 +668,7 @@ export async function runTask(
               attempt.state = "completed";
               attempt.endedAt = stamp();
               await save();
+              raw = new TextDecoder("utf-8", { fatal: true }).decode(rawBytes);
             }
             return result;
           },
@@ -693,6 +717,16 @@ export async function runTask(
         raw = await readFile(path.join(task, "raw-primary.srt"), "utf8");
       if ((await fileHash(path.join(task, "raw-primary.srt"))) !== m.rawHash)
         throw Error("成功请求的原始输出身份不匹配；禁止重新识别");
+      const { rawRecords, classifyRecords } = await import("./recovery.js");
+      const rawAnalysis = classifyRecords(rawRecords(raw, m.rawHash), m);
+      await put("raw-records.json", {
+        rawHash: m.rawHash,
+        records: rawAnalysis.records,
+      });
+      if (rawAnalysis.unresolved.length)
+        throw Error(
+          `原始记录时间或导出完整性受阻：${rawAnalysis.unresolved.length} 条`,
+        );
       const parsed = raw.trim() ? parseSrt(raw) : [];
       // Missing model initialization logs are unknown, not proof of zero loads.
       if (m.modelLoads === 0 && m.attempts.some((a) => a.state === "completed"))
@@ -754,6 +788,12 @@ export async function runTask(
         "# 尚无可导出的字幕\n\n" + m.warnings.join("\n"),
       );
       await phase("模型请求完成但未获得文本：需检查原音频和模型配置");
+      const { recoverTask } = await import("./recovery.js");
+      const recovery = await recoverTask(task);
+      await atomic(
+        path.join(task, "OUTPUT_INDEX.md"),
+        `# 空响应：未确认无语音\n\n[原始记录与诊断](${path.relative(task, recovery.outputIndex)})\n`,
+      );
       return m;
     }
     // Shared centisecond quantization makes all three formats use exactly one timeline.
@@ -850,15 +890,46 @@ export async function runTask(
     await phase("完成：机器草稿已导出，仍需复核");
     return m;
   } catch (e) {
+    let failure = e;
+    if (
+      !options.signal?.aborted &&
+      m.rawHash &&
+      !m.evidenceHash &&
+      m.attempts.some((a) => a.state === "completed")
+    ) {
+      try {
+        const { readRecoverySource, recoverTask } =
+          await import("./recovery.js");
+        const source = await readRecoverySource(task);
+        if (source.analysis.unresolved.length) {
+          m.executionStatus = "partial";
+          m.artifactIntegrity = "failed";
+          m.error = `识别已完成；${source.analysis.unresolved.length} 条原始记录无法导出。再次 resume 不会产生新时间；使用 recover --export-partial。`;
+          m.phase = "完整定时导出受阻；全文与诊断可取回";
+          if (!m.ownedFiles.includes("OUTPUT_INDEX.md"))
+            m.ownedFiles.push("OUTPUT_INDEX.md");
+          await save();
+          const result = await recoverTask(task);
+          await atomic(
+            path.join(task, "OUTPUT_INDEX.md"),
+            `# 部分结果\n\n${m.error}\n\n[全文与异常索引](${path.relative(task, result.outputIndex)})\n`,
+          );
+          options.progress?.(result.outputIndex);
+          return m;
+        }
+      } catch (recoveryError) {
+        failure = recoveryError;
+      }
+    }
     m.executionStatus = options.signal?.aborted
       ? "cancelled"
       : m.evidenceHash
         ? "partial"
         : "failed";
-    m.error = String(e);
+    m.error = String(failure);
     m.artifactIntegrity = "failed";
     await save();
-    throw e;
+    throw failure;
   } finally {
     await rm(lock, { force: true });
   }

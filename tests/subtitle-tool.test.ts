@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { mkdtemp, writeFile, readFile, access, chmod } from "node:fs/promises";
+import {
+  mkdtemp,
+  realpath,
+  writeFile,
+  readFile,
+  access,
+  chmod,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
@@ -22,7 +29,9 @@ import { subtitleCueSchema } from "@mvl/shared";
 import { Ajv2020 } from "ajv/dist/2020.js";
 
 async function fixture() {
-  const task = await mkdtemp(path.join(os.tmpdir(), "subtitle-v1-test-"));
+  const task = await realpath(
+    await mkdtemp(path.join(os.tmpdir(), "subtitle-v1-test-")),
+  );
   for (const name of [
     "input 日本語.mkv",
     "model.bin",
@@ -196,12 +205,12 @@ describe("standalone machine draft contract", () => {
     expect(m.attempts.map((a) => a.state)).toEqual(["failed", "completed"]);
     const other = await fixture();
     const invalid = stub("1\n00:00:00,000 --> 00:00:30,000\n越界。\n");
-    await expect(
-      runTask(other.task, { runner: invalid.runner }),
-    ).rejects.toThrow("越界");
-    await expect(
-      runTask(other.task, { runner: invalid.runner }),
-    ).rejects.toThrow("越界");
+    expect(
+      (await runTask(other.task, { runner: invalid.runner })).executionStatus,
+    ).toBe("partial");
+    expect(
+      (await runTask(other.task, { runner: invalid.runner })).phase,
+    ).toContain("不会产生新时间");
     expect(invalid.count()).toBe(1);
   });
   it("two failures exhaust budget across resume", async () => {
