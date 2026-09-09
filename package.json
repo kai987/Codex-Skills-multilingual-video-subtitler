@@ -13,6 +13,10 @@
     "npm": ">=11"
   },
   "scripts": {
+    "subtitle-tool": "node scripts/subtitle-tool.mjs",
+    "package:subtitle-tool": "node scripts/package-subtitle-tool.mjs",
+    "build:subtitle-tool": "tsc -b packages/video-subtitler/tsconfig.json --pretty false",
+    "test:subtitle-tool": "vitest run tests/subtitle-tool.test.ts tests/e2e/subtitle-tool.test.ts --maxWorkers=2",
     "c60118:prepare-preflight": "node scripts/prepare-c60118.mjs",
     "c60118:execute-second-asr": "node scripts/execute-c60118.mjs",
     "c60118:replay-frozen-assembly": "node scripts/replay-c60118.mjs",

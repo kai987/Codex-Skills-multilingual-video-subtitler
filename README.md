@@ -1,5 +1,13 @@
 # Multilingual Video Subtitler
 
+## 独立字幕工具 v1 候选版
+
+完整本地视频/音频 → 本地 Whisper → ASS/SRT/VTT 机器字幕草稿。首次配置后，仅需输入文件和输出目录；默认不搜索参考字幕、不调用云端。
+
+阅读 [安装与日常使用](STANDALONE_SUBTITLE_TOOL_V1.md) 和 [本轮交付报告](SUBTITLE_TOOL_V1_DELIVERY_REPORT.md)。使用 `npm ci && npm run build:subtitle-tool` 定向构建，无需构建语法学习站点。
+
+以下为保留兼容的旧高级工作流；其来源优先级和终稿授权规则不适用于新入口的机器草稿导出。
+
 Codex Skill and TypeScript runtime for extracting, finding, generating, validating, and optionally burning Chinese, Japanese, and English subtitles.
 
 The workflow prefers validated embedded or public subtitles, then local `whisper.cpp` transcription. OpenAI transcription is only used when explicitly selected or when the automatic provider has no usable local adapter and `OPENAI_API_KEY` is configured.

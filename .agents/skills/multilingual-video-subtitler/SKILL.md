@@ -5,6 +5,10 @@ description: Extract existing subtitles, search for matching public subtitle fil
 
 # Multilingual Video Subtitler
 
+## Standalone subtitle tool v1 candidate
+
+For an explicit standalone local machine-draft request, use `npm run subtitle-tool --` after `npm run build:subtitle-tool`. This separate product entry accepts full local video or audio, uses explicit local Whisper without prompts, reference discovery, cloud fallback, or research orchestration, and defaults to `primary-minimal`; `g11` is opt-in. Exporting a parseable local ASS/SRT/VTT machine draft is not protected finalization: execution may be `completed`, artifact integrity `passed`, and quality still `needs-review`, with `finalizationMethod: none`, `humanValidated: false`, and `machineOnlyReleaseAuthorized: false`. Preserve raw evidence; edits belong in separate copies. Existing subtitle/finalize/review workflows and all protected release rules below remain unchanged. Do not apply historical research refinements automatically to this entry. See `STANDALONE_SUBTITLE_TOOL_V1.md` in the standalone repository for configuration, resume, and limitations.
+
 Inspect and process only the local video explicitly selected by the user. Preserve the source file and place every generated artifact in a new collision-safe task directory unless the user supplies an output directory. The task-root name is not part of the public artifact contract. Put the primary subtitle artifacts and `source-info.json`, `media-identity.json`, `subtitle-search-results.json`, `processing-manifest.json`, `subtitle-package.json`, and any `transcription-refinement.json`/`transcription-corrections.json` records in one child directory named `subtitle-<original-video-stem>`; name each primary `.srt`, `.vtt`, and `.ass` file `subtitle-<original-video-stem>.<extension>`. Keep `audio/`, `temp/`, and `video/` as task-root siblings of that child directory.
 
 ## Run the local workflow
