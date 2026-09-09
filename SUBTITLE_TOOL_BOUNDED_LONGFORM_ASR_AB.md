@@ -32,6 +32,10 @@ persists `pre-vad-freeze.json` and a reservation before Silero, then freezes chu
 individual PCM hashes, decoder defaults, code identities and review locations.
 No automatic download or environment upgrade is performed. The existing VAD-only
 C API adapter is reused; none of its old research orchestration is invoked.
+For dynamically packaged GGML, the thin wrapper registers the existing local backends
+before model initialization; Silero itself remains CPU/four-thread. Fsynced
+`vad-phases.jsonl` and streamed stdout/stderr distinguish a startup failure from a
+reserved/completed audio inference. Registration does not download a backend or model.
 
 A's complete raw SRT is copied with task/audio/media/model/runtime/hash bindings.
 Its historical argv was not separately saved: effective settings are reconstructed
@@ -116,6 +120,8 @@ npm run typecheck
 npm run lint
 npm run format:check
 npm run build:subtitle-tool
+python3 tests/bounded-silero-bootstrap.py
+node scripts/validate-bounded-asr-ab.mjs /path/new-run/experiment.json
 ```
 
 Synthetic tests never count as the real B. Experiment JSON has a strict published
