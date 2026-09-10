@@ -25,7 +25,7 @@ npm run experiment:subtitle-tool:bounded-content-review -- summarize \
 
 Without `--export-listening-audio`, prepare exports zero WAVs and reports `METADATA_ONLY_NOT_LISTENING_READY`. It still authenticates authorized saved WAVs. With explicit export, prepare produces derived listening WAVs, not new ASR windows. Missing saved WAVs block listening for the entire bundle because the common source PCM can no longer be authenticated end to end. There is no extraction fallback. Wrong hashes, symlinks, traversal, inconsistent revisions or corrupt identities fail closed.
 
-Exit codes: **0** = technical prepare/verify completed, or a complete valid human-declared summary; **2** = requested listening audio blocked, or incomplete/invalid human annotation rows; **1** = input identity, binding, malformed file/UTF-8, filesystem or output conflict. A zero exit is never subtitle-quality acceptance. A malformed CSV syntax is recorded as validation failure in an immutable summary with exit 2; an unreadable annotation file exits 1.
+Exit codes: **0** = technical prepare/verify completed, or a complete valid human-declared summary; **2** = requested listening audio blocked, or valid but unfinished annotations; **1** = invalid annotations, input identity/binding, malformed file/UTF-8, filesystem or output conflict. Invalid CSV is snapshotted with validation errors and exits 1 when readable. Unknown columns remain warnings. A zero exit, including a valid all-UNJUDGEABLE summary, is never subtitle-quality acceptance. Old summaries remain immutable; the new exit contract is part of summary identity.
 
 ## Listening contract
 

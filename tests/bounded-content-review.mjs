@@ -143,7 +143,7 @@ for (const [name, column, value] of [
     const result = evaluateCsv(encode(r), bound, [bItem]);
     assert.equal(result.summary.humanDeclaredReviewedItems, 0);
     assert.equal(result.summary.groups.stratified.counts.invalidOrMissing, 1);
-    assert.equal(result.exitCode, 2);
+    assert.equal(result.exitCode, 1);
   });
 test("duplicate ids, missing rows, unknown columns, foreign rows; disjoint group denominators", () => {
   const r = reviewed();
@@ -162,7 +162,7 @@ test("duplicate ids, missing rows, unknown columns, foreign rows; disjoint group
   unknown.push([...unknown[1]]);
   unknown[2][0] = "foreign";
   result = evaluateCsv(encode(unknown), bound, [bItem]);
-  assert.equal(result.exitCode, 2);
+  assert.equal(result.exitCode, 1);
   assert.equal(result.validation.foreignRows.length, 1);
 });
 test("overlap counted as evaluation sample union, not playback or utterance rate", () => {

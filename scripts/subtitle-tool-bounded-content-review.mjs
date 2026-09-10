@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* global AbortController */
 import { Command } from "commander";
+import { attachReference } from "./lib/historical-reference-review.mjs";
 import {
   prepareReview,
   verifyBundle,
@@ -31,6 +32,13 @@ cli
     "Explicitly authorize derived byte-exact listening WAVs only",
   )
   .action((o) => show(prepareReview, o));
+cli
+  .command("attach-reference")
+  .requiredOption("--bundle <path>")
+  .requiredOption("--reference <path>")
+  .requiredOption("--reference-evidence <path>")
+  .requiredOption("--output-root <path>")
+  .action((o) => show(attachReference, o));
 cli
   .command("verify")
   .requiredOption("--bundle <path>")

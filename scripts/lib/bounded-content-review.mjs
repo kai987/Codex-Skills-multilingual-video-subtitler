@@ -28,7 +28,11 @@ import {
   hint,
   unionSamples,
 } from "./content-review-plan.mjs";
-import { template, evaluateCsv } from "./content-review-input.mjs";
+import {
+  template,
+  evaluateCsv,
+  exitContract,
+} from "./content-review-input.mjs";
 const utf8 = (b) => new TextDecoder("utf-8", { fatal: true }).decode(b);
 const sha = z.string().regex(/^[a-f0-9]{64}$/u);
 const rel = z
@@ -140,6 +144,9 @@ async function codeIdentity() {
     "scripts/lib/bounded-content-review.mjs",
     "scripts/lib/content-review-plan.mjs",
     "scripts/lib/content-review-input.mjs",
+    "scripts/lib/historical-reference-text.mjs",
+    "scripts/lib/historical-reference-review.mjs",
+    "scripts/lib/historical-reference-guide.mjs",
     "scripts/lib/bounded-report-revision.mjs",
     "scripts/lib/bounded-diagnostics.mjs",
     "scripts/lib/bounded-asr-ab.mjs",
@@ -147,6 +154,7 @@ async function codeIdentity() {
     "packages/video-subtitler/dist/standalone/recovery.js",
     "packages/video-subtitler/dist/standalone/assembly.js",
     "packages/subtitle-core/dist/parse.js",
+    "packages/subtitle-core/dist/clean.js",
     "packages/subtitle-core/dist/format.js",
     "packages/subtitle-core/dist/time.js",
     "packages/shared/dist/schemas.js",
@@ -310,6 +318,14 @@ async function publish(root, name, produce, verify, signal) {
 }
 export async function verifyBundle(root) {
   root = await checkedPath(root);
+  if (
+    (await readJson(root, "bundle.json")).version ===
+    "historical-reference-review-v2"
+  ) {
+    const { verifyReferenceBundle } =
+      await import("./historical-reference-review.mjs");
+    return verifyReferenceBundle(root);
+  }
   const b = bundleSchema.parse(await readJson(root, "bundle.json")),
     freeze = bundleFreezeSchema.parse(
       await readJson(root, "bundle-freeze.json"),
@@ -318,6 +334,9 @@ export async function verifyBundle(root) {
     throw Error("BUNDLE_IDENTITY_CONFLICT");
   if (json(await files(root)) !== json(freeze.files))
     throw Error("BUNDLE_CONTENT_CONFLICT");
+  return verifyListeningContent(root, b, freeze);
+}
+export async function verifyListeningContent(root, b, freeze) {
   if (
     json(b.gates) !== json(gates) ||
     json(b.operations) !== json(counters) ||
@@ -759,13 +778,18 @@ export async function summarizeReview(o) {
     snapshot = await fs.readFile(annotations);
   const result = evaluateCsv(
       utf8(snapshot),
-      { identity: b.identity, pcm: b.payload.pcm },
+      {
+        identity: b.identity,
+        pcm: b.payload.pcm,
+        annotationSchema: b.payload.annotationSchema,
+      },
       items,
     ),
     id = identity({
       bundle: b.identity,
       annotations: hash(snapshot),
       schema: b.payload.annotationSchema,
+      exitCodeContract: exitContract,
       code: await codeIdentity(),
     });
   return publish(
@@ -806,3 +830,16 @@ export async function summarizeReview(o) {
     o.signal,
   );
 }
+export {
+  read,
+  readJson,
+  write,
+  files,
+  exists,
+  codeIdentity,
+  separate,
+  publish,
+  page,
+  esc,
+  fullRecord,
+};

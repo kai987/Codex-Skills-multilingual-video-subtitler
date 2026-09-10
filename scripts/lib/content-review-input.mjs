@@ -31,6 +31,17 @@ export const columns = [
   "overall",
   "notes",
 ];
+export const referenceSchema = "paired-human-declaration-reference-v2";
+export const exitContract = "invalid-1-complete-0-pending-2-v2";
+export const referenceUses = [
+  "NOT_DECLARED",
+  "NOT_VIEWED",
+  "VIEWED",
+  "UNKNOWN",
+];
+export const overallValues = ["A", "B", "EQUAL", "UNJUDGEABLE"];
+export const schemaColumns = (schema) =>
+  schema === referenceSchema ? [...columns, "referenceUse"] : columns;
 export function parseCsv(text) {
   const rows = [];
   let row = [],
@@ -88,7 +99,8 @@ export function parseCsv(text) {
   return rows;
 }
 export const csvCell = (s) => '"' + String(s).replaceAll('"', '""') + '"';
-export function template(items, bundleIdentity) {
+export function template(items, bundleIdentity, schema) {
+  const columns = schemaColumns(schema);
   return (
     [
       columns,
@@ -100,9 +112,11 @@ export function template(items, bundleIdentity) {
               ? bundleIdentity
               : k === "status"
                 ? "NOT_PERFORMED"
-                : /^[AB]_/.test(k)
-                  ? "NOT_CHECKED"
-                  : "",
+                : k === "referenceUse"
+                  ? "NOT_DECLARED"
+                  : /^[AB]_/.test(k)
+                    ? "NOT_CHECKED"
+                    : "",
         ),
       ),
     ]
@@ -111,6 +125,8 @@ export function template(items, bundleIdentity) {
   );
 }
 export function evaluateCsv(text, bundle, items) {
+  const columns = schemaColumns(bundle.annotationSchema);
+  const withReference = bundle.annotationSchema === referenceSchema;
   const warnings = [],
     fileErrors = [],
     rowErrors = [],
@@ -160,9 +176,13 @@ export function evaluateCsv(text, bundle, items) {
         for (const c of criteria)
           if (!issueValues.includes(r[side + "_" + c]))
             errors.push("INVALID_ISSUE_ENUM:" + side + "_" + c);
-      if (r.overall && !["A", "B", "EQUAL", "UNJUDGEABLE"].includes(r.overall))
+      if (r.overall && !overallValues.includes(r.overall))
         errors.push("INVALID_COMPARISON_ENUM");
+      if (withReference && !referenceUses.includes(r.referenceUse))
+        errors.push("INVALID_REFERENCE_USE");
       if (["REVIEWED", "UNJUDGEABLE"].includes(r.status)) {
+        if (withReference && r.referenceUse === "NOT_DECLARED")
+          errors.push("REFERENCE_USE_REQUIRED");
         if (r.actuallyListened !== "TRUE")
           errors.push("ACTUAL_LISTENING_NOT_DECLARED");
         if (
@@ -218,7 +238,11 @@ export function evaluateCsv(text, bundle, items) {
         { denominator: 0, A_issues: 0, B_issues: 0, unjudgeableItems: 0 },
       ]),
     );
-    const intervals = [];
+    const intervals = [],
+      judgeable = [];
+    const referenceUseCounts = Object.fromEntries(
+      referenceUses.map((v) => [v, 0]),
+    );
     for (const i of planned) {
       const r = valid.get(i.reviewId);
       if (!r) {
@@ -233,6 +257,7 @@ export function evaluateCsv(text, bundle, items) {
           UNJUDGEABLE: "unjudgeable",
         }[r.status]
       ]++;
+      if (withReference) referenceUseCounts[r.referenceUse]++;
       if (["REVIEWED", "UNJUDGEABLE"].includes(r.status)) {
         comparison.denominator++;
         comparison[r.overall]++;
@@ -251,6 +276,17 @@ export function evaluateCsv(text, bundle, items) {
           i.bounds.evaluationStartSample,
           i.bounds.evaluationEndSample,
         ]);
+        if (
+          r.status === "REVIEWED" &&
+          r.overall !== "UNJUDGEABLE" &&
+          criteria.every((c) =>
+            ["A", "B"].every((s) => r[s + "_" + c] !== "UNJUDGEABLE"),
+          )
+        )
+          judgeable.push([
+            i.bounds.evaluationStartSample,
+            i.bounds.evaluationEndSample,
+          ]);
       }
     }
     groups[kind] = {
@@ -260,6 +296,9 @@ export function evaluateCsv(text, bundle, items) {
       reviewedEvaluationSampleUnion: unionSamples(intervals),
       reviewedEvaluationSeconds:
         unionSamples(intervals) / bundle.pcm.sampleRate,
+      declaredListenedEvaluationSampleUnion: unionSamples(intervals),
+      contentJudgeableEvaluationSampleUnion: unionSamples(judgeable),
+      referenceUseCounts: withReference ? referenceUseCounts : null,
     };
   }
   const reviewed = items.filter((i) =>
@@ -270,9 +309,20 @@ export function evaluateCsv(text, bundle, items) {
     !rowErrors.length &&
     !foreignRows.length &&
     !fileErrors.length;
+  const inputValid =
+    !rowErrors.length && !foreignRows.length && !fileErrors.length;
+  const sampleUnion = (predicate) =>
+    unionSamples(
+      items
+        .filter((i) => predicate(valid.get(i.reviewId)))
+        .map((i) => [
+          i.bounds.evaluationStartSample,
+          i.bounds.evaluationEndSample,
+        ]),
+    );
   return {
     validation: {
-      valid: !rowErrors.length && !foreignRows.length && !fileErrors.length,
+      valid: inputValid,
       fileErrors,
       rowErrors,
       foreignRows,
@@ -287,6 +337,19 @@ export function evaluateCsv(text, bundle, items) {
         : "AWAITING_HUMAN_REVIEW",
       humanAnnotationFilesRead: 1,
       humanDeclaredReviewedItems: reviewed.length,
+      exitCodeContract: exitContract,
+      referenceUseIsSelfDeclarationNotBlindProof: withReference,
+      declaredListenedEvaluationSampleUnion: sampleUnion(
+        (r) => r && ["REVIEWED", "UNJUDGEABLE"].includes(r.status),
+      ),
+      contentJudgeableEvaluationSampleUnion: sampleUnion(
+        (r) =>
+          r?.status === "REVIEWED" &&
+          r.overall !== "UNJUDGEABLE" &&
+          criteria.every((c) =>
+            ["A", "B"].every((s) => r[s + "_" + c] !== "UNJUDGEABLE"),
+          ),
+      ),
       groups,
       reviewedEvaluationSampleUnion: unionSamples(
         reviewed.map((i) => [
@@ -299,6 +362,6 @@ export function evaluateCsv(text, bundle, items) {
       automaticWinner: null,
       releaseAuthorityGranted: false,
     },
-    exitCode: complete ? 0 : 2,
+    exitCode: !inputValid ? 1 : complete ? 0 : 2,
   };
 }
