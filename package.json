@@ -13,6 +13,7 @@
     "npm": ">=11"
   },
   "scripts": {
+    "experiment:subtitle-tool:bounded-local-asr-recovery": "node scripts/subtitle-tool-bounded-local-asr-recovery.mjs",
     "experiment:subtitle-tool:bounded-recovery": "node scripts/subtitle-tool-bounded-recovery.mjs",
     "experiment:subtitle-tool:bounded-content-review": "node scripts/subtitle-tool-bounded-content-review.mjs",
     "experiment:subtitle-tool:bounded-asr-ab": "node scripts/subtitle-tool-bounded-asr-ab.mjs",
