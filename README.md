@@ -1,5 +1,7 @@
 # Multilingual Video Subtitler
 
+[![Offline CI](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/actions/workflows/offline-ci.yml/badge.svg?branch=main)](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/actions/workflows/offline-ci.yml)
+
 English | [日本語](README.ja.md)
 
 A local-first subtitle toolkit and Codex Skill for Chinese, Japanese, and English media. Generate editable machine drafts with local Whisper, export SRT/ASS/VTT, and retain evidence for timing checks and human review.

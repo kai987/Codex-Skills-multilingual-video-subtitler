@@ -1,5 +1,7 @@
 # Multilingual Video Subtitler
 
+[![Offline CI の状態](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/actions/workflows/offline-ci.yml/badge.svg?branch=main)](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/actions/workflows/offline-ci.yml)
+
 [English](README.md) | 日本語
 
 中国語・日本語・英語の動画や音声を扱う、ローカル処理を基本とした字幕ツールキット兼 Codex Skill です。ローカルの Whisper で編集可能な機械字幕の下書きを生成し、SRT／ASS／VTT へ出力します。タイミング検査や人手確認に使う認識結果・検証データも保存します。
