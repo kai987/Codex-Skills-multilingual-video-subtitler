@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-local-association-repair-proposals.schema.json",
+  "title": "machine-local-association-repair-proposals",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-local-association-repair-proposals"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe"] },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "sourceEventId": { "type": "string", "minLength": 1 },
+          "targetEventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "evidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reason": { "type": "string", "minLength": 1 },
+          "risk": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+          "applyEligibility": { "type": "string", "const": "observe-only" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "sourceEventId",
+          "targetEventId",
+          "candidateId",
+          "evidenceIds",
+          "reason",
+          "risk",
+          "applyEligibility",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "inspectedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "proposalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "appliedCount": { "type": "number", "const": 0 }
+      },
+      "required": ["inspectedEventCount", "proposalCount", "appliedCount"],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "proposals",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

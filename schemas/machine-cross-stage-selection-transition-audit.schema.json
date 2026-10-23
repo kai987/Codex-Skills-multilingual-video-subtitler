@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-cross-stage-selection-transition-audit.schema.json",
+  "title": "machine-cross-stage-selection-transition-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-cross-stage-selection-transition-audit"
+    },
+    "stages": {
+      "minItems": 4,
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stageId": {
+            "type": "string",
+            "enum": [
+              "S0_C601141_ACTIVE",
+              "S1_C601142_PHASE_A",
+              "S2_COMBINED_INVENTORY",
+              "S3_OLD_FINAL"
+            ]
+          },
+          "inputSelectionHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "activeTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomicNativeIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "atomicSourceIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "nativeIntervalUnion": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "speechCoreUnionSeconds": { "type": "number", "minimum": 0 },
+          "evidenceStrata": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MULTI_DETECTOR",
+                "PYANNOTE_EXCLUSIVE",
+                "SILERO_EXCLUSIVE",
+                "WEBRTC_EXCLUSIVE",
+                "LEGACY_FINGERPRINT_EXCLUSIVE",
+                "MULTI_VIEW_SAME_DETECTOR",
+                "EXISTING_VERIFIED",
+                "MASKED_SUBTHRESHOLD",
+                "AUDIT_ONLY"
+              ]
+            }
+          },
+          "detectorFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SILERO",
+                "PYANNOTE",
+                "WEBRTC",
+                "LEGACY_FINGERPRINT",
+                "EXISTING_VERIFIED",
+                "LOCALIZED_LEXICAL"
+              ]
+            }
+          },
+          "timelineBins": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "targetCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "carriedForwardTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "equivalentReplacementTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "droppedTargetIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "droppedNativeIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "newCoverageIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "stageId",
+          "inputSelectionHash",
+          "activeTargetIds",
+          "atomicNativeIntervals",
+          "atomicSourceIntervals",
+          "nativeIntervalUnion",
+          "speechCoreUnionSeconds",
+          "evidenceStrata",
+          "detectorFamilies",
+          "timelineBins",
+          "targetCount",
+          "carriedForwardTargetIds",
+          "equivalentReplacementTargetIds",
+          "droppedTargetIds",
+          "droppedNativeIntervals",
+          "newCoverageIntervals",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "phaseARegressedNativeIntervals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "startSample": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "endSample": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["startSample", "endSample"],
+        "additionalProperties": false
+      }
+    },
+    "phaseARegressedNativeSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "phaseARegressedTargetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "diagnosis": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "goldUsedForDetection": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "stages",
+    "phaseARegressedNativeIntervals",
+    "phaseARegressedNativeSamples",
+    "phaseARegressedTargetCount",
+    "diagnosis",
+    "goldUsedForDetection"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-final-ab-parity.schema.json",
+  "title": "c6-0-1-14-3-final-ab-parity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-final-ab-parity"
+    },
+    "finalAFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalBFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "comparedFiles": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "semanticCompared": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioCompared": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "protectedFilesCompared": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "byteParity": { "type": "boolean", "const": true },
+    "semanticParity": { "type": "boolean", "const": true },
+    "audioShaParity": { "type": "boolean", "const": true },
+    "canonicalByteParity": { "type": "boolean", "const": true },
+    "normalizedFreezeParity": { "type": "boolean", "const": true },
+    "mismatches": {
+      "minItems": 0,
+      "maxItems": 0,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "finalAFreezeHash",
+    "finalBFreezeHash",
+    "comparedFiles",
+    "semanticCompared",
+    "audioCompared",
+    "protectedFilesCompared",
+    "byteParity",
+    "semanticParity",
+    "audioShaParity",
+    "canonicalByteParity",
+    "normalizedFreezeParity",
+    "mismatches"
+  ],
+  "additionalProperties": false
+}

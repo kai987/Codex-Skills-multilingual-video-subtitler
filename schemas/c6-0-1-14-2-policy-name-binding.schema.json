@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-policy-name-binding.schema.json",
+  "title": "c6-0-1-14-2-policy-name-binding",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-2-policy-name-binding"
+    },
+    "requestedPolicyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-detector-exclusive-selection-masked-speech-ceiling-v1"
+    },
+    "frozenExecutionPolicyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "executionPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "aliasOnly": { "type": "boolean", "const": true },
+    "thresholdsChanged": { "type": "boolean", "const": false },
+    "cacheKeysChanged": { "type": "boolean", "const": false },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "requestedPolicyVersion",
+    "frozenExecutionPolicyVersion",
+    "executionPolicyHash",
+    "aliasOnly",
+    "thresholdsChanged",
+    "cacheKeysChanged",
+    "inferenceCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

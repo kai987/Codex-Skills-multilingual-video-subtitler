@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-3-validation.schema.json",
+  "title": "c6-0-1-3-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.3-candidate-association-canonical-assembly-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-3-validation" },
+    "branch": {
+      "type": "string",
+      "const": "codex/c6-0-1-3-candidate-association-canonical-assembly"
+    },
+    "repositoryCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["id", "passed", "evidence"],
+        "additionalProperties": false
+      }
+    },
+    "finalABSemanticParity": { "type": "boolean" },
+    "datasetHardcodingFindingCount": { "type": "number", "const": 0 },
+    "outcome": {
+      "type": "string",
+      "enum": ["GO", "HOLD_FOR_MORE_ASSOCIATION_ASSEMBLY_RECOVERY"]
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "branch",
+    "repositoryCommit",
+    "sourceMediaSha256",
+    "runtimeGoldInputCount",
+    "checks",
+    "finalABSemanticParity",
+    "datasetHardcodingFindingCount",
+    "outcome",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/japanese-text-analysis.schema.json",
+  "title": "japanese-text-analysis",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "analyzer": {
+          "type": "string",
+          "enum": ["auto", "intl-segmenter", "external"]
+        },
+        "locale": { "type": "string", "const": "ja" },
+        "implementation": { "type": "string", "minLength": 1 }
+      },
+      "required": ["analyzer", "locale", "implementation"],
+      "additionalProperties": false
+    },
+    "cues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "sourceCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "analysis": {
+            "type": "object",
+            "properties": {
+              "normalizedText": { "type": "string" },
+              "lexicalCharacterCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "segments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": { "type": "string", "minLength": 1 },
+                    "start": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "end": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "wordLike": { "type": "boolean" }
+                  },
+                  "required": ["text", "start", "end", "wordLike"],
+                  "additionalProperties": false
+                }
+              },
+              "singleCharacter": { "type": "boolean" },
+              "standaloneInterjectionLikelihood": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "startsMidWord": { "type": "boolean" },
+              "endsMidWord": { "type": "boolean" },
+              "likelyIncompleteClause": { "type": "boolean" },
+              "sentenceEndingConfidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "evidence": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "normalizedText",
+              "lexicalCharacterCount",
+              "segments",
+              "singleCharacter",
+              "standaloneInterjectionLikelihood",
+              "startsMidWord",
+              "endsMidWord",
+              "likelyIncompleteClause",
+              "sentenceEndingConfidence",
+              "evidence"
+            ],
+            "additionalProperties": false
+          },
+          "previousBoundary": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "boundarySplitsWord": { "type": "boolean" },
+                  "concatenatedTextFormsStableTokenization": {
+                    "type": "boolean"
+                  },
+                  "likelyContinuation": { "type": "boolean" },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                },
+                "required": [
+                  "boundarySplitsWord",
+                  "concatenatedTextFormsStableTokenization",
+                  "likelyContinuation",
+                  "confidence",
+                  "evidence"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "nextBoundary": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "boundarySplitsWord": { "type": "boolean" },
+                  "concatenatedTextFormsStableTokenization": {
+                    "type": "boolean"
+                  },
+                  "likelyContinuation": { "type": "boolean" },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "evidence": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                },
+                "required": [
+                  "boundarySplitsWord",
+                  "concatenatedTextFormsStableTokenization",
+                  "likelyContinuation",
+                  "confidence",
+                  "evidence"
+                ],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "cueId",
+          "sourceCueIds",
+          "analysis",
+          "previousBoundary",
+          "nextBoundary"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "configuration",
+    "cues",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-evidence-utility-propagation-ledger.schema.json",
+  "title": "machine-evidence-utility-propagation-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-evidence-utility-propagation-ledger"
+    },
+    "atomUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "childUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "bundleUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "plannerCertificateHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "propagationId": { "type": "string", "minLength": 1 },
+          "evidenceObservationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomId": { "type": "string", "minLength": 1 },
+          "atomUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "childUnitId": { "type": "string", "minLength": 1 },
+          "childUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "bundleIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "bundleUtilityHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "independentFamilyDedup": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "durationDedup": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tierPropagation": { "type": "boolean" },
+          "textUtilityPropagation": { "type": "boolean" },
+          "reviewSafetyPropagation": { "type": "boolean" },
+          "zeroedAtStage": {
+            "type": "string",
+            "enum": ["NONE", "ATOM", "CHILD", "BUNDLE", "PLANNER"]
+          },
+          "zeroReason": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "finalPlannerConsumption": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "propagationId",
+          "evidenceObservationIds",
+          "atomId",
+          "atomUtilityHash",
+          "childUnitId",
+          "childUtilityHash",
+          "bundleIds",
+          "bundleUtilityHashes",
+          "independentFamilyDedup",
+          "durationDedup",
+          "tierPropagation",
+          "textUtilityPropagation",
+          "reviewSafetyPropagation",
+          "zeroedAtStage",
+          "zeroReason",
+          "finalPlannerConsumption",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "positiveEvidenceRows": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "atomUtilityProduced": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "childUtilityProduced": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bundleUtilityProduced": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "plannerUtilityConsumed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "explicitGeometryDropCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "silentUtilityLossCount": { "type": "number", "const": 0 },
+    "droppedBetweenEvidenceAndAtom": { "type": "number", "const": 0 },
+    "droppedBetweenAtomAndChild": { "type": "number", "const": 0 },
+    "droppedBetweenChildAndBundle": { "type": "number", "const": 0 },
+    "droppedBetweenBundleAndPlanner": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "atomUtilityHash",
+    "childUtilityHash",
+    "bundleUtilityHash",
+    "plannerCertificateHash",
+    "entries",
+    "positiveEvidenceRows",
+    "atomUtilityProduced",
+    "childUtilityProduced",
+    "bundleUtilityProduced",
+    "plannerUtilityConsumed",
+    "explicitGeometryDropCount",
+    "silentUtilityLossCount",
+    "droppedBetweenEvidenceAndAtom",
+    "droppedBetweenAtomAndChild",
+    "droppedBetweenChildAndBundle",
+    "droppedBetweenBundleAndPlanner"
+  ],
+  "additionalProperties": false
+}

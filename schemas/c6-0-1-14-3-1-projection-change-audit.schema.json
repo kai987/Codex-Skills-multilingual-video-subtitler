@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-1-projection-change-audit.schema.json",
+  "title": "c6-0-1-14-3-1-projection-change-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-1-projection-change-audit"
+    },
+    "beforeProjectionSetHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "afterProjectionSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "allowedChangeClasses": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "string", "const": "PROJECTED_AUDIO_ROW_SEMANTIC_HASH" },
+        { "type": "string", "const": "PROJECTION_VARIANT_SEMANTIC_HASH" },
+        { "type": "string", "const": "PROJECTION_SET_SEMANTIC_HASH" },
+        { "type": "string", "const": "UPSTREAM_FREEZE_BINDING_HASH" }
+      ]
+    },
+    "changedProjectedAudioHashCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "changedVariantHashCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "changedOuterHashCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackRowsByteEquivalent": { "type": "boolean" },
+    "plannerEquivalent": { "type": "boolean" },
+    "targetEquivalent": { "type": "boolean" },
+    "regionEquivalent": { "type": "boolean" },
+    "audioBytesEquivalent": { "type": "boolean" },
+    "playbackIntervalsEquivalent": { "type": "boolean" },
+    "rowCountsEquivalent": { "type": "boolean" },
+    "canonicalTextEquivalent": { "type": "boolean" },
+    "canonicalTimingEquivalent": { "type": "boolean" },
+    "presentationEquivalent": { "type": "boolean" },
+    "forbiddenChanges": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "passed": { "type": "boolean" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "beforeProjectionSetHash",
+    "afterProjectionSetHash",
+    "allowedChangeClasses",
+    "changedProjectedAudioHashCount",
+    "changedVariantHashCount",
+    "changedOuterHashCount",
+    "playbackRowsByteEquivalent",
+    "plannerEquivalent",
+    "targetEquivalent",
+    "regionEquivalent",
+    "audioBytesEquivalent",
+    "playbackIntervalsEquivalent",
+    "rowCountsEquivalent",
+    "canonicalTextEquivalent",
+    "canonicalTimingEquivalent",
+    "presentationEquivalent",
+    "forbiddenChanges",
+    "passed"
+  ],
+  "additionalProperties": false
+}

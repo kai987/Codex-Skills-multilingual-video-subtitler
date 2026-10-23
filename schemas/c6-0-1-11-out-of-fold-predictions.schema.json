@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-11-out-of-fold-predictions.schema.json",
+  "title": "c6-0-1-11-out-of-fold-predictions",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.11-paired-evidence-independent-discriminator-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-11-out-of-fold-predictions"
+    },
+    "modelId": {
+      "type": "string",
+      "enum": ["M0", "M1", "M2", "M3", "M4", "M5"]
+    },
+    "cvSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "predictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "fold": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "threshold": { "type": "number" },
+          "decision": {
+            "type": "string",
+            "enum": ["SELECT_REAZON", "ABSTAIN"]
+          },
+          "label": {
+            "type": "string",
+            "enum": [
+              "REAZON_BETTER",
+              "WHISPER_BETTER",
+              "EQUIVALENT",
+              "UNEVALUABLE"
+            ]
+          },
+          "localGain": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "fold",
+          "score",
+          "threshold",
+          "decision",
+          "label",
+          "localGain",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "inSamplePredictionCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "modelId",
+    "cvSemanticHash",
+    "predictions",
+    "inSamplePredictionCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

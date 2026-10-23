@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-decision.schema.json",
+  "title": "c6-0-1-12-review-decision",
+  "type": "object",
+  "properties": {
+    "decisionType": {
+      "type": "string",
+      "enum": [
+        "KEEP_CURRENT",
+        "USE_REAZON",
+        "USE_WHISPER_ALTERNATE",
+        "MANUAL_EDIT",
+        "TIMING_EDIT",
+        "ADD_NEW_CUE",
+        "MARK_FALSE_POSITIVE",
+        "UNRESOLVED",
+        "WAIVE_REVIEW"
+      ]
+    },
+    "selectedCandidateId": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "manualText": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "timing": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "newCue": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "cueId": { "type": "string", "minLength": 1 },
+            "text": { "type": "string", "minLength": 1 },
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "required": ["cueId", "text", "start", "end"],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "reviewerNote": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "candidateSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evidenceSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    }
+  },
+  "required": [
+    "decisionType",
+    "selectedCandidateId",
+    "manualText",
+    "timing",
+    "newCue",
+    "reviewerNote",
+    "candidateSetHash",
+    "evidenceSnapshotHash",
+    "decidedAt"
+  ],
+  "additionalProperties": false
+}

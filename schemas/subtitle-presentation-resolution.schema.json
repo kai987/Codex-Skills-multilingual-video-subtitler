@@ -1,0 +1,738 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-presentation-resolution.schema.json",
+  "title": "subtitle-presentation-resolution",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-presentation-resolution"
+    },
+    "resolutionVersion": {
+      "type": "string",
+      "enum": [
+        "C5.14",
+        "C5.15",
+        "C5.15.1",
+        "C5.16",
+        "C5.16.1",
+        "C5.17",
+        "C5.18",
+        "C5.18.1"
+      ]
+    },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "presentationResolution": {
+          "type": "string",
+          "enum": ["off", "observe", "enforce"]
+        },
+        "overlapResolution": {
+          "type": "string",
+          "enum": ["conservative", "balanced"]
+        },
+        "maximumLines": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maximumCharactersPerLine": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maximumRapidTurnOverlapSeconds": { "type": "number", "minimum": 0 },
+        "maximumRapidTurnOverlapRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximumTimingAdjustmentSeconds": { "type": "number", "minimum": 0 },
+        "minimumPostRepairCueDurationSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "presentationResolution",
+        "overlapResolution",
+        "maximumLines",
+        "maximumCharactersPerLine",
+        "maximumRapidTurnOverlapSeconds",
+        "maximumRapidTurnOverlapRatio",
+        "maximumTimingAdjustmentSeconds",
+        "minimumPostRepairCueDurationSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "layoutDecisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "decisionId": { "type": "string", "minLength": 1 },
+          "cueId": { "type": "string", "minLength": 1 },
+          "canonicalText": { "type": "string", "minLength": 1 },
+          "displayText": { "type": "string", "minLength": 1 },
+          "canonicalLexicalHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "displayLexicalHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "lineBreakIndices": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "lineCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "charactersPerLine": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "maximumLines": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "maximumCharactersPerLine": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "preserved-existing-layout",
+              "semantic-balanced-line-break",
+              "natural-punctuation-line-break",
+              "particle-boundary-line-break",
+              "chant-unit-line-break",
+              "music-decoration-aware-line-break",
+              "unresolved"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "changed": { "type": "boolean" },
+          "resolved": { "type": "boolean" },
+          "blocking": { "type": "boolean" }
+        },
+        "required": [
+          "decisionId",
+          "cueId",
+          "canonicalText",
+          "displayText",
+          "canonicalLexicalHash",
+          "displayLexicalHash",
+          "lineBreakIndices",
+          "lineCount",
+          "charactersPerLine",
+          "maximumLines",
+          "maximumCharactersPerLine",
+          "method",
+          "reasons",
+          "changed",
+          "resolved",
+          "blocking"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "repetitionDecisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "decisionId": { "type": "string", "minLength": 1 },
+          "cueIds": {
+            "minItems": 2,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "confirmed-intentional-repetition",
+              "likely-intentional-repetition",
+              "call-and-response",
+              "crowd-chant",
+              "separate-utterance-repetition",
+              "duplicate-cue",
+              "same-utterance-alternative",
+              "unresolved"
+            ]
+          },
+          "normalizedText": { "type": "string", "minLength": 1 },
+          "intervals": {
+            "minItems": 2,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "gapSeconds": { "type": "number" },
+          "temporalOverlapSeconds": { "type": "number", "minimum": 0 },
+          "temporalOverlapRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "sameBounds": { "type": "boolean" },
+          "sameSourceRequest": { "type": "boolean" },
+          "independentIntervalEvidence": { "type": "boolean" },
+          "humanReviewedAuthority": { "type": "boolean" },
+          "sceneEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "tokenEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speechIntervalEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "blocking": { "type": "boolean" },
+          "recommendedAction": {
+            "type": "string",
+            "enum": [
+              "preserve-both",
+              "delete-duplicate",
+              "select-alternative",
+              "review"
+            ]
+          }
+        },
+        "required": [
+          "decisionId",
+          "cueIds",
+          "relationship",
+          "normalizedText",
+          "intervals",
+          "gapSeconds",
+          "temporalOverlapSeconds",
+          "temporalOverlapRatio",
+          "sameBounds",
+          "sameSourceRequest",
+          "independentIntervalEvidence",
+          "humanReviewedAuthority",
+          "sceneEvidence",
+          "tokenEvidence",
+          "speechIntervalEvidence",
+          "reasons",
+          "blocking",
+          "recommendedAction"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "overlapDecisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "decisionId": { "type": "string", "minLength": 1 },
+          "cueIds": {
+            "minItems": 2,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "exact-duplicate",
+              "near-duplicate",
+              "same-utterance-alternative",
+              "complementary-fragments",
+              "rapid-turn-taking",
+              "true-simultaneous-speech",
+              "crowd-call-plus-dialogue",
+              "nested-background-speech",
+              "different-dialogue-boundary-error",
+              "legal-authoritative-overlap",
+              "unresolved"
+            ]
+          },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "overlapPairs": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "leftCueId": { "type": "string", "minLength": 1 },
+                "rightCueId": { "type": "string", "minLength": 1 },
+                "overlapSeconds": { "type": "number", "exclusiveMinimum": 0 },
+                "overlapRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "textSimilarity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "textContainment": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "leftCueId",
+                "rightCueId",
+                "overlapSeconds",
+                "overlapRatio",
+                "textSimilarity",
+                "textContainment"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "overlapSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "overlapRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "textSimilarity": { "type": "number", "minimum": 0, "maximum": 1 },
+          "textContainment": { "type": "number", "minimum": 0, "maximum": 1 },
+          "speakerEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "styleEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "layerEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "tokenBoundaryEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speechBoundaryEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sceneEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "humanReviewedAuthority": { "type": "boolean" },
+          "recommendedAction": {
+            "type": "string",
+            "enum": [
+              "preserve-overlap",
+              "delete-duplicate",
+              "select-alternative",
+              "merge-fragments",
+              "trim-boundary",
+              "review"
+            ]
+          },
+          "safeAutomaticAction": {
+            "type": "string",
+            "enum": [
+              "none",
+              "presentation-only",
+              "timing-only",
+              "delete-duplicate",
+              "select-alternative",
+              "merge-fragments"
+            ]
+          },
+          "timingMutations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cueId": { "type": "string", "minLength": 1 },
+                "before": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "after": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "boundarySource": {
+                  "type": "string",
+                  "enum": [
+                    "token",
+                    "speech",
+                    "vad",
+                    "source",
+                    "canonical-forced-alignment",
+                    "local-speaker-evidence",
+                    "local-ctc-boundary"
+                  ]
+                }
+              },
+              "required": ["cueId", "before", "after", "boundarySource"],
+              "additionalProperties": false
+            }
+          },
+          "assEventOverrides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cueId": { "type": "string", "minLength": 1 },
+                "layer": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "alignment": {
+                  "anyOf": [
+                    { "type": "integer", "minimum": 1, "maximum": 9 },
+                    { "type": "null" }
+                  ]
+                },
+                "marginLeft": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "marginRight": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "marginVertical": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "position": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" }
+                      },
+                      "required": ["x", "y"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "cueId",
+                "layer",
+                "alignment",
+                "marginLeft",
+                "marginRight",
+                "marginVertical",
+                "position"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "vttCueSettings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cueId": { "type": "string", "minLength": 1 },
+                "settings": { "type": "string", "minLength": 1 }
+              },
+              "required": ["cueId", "settings"],
+              "additionalProperties": false
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "blocking": { "type": "boolean" },
+          "resolutionSource": {
+            "default": "presentation-only",
+            "type": "string",
+            "enum": [
+              "presentation-only",
+              "targeted-acoustic",
+              "canonical-forced-alignment",
+              "local-speaker-evidence",
+              "local-ctc-boundary"
+            ]
+          },
+          "acousticEvidenceIds": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "classificationConfidence": {
+            "default": null,
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "counterfactualScores": {
+            "default": {},
+            "type": "object",
+            "propertyNames": { "type": "string", "minLength": 1 },
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "required": [
+          "decisionId",
+          "cueIds",
+          "relationship",
+          "interval",
+          "overlapPairs",
+          "overlapSeconds",
+          "overlapRatio",
+          "textSimilarity",
+          "textContainment",
+          "speakerEvidence",
+          "styleEvidence",
+          "layerEvidence",
+          "sourceEvidence",
+          "tokenBoundaryEvidence",
+          "speechBoundaryEvidence",
+          "sceneEvidence",
+          "humanReviewedAuthority",
+          "recommendedAction",
+          "safeAutomaticAction",
+          "timingMutations",
+          "assEventOverrides",
+          "vttCueSettings",
+          "reasons",
+          "blocking",
+          "resolutionSource",
+          "acousticEvidenceIds",
+          "classificationConfidence",
+          "counterfactualScores"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "canonicalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "presentationCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "layoutDecisionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "layoutChangedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "layoutResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "layoutBlockingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "repetitionDecisionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "repetitionResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "repetitionBlockingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapPairCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapComponentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapBlockingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTimingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "displayLexicalMismatchCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "presentationCreatedTemporalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "serializedSrtContainsOverlap": { "default": false, "type": "boolean" },
+        "legalSrtOverlapRenderingMayVary": {
+          "default": false,
+          "type": "boolean"
+        },
+        "unresolvedSrtOverlapPresent": { "default": false, "type": "boolean" },
+        "srtOverlapRenderingMayVary": { "default": false, "type": "boolean" }
+      },
+      "required": [
+        "canonicalCueCount",
+        "presentationCueCount",
+        "layoutDecisionCount",
+        "layoutChangedCount",
+        "layoutResolvedCount",
+        "layoutBlockingCount",
+        "repetitionDecisionCount",
+        "repetitionResolvedCount",
+        "repetitionBlockingCount",
+        "overlapPairCount",
+        "overlapComponentCount",
+        "overlapResolvedCount",
+        "overlapBlockingCount",
+        "timingMutationCount",
+        "canonicalTextMutationCount",
+        "canonicalTimingMutationCount",
+        "displayLexicalMismatchCount",
+        "presentationCreatedTemporalCueCount",
+        "reviewGroupCount",
+        "serializedSrtContainsOverlap",
+        "legalSrtOverlapRenderingMayVary",
+        "unresolvedSrtOverlapPresent",
+        "srtOverlapRenderingMayVary"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "resolutionVersion",
+    "generatedAt",
+    "baseCueHash",
+    "canonicalCueHash",
+    "presentationCueHash",
+    "configuration",
+    "layoutDecisions",
+    "repetitionDecisions",
+    "overlapDecisions",
+    "summary"
+  ],
+  "additionalProperties": false
+}

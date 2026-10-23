@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-blank-review-session.schema.json",
+  "title": "c6-0-1-13-blank-review-session",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "status": { "type": "string", "const": "NOT_STARTED" },
+    "reviewPackageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decisionCount": { "type": "number", "const": 0 },
+    "eventCount": { "type": "number", "const": 0 },
+    "realHumanSessionExecuted": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "status",
+    "reviewPackageHash",
+    "machineDraftHash",
+    "decisionCount",
+    "eventCount",
+    "realHumanSessionExecuted"
+  ],
+  "additionalProperties": false
+}

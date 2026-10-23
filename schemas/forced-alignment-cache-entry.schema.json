@@ -1,0 +1,683 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/forced-alignment-cache-entry.schema.json",
+  "title": "forced-alignment-cache-entry",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "forced-alignment-cache-entry"
+    },
+    "cacheVersion": { "type": "string", "enum": ["C5.17", "C5.17.1"] },
+    "requestType": { "type": "string", "const": "canonical-forced-alignment" },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "requestType": {
+          "type": "string",
+          "const": "canonical-forced-alignment"
+        },
+        "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "windowMediaInterval": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        },
+        "windowAudioInterval": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        },
+        "canonicalTextSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "alignmentTextSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "readingManifestSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "backend": {
+          "type": "string",
+          "enum": ["evidence-dp", "mfa-japanese", "hybrid"]
+        },
+        "runtimeIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "environmentExplicitSpecSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "acousticModelSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "dictionaryModelSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "g2pModelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "commandMode": {
+          "type": "string",
+          "enum": ["align_one", "align_one_legacy", "mock"]
+        },
+        "mfaConfigurationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "outputParserVersion": { "type": "string", "minLength": 1 },
+        "antiForcePolicyVersion": { "type": "string", "minLength": 1 },
+        "jointAssignmentPolicyVersion": { "type": "string", "minLength": 1 },
+        "textGridLexicalBoundaryPolicyVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wordUnitMappingPolicyVersion": { "type": "string", "minLength": 1 },
+        "pronunciationCoveragePolicyVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundaryAgreementPolicyVersion": { "type": "string", "minLength": 1 },
+        "g2pPreparationPolicyVersion": { "type": "string", "minLength": 1 },
+        "sudachiRuntimeIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "requestType",
+        "audioSha256",
+        "windowMediaInterval",
+        "windowAudioInterval",
+        "canonicalTextSha256",
+        "alignmentTextSha256",
+        "readingManifestSha256",
+        "backend",
+        "runtimeIdentityHash",
+        "environmentExplicitSpecSha256",
+        "acousticModelSha256",
+        "dictionaryModelSha256",
+        "g2pModelSha256",
+        "commandMode",
+        "mfaConfigurationHash",
+        "outputParserVersion",
+        "antiForcePolicyVersion",
+        "jointAssignmentPolicyVersion"
+      ],
+      "additionalProperties": false
+    },
+    "attempt": {
+      "type": "object",
+      "properties": {
+        "attemptId": { "type": "string", "minLength": 1 },
+        "requestType": {
+          "type": "string",
+          "const": "canonical-forced-alignment"
+        },
+        "componentId": { "type": "string", "minLength": 1 },
+        "cueId": { "type": "string", "minLength": 1 },
+        "windowType": { "type": "string", "enum": ["narrow", "expanded"] },
+        "windowLocalInterval": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "minimum": 0 },
+            "coordinateSystem": {
+              "type": "string",
+              "enum": [
+                "attempt-audio-local",
+                "component-audio-local",
+                "original-media-global"
+              ]
+            }
+          },
+          "required": ["start", "end", "coordinateSystem"],
+          "additionalProperties": false
+        },
+        "windowMediaInterval": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "minimum": 0 },
+            "coordinateSystem": {
+              "type": "string",
+              "enum": [
+                "attempt-audio-local",
+                "component-audio-local",
+                "original-media-global"
+              ]
+            }
+          },
+          "required": ["start", "end", "coordinateSystem"],
+          "additionalProperties": false
+        },
+        "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "audioDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "canonicalTextSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "alignmentTextSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "readingManifestSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "runtimeIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "acousticModelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "dictionaryModelHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "g2pModelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "commandMode": {
+          "type": "string",
+          "enum": ["align_one", "align_one_legacy", "mock"]
+        },
+        "outputFormat": {
+          "type": "string",
+          "enum": ["json", "long_textgrid", "mock-json"]
+        },
+        "parserVersion": { "type": "string", "minLength": 1 },
+        "cacheHit": { "type": "boolean" },
+        "exitCode": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "wallClockSeconds": { "type": "number", "minimum": 0 },
+        "wordAlignments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "alignmentId": { "type": "string", "minLength": 1 },
+              "label": { "type": "string" },
+              "expectedUnitIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "rawInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "minimum": 0 },
+                  "coordinateSystem": {
+                    "type": "string",
+                    "enum": [
+                      "attempt-audio-local",
+                      "component-audio-local",
+                      "original-media-global"
+                    ]
+                  }
+                },
+                "required": ["start", "end", "coordinateSystem"],
+                "additionalProperties": false
+              },
+              "mappedInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "minimum": 0 },
+                  "coordinateSystem": {
+                    "type": "string",
+                    "enum": [
+                      "attempt-audio-local",
+                      "component-audio-local",
+                      "original-media-global"
+                    ]
+                  }
+                },
+                "required": ["start", "end", "coordinateSystem"],
+                "additionalProperties": false
+              },
+              "oov": { "type": "boolean" },
+              "mappingIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "alignmentId",
+              "label",
+              "expectedUnitIds",
+              "rawInterval",
+              "mappedInterval",
+              "oov"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "phoneAlignments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "alignmentId": { "type": "string", "minLength": 1 },
+              "label": { "type": "string" },
+              "wordAlignmentId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "rawInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "minimum": 0 },
+                  "coordinateSystem": {
+                    "type": "string",
+                    "enum": [
+                      "attempt-audio-local",
+                      "component-audio-local",
+                      "original-media-global"
+                    ]
+                  }
+                },
+                "required": ["start", "end", "coordinateSystem"],
+                "additionalProperties": false
+              },
+              "mappedInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "minimum": 0 },
+                  "coordinateSystem": {
+                    "type": "string",
+                    "enum": [
+                      "attempt-audio-local",
+                      "component-audio-local",
+                      "original-media-global"
+                    ]
+                  }
+                },
+                "required": ["start", "end", "coordinateSystem"],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "alignmentId",
+              "label",
+              "wordAlignmentId",
+              "rawInterval",
+              "mappedInterval"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "silenceIntervals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "minimum": 0 },
+              "coordinateSystem": {
+                "type": "string",
+                "enum": [
+                  "attempt-audio-local",
+                  "component-audio-local",
+                  "original-media-global"
+                ]
+              }
+            },
+            "required": ["start", "end", "coordinateSystem"],
+            "additionalProperties": false
+          }
+        },
+        "utteranceInterval": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "coordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "attempt-audio-local",
+                    "component-audio-local",
+                    "original-media-global"
+                  ]
+                }
+              },
+              "required": ["start", "end", "coordinateSystem"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "fileInterval": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "minimum": 0 },
+            "coordinateSystem": {
+              "type": "string",
+              "enum": [
+                "attempt-audio-local",
+                "component-audio-local",
+                "original-media-global"
+              ]
+            }
+          },
+          "required": ["start", "end", "coordinateSystem"],
+          "additionalProperties": false
+        },
+        "lexicalUtteranceInterval": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "coordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "attempt-audio-local",
+                    "component-audio-local",
+                    "original-media-global"
+                  ]
+                }
+              },
+              "required": ["start", "end", "coordinateSystem"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "phoneUtteranceInterval": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "coordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "attempt-audio-local",
+                    "component-audio-local",
+                    "original-media-global"
+                  ]
+                }
+              },
+              "required": ["start", "end", "coordinateSystem"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "selectedUtteranceInterval": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "coordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "attempt-audio-local",
+                    "component-audio-local",
+                    "original-media-global"
+                  ]
+                }
+              },
+              "required": ["start", "end", "coordinateSystem"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "selectedBoundarySource": {
+          "type": "string",
+          "enum": ["lexical-word-tier", "phone-tier-fallback", "none"]
+        },
+        "wordUnitMappings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "mappingId": { "type": "string", "minLength": 1 },
+              "canonicalUnitIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "mfaWordIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "mappingType": {
+                "type": "string",
+                "enum": [
+                  "MATCH_1_TO_1",
+                  "MATCH_1_TO_MANY",
+                  "MATCH_MANY_TO_1",
+                  "SKIP_CANONICAL_UNIT",
+                  "SKIP_MFA_WORD",
+                  "UNRESOLVED_MAPPING"
+                ]
+              },
+              "surfaceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+              "readingScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "phoneScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "combinedScore": { "type": "number", "minimum": 0, "maximum": 1 },
+              "ambiguityMargin": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "mappingConfidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "blockers": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "mappingId",
+              "canonicalUnitIds",
+              "mfaWordIds",
+              "mappingType",
+              "surfaceScore",
+              "readingScore",
+              "phoneScore",
+              "combinedScore",
+              "ambiguityMargin",
+              "mappingConfidence",
+              "blockers"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "alignedWordCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expectedWordCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "alignedPhoneCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oovCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wordCoverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "readingCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "phoneCoverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "canonicalUnitCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "alignedWordCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "pronunciationUnitCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "expectedPhoneCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "wordWithAnyPhoneRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "alignedPhonePlausibilityRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "expectedPhoneCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "alignedExpectedPhoneCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "boundaryStart": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        },
+        "boundaryEnd": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        },
+        "startPinnedToWindowEdge": { "type": "boolean" },
+        "endPinnedToWindowEdge": { "type": "boolean" },
+        "alignmentSucceeded": { "type": "boolean" },
+        "failure": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "required": [
+        "attemptId",
+        "requestType",
+        "componentId",
+        "cueId",
+        "windowType",
+        "windowLocalInterval",
+        "windowMediaInterval",
+        "audioSha256",
+        "audioDurationSeconds",
+        "canonicalTextSha256",
+        "alignmentTextSha256",
+        "readingManifestSha256",
+        "runtimeIdentityHash",
+        "acousticModelHash",
+        "dictionaryModelHash",
+        "g2pModelHash",
+        "commandMode",
+        "outputFormat",
+        "parserVersion",
+        "cacheHit",
+        "exitCode",
+        "wallClockSeconds",
+        "wordAlignments",
+        "phoneAlignments",
+        "silenceIntervals",
+        "utteranceInterval",
+        "alignedWordCount",
+        "expectedWordCount",
+        "alignedPhoneCount",
+        "oovCount",
+        "wordCoverageRatio",
+        "readingCoverageRatio",
+        "phoneCoverageRatio",
+        "boundaryStart",
+        "boundaryEnd",
+        "startPinnedToWindowEdge",
+        "endPinnedToWindowEdge",
+        "alignmentSucceeded",
+        "failure",
+        "warnings"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "cacheVersion",
+    "requestType",
+    "createdAt",
+    "cacheKey",
+    "identity",
+    "attempt"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-detector-request.schema.json",
+  "title": "c6-0-1-14-2-detector-request",
+  "type": "object",
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "family": { "type": "string", "enum": ["SILERO", "PYANNOTE", "WEBRTC"] },
+    "audioPath": { "type": "string", "minLength": 1 },
+    "model": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "library": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sampleRate": { "type": "number", "const": 16000 },
+            "channels": { "type": "number", "const": 1 },
+            "bitDepth": { "type": "number", "const": 16 },
+            "frameMs": { "type": "number", "const": 20 },
+            "aggressiveness": { "type": "number", "const": 0 },
+            "mergeGapMs": { "type": "number", "const": 160 },
+            "minimumSpeechMs": { "type": "number", "const": 100 },
+            "paddingMs": { "type": "number", "const": 40 },
+            "maximumIntervalSeconds": { "type": "number", "const": 12 }
+          },
+          "required": [
+            "sampleRate",
+            "channels",
+            "bitDepth",
+            "frameMs",
+            "aggressiveness",
+            "mergeGapMs",
+            "minimumSpeechMs",
+            "paddingMs",
+            "maximumIntervalSeconds"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "profileId": { "type": "string", "minLength": 1 },
+            "threshold": { "type": "number", "const": 0.2 },
+            "minSpeechMs": { "type": "number", "const": 96 },
+            "minSilenceMs": { "type": "number", "const": 80 },
+            "maxSpeechSeconds": { "type": "number", "const": 12 },
+            "speechPadMs": { "type": "number", "const": 0 },
+            "samplesOverlap": { "type": "number", "const": 0 }
+          },
+          "required": [
+            "profileId",
+            "threshold",
+            "minSpeechMs",
+            "minSilenceMs",
+            "maxSpeechSeconds",
+            "speechPadMs",
+            "samplesOverlap"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "anonymousUnionOnly": { "type": "boolean", "const": true },
+            "posteriorCaptureBeforeHardPowersetConversion": {
+              "type": "boolean",
+              "const": true
+            },
+            "threshold": { "type": "number", "const": 0.5 }
+          },
+          "required": [
+            "anonymousUnionOnly",
+            "posteriorCaptureBeforeHardPowersetConversion",
+            "threshold"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "scoreDirectory": { "type": "string", "minLength": 1 },
+    "authorized": { "type": "boolean", "const": true },
+    "dispatchReserved": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "runId",
+    "family",
+    "audioPath",
+    "model",
+    "library",
+    "profile",
+    "scoreDirectory",
+    "authorized",
+    "dispatchReserved"
+  ],
+  "additionalProperties": false
+}

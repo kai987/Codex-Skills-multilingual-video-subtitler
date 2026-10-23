@@ -1,0 +1,687 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-1-shareable-summary.schema.json",
+  "title": "c6-0-1-14-1-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-1-shareable-summary"
+    },
+    "visibility": { "type": "string", "const": "AGGREGATE_ONLY" },
+    "version": { "type": "string", "const": "C6.0.1.14.1" },
+    "viewCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "uniquePcmViewCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "fingerprint": {
+      "type": "object",
+      "properties": {
+        "quarantinedEntryCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "retainedClipCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniqueSearchedClips": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "searchedClipSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 900
+        },
+        "recoveredEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "noBytesEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lexicalEligibleEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "quarantinedEntryCount",
+        "retainedClipCount",
+        "uniqueSearchedClips",
+        "searchedClipSeconds",
+        "recoveredEntries",
+        "ambiguousEntries",
+        "noBytesEntries",
+        "rejectedEntries",
+        "lexicalEligibleEntries"
+      ],
+      "additionalProperties": false
+    },
+    "speechFresh": {
+      "type": "object",
+      "properties": {
+        "plannedRuns": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "sileroRuns": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "pyannoteRuns": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fullMediaAsrCount": { "type": "number", "const": 0 },
+        "retryCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "plannedRuns",
+        "sileroRuns",
+        "pyannoteRuns",
+        "inferenceCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "fullMediaAsrCount",
+        "retryCount"
+      ],
+      "additionalProperties": false
+    },
+    "speechReplay": {
+      "type": "object",
+      "properties": {
+        "plannedRuns": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "sileroRuns": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "pyannoteRuns": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fullMediaAsrCount": { "type": "number", "const": 0 },
+        "retryCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "plannedRuns",
+        "sileroRuns",
+        "pyannoteRuns",
+        "inferenceCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "fullMediaAsrCount",
+        "retryCount"
+      ],
+      "additionalProperties": false
+    },
+    "asrFresh": {
+      "type": "object",
+      "properties": {
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "exactCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "contextCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resultPersistedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hiddenRetryCount": { "type": "number", "const": 0 },
+        "fullMediaAsrCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "inferenceCount",
+        "exactCount",
+        "contextCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "resultPersistedCount",
+        "failedCount",
+        "hiddenRetryCount",
+        "fullMediaAsrCount"
+      ],
+      "additionalProperties": false
+    },
+    "asrReplay": {
+      "type": "object",
+      "properties": {
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "exactCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "contextCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resultPersistedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hiddenRetryCount": { "type": "number", "const": 0 },
+        "fullMediaAsrCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "inferenceCount",
+        "exactCount",
+        "contextCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "resultPersistedCount",
+        "failedCount",
+        "hiddenRetryCount",
+        "fullMediaAsrCount"
+      ],
+      "additionalProperties": false
+    },
+    "startupFailureProviderStarts": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "nonSourceWarmupTransportCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "nonSourceWarmupEncoderDecoderCount": { "type": "number", "const": 0 },
+    "inventory": {
+      "type": "object",
+      "properties": {
+        "observationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "islandCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiDetectorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "nativeUnionSeconds": { "type": "number", "minimum": 0 },
+        "unresolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "parentEnvelopeAsSpeechCount": { "type": "number", "const": 0 },
+        "correlationInflationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "observationCount",
+        "islandCount",
+        "multiDetectorCount",
+        "nativeUnionSeconds",
+        "unresolvedCount",
+        "parentEnvelopeAsSpeechCount",
+        "correlationInflationCount"
+      ],
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "targetCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "strongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "possibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetUnionSeconds": { "type": "number", "minimum": 0, "maximum": 60 },
+        "overflowCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "auditOnlyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "catchAllTargetCount": { "type": "number", "const": 0 },
+        "requiredLevelPromotionCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "targetCount",
+        "strongCount",
+        "possibleCount",
+        "targetUnionSeconds",
+        "overflowCount",
+        "auditOnlyCount",
+        "catchAllTargetCount",
+        "requiredLevelPromotionCount"
+      ],
+      "additionalProperties": false
+    },
+    "lexical": {
+      "type": "object",
+      "properties": {
+        "targetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossModelCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "readingAgreementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "singleModelCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emptyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "disagreementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reliableLocalizedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "existingProbeTargetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "historicalFingerprintCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalInsertCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "targetCount",
+        "crossModelCount",
+        "readingAgreementCount",
+        "singleModelCount",
+        "emptyCount",
+        "disagreementCount",
+        "reliableLocalizedCount",
+        "existingProbeTargetCount",
+        "historicalFingerprintCandidateCount",
+        "canonicalInsertCount"
+      ],
+      "additionalProperties": false
+    },
+    "physical": {
+      "type": "object",
+      "properties": {
+        "targetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "regionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wavCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playableWavCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playbackSegmentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fullQueueSeconds": { "type": "number", "minimum": 0 },
+        "conservativeQueueSeconds": { "type": "number", "minimum": 0 },
+        "mandatorySeconds": { "type": "number", "minimum": 0 },
+        "allTargetsAudible": { "type": "boolean" }
+      },
+      "required": [
+        "targetCount",
+        "itemCount",
+        "regionCount",
+        "wavCount",
+        "playableWavCount",
+        "playbackSegmentCount",
+        "requiredItemCount",
+        "fullQueueSeconds",
+        "conservativeQueueSeconds",
+        "mandatorySeconds",
+        "allTargetsAudible"
+      ],
+      "additionalProperties": false
+    },
+    "missingAudibleRecall": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "covered": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recall": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["total", "covered", "recall"],
+      "additionalProperties": false
+    },
+    "missingFullRecall": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "covered": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recall": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["total", "covered", "recall"],
+      "additionalProperties": false
+    },
+    "hallucinationAudibleRecall": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "covered": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recall": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["total", "covered", "recall"],
+      "additionalProperties": false
+    },
+    "burden": {
+      "type": "object",
+      "properties": {
+        "baselineFullQueueSeconds": { "type": "number", "minimum": 0 },
+        "finalFullQueueSeconds": { "type": "number", "minimum": 0 },
+        "incrementalFullQueueSeconds": { "type": "number", "minimum": 0 },
+        "episodeRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "newTargetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "safetyTargetsNotOverlappingGoldMissing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "safetyTargetSecondsNotOverlappingGoldMissing": {
+          "type": "number",
+          "minimum": 0
+        },
+        "additionalRecoveredMissing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioSecondsPerRecoveredMissing": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        },
+        "nonOverlapMeansConfirmedFalsePositive": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "required": [
+        "baselineFullQueueSeconds",
+        "finalFullQueueSeconds",
+        "incrementalFullQueueSeconds",
+        "episodeRatio",
+        "newTargetCount",
+        "safetyTargetsNotOverlappingGoldMissing",
+        "safetyTargetSecondsNotOverlappingGoldMissing",
+        "additionalRecoveredMissing",
+        "audioSecondsPerRecoveredMissing",
+        "nonOverlapMeansConfirmedFalsePositive"
+      ],
+      "additionalProperties": false
+    },
+    "parity": {
+      "type": "object",
+      "properties": {
+        "speechFreshReplay": { "type": "boolean" },
+        "asrFreshReplay": { "type": "boolean" },
+        "finalMachineBytes": { "type": "boolean" },
+        "canonicalBytes": { "type": "boolean" },
+        "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalTimingHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "machineTextMutationCount": { "type": "number", "const": 0 },
+        "machineTimingMutationCount": { "type": "number", "const": 0 },
+        "machinePresentationMutationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "speechFreshReplay",
+        "asrFreshReplay",
+        "finalMachineBytes",
+        "canonicalBytes",
+        "canonicalTextHash",
+        "canonicalTimingHash",
+        "presentationHash",
+        "machineTextMutationCount",
+        "machineTimingMutationCount",
+        "machinePresentationMutationCount"
+      ],
+      "additionalProperties": false
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_ENGINEERING_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_LEGACY_PROVENANCE_RECOVERY",
+        "HOLD_FOR_MACHINE_SPEECH_DETECTION_MODEL_CEILING",
+        "HOLD_FOR_DIALOGUE_ENHANCEMENT_SOURCE_SEPARATION_INVESTIGATION",
+        "HOLD_FOR_SAFETY_RESERVE_SELECTION_REPAIR",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR"
+      ]
+    },
+    "engineeringAcceptancePassed": { "type": "boolean" },
+    "coverageGatePassed": { "type": "boolean" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "humanTrialStarted": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "version",
+    "viewCount",
+    "uniquePcmViewCount",
+    "fingerprint",
+    "speechFresh",
+    "speechReplay",
+    "asrFresh",
+    "asrReplay",
+    "startupFailureProviderStarts",
+    "nonSourceWarmupTransportCount",
+    "nonSourceWarmupEncoderDecoderCount",
+    "inventory",
+    "safety",
+    "lexical",
+    "physical",
+    "missingAudibleRecall",
+    "missingFullRecall",
+    "hallucinationAudibleRecall",
+    "burden",
+    "parity",
+    "route",
+    "engineeringAcceptancePassed",
+    "coverageGatePassed",
+    "runtimeGoldInputCount",
+    "rankerRetrained",
+    "humanTrialStarted",
+    "productionStatus",
+    "finalizationMethod",
+    "c602Status",
+    "machineOnlyReleaseAuthorized",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-global-token-timeline-v2.schema.json",
+  "title": "machine-global-token-timeline-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-vad-timebase-acoustic-text-variant-reasr-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-global-token-timeline-v2"
+    },
+    "requestTimelineSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tokenId": { "type": "string", "minLength": 1 },
+          "requestId": { "type": "string", "minLength": 1 },
+          "cueId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "text": { "type": "string" },
+          "lexical": { "type": "boolean" },
+          "probability": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "decoderLocalStartCentiseconds": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "decoderLocalEndCentiseconds": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "decoderLocalStartSample": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "decoderLocalEndSample": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "sourceGlobalStartSample": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "sourceGlobalEndSample": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "sourceSampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sourceGlobalInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "mappingStatus": {
+            "type": "string",
+            "enum": [
+              "TRUSTED",
+              "ASSOCIATION_PENDING",
+              "UNTRUSTED",
+              "AMBIGUOUS_TIME_BASE",
+              "UNMAPPED"
+            ]
+          },
+          "mappingReason": { "type": "string", "minLength": 1 },
+          "requestTimelineSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "parentTransformHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "cacheIdentity": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "trusted": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "tokenId",
+          "requestId",
+          "cueId",
+          "text",
+          "lexical",
+          "probability",
+          "decoderLocalStartCentiseconds",
+          "decoderLocalEndCentiseconds",
+          "decoderLocalStartSample",
+          "decoderLocalEndSample",
+          "sourceGlobalStartSample",
+          "sourceGlobalEndSample",
+          "sourceSampleRate",
+          "sourceGlobalInterval",
+          "mappingStatus",
+          "mappingReason",
+          "requestTimelineSemanticHash",
+          "parentTransformHashes",
+          "cacheIdentity",
+          "trusted",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "tokenObservationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lexicalTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trustedMappedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "associationPendingTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "untrustedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousTimeBaseTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmappedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "missingLocalTimeTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshRecoveredTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trustedCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingEligibleCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "monotonicityFailureCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "containmentFailureCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "staleLineageCount": { "type": "number", "const": 0 },
+        "guessedOffsetCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "tokenObservationCount",
+        "lexicalTokenCount",
+        "trustedMappedTokenCount",
+        "associationPendingTokenCount",
+        "untrustedTokenCount",
+        "ambiguousTimeBaseTokenCount",
+        "unmappedTokenCount",
+        "missingLocalTimeTokenCount",
+        "freshRecoveredTokenCount",
+        "trustedCueCount",
+        "timingEligibleCueCount",
+        "monotonicityFailureCount",
+        "containmentFailureCount",
+        "staleLineageCount",
+        "guessedOffsetCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "requestTimelineSemanticHash",
+    "sourceMediaSha256",
+    "tokens",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

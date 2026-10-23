@@ -8,9 +8,9 @@ A local-first subtitle toolkit and Codex Skill for Chinese, Japanese, and Englis
 
 ## Find the source code
 
-The default `main` branch contains this project overview, the Japanese README, and the license. **Runtime source is currently maintained on development branches, not `main`.**
+The default `main` branch now includes the current core runtime, Codex Skill, schemas, and tests alongside this overview and the Japanese README. Generated outputs, model weights, caches, and machine-specific experiment plans are excluded.
 
-For the documented standalone CLI, use [`codex/subtitle-tool-bounded-asr-local-recovery-integration`](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/tree/codex/subtitle-tool-bounded-asr-local-recovery-integration). The quick start below targets that branch. Other experimental branches have their own contracts and acceptance reports; they are not interchangeable releases.
+Use `main` for the standalone CLI and the [current usage guide](STANDALONE_SUBTITLE_TOOL_V1.md). Historical development branches retain their own experiments and acceptance reports; they are not interchangeable releases. The core integration preserves the latest local bounded-generation, content-recovery, and seam-refinement modules without including private run data.
 
 ## What it does
 
@@ -25,7 +25,7 @@ The standalone CLI does **not** automatically translate, download models, search
 ## Requirements
 
 - Node.js `>=24 <25`.
-- npm `>=11`; the source branch pins `npm@11.18.0`.
+- npm `11.x` for the standalone CLI; the repository pins `npm@11.18.0`.
 - FFmpeg and ffprobe.
 - A local `whisper-cli` executable and a compatible whisper.cpp GGML model.
 
@@ -33,11 +33,11 @@ Install the external tools and model separately. They are not bundled with this 
 
 ## Quick start
 
-Clone the **source branch** explicitly:
+Clone the `main` branch:
 
 ```bash
 git clone --single-branch \
-  --branch codex/subtitle-tool-bounded-asr-local-recovery-integration \
+  --branch main \
   https://github.com/kai987/Codex-Skills-multilingual-video-subtitler.git \
   multilingual-video-subtitler
 cd multilingual-video-subtitler
@@ -96,12 +96,14 @@ Partial export is not a complete subtitle delivery. Format/text-accounting check
 ## Documentation and development
 
 - [日本語 README](README.ja.md)
-- [Standalone installation, usage, and recovery guide](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/blob/codex/subtitle-tool-bounded-asr-local-recovery-integration/STANDALONE_SUBTITLE_TOOL_V1.md)
-- [Advanced workflows and validation commands](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/blob/codex/subtitle-tool-bounded-asr-local-recovery-integration/README.md)
-- [Codex Skill instructions](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/blob/codex/subtitle-tool-bounded-asr-local-recovery-integration/.agents/skills/multilingual-video-subtitler/SKILL.md)
+- [Standalone installation, usage, and recovery guide](STANDALONE_SUBTITLE_TOOL_V1.md)
+- [Advanced workflows](.agents/skills/multilingual-video-subtitler/references/research-workflows.md)
+- [Codex Skill instructions](.agents/skills/multilingual-video-subtitler/SKILL.md)
 - [Development branches](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/branches)
 
-The source branch uses TypeScript/Node.js workspaces, with application entry points in `apps/`, runtime packages in `packages/`, schemas in `schemas/`, and command helpers in `scripts/`. Media, models, caches, generated `output/`, and personal review files are not prerequisites for reading or building the source and should not be committed as documentation assets.
+The source uses TypeScript/Node.js workspaces, with application entry points in `apps/`, runtime packages in `packages/`, schemas in `schemas/`, and command helpers in `scripts/`. Media, models, caches, generated `output/`, and personal review files are not prerequisites for reading or building the source and should not be committed as documentation assets.
+
+Historical research tests additionally use Python with NumPy/SciPy for model-free numerical checks. Real-model and personal-artifact integration checks require explicit opt-in; these dependencies and private fixtures are not bundled.
 
 ## License
 

@@ -1,0 +1,393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-exact-cache-replay-accounting.schema.json",
+  "title": "c6-0-1-14-3-exact-cache-replay-accounting",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-exact-cache-replay-accounting"
+    },
+    "executionPolicy": { "type": "string", "const": "replay-only" },
+    "mode": { "type": "string", "const": "EXACT_CACHE_ONLY" },
+    "previousDetector": {
+      "type": "object",
+      "properties": {
+        "plannedRuns": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "sileroRuns": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "pyannoteRuns": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fullMediaAsrCount": { "type": "number", "const": 0 },
+        "retryCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "plannedRuns",
+        "sileroRuns",
+        "pyannoteRuns",
+        "inferenceCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "fullMediaAsrCount",
+        "retryCount"
+      ],
+      "additionalProperties": false
+    },
+    "currentDetector": {
+      "type": "object",
+      "properties": {
+        "plannedRuns": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "webrtcRuns": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "sileroRuns": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "pyannoteRuns": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "persistedResultCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "retryCount": { "type": "number", "const": 0 },
+        "backfillCount": { "type": "number", "const": 0 },
+        "fullMediaAsrCount": { "type": "number", "const": 0 },
+        "networkRequestCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "plannedRuns",
+        "inferenceCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "webrtcRuns",
+        "sileroRuns",
+        "pyannoteRuns",
+        "persistedResultCount",
+        "failedCount",
+        "retryCount",
+        "backfillCount",
+        "fullMediaAsrCount",
+        "networkRequestCount"
+      ],
+      "additionalProperties": false
+    },
+    "previousAsr": {
+      "type": "object",
+      "properties": {
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "exactCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "contextCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resultPersistedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hiddenRetryCount": { "type": "number", "const": 0 },
+        "fullMediaAsrCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "inferenceCount",
+        "exactCount",
+        "contextCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "resultPersistedCount",
+        "failedCount",
+        "hiddenRetryCount",
+        "fullMediaAsrCount"
+      ],
+      "additionalProperties": false
+    },
+    "currentAsr": {
+      "type": "object",
+      "properties": {
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 12 },
+        "exactCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "contextCount": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "providerProcessStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resultPersistedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hiddenRetryCount": { "type": "number", "const": 0 },
+        "fullMediaAsrCount": { "type": "number", "const": 0 },
+        "repeatedPreviousRequestCount": { "type": "number", "const": 0 },
+        "targetBackfillCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "inferenceCount",
+        "exactCount",
+        "contextCount",
+        "cacheHits",
+        "cacheMisses",
+        "modelLoadCount",
+        "providerProcessStartCount",
+        "resultPersistedCount",
+        "failedCount",
+        "hiddenRetryCount",
+        "fullMediaAsrCount",
+        "repeatedPreviousRequestCount",
+        "targetBackfillCount"
+      ],
+      "additionalProperties": false
+    },
+    "expectedDetectorRequestCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "detectorCacheHitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "expectedAsrRequestCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "asrCacheHitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "detectorEvidenceSemanticHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "asrEvidenceSemanticHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "scoreTracksHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "detectorRuntimeIdentityHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "detectorModelSnapshotHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "asrRuntimeIdentityHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "asrModelIdentityHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "asrModelFileManifestHashes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "sourceReadOnlyIdentity": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number" },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "previousEvidenceParity": { "type": "boolean", "const": true },
+    "currentEvidenceParity": { "type": "boolean", "const": true },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "cacheMissCount": { "type": "number", "const": 0 },
+    "retryCount": { "type": "number", "const": 0 },
+    "backfillCount": { "type": "number", "const": 0 },
+    "networkRequestCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "executionPolicy",
+    "mode",
+    "previousDetector",
+    "currentDetector",
+    "previousAsr",
+    "currentAsr",
+    "expectedDetectorRequestCount",
+    "detectorCacheHitCount",
+    "expectedAsrRequestCount",
+    "asrCacheHitCount",
+    "detectorEvidenceSemanticHashes",
+    "asrEvidenceSemanticHashes",
+    "scoreTracksHash",
+    "detectorRuntimeIdentityHashes",
+    "detectorModelSnapshotHashes",
+    "asrRuntimeIdentityHashes",
+    "asrModelIdentityHashes",
+    "asrModelFileManifestHashes",
+    "sourceReadOnlyIdentity",
+    "previousEvidenceParity",
+    "currentEvidenceParity",
+    "inferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "cacheMissCount",
+    "retryCount",
+    "backfillCount",
+    "networkRequestCount"
+  ],
+  "additionalProperties": false
+}

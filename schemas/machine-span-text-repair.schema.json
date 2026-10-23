@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-span-text-repair.schema.json",
+  "title": "machine-span-text-repair",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "machine-span-text-repair" },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "mutationPolicy": {
+      "type": "string",
+      "const": "event-span-only-independent-text-and-timing"
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "finalCueId": { "type": "string", "minLength": 1 },
+          "spanStart": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "spanEnd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "beforeSpanText": { "type": "string", "minLength": 1 },
+          "afterSpanText": { "type": "string", "minLength": 1 },
+          "replacementCandidateId": { "type": "string", "minLength": 1 },
+          "evidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "lineageVerified": { "type": "boolean" },
+          "sameEventVerified": { "type": "boolean" },
+          "neighboringSpanSafe": { "type": "boolean" },
+          "punctuationBoundarySafe": { "type": "boolean" },
+          "crossSpeakerJoinSafe": { "type": "boolean" },
+          "hallucinationNonIncreasePassed": { "type": "boolean" },
+          "evidenceStronger": { "type": "boolean" },
+          "textNonDegradationPassed": { "type": "boolean" },
+          "timingCompatible": { "type": "boolean" },
+          "accepted": { "type": "boolean" },
+          "applied": { "type": "boolean" },
+          "changedSpanCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "replacementChars": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rejectReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "finalCueId",
+          "spanStart",
+          "spanEnd",
+          "beforeSpanText",
+          "afterSpanText",
+          "replacementCandidateId",
+          "evidenceIds",
+          "lineageVerified",
+          "sameEventVerified",
+          "neighboringSpanSafe",
+          "punctuationBoundarySafe",
+          "crossSpeakerJoinSafe",
+          "hallucinationNonIncreasePassed",
+          "evidenceStronger",
+          "textNonDegradationPassed",
+          "timingCompatible",
+          "accepted",
+          "applied",
+          "changedSpanCount",
+          "replacementChars",
+          "rejectReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "proposalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acceptedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "appliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "changedFinalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "changedSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "replacementChars": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "proposalCount",
+        "acceptedCount",
+        "rejectedCount",
+        "appliedCount",
+        "changedFinalCueCount",
+        "changedSpanCount",
+        "replacementChars"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "mutationPolicy",
+    "proposals",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

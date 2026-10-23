@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-missing-speech-evidence-v2.schema.json",
+  "title": "machine-missing-speech-evidence-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-machine-missing-speech-evidence-v2"
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "gapId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "legacySignal": { "type": "boolean" },
+          "legacyMappedClassification": {
+            "anyOf": [
+              { "type": "string", "const": "SPEECH_GAP_OBSERVED" },
+              { "type": "null" }
+            ]
+          },
+          "observedSpeechEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "lexicalEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "cueCoverageEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "neighboringEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "contradictionEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SPEECH_ACTIVITY",
+                "ASR_LEXICAL_CONTENT",
+                "CUE_COVERAGE",
+                "NEIGHBOR_CONTINUITY",
+                "SPEAKER_ACTIVITY",
+                "CROSS_MODEL_CONTENT",
+                "MUSIC_LYRICS_CONTRADICTION",
+                "LOCALIZATION",
+                "WHISPER_STABILITY",
+                "REAZON_STABILITY",
+                "ACOUSTIC_ALIGNMENT",
+                "DECODER",
+                "TIMING_BOUNDARY",
+                "HALLUCINATION",
+                "OVERLAP",
+                "STRUCTURAL_INTEGRITY"
+              ]
+            }
+          },
+          "independentFamilyCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "correlatedEvidenceGroups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupId": { "type": "string", "minLength": 1 },
+                "evidenceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "rootLineageIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "families": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "SPEECH_ACTIVITY",
+                      "ASR_LEXICAL_CONTENT",
+                      "CUE_COVERAGE",
+                      "NEIGHBOR_CONTINUITY",
+                      "SPEAKER_ACTIVITY",
+                      "CROSS_MODEL_CONTENT",
+                      "MUSIC_LYRICS_CONTRADICTION",
+                      "LOCALIZATION",
+                      "WHISPER_STABILITY",
+                      "REAZON_STABILITY",
+                      "ACOUSTIC_ALIGNMENT",
+                      "DECODER",
+                      "TIMING_BOUNDARY",
+                      "HALLUCINATION",
+                      "OVERLAP",
+                      "STRUCTURAL_INTEGRITY"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "groupId",
+                "evidenceIds",
+                "rootLineageIds",
+                "families"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "validatedSourceGlobal": { "type": "boolean" },
+          "cueCoveredRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "SPEECH_GAP_OBSERVED",
+              "MISSING_DIALOGUE_POSSIBLE",
+              "MISSING_DIALOGUE_STRONG",
+              "MISSING_DIALOGUE_CONTRADICTED",
+              "MISSING_DIALOGUE_UNRESOLVED"
+            ]
+          },
+          "reviewLevel": {
+            "type": "string",
+            "enum": ["REQUIRED", "RECOMMENDED", "INFORMATIONAL"]
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "gapId",
+          "sourceInterval",
+          "itemIds",
+          "legacySignal",
+          "legacyMappedClassification",
+          "observedSpeechEvidence",
+          "lexicalEvidence",
+          "cueCoverageEvidence",
+          "neighboringEvidence",
+          "speakerEvidence",
+          "contradictionEvidence",
+          "evidenceFamilies",
+          "independentFamilyCount",
+          "correlatedEvidenceGroups",
+          "validatedSourceGlobal",
+          "cueCoveredRatio",
+          "classification",
+          "reviewLevel",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "gapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "legacyMissingItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "possibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "strongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contradictedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "independentFamilyMean": { "type": "number", "minimum": 0 },
+        "correlatedEvidenceDeduplicatedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "gapCount",
+        "legacyMissingItemCount",
+        "observedCount",
+        "possibleCount",
+        "strongCount",
+        "contradictedCount",
+        "unresolvedCount",
+        "independentFamilyMean",
+        "correlatedEvidenceDeduplicatedCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "gaps",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

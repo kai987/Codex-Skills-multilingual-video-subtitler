@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/reference-coverage-integrity.schema.json",
+  "title": "reference-coverage-integrity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "referenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "generatedSubtitleSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "configuration": {
+      "default": {
+        "coverageRule": "temporal-alignment",
+        "promoteUncoveredToActiveReview": false
+      },
+      "type": "object",
+      "properties": {
+        "coverageRule": { "type": "string", "const": "temporal-alignment" },
+        "promoteUncoveredToActiveReview": { "type": "boolean" }
+      },
+      "required": ["coverageRule", "promoteUncoveredToActiveReview"],
+      "additionalProperties": false
+    },
+    "validationStatus": {
+      "type": "string",
+      "enum": ["passed", "needs-review"]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "code": {
+            "type": "string",
+            "enum": [
+              "REFERENCE_DIALOGUE_UNCOVERED",
+              "REFERENCE_NARRATION_UNCOVERED",
+              "REFERENCE_LYRICS_UNCOVERED",
+              "REFERENCE_UNSUPPORTED_INSERTION",
+              "REFERENCE_TIMING_AUDIO_CONFLICT",
+              "REFERENCE_SEMANTIC_CONFLICT",
+              "REFERENCE_CUE_CLASSIFICATION_UNCERTAIN",
+              "REFERENCE_DUPLICATE_EFFECT_CUES"
+            ]
+          },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "anchorIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "activeReview": { "type": "boolean" },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "interval",
+          "anchorIds",
+          "cueIds",
+          "activeReview",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "trustedExpectedAnchors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coveredAnchors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uncoveredWithActiveReview": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uncoveredWithoutReview": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsupportedInsertions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "trustedExpectedAnchors",
+        "coveredAnchors",
+        "uncoveredWithActiveReview",
+        "uncoveredWithoutReview",
+        "unsupportedInsertions"
+      ],
+      "additionalProperties": false
+    },
+    "fallback": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "referenceSha256",
+    "generatedSubtitleSha256",
+    "configuration",
+    "validationStatus",
+    "findings",
+    "summary",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

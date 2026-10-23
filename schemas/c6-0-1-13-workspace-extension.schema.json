@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-workspace-extension.schema.json",
+  "title": "c6-0-1-13-workspace-extension",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "workspaceMode": { "type": "string", "const": "REGION_FIRST_V2" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "regionId": { "type": "string", "minLength": 1 },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rankPosition": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rankScore": { "type": "number" },
+          "contextInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "minimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "mandatoryReasons": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "independentEvidenceFamilies": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "candidateActionableCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "estimatedUniqueAudioSeconds": { "type": "number", "minimum": 0 },
+          "missingSpeechStates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SPEECH_GAP_OBSERVED",
+                "MISSING_DIALOGUE_POSSIBLE",
+                "MISSING_DIALOGUE_STRONG",
+                "MISSING_DIALOGUE_CONTRADICTED",
+                "MISSING_DIALOGUE_UNRESOLVED"
+              ]
+            }
+          }
+        },
+        "required": [
+          "regionId",
+          "itemIds",
+          "rankPosition",
+          "rankScore",
+          "contextInterval",
+          "mandatoryReasons",
+          "independentEvidenceFamilies",
+          "candidateActionableCount",
+          "estimatedUniqueAudioSeconds",
+          "missingSpeechStates"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "enum": [
+              "UNIQUE_AUDIO_10_PERCENT",
+              "UNIQUE_AUDIO_20_PERCENT",
+              "UNIQUE_AUDIO_30_PERCENT",
+              "UNIQUE_AUDIO_40_PERCENT",
+              "UNIQUE_AUDIO_50_PERCENT",
+              "ALL_MANDATORY",
+              "FULL_QUEUE"
+            ]
+          },
+          "budgetSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "regionIds": { "type": "array", "items": { "type": "string" } },
+          "uniqueUnionSeconds": { "type": "number", "minimum": 0 }
+        },
+        "required": [
+          "planId",
+          "budgetSeconds",
+          "regionIds",
+          "uniqueUnionSeconds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "segmentId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "minimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "regionIds": { "type": "array", "items": { "type": "string" } },
+          "itemIds": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["segmentId", "sourceInterval", "regionIds", "itemIds"],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "workspaceMode",
+    "policyHash",
+    "regions",
+    "plans",
+    "segments",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

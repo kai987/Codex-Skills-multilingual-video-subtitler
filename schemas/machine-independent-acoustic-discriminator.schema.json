@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-independent-acoustic-discriminator.schema.json",
+  "title": "machine-independent-acoustic-discriminator",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.11-paired-evidence-independent-discriminator-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-independent-acoustic-discriminator"
+    },
+    "corpusSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "pairedWhisperSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "verifierRuntimeSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "lowerIsBetter": { "type": "boolean", "const": true },
+    "marginDefinition": {
+      "type": "string",
+      "const": "whisperNllPerTargetToken-minus-reazonNllPerTargetToken"
+    },
+    "oldCorrelatedCtcRole": { "type": "string", "const": "AUDIT_ONLY" },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "whisper": {
+            "type": "object",
+            "properties": {
+              "candidateId": { "type": "string", "minLength": 1 },
+              "representation": {
+                "type": "string",
+                "enum": ["NORMALIZED_DISPLAY", "PRONUNCIATION"]
+              },
+              "representationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "encodedTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "unknownTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "coverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+              "rawNll": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "nllPerTargetToken": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "acousticFrameCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "targetCoverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "blockers": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": [
+              "candidateId",
+              "representation",
+              "representationHash",
+              "encodedTokenCount",
+              "unknownTokenCount",
+              "coverageRatio",
+              "rawNll",
+              "nllPerTargetToken",
+              "acousticFrameCount",
+              "targetCoverage",
+              "blockers"
+            ],
+            "additionalProperties": false
+          },
+          "reazon": {
+            "type": "object",
+            "properties": {
+              "candidateId": { "type": "string", "minLength": 1 },
+              "representation": {
+                "type": "string",
+                "enum": ["NORMALIZED_DISPLAY", "PRONUNCIATION"]
+              },
+              "representationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "encodedTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "unknownTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "coverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+              "rawNll": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "nllPerTargetToken": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "acousticFrameCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "targetCoverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "blockers": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": [
+              "candidateId",
+              "representation",
+              "representationHash",
+              "encodedTokenCount",
+              "unknownTokenCount",
+              "coverageRatio",
+              "rawNll",
+              "nllPerTargetToken",
+              "acousticFrameCount",
+              "targetCoverage",
+              "blockers"
+            ],
+            "additionalProperties": false
+          },
+          "pairwiseMargin": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "INDEPENDENT_FAVORS_WHISPER",
+              "INDEPENDENT_FAVORS_REAZON",
+              "INDEPENDENT_NEAR_TIE",
+              "INDEPENDENT_UNSCORABLE"
+            ]
+          },
+          "scorability": {
+            "type": "string",
+            "enum": ["SCORABLE", "UNSCORABLE"]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "audioSha256",
+          "whisper",
+          "reazon",
+          "pairwiseMargin",
+          "outcome",
+          "scorability",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "scorableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unscorableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "scorableCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "favorsWhisperCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "favorsReazonCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "nearTieCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 },
+        "networkUsed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "eventCount",
+        "scorableCount",
+        "unscorableCount",
+        "scorableCoverage",
+        "favorsWhisperCount",
+        "favorsReazonCount",
+        "nearTieCount",
+        "runtimeGoldInputCount",
+        "networkUsed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "corpusSemanticHash",
+    "pairedWhisperSemanticHash",
+    "verifierRuntimeSemanticHash",
+    "lowerIsBetter",
+    "marginDefinition",
+    "oldCorrelatedCtcRole",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

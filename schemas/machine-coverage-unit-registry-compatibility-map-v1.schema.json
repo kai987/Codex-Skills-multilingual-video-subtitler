@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-coverage-unit-registry-compatibility-map-v1.schema.json",
+  "title": "machine-coverage-unit-registry-compatibility-map-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-coverage-unit-registry-compatibility-map-v1"
+    },
+    "planningUnitsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fullRegistryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "legacyPlanningCoverageUnitId": { "type": "string", "minLength": 1 },
+          "fullRegistryCoverageUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "relationType": {
+            "type": "string",
+            "enum": [
+              "EXACT_EQUIVALENT",
+              "LEGACY_SUBSET_OF_FULL_UNIT",
+              "FULL_UNIT_SUBSET_OF_LEGACY",
+              "ONE_TO_MANY_ATOMIC_PARTITION",
+              "MANY_TO_ONE_COMPATIBILITY",
+              "NO_COMPATIBLE_REGISTRY_UNIT"
+            ]
+          },
+          "sourceNativeIntersectionSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "legacyCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "fullRegistryCoverageRatios": {
+            "type": "array",
+            "items": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "evidenceFamilyCompatibility": { "type": "boolean" },
+          "sourceIdentityMatch": { "type": "boolean" },
+          "relationVerified": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "legacyPlanningCoverageUnitId",
+          "fullRegistryCoverageUnitIds",
+          "relationType",
+          "sourceNativeIntersectionSamples",
+          "legacyCoverageRatio",
+          "fullRegistryCoverageRatios",
+          "evidenceFamilyCompatibility",
+          "sourceIdentityMatch",
+          "relationVerified",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "exactCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "oneToManyCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "manyToOneCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unresolvedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unresolvedPlannerSelectedUnitMappings": { "type": "number", "const": 0 },
+    "plannerSelectedUnitMappingCoverageRatio": { "type": "number", "const": 1 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "planningUnitsHash",
+    "fullRegistryHash",
+    "rows",
+    "exactCount",
+    "oneToManyCount",
+    "manyToOneCount",
+    "unresolvedCount",
+    "unresolvedPlannerSelectedUnitMappings",
+    "plannerSelectedUnitMappingCoverageRatio"
+  ],
+  "additionalProperties": false
+}

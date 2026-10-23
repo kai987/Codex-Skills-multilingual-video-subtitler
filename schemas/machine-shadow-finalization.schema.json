@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-shadow-finalization.schema.json",
+  "title": "machine-shadow-finalization",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-shadow-finalization"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1-machine-shadow-finalization-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "generationRunId": { "type": "string", "minLength": 1 },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evidenceCoverageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "provenanceAuditHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "object",
+      "properties": {
+        "sourceIntegrityPassed": { "type": "boolean" },
+        "canonicalIntegrityPassed": { "type": "boolean" },
+        "serializationPassed": { "type": "boolean" },
+        "formatSemanticParityPassed": { "type": "boolean" },
+        "unknownSignalCountZero": { "type": "boolean" },
+        "positiveCurrentOutputDefectEvidenceCountZero": { "type": "boolean" },
+        "criticalEvidenceCoveragePassed": { "type": "boolean" },
+        "noUnresolvedHighRiskMachineRegion": { "type": "boolean" },
+        "noGoldDerivedProvenance": { "type": "boolean" },
+        "blindIsolationPassed": { "type": "boolean" }
+      },
+      "required": [
+        "sourceIntegrityPassed",
+        "canonicalIntegrityPassed",
+        "serializationPassed",
+        "formatSemanticParityPassed",
+        "unknownSignalCountZero",
+        "positiveCurrentOutputDefectEvidenceCountZero",
+        "criticalEvidenceCoveragePassed",
+        "noUnresolvedHighRiskMachineRegion",
+        "noGoldDerivedProvenance",
+        "blindIsolationPassed"
+      ],
+      "additionalProperties": false
+    },
+    "positiveCurrentOutputDefectEvidenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "shadowMachineOutcome": {
+      "type": "string",
+      "enum": ["FINAL_CANDIDATE", "REVIEW_REQUIRED", "REJECTED"]
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "productionFinalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "blindAcceptanceRequired": { "type": "boolean", "const": true },
+    "reasonCodes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "generatedAt",
+    "generationRunId",
+    "policyHash",
+    "evidenceCoverageHash",
+    "provenanceAuditHash",
+    "checks",
+    "positiveCurrentOutputDefectEvidenceCount",
+    "shadowMachineOutcome",
+    "productionStatus",
+    "productionFinalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "blindAcceptanceRequired",
+    "reasonCodes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-review-burden-plans.schema.json",
+  "title": "machine-review-burden-plans",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-machine-review-burden-plans"
+    },
+    "regionPriorityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "selectionPolicy": {
+      "type": "string",
+      "const": "RECOMPUTED_MARGINAL_MACHINE_RISK_PER_UNIQUE_AUDIO_COST"
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "planId": { "type": "string", "minLength": 1 },
+          "budgetSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "budgetKind": {
+            "type": "string",
+            "enum": [
+              "EPISODE_UNIQUE_AUDIO_PERCENT",
+              "FIXED_SECONDS",
+              "ALL_MANDATORY",
+              "FULL_QUEUE"
+            ]
+          },
+          "regionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectionSteps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rankPosition": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "regionId": { "type": "string", "minLength": 1 },
+                "incrementalPlaybackSeconds": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "cumulativeUniqueAudioSeconds": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "marginalUtility": { "type": "number", "minimum": 0 },
+                "utilityPerCost": { "type": "number", "minimum": 0 },
+                "newRiskCoverageCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "newActionableCoverageCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "newMandatoryCoverageCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "redundancyPenalty": { "type": "number", "minimum": 0 },
+                "fixedReviewOverheadSeconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "rankPosition",
+                "regionId",
+                "incrementalPlaybackSeconds",
+                "cumulativeUniqueAudioSeconds",
+                "marginalUtility",
+                "utilityPerCost",
+                "newRiskCoverageCount",
+                "newActionableCoverageCount",
+                "newMandatoryCoverageCount",
+                "redundancyPenalty",
+                "fixedReviewOverheadSeconds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "clipSumSeconds": { "type": "number", "minimum": 0 },
+          "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+          "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+          "mandatoryRegionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unselectedMandatoryRegionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "planId",
+          "budgetSeconds",
+          "budgetKind",
+          "regionIds",
+          "itemIds",
+          "selectionSteps",
+          "clipSumSeconds",
+          "uniqueUnionSeconds",
+          "duplicateContextSeconds",
+          "mandatoryRegionCount",
+          "unselectedMandatoryRegionIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "regionPriorityHash",
+    "sourceDurationSeconds",
+    "selectionPolicy",
+    "plans",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

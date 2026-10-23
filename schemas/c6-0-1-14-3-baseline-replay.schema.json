@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-baseline-replay.schema.json",
+  "title": "c6-0-1-14-3-baseline-replay",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-baseline-replay"
+    },
+    "baselineCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "sourceReadOnlyIdentity": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number" },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "previousFinalAHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "previousFinalBHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "phaseAHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "combinedInventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "phaseASafetyCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "phaseASafetyCoreSeconds": { "type": "number", "minimum": 0 },
+    "oldFinalSafetyCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "oldFinalSafetyCoreSeconds": { "type": "number", "minimum": 0 },
+    "immutableTargetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "immutableItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "immutableRegionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceAudioStreamIndex": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceNativeSampleRate": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "canonicalTextMutationCount": { "type": "number", "const": 0 },
+    "canonicalTimingMutationCount": { "type": "number", "const": 0 },
+    "presentationMutationCount": { "type": "number", "const": 0 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "baselineGoldMetricsDeferredUntilPostFreezeEvaluator": {
+      "type": "boolean",
+      "const": true
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "baselineCommit",
+    "sourceReadOnlyIdentity",
+    "previousFinalAHash",
+    "previousFinalBHash",
+    "phaseAHash",
+    "combinedInventoryHash",
+    "canonicalTextHash",
+    "canonicalTimingHash",
+    "presentationHash",
+    "machineCueCount",
+    "phaseASafetyCount",
+    "phaseASafetyCoreSeconds",
+    "oldFinalSafetyCount",
+    "oldFinalSafetyCoreSeconds",
+    "immutableTargetCount",
+    "immutableItemCount",
+    "immutableRegionCount",
+    "sourceAudioStreamIndex",
+    "sourceNativeSampleRate",
+    "sourceDurationSeconds",
+    "inferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "canonicalTextMutationCount",
+    "canonicalTimingMutationCount",
+    "presentationMutationCount",
+    "productionStatus",
+    "finalizationMethod",
+    "baselineGoldMetricsDeferredUntilPostFreezeEvaluator"
+  ],
+  "additionalProperties": false
+}

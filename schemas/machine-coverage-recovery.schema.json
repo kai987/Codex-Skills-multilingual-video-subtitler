@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-coverage-recovery.schema.json",
+  "title": "machine-coverage-recovery",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.1-machine-quality-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "profile": {
+      "type": "string",
+      "enum": ["legacy", "diagnostics", "coverage", "timing", "full"]
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "runId": { "type": "string", "minLength": 1 },
+        "repositoryCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "goldRuntimeInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "runId",
+        "repositoryCommit",
+        "sourceMediaSha256",
+        "goldRuntimeInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "artifactType": { "type": "string", "const": "machine-coverage-recovery" },
+    "recoveryUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "recoveryRequestCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "recoveredUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unresolvedUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "cacheHitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "adjacentPromptPolicy": {
+      "type": "string",
+      "enum": [
+        "legacy-all-cues",
+        "diagnostic-only",
+        "machine-verified-only",
+        "disabled-unverified-context"
+      ]
+    },
+    "adjacentPromptCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unverifiedAdjacentPromptCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "canonicalCueMutationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "canonicalTimingMutationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "mode",
+    "profile",
+    "run",
+    "artifactType",
+    "recoveryUnitCount",
+    "recoveryRequestCount",
+    "recoveredUnitCount",
+    "unresolvedUnitCount",
+    "cacheHitCount",
+    "adjacentPromptPolicy",
+    "adjacentPromptCount",
+    "unverifiedAdjacentPromptCount",
+    "canonicalCueMutationCount",
+    "canonicalTimingMutationCount"
+  ],
+  "additionalProperties": false
+}

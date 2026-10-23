@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c5-17-2-review-delivery-replay-summary.schema.json",
+  "title": "c5-17-2-review-delivery-replay-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c5-17-2-review-delivery-replay-summary"
+    },
+    "replayVersion": { "type": "string", "const": "C5.17.2" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceTaskName": { "type": "string", "minLength": 1 },
+    "outputTaskName": { "type": "string", "minLength": 1 },
+    "reviewAudioMode": {
+      "type": "string",
+      "enum": ["auto", "generate", "reuse-only", "off"]
+    },
+    "reviewEvidenceReconciliation": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "reviewDeliveryIntegrity": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "reviewPageTimeline": { "type": "boolean" },
+    "sourceReviewPackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceFinalizationReportHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "outputReviewPackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "outputFinalizationReportHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewPackageSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "finalizationSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewAudioHashes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewId": { "type": "string", "minLength": 1 },
+          "sha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["reviewId", "sha256"],
+        "additionalProperties": false
+      }
+    },
+    "evidenceReconciliationHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "deliveryIntegritySemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalCueHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalCueHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHashBefore": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "canonicalTimingHashAfter": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "presentationHashBefore": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHashAfter": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewPageAssetsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTaskCriticalArtifactsReadOnly": { "type": "boolean" },
+    "sourceVideoReadOnly": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sizeBefore": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "sizeAfter": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "mtimeMsBefore": { "type": "number", "minimum": 0 },
+            "mtimeMsAfter": { "type": "number", "minimum": 0 },
+            "sha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "sha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "verified": { "type": "boolean" }
+          },
+          "required": [
+            "sizeBefore",
+            "sizeAfter",
+            "mtimeMsBefore",
+            "mtimeMsAfter",
+            "sha256Before",
+            "sha256After",
+            "verified"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "humanSubtitleReadOnly": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sizeBefore": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "sizeAfter": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "mtimeMsBefore": { "type": "number", "minimum": 0 },
+            "mtimeMsAfter": { "type": "number", "minimum": 0 },
+            "sha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "sha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "verified": { "type": "boolean" }
+          },
+          "required": [
+            "sizeBefore",
+            "sizeAfter",
+            "mtimeMsBefore",
+            "mtimeMsAfter",
+            "sha256Before",
+            "sha256After",
+            "verified"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "mfaProcessCount": { "type": "number", "const": 0 },
+        "whisperProcessCount": { "type": "number", "const": 0 },
+        "sudachiProcessCount": { "type": "number", "const": 0 },
+        "g2pProcessCount": { "type": "number", "const": 0 },
+        "ffmpegProcessCount": { "type": "number", "const": 0 },
+        "wholeMediaAsrRequestCount": { "type": "number", "const": 0 },
+        "openAiRequestCount": { "type": "number", "const": 0 },
+        "onlineSubtitleLookupCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "mfaProcessCount",
+        "whisperProcessCount",
+        "sudachiProcessCount",
+        "g2pProcessCount",
+        "ffmpegProcessCount",
+        "wholeMediaAsrRequestCount",
+        "openAiRequestCount",
+        "onlineSubtitleLookupCount"
+      ],
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewAudioPlayableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewDeliveryIntegrityPassed": { "type": "boolean" },
+        "finalStatus": { "type": "string", "const": "needs-review" },
+        "finalizationMethod": { "type": "string", "const": "none" }
+      },
+      "required": [
+        "cueCount",
+        "reviewItemCount",
+        "reviewAudioPlayableCount",
+        "reviewDeliveryIntegrityPassed",
+        "finalStatus",
+        "finalizationMethod"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "replayVersion",
+    "generatedAt",
+    "sourceTaskName",
+    "outputTaskName",
+    "reviewAudioMode",
+    "reviewEvidenceReconciliation",
+    "reviewDeliveryIntegrity",
+    "reviewPageTimeline",
+    "sourceReviewPackageHash",
+    "sourceFinalizationReportHash",
+    "outputReviewPackageHash",
+    "outputFinalizationReportHash",
+    "reviewPackageSemanticHash",
+    "finalizationSemanticHash",
+    "reviewAudioHashes",
+    "evidenceReconciliationHash",
+    "deliveryIntegritySemanticHash",
+    "canonicalCueHashBefore",
+    "canonicalCueHashAfter",
+    "canonicalTimingHashBefore",
+    "canonicalTimingHashAfter",
+    "presentationHashBefore",
+    "presentationHashAfter",
+    "reviewPageAssetsHash",
+    "sourceTaskCriticalArtifactsReadOnly",
+    "sourceVideoReadOnly",
+    "humanSubtitleReadOnly",
+    "execution",
+    "outcome",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

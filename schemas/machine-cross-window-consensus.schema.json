@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-cross-window-consensus.schema.json",
+  "title": "machine-cross-window-consensus",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.2-candidate-precision-global-timeline-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-cross-window-consensus"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "familySemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "familyId": { "type": "string", "minLength": 1 },
+          "candidateIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedCueId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "independentSupportCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "correlatedSupportCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "stable": { "type": "boolean" },
+          "mutationAllowed": { "type": "boolean" },
+          "candidateRankings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "rank": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evidenceStrength": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": ["candidateId", "rank", "evidenceStrength"],
+              "additionalProperties": false
+            }
+          },
+          "evidenceGroups": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "correlatedEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "alternativeCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "CONSENSUS_ACCEPT",
+              "CONSENSUS_AMBIGUOUS",
+              "MULTI_SPEAKER_EVENT",
+              "LOW_SUPPORT",
+              "REJECT_HALLUCINATION"
+            ]
+          },
+          "confidenceClass": {
+            "type": "string",
+            "enum": ["high", "medium", "low", "unknown"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "familyId",
+          "candidateIds",
+          "selectedCueId",
+          "independentSupportCount",
+          "correlatedSupportCount",
+          "stable",
+          "mutationAllowed",
+          "candidateRankings",
+          "evidenceGroups",
+          "correlatedEvidence",
+          "alternativeCandidateIds",
+          "decision",
+          "confidenceClass",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "decisionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "stableDecisionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mutationAllowedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emittedCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "diagnosticOnly": { "type": "boolean" }
+      },
+      "required": [
+        "decisionCount",
+        "stableDecisionCount",
+        "mutationAllowedCount",
+        "emittedCandidateCount",
+        "diagnosticOnly"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "familySemanticHash",
+    "outputSemanticHash",
+    "decisions",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

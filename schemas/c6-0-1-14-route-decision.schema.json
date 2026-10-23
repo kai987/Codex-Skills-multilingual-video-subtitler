@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-route-decision.schema.json",
+  "title": "c6-0-1-14-route-decision",
+  "type": "object",
+  "properties": {
+    "primaryDecision": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_ENGINEERING_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_SOURCE_GLOBAL_LINEAGE_REPAIR",
+        "HOLD_FOR_MACHINE_SPEECH_DETECTION_REPAIR",
+        "HOLD_FOR_REVIEW_LOCALIZATION_REPAIR",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_LOCALIZED_LEXICAL_EVIDENCE_REPAIR"
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "diagnosis": { "type": "string", "minLength": 1 },
+          "errorComponentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["diagnosis", "errorComponentIds", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "advisories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "diagnosis": { "type": "string", "minLength": 1 },
+          "errorComponentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["diagnosis", "errorComponentIds", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "perComponentDiagnoses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorComponentId": { "type": "string", "minLength": 1 },
+          "primaryDiagnosis": {
+            "type": "string",
+            "enum": [
+              "EVALUATION_INTEGRITY_FAILURE",
+              "SOURCE_GLOBAL_LINEAGE_UNVERIFIED",
+              "MACHINE_SPEECH_DETECTION_MISS",
+              "MACHINE_REVIEW_LOCALIZATION_MISS",
+              "MACHINE_REVIEW_AUDIO_OMISSION",
+              "LOCALIZED_LEXICAL_EVIDENCE_INCOMPLETE",
+              "FULLY_PLAYBACK_COVERED"
+            ]
+          },
+          "diagnoses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "EVALUATION_INTEGRITY_FAILURE",
+                "SOURCE_GLOBAL_LINEAGE_UNVERIFIED",
+                "MACHINE_SPEECH_DETECTION_MISS",
+                "MACHINE_REVIEW_LOCALIZATION_MISS",
+                "MACHINE_REVIEW_AUDIO_OMISSION",
+                "LOCALIZED_LEXICAL_EVIDENCE_INCOMPLETE",
+                "FULLY_PLAYBACK_COVERED"
+              ]
+            }
+          },
+          "unverifiedLineageEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "errorComponentId",
+          "primaryDiagnosis",
+          "diagnoses",
+          "unverifiedLineageEvidenceIds",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fullQueueGatePassed": { "type": "boolean" },
+    "requiredTargetAudioGatePassed": { "type": "boolean" },
+    "mandatorySubsetRecallIsBlocking": { "type": "boolean", "const": false },
+    "lexicalIncompleteWhenAudibleIsBlocking": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "required": [
+    "primaryDecision",
+    "blockers",
+    "advisories",
+    "perComponentDiagnoses",
+    "fullQueueGatePassed",
+    "requiredTargetAudioGatePassed",
+    "mandatorySubsetRecallIsBlocking",
+    "lexicalIncompleteWhenAudibleIsBlocking"
+  ],
+  "additionalProperties": false
+}

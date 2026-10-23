@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-cross-model-text-mutation-proposals.schema.json",
+  "title": "machine-cross-model-text-mutation-proposals",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.10-cross-model-arbitration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-cross-model-text-mutation-proposals"
+    },
+    "arbitrationLedgerSemanticHashes": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "textOnlyMutation": { "type": "boolean", "const": true },
+    "reazonTimingUsed": { "type": "boolean", "const": false },
+    "hybridProviderTextAllowed": { "type": "boolean", "const": false },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposalId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "finalCueId": { "type": "string", "minLength": 1 },
+          "spanStart": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "spanEnd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "beforeText": { "type": "string", "minLength": 1 },
+          "afterText": { "type": "string", "minLength": 1 },
+          "selectedProvider": { "type": "string", "const": "REAZON" },
+          "selectedCandidateId": { "type": "string", "minLength": 1 },
+          "arbitrationDecisionId": { "type": "string", "minLength": 1 },
+          "evidenceBundleId": { "type": "string", "minLength": 1 },
+          "safetyChecks": {
+            "type": "object",
+            "properties": {
+              "highConfidenceSelection": { "type": "boolean" },
+              "exactOrNormalizedExactSpan": { "type": "boolean" },
+              "contiguousSpan": { "type": "boolean" },
+              "neighborPreserved": { "type": "boolean" },
+              "punctuationSafe": { "type": "boolean" },
+              "duplicationSafe": { "type": "boolean" },
+              "crossSpeakerSafe": { "type": "boolean" },
+              "timingMutationRequired": { "type": "boolean", "const": false },
+              "outputSchemaValid": { "type": "boolean" },
+              "nonDegradationPassed": { "type": "boolean" }
+            },
+            "required": [
+              "highConfidenceSelection",
+              "exactOrNormalizedExactSpan",
+              "contiguousSpan",
+              "neighborPreserved",
+              "punctuationSafe",
+              "duplicationSafe",
+              "crossSpeakerSafe",
+              "timingMutationRequired",
+              "outputSchemaValid",
+              "nonDegradationPassed"
+            ],
+            "additionalProperties": false
+          },
+          "accepted": { "type": "boolean" },
+          "applied": { "type": "boolean" },
+          "rejectionReasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CROSS_MODEL_EXACT_AGREEMENT",
+                "CROSS_MODEL_NORMALIZED_AGREEMENT",
+                "CROSS_MODEL_PRONUNCIATION_SUPPORT",
+                "ORTHOGRAPHY_ONLY_REVIEW",
+                "REAZON_STABLE",
+                "REAZON_CONTEXT_EXTENSION_ONLY",
+                "REAZON_LEXICALLY_UNSTABLE",
+                "REAZON_HALLUCINATION_RISK",
+                "REAZON_EMPTY",
+                "REAZON_UNCOMPARABLE",
+                "REAZON_RUNTIME_PROVENANCE_INCOMPLETE",
+                "REAZON_DURATION_TEXT_ANOMALY",
+                "WHISPER_LEXICALLY_UNSTABLE",
+                "WHISPER_HALLUCINATION_RISK",
+                "WHISPER_DECODER_INSTABILITY",
+                "WHISPER_INCOMPLETE_SPEECH_SUPPORT",
+                "WHISPER_ALTERNATE_CORROBORATES_REAZON",
+                "WHISPER_STRONG_SUPPORT",
+                "EVIDENCE_ABSENCE_ONLY",
+                "CTC_SUPPORTS_REAZON",
+                "CTC_SUPPORTS_WHISPER",
+                "CTC_AMBIGUOUS",
+                "CTC_UNSCORABLE",
+                "CORE_LOCALIZATION_AMBIGUOUS",
+                "SPAN_LINEAGE_UNSAFE",
+                "CROSS_EVENT_AMBIGUITY",
+                "MUTATION_NONDEGRADATION_BLOCKED",
+                "CONFLICTING_EVIDENCE",
+                "PRODUCTION_ENFORCEMENT_DISABLED",
+                "AGGRESSIVE_PROFILE_SHADOW_ONLY"
+              ]
+            }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "proposalId",
+          "eventId",
+          "finalCueId",
+          "spanStart",
+          "spanEnd",
+          "beforeText",
+          "afterText",
+          "selectedProvider",
+          "selectedCandidateId",
+          "arbitrationDecisionId",
+          "evidenceBundleId",
+          "safetyChecks",
+          "accepted",
+          "applied",
+          "rejectionReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "proposalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acceptedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "appliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "textChangedFinalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingChangedFinalCueCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "proposalCount",
+        "acceptedCount",
+        "rejectedCount",
+        "appliedCount",
+        "textChangedFinalCueCount",
+        "timingChangedFinalCueCount"
+      ],
+      "additionalProperties": false
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "arbitrationLedgerSemanticHashes",
+    "textOnlyMutation",
+    "reazonTimingUsed",
+    "hybridProviderTextAllowed",
+    "proposals",
+    "summary",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

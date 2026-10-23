@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-review-ranker-oof.schema.json",
+  "title": "c6-0-1-13-review-ranker-oof",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-review-ranker-oof"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineFeaturesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labelsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "scoreMeaning": {
+      "type": "string",
+      "const": "RANKING_SCORE_NOT_CALIBRATED_PROBABILITY"
+    },
+    "predictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "regionId": { "type": "string" },
+          "outerFold": { "type": "string" },
+          "modelType": { "type": "string", "const": "L2_LOGISTIC_REGRESSION" },
+          "machineFeaturesHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "rankingScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "rank": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectedAtBudgets": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "regionId",
+          "outerFold",
+          "modelType",
+          "machineFeaturesHash",
+          "rankingScore",
+          "rank",
+          "selectedAtBudgets",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "outerFold": { "type": "string" },
+          "trainRegionIds": { "type": "array", "items": { "type": "string" } },
+          "testRegionIds": { "type": "array", "items": { "type": "string" } },
+          "model": {
+            "type": "object",
+            "properties": {
+              "modelType": {
+                "type": "string",
+                "const": "L2_LOGISTIC_REGRESSION"
+              },
+              "preprocessing": {
+                "type": "object",
+                "properties": {
+                  "featureNames": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "medians": { "type": "array", "items": { "type": "number" } },
+                  "means": { "type": "array", "items": { "type": "number" } },
+                  "scales": {
+                    "type": "array",
+                    "items": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "fittedRegionIds": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "missingValueEncoding": {
+                    "type": "string",
+                    "const": "MEDIAN_PLUS_SEPARATE_UNKNOWN_UNAVAILABLE_INDICATORS"
+                  }
+                },
+                "required": [
+                  "featureNames",
+                  "medians",
+                  "means",
+                  "scales",
+                  "fittedRegionIds",
+                  "missingValueEncoding"
+                ],
+                "additionalProperties": false
+              },
+              "coefficients": {
+                "type": "array",
+                "items": { "type": "number" }
+              },
+              "intercept": { "type": "number" },
+              "positiveClassWeight": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "negativeClassWeight": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "l2": { "type": "number", "exclusiveMinimum": 0 },
+              "iterations": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "classificationThreshold": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "trainingStatus": {
+                "type": "string",
+                "enum": ["FITTED", "SINGLE_CLASS_CONSTANT", "NO_TRAINING_DATA"]
+              }
+            },
+            "required": [
+              "modelType",
+              "preprocessing",
+              "coefficients",
+              "intercept",
+              "positiveClassWeight",
+              "negativeClassWeight",
+              "l2",
+              "iterations",
+              "classificationThreshold",
+              "trainingStatus"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["outerFold", "trainRegionIds", "testRegionIds", "model"],
+        "additionalProperties": false
+      }
+    },
+    "formalMetricsOofOnly": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "machineFreezeHash",
+    "machineFeaturesHash",
+    "foldsHash",
+    "labelsHash",
+    "scoreMeaning",
+    "predictions",
+    "models",
+    "formalMetricsOofOnly",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-5-quality-policy.schema.json",
+  "title": "c6-0-1-5-quality-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-5-quality-policy" },
+    "evidenceToCanonical": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "singleVariantAudit": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "rawAsrEventRecovery": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "gates": {
+      "type": "object",
+      "properties": {
+        "minimumCoverage": { "type": "number", "const": 0.9 },
+        "maximumMissing": { "type": "number", "const": 15 },
+        "maximumHallucinations": { "type": "number", "const": 2 },
+        "maximumMaterialErrors": { "type": "number", "const": 45 },
+        "maximumRawAsrOriginErrors": { "type": "number", "const": 30 },
+        "maximumAssociationErrors": { "type": "number", "const": 10 },
+        "maximumNormalizedCer": { "type": "number", "const": 0.55 },
+        "maximumSevereTimingErrors": { "type": "number", "const": 30 },
+        "maximumStartMaeSeconds": { "type": "number", "const": 1.2 },
+        "maximumEndMaeSeconds": { "type": "number", "const": 1.2 },
+        "maximumP95BoundaryErrorSeconds": { "type": "number", "const": 3.5 },
+        "maximumOverlapPairs": { "type": "number", "const": 20 },
+        "minimumEventFinalLineageCoverage": { "type": "number", "const": 0.95 },
+        "maximumUnsupportedMutationCount": { "type": "number", "const": 0 },
+        "maximumRuntimeGoldInputCount": { "type": "number", "const": 0 },
+        "maximumDatasetHardcodingCount": { "type": "number", "const": 0 },
+        "maximumUnsafeFinalizationEscapeCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "minimumCoverage",
+        "maximumMissing",
+        "maximumHallucinations",
+        "maximumMaterialErrors",
+        "maximumRawAsrOriginErrors",
+        "maximumAssociationErrors",
+        "maximumNormalizedCer",
+        "maximumSevereTimingErrors",
+        "maximumStartMaeSeconds",
+        "maximumEndMaeSeconds",
+        "maximumP95BoundaryErrorSeconds",
+        "maximumOverlapPairs",
+        "minimumEventFinalLineageCoverage",
+        "maximumUnsupportedMutationCount",
+        "maximumRuntimeGoldInputCount",
+        "maximumDatasetHardcodingCount",
+        "maximumUnsafeFinalizationEscapeCount"
+      ],
+      "additionalProperties": false
+    },
+    "mutationPolicy": {
+      "type": "object",
+      "properties": {
+        "textReplacementMinimumEvidenceTier": {
+          "type": "string",
+          "const": "STRONG"
+        },
+        "minimumTokenCoverage": { "type": "number", "const": 0.8 },
+        "structuralMutationMode": { "type": "string", "const": "observe-only" },
+        "candidateTextPromptAllowed": { "type": "boolean", "const": false },
+        "goldRuntimeInputAllowed": { "type": "boolean", "const": false },
+        "maximumRequestsPerEvent": { "type": "number", "const": 3 },
+        "episodeRequestBudget": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "textReplacementMinimumEvidenceTier",
+        "minimumTokenCoverage",
+        "structuralMutationMode",
+        "candidateTextPromptAllowed",
+        "goldRuntimeInputAllowed",
+        "maximumRequestsPerEvent",
+        "episodeRequestBudget"
+      ],
+      "additionalProperties": false
+    },
+    "artifactSemanticHashes": {
+      "minItems": 8,
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evidenceToCanonical",
+    "singleVariantAudit",
+    "rawAsrEventRecovery",
+    "runtimeGoldInputCount",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "gates",
+    "mutationPolicy",
+    "artifactSemanticHashes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

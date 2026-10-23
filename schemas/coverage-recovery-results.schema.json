@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/coverage-recovery-results.schema.json",
+  "title": "coverage-recovery-results",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "planInputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "roundsCompleted": { "type": "integer", "minimum": 0, "maximum": 2 },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "unitId": { "type": "string", "minLength": 1 },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "cacheHitCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "candidateCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "acceptedCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "decision": {
+            "type": "string",
+            "enum": ["accepted", "rejected", "review-only", "not-run"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "unitId",
+          "requestIds",
+          "cacheHitCount",
+          "candidateCueIds",
+          "acceptedCueIds",
+          "decision",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "requestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acceptedCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedHallucinationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedNoAudibleSpeechCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "workerStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fallbackProcessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "requestCount",
+        "cacheHitCount",
+        "acceptedCandidateCount",
+        "rejectedCandidateCount",
+        "workerStartCount",
+        "modelLoadCount",
+        "fallbackProcessCount"
+      ],
+      "additionalProperties": false
+    },
+    "stopReason": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "no-recovery-units",
+        "no-new-accepted-candidates",
+        "coverage-did-not-improve",
+        "maximum-rounds-reached",
+        "completed",
+        "pending-execution"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "planInputHash",
+    "roundsCompleted",
+    "results",
+    "summary",
+    "stopReason"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>字幕局部复核 · Word Repair</title>
+    <link rel="icon" href="data:," />
+    <style>
+      body {
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+        margin: 32px auto;
+        padding: 0 20px;
+        max-width: 1100px;
+        color: #222;
+        background: #fff;
+      }
+      h1 {
+        font-size: 26px;
+      }
+      header {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 16px;
+      }
+      section {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 18px;
+        margin: 22px 0;
+      }
+      article {
+        border-top: 1px solid #ddd;
+        padding: 16px 0;
+      }
+      textarea {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 80px;
+        font: inherit;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 6px 12px;
+        cursor: pointer;
+        margin: 6px 8px 6px 0;
+      }
+      input {
+        width: 130px;
+      }
+      label {
+        display: inline-block;
+        margin: 5px 12px 5px 0;
+      }
+      audio {
+        width: 100%;
+        max-width: 600px;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      small,
+      .muted {
+        color: #666;
+      }
+      #message {
+        position: sticky;
+        top: 0;
+        background: #fff7d5;
+        padding: 10px;
+        z-index: 1;
+        overflow-wrap: anywhere;
+      }
+      #downloads a {
+        display: block;
+      }
+      summary {
+        cursor: pointer;
+      }
+      .original {
+        background: #f5f5f5;
+        padding: 10px;
+        white-space: pre-wrap;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 600px) {
+        body {
+          margin: 16px auto;
+          padding: 0 12px;
+        }
+        section {
+          padding: 12px;
+        }
+        h1 {
+          font-size: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>字幕局部复核</h1>
+      <p>冻结音频与候选 · 文本和时间分别保存 · 不自动改词</p>
+      <p>
+        这是参考稿辅助开发／人工修订工作台，不是盲测。导出始终标记
+        needs-review，不覆盖原字幕。
+      </p>
+      <button id="reload">重新读取已保存状态</button
+      ><button id="export">导出 ASS / SRT / VTT</button
+      ><button id="backup">备份操作 JSON</button
+      ><label
+        >恢复操作 JSON<input id="restore" type="file" accept="application/json"
+      /></label>
+    </header>
+    <p id="message" role="status">读取中…</p>
+    <div id="downloads"></div>
+    <details>
+      <summary>术语参考（不等于声学证据；不会自动替换）</summary>
+      <p id="vocabulary"></p>
+    </details>
+    <main id="units"></main>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

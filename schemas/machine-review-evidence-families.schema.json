@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-review-evidence-families.schema.json",
+  "title": "machine-review-evidence-families",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-machine-review-evidence-families"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidenceId": { "type": "string", "minLength": 1 },
+          "rootLineageIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "family": {
+            "type": "string",
+            "enum": [
+              "SPEECH_ACTIVITY",
+              "ASR_LEXICAL_CONTENT",
+              "CUE_COVERAGE",
+              "NEIGHBOR_CONTINUITY",
+              "SPEAKER_ACTIVITY",
+              "CROSS_MODEL_CONTENT",
+              "MUSIC_LYRICS_CONTRADICTION",
+              "LOCALIZATION",
+              "WHISPER_STABILITY",
+              "REAZON_STABILITY",
+              "ACOUSTIC_ALIGNMENT",
+              "DECODER",
+              "TIMING_BOUNDARY",
+              "HALLUCINATION",
+              "OVERLAP",
+              "STRUCTURAL_INTEGRITY"
+            ]
+          },
+          "provider": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "correlationGroup": { "type": "string", "minLength": 1 },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "gapIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "positiveRisk": { "type": "boolean" },
+          "evidenceAbsence": { "type": "boolean" },
+          "contradiction": { "type": "boolean" },
+          "strength": { "type": "number", "minimum": 0, "maximum": 1 },
+          "validatedSourceGlobal": { "type": "boolean" },
+          "detailCode": { "type": "string", "minLength": 1 },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "evidenceId",
+          "rootLineageIds",
+          "family",
+          "provider",
+          "correlationGroup",
+          "itemIds",
+          "gapIds",
+          "sourceInterval",
+          "positiveRisk",
+          "evidenceAbsence",
+          "contradiction",
+          "strength",
+          "validatedSourceGlobal",
+          "detailCode",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "correlationGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "groupId": { "type": "string", "minLength": 1 },
+          "evidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rootLineageIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "families": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SPEECH_ACTIVITY",
+                "ASR_LEXICAL_CONTENT",
+                "CUE_COVERAGE",
+                "NEIGHBOR_CONTINUITY",
+                "SPEAKER_ACTIVITY",
+                "CROSS_MODEL_CONTENT",
+                "MUSIC_LYRICS_CONTRADICTION",
+                "LOCALIZATION",
+                "WHISPER_STABILITY",
+                "REAZON_STABILITY",
+                "ACOUSTIC_ALIGNMENT",
+                "DECODER",
+                "TIMING_BOUNDARY",
+                "HALLUCINATION",
+                "OVERLAP",
+                "STRUCTURAL_INTEGRITY"
+              ]
+            }
+          }
+        },
+        "required": ["groupId", "evidenceIds", "rootLineageIds", "families"],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "evidenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "familyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "correlationGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "correlatedEvidenceDeduplicatedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateEvidenceInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evidenceAbsenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evidenceAbsenceRiskBoostCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "evidenceCount",
+        "familyCount",
+        "correlationGroupCount",
+        "correlatedEvidenceDeduplicatedCount",
+        "duplicateEvidenceInputCount",
+        "evidenceAbsenceCount",
+        "evidenceAbsenceRiskBoostCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "evidence",
+    "correlationGroups",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/memory-assisted-ctc-observation.schema.json",
+  "title": "memory-assisted-ctc-observation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "memory-assisted-ctc-observation"
+    },
+    "observationVersion": { "type": "string", "const": "C5.19" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "mode": { "type": "string", "enum": ["off", "targeted-observe-only"] },
+    "runtimeAvailable": { "type": "boolean" },
+    "ctcRuntimeIdentityHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcModelSnapshotHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "deviceUsed": {
+      "anyOf": [
+        { "type": "string", "enum": ["cpu", "mps"] },
+        { "type": "null" }
+      ]
+    },
+    "attempts": {
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "windowType": { "type": "string", "enum": ["narrow", "expanded"] },
+          "projectedTargetHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "pathStatus": { "type": "string", "minLength": 1 },
+          "targetEncodable": { "type": "boolean" },
+          "cacheHit": { "type": "boolean" },
+          "inferenceExecuted": { "type": "boolean" },
+          "timingMutationApplied": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "cueId",
+          "windowType",
+          "projectedTargetHash",
+          "pathStatus",
+          "targetEncodable",
+          "cacheHit",
+          "inferenceExecuted",
+          "timingMutationApplied"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "requestCount": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "cacheHitCount": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "pathSuccessCount": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "memoryAssistedCtcTimingMutationCount": {
+          "type": "number",
+          "const": 0
+        },
+        "networkUsed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "requestCount",
+        "inferenceCount",
+        "cacheHitCount",
+        "pathSuccessCount",
+        "memoryAssistedCtcTimingMutationCount",
+        "networkUsed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "observationVersion",
+    "generatedAt",
+    "mode",
+    "runtimeAvailable",
+    "ctcRuntimeIdentityHash",
+    "ctcModelSnapshotHash",
+    "deviceUsed",
+    "attempts",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

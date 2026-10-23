@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-loss-attribution.schema.json",
+  "title": "gold-loss-attribution",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.1-machine-quality-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "gold-loss-attribution" },
+    "evaluationOnly": { "type": "boolean", "const": true },
+    "goldRuntimeInputCount": { "type": "number", "const": 0 },
+    "machineRunId": { "type": "string" },
+    "goldArtifactSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineMetrics": {
+      "type": "object",
+      "properties": {
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "speechCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missingDialogueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialTextDefectCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTimingDefectCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawAsr": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "cueCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "exactCer": { "type": "number", "minimum": 0 },
+                "normalizedCer": { "type": "number", "minimum": 0 },
+                "speechCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "missingDialogueCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "materialTextDefectCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "severeTimingDefectCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "cueCount",
+                "exactCer",
+                "normalizedCer",
+                "speechCoverage",
+                "missingDialogueCount",
+                "materialTextDefectCount",
+                "severeTimingDefectCount"
+              ],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "finalVsRaw": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "cueCountDelta": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "normalizedCerDelta": { "type": "number" },
+                "speechCoverageDelta": { "type": "number" },
+                "missingDialogueDelta": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "materialTextDefectDelta": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "severeTimingDefectDelta": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "cueCountDelta",
+                "normalizedCerDelta",
+                "speechCoverageDelta",
+                "missingDialogueDelta",
+                "materialTextDefectDelta",
+                "severeTimingDefectDelta"
+              ],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "cueCount",
+        "normalizedCer",
+        "speechCoverage",
+        "missingDialogueCount",
+        "materialTextDefectCount",
+        "severeTimingDefectCount",
+        "rawAsr",
+        "finalVsRaw"
+      ],
+      "additionalProperties": false
+    },
+    "attribution": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": { "type": "string" },
+          "lossClass": {
+            "type": "string",
+            "enum": [
+              "never-detected-speech",
+              "detected-then-filtered",
+              "association-loss",
+              "deduplication-loss",
+              "merge-or-fragment-loss",
+              "finalization-loss",
+              "coverage-recovery-gain",
+              "unattributed-machine-unit-loss"
+            ]
+          },
+          "estimatedGoldLossCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "machineUnitDropCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": [
+          "stage",
+          "lossClass",
+          "estimatedGoldLossCount",
+          "machineUnitDropCount",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evaluationOnly",
+    "goldRuntimeInputCount",
+    "machineRunId",
+    "goldArtifactSha256",
+    "machineMetrics",
+    "attribution"
+  ],
+  "additionalProperties": false
+}

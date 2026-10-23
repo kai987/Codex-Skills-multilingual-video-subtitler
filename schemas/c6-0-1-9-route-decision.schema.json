@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-9-route-decision.schema.json",
+  "title": "c6-0-1-9-route-decision",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.9-independent-asr-complementarity-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-9-route-decision" },
+    "complementarityResult": {
+      "type": "string",
+      "enum": [
+        "SECOND_ASR_COMPLEMENTARITY_CONFIRMED",
+        "SECOND_ASR_COMPLEMENTARITY_WEAK",
+        "SECOND_ASR_NOT_USEFUL",
+        "SECOND_ASR_TOO_UNSTABLE",
+        "INSUFFICIENT_SECOND_ASR_EVIDENCE"
+      ]
+    },
+    "routeDecision": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_10_CROSS_MODEL_ARBITRATION",
+        "HOLD_FOR_SECOND_ASR_SELECTION_DECISION",
+        "REJECT_REAZONSPEECH_K2_AS_ENSEMBLE_MEMBER",
+        "INSUFFICIENT_SECOND_ASR_EVIDENCE"
+      ]
+    },
+    "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
+    "supportingMetrics": {
+      "type": "object",
+      "properties": {
+        "targetEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetBaselineWrongCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonOnlyBetterCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reazonOnlyCorrectCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unionOracleAbsoluteGain": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unionOracleRelativeGain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "unionOracleImprovedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "complementarityRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "controlEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "blindReazonRegressionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "secondAsrStabilityRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "targetEvaluableCount",
+        "targetBaselineWrongCount",
+        "reazonOnlyBetterCount",
+        "reazonOnlyCorrectCount",
+        "unionOracleAbsoluteGain",
+        "unionOracleRelativeGain",
+        "unionOracleImprovedEventCount",
+        "complementarityRate",
+        "controlEvaluableCount",
+        "blindReazonRegressionCount",
+        "secondAsrStabilityRate"
+      ],
+      "additionalProperties": false
+    },
+    "reasons": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "recommendCrossModelArbitrationNext": { "type": "boolean" },
+    "rejectReazonK2": { "type": "boolean" },
+    "canonicalTextMutationCount": { "type": "number", "const": 0 },
+    "canonicalTimingMutationCount": { "type": "number", "const": 0 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineReleaseAuthorized": { "type": "boolean", "const": false },
+    "goC602": { "type": "boolean", "const": false },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "complementarityResult",
+    "routeDecision",
+    "confidence",
+    "supportingMetrics",
+    "reasons",
+    "blockers",
+    "recommendCrossModelArbitrationNext",
+    "rejectReazonK2",
+    "canonicalTextMutationCount",
+    "canonicalTimingMutationCount",
+    "productionStatus",
+    "finalizationMethod",
+    "machineReleaseAuthorized",
+    "goC602",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

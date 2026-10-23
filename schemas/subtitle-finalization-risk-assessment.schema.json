@@ -1,0 +1,766 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-finalization-risk-assessment.schema.json",
+  "title": "subtitle-finalization-risk-assessment",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-finalization-risk-assessment"
+    },
+    "riskVersion": { "type": "string", "const": "C6.0-protected" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0-protected-finalization-risk-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "taskName": { "type": "string", "minLength": 1 },
+        "sourceFileName": { "type": "string", "minLength": 1 },
+        "sourceFileSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceFileSize": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalTimingHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "taskName",
+        "sourceFileName",
+        "sourceFileSha256",
+        "sourceFileSize",
+        "canonicalCueHash",
+        "canonicalTimingHash",
+        "presentationHash"
+      ],
+      "additionalProperties": false
+    },
+    "humanAuthority": {
+      "type": "object",
+      "properties": {
+        "authorityType": {
+          "type": "string",
+          "enum": ["user-confirmed-human-reviewed", "none"]
+        },
+        "authorityVerified": { "type": "boolean" },
+        "authoritySemanticHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "authorityType",
+        "authorityVerified",
+        "authoritySemanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["legacy", "protected-observe", "protected-enforce"]
+    },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "blindAcceptanceRequired": { "type": "boolean", "const": true },
+    "legacyState": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "minLength": 1 },
+        "finalizationMethod": { "type": "string", "minLength": 1 },
+        "qualityPassed": { "type": "boolean" },
+        "blockingFindingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "status",
+        "finalizationMethod",
+        "qualityPassed",
+        "blockingFindingCount",
+        "reviewItemCount"
+      ],
+      "additionalProperties": false
+    },
+    "policyIntegrityPassed": { "type": "boolean" },
+    "signalAssessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "signalId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "occurrenceCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "policyMatched": { "type": "boolean" },
+          "rootRiskFamily": { "type": "string", "minLength": 1 },
+          "blockingScope": {
+            "type": "string",
+            "enum": [
+              "current-output-safety",
+              "automatic-mutation-safety",
+              "evidence-availability",
+              "evidence-consistency",
+              "delivery-integrity",
+              "format-compatibility",
+              "review-routing",
+              "diagnostic-only"
+            ]
+          },
+          "evidencePolarity": {
+            "type": "string",
+            "enum": [
+              "positive-risk-evidence",
+              "absence-of-support",
+              "contradictory-evidence",
+              "execution-diagnostic",
+              "format-advisory",
+              "preservation-support"
+            ]
+          },
+          "originalDisposition": {
+            "type": "string",
+            "enum": [
+              "FINAL_BLOCKER",
+              "MUTATION_GUARD",
+              "REVIEW_ADVISORY",
+              "DIAGNOSTIC_ONLY",
+              "CONTEXT_DEPENDENT",
+              "SUPERSEDED",
+              "UNKNOWN"
+            ]
+          },
+          "effectiveDisposition": {
+            "type": "string",
+            "enum": [
+              "FINAL_BLOCKER",
+              "MUTATION_GUARD",
+              "REVIEW_ADVISORY",
+              "DIAGNOSTIC_ONLY",
+              "CONTEXT_DEPENDENT",
+              "SUPERSEDED",
+              "UNKNOWN"
+            ]
+          },
+          "currentOutputRisk": {
+            "type": "string",
+            "enum": [
+              "PROVEN_UNSAFE",
+              "HIGH_RISK",
+              "UNKNOWN",
+              "LOW_RISK",
+              "NO_POSITIVE_DEFECT_EVIDENCE"
+            ]
+          },
+          "proposedMutationRisk": {
+            "type": "string",
+            "enum": ["HIGH", "MEDIUM", "LOW", "NOT_APPLICABLE"]
+          },
+          "finalBlocking": { "type": "boolean" },
+          "reasonCodes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "signalId",
+          "code",
+          "occurrenceCount",
+          "policyMatched",
+          "rootRiskFamily",
+          "blockingScope",
+          "evidencePolarity",
+          "originalDisposition",
+          "effectiveDisposition",
+          "currentOutputRisk",
+          "proposedMutationRisk",
+          "finalBlocking",
+          "reasonCodes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "freshnessAssessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "freshnessId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "cueId": { "type": "string", "minLength": 1 },
+          "componentId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "originalEvidenceRef": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+          },
+          "originalEvidenceHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "laterEvidenceRef": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+          },
+          "laterEvidenceHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "canonicalTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "semanticSubject": { "type": "string", "minLength": 1 },
+          "originalMeaning": { "type": "string", "minLength": 1 },
+          "laterMeaning": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "cueIdentityMatched": { "type": "boolean" },
+          "canonicalHashMatched": { "type": "boolean" },
+          "timingHashMatched": { "type": "boolean" },
+          "semanticSubjectMatched": { "type": "boolean" },
+          "lineageCompatible": { "type": "boolean" },
+          "canonicalTextChanged": { "type": "boolean" },
+          "canonicalTimingChanged": { "type": "boolean" },
+          "freshnessStatus": {
+            "type": "string",
+            "enum": [
+              "current",
+              "superseded",
+              "missing-later-evidence",
+              "cue-mismatch",
+              "hash-mismatch",
+              "subject-mismatch",
+              "canonical-changed",
+              "timing-changed",
+              "lineage-mismatch"
+            ]
+          },
+          "supersededByEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasonCodes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "freshnessId",
+          "code",
+          "cueId",
+          "componentId",
+          "originalEvidenceRef",
+          "originalEvidenceHash",
+          "laterEvidenceRef",
+          "laterEvidenceHash",
+          "canonicalCueHash",
+          "canonicalTimingHash",
+          "semanticSubject",
+          "originalMeaning",
+          "laterMeaning",
+          "cueIdentityMatched",
+          "canonicalHashMatched",
+          "timingHashMatched",
+          "semanticSubjectMatched",
+          "lineageCompatible",
+          "canonicalTextChanged",
+          "canonicalTimingChanged",
+          "freshnessStatus",
+          "supersededByEvidenceIds",
+          "reasonCodes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "effectiveFindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "findingId": { "type": "string", "minLength": 1 },
+          "originalSeverity": {
+            "type": "string",
+            "enum": ["blocking", "warning"]
+          },
+          "originalCode": { "type": "string", "minLength": 1 },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "effectiveDisposition": {
+            "type": "string",
+            "enum": [
+              "FINAL_BLOCKER",
+              "MUTATION_GUARD",
+              "REVIEW_ADVISORY",
+              "DIAGNOSTIC_ONLY",
+              "CONTEXT_DEPENDENT",
+              "SUPERSEDED",
+              "UNKNOWN"
+            ]
+          },
+          "effectiveFinalBlocking": { "type": "boolean" },
+          "effectiveReviewAdvisory": { "type": "boolean" },
+          "riskScope": {
+            "type": "string",
+            "enum": [
+              "current-output-safety",
+              "automatic-mutation-safety",
+              "evidence-availability",
+              "evidence-consistency",
+              "delivery-integrity",
+              "format-compatibility",
+              "review-routing",
+              "diagnostic-only"
+            ]
+          },
+          "rootRiskFamily": { "type": "string", "minLength": 1 },
+          "freshnessStatus": {
+            "type": "string",
+            "enum": ["current", "superseded", "not-applicable", "failed"]
+          },
+          "rationale": { "type": "string", "minLength": 1 },
+          "evidenceRefs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+            }
+          },
+          "reasonCodes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "findingId",
+          "originalSeverity",
+          "originalCode",
+          "cueIds",
+          "effectiveDisposition",
+          "effectiveFinalBlocking",
+          "effectiveReviewAdvisory",
+          "riskScope",
+          "rootRiskFamily",
+          "freshnessStatus",
+          "rationale",
+          "evidenceRefs",
+          "reasonCodes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rootRisks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rootRiskId": { "type": "string", "minLength": 1 },
+          "rootRiskFamily": { "type": "string", "minLength": 1 },
+          "memberSignalIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "derivedFindingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "metaFindingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "effectiveDisposition": {
+            "type": "string",
+            "enum": [
+              "FINAL_BLOCKER",
+              "MUTATION_GUARD",
+              "REVIEW_ADVISORY",
+              "DIAGNOSTIC_ONLY",
+              "CONTEXT_DEPENDENT",
+              "SUPERSEDED",
+              "UNKNOWN"
+            ]
+          }
+        },
+        "required": [
+          "rootRiskId",
+          "rootRiskFamily",
+          "memberSignalIds",
+          "derivedFindingIds",
+          "metaFindingIds",
+          "effectiveDisposition"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "componentRisks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewId": { "type": "string", "minLength": 1 },
+          "componentId": { "type": "string", "minLength": 1 },
+          "cueIds": {
+            "minItems": 2,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "currentOutputRisk": {
+            "type": "string",
+            "enum": [
+              "PROVEN_UNSAFE",
+              "HIGH_RISK",
+              "UNKNOWN",
+              "LOW_RISK",
+              "NO_POSITIVE_DEFECT_EVIDENCE"
+            ]
+          },
+          "proposedMutationRisk": {
+            "type": "string",
+            "enum": ["HIGH", "MEDIUM", "LOW", "NOT_APPLICABLE"]
+          },
+          "positiveCurrentOutputDefectEvidence": { "type": "boolean" },
+          "safeAutomaticMutationAvailable": { "type": "boolean" },
+          "speakerRelationshipResolved": { "type": "boolean" },
+          "subtitleOverlapResolved": { "type": "boolean" },
+          "preservationSupported": { "type": "boolean" },
+          "preservationSupportEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasonCodes": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "reviewId",
+          "componentId",
+          "cueIds",
+          "currentOutputRisk",
+          "proposedMutationRisk",
+          "positiveCurrentOutputDefectEvidence",
+          "safeAutomaticMutationAvailable",
+          "speakerRelationshipResolved",
+          "subtitleOverlapResolved",
+          "preservationSupported",
+          "preservationSupportEvidenceIds",
+          "reasonCodes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "baselinePreservation": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "artifactType": {
+          "type": "string",
+          "const": "subtitle-baseline-preservation-assessment"
+        },
+        "preservationVersion": {
+          "type": "string",
+          "const": "c6.0-human-baseline-preservation-v1"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "decisionPath": { "type": "string", "const": "BASELINE_PRESERVATION" },
+        "canonicalCueHashBefore": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "canonicalCueHashAfter": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "canonicalTimingHashBefore": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "canonicalTimingHashAfter": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "canonicalTextMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTimingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "checks": {
+          "type": "object",
+          "properties": {
+            "humanAuthorityVerified": { "type": "boolean" },
+            "sourceReadOnlyVerified": { "type": "boolean" },
+            "humanSubtitleReadOnlyVerified": { "type": "boolean" },
+            "canonicalCueHashUnchanged": { "type": "boolean" },
+            "canonicalTimingHashUnchanged": { "type": "boolean" },
+            "noCanonicalTextMutation": { "type": "boolean" },
+            "noCanonicalTimingMutation": { "type": "boolean" },
+            "noPositiveCurrentOutputDefectEvidence": { "type": "boolean" },
+            "noIntegrityFinalBlockers": { "type": "boolean" },
+            "noUnknownObservedSignals": { "type": "boolean" },
+            "freshnessIntegrityPassed": { "type": "boolean" },
+            "policyIntegrityPassed": { "type": "boolean" },
+            "serializationRoundTripPassed": { "type": "boolean" },
+            "formatSemanticParityPassed": { "type": "boolean" },
+            "presentationIntegrityPassed": { "type": "boolean" },
+            "reviewDeliveryIntegrityPassed": { "type": "boolean" }
+          },
+          "required": [
+            "humanAuthorityVerified",
+            "sourceReadOnlyVerified",
+            "humanSubtitleReadOnlyVerified",
+            "canonicalCueHashUnchanged",
+            "canonicalTimingHashUnchanged",
+            "noCanonicalTextMutation",
+            "noCanonicalTimingMutation",
+            "noPositiveCurrentOutputDefectEvidence",
+            "noIntegrityFinalBlockers",
+            "noUnknownObservedSignals",
+            "freshnessIntegrityPassed",
+            "policyIntegrityPassed",
+            "serializationRoundTripPassed",
+            "formatSemanticParityPassed",
+            "presentationIntegrityPassed",
+            "reviewDeliveryIntegrityPassed"
+          ],
+          "additionalProperties": false
+        },
+        "eligible": { "type": "boolean" },
+        "applied": { "type": "boolean" },
+        "reasonCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "schemaVersion",
+        "artifactType",
+        "preservationVersion",
+        "generatedAt",
+        "decisionPath",
+        "canonicalCueHashBefore",
+        "canonicalCueHashAfter",
+        "canonicalTimingHashBefore",
+        "canonicalTimingHashAfter",
+        "canonicalTextMutationCount",
+        "canonicalTimingMutationCount",
+        "checks",
+        "eligible",
+        "applied",
+        "reasonCodes",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "observedSignalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "policyCoveredObservedSignalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownObservedSignalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownSignalFailClosedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "legacyBlockingFindingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effectiveProtectedFinalBlockerCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effectiveMutationGuardCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effectiveReviewAdvisoryCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effectiveDiagnosticCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effectiveSupersededCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "positiveCurrentOutputDefectEvidenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rootRiskFamilyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "legacyReviewItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "protectedReviewArtifactItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effectiveMandatoryReviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effectiveAdvisoryReviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "preservationSupportedReviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speakerRelationshipResolvedComponentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "subtitleOverlapResolvedComponentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTimingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "observedSignalCount",
+        "policyCoveredObservedSignalCount",
+        "unknownObservedSignalCount",
+        "unknownSignalFailClosedCount",
+        "legacyBlockingFindingCount",
+        "effectiveProtectedFinalBlockerCount",
+        "effectiveMutationGuardCount",
+        "effectiveReviewAdvisoryCount",
+        "effectiveDiagnosticCount",
+        "effectiveSupersededCount",
+        "positiveCurrentOutputDefectEvidenceCount",
+        "rootRiskFamilyCount",
+        "legacyReviewItemCount",
+        "protectedReviewArtifactItemCount",
+        "effectiveMandatoryReviewCount",
+        "effectiveAdvisoryReviewCount",
+        "preservationSupportedReviewCount",
+        "speakerRelationshipResolvedComponentCount",
+        "subtitleOverlapResolvedComponentCount",
+        "canonicalTextMutationCount",
+        "canonicalTimingMutationCount"
+      ],
+      "additionalProperties": false
+    },
+    "protectedOutcome": {
+      "type": "string",
+      "enum": [
+        "FINAL_SAFE",
+        "FINAL_SAFE_WITH_ADVISORIES",
+        "HUMAN_REVIEW_REQUIRED",
+        "REJECTED",
+        "MACHINE_ONLY_NOT_AUTHORIZED"
+      ]
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "riskVersion",
+    "policyVersion",
+    "policyHash",
+    "generatedAt",
+    "sourceIdentity",
+    "humanAuthority",
+    "mode",
+    "machineOnlyReleaseAuthorized",
+    "blindAcceptanceRequired",
+    "legacyState",
+    "policyIntegrityPassed",
+    "signalAssessments",
+    "freshnessAssessments",
+    "effectiveFindings",
+    "rootRisks",
+    "componentRisks",
+    "baselinePreservation",
+    "summary",
+    "protectedOutcome",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

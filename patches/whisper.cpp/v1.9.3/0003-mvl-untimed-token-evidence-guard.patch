@@ -1,0 +1,88 @@
+diff --git a/examples/server/server.cpp b/examples/server/server.cpp
+index 35e4b7bc..7c92c193 100644
+--- a/examples/server/server.cpp
++++ b/examples/server/server.cpp
+@@ -1254,21 +1254,21 @@ int main(int argc, char ** argv) {
+                     json raw = nullptr;
+                     json mapped = nullptr;
+                     if (!special && params.token_timestamps && token.t0 >= 0 && token.t1 >= token.t0) {
+-                        raw = json{
+-                            {"startCentiseconds", token.t0},
+-                            {"endCentiseconds", token.t1},
+-                            {"coordinateSystem", params.vad ? "vad-processed-local" : "original-audio-local"},
+-                        };
+                         const int64_t mapped_t0 = whisper_full_get_token_t0_from_state(mvl_state.get(), i, j);
+                         const int64_t mapped_t1 = whisper_full_get_token_t1_from_state(mvl_state.get(), i, j);
+-                        mapped_token_getter_used = true;
+                         if (mapped_t0 >= 0 && mapped_t1 >= mapped_t0) {
++                            raw = json{
++                                {"startCentiseconds", token.t0},
++                                {"endCentiseconds", token.t1},
++                                {"coordinateSystem", params.vad ? "vad-processed-local" : "original-audio-local"},
++                            };
+                             mapped = json{
+                                 {"startCentiseconds", mapped_t0},
+                                 {"endCentiseconds", mapped_t1},
+                                 {"coordinateSystem", "original-audio-local"},
+                                 {"method", "whisper_full_get_token_t0_t1"},
+                             };
++                            mapped_token_getter_used = true;
+                             ++mapped_token_count;
+                         }
+                     }
+@@ -1293,15 +1293,22 @@ int main(int argc, char ** argv) {
+                     }
+                     std::string word_text = whisper_full_get_token_text_from_state(ctx, mvl_state.get(), i, j);
+                     std::vector<int> member_indices = {j};
+-                    int64_t raw_start = first.t0;
+-                    int64_t raw_end = first.t1;
++                    int64_t raw_start = -1;
++                    int64_t raw_end = -1;
+                     int64_t mapped_start = -1;
+                     int64_t mapped_end = -1;
+                     float probability_sum = first.p;
++                    bool group_timing_valid = false;
+                     if (params.token_timestamps && first.t0 >= 0 && first.t1 >= first.t0) {
+-                        mapped_start = whisper_full_get_token_t0_from_state(mvl_state.get(), i, j);
+-                        mapped_end = whisper_full_get_token_t1_from_state(mvl_state.get(), i, j);
+-                        mapped_token_getter_used = true;
++                        const int64_t first_mapped_start = whisper_full_get_token_t0_from_state(mvl_state.get(), i, j);
++                        const int64_t first_mapped_end = whisper_full_get_token_t1_from_state(mvl_state.get(), i, j);
++                        if (first_mapped_start >= 0 && first_mapped_end >= first_mapped_start) {
++                            raw_start = first.t0;
++                            raw_end = first.t1;
++                            mapped_start = first_mapped_start;
++                            mapped_end = first_mapped_end;
++                            group_timing_valid = true;
++                        }
+                     }
+                     while (j + 1 < n_tokens && utf8_trailing_bytes_needed(word_text) > 0) {
+                         const whisper_token_data next = whisper_full_get_token_data_from_state(mvl_state.get(), i, j + 1);
+@@ -1312,15 +1319,19 @@ int main(int argc, char ** argv) {
+                         member_indices.push_back(j);
+                         word_text += whisper_full_get_token_text_from_state(ctx, mvl_state.get(), i, j);
+                         probability_sum += next.p;
+-                        if (next.t1 >= 0) {
+-                            raw_end = next.t1;
+-                        }
+-                        if (params.token_timestamps && next.t0 >= 0 && next.t1 >= next.t0) {
+-                            if (mapped_start < 0) {
+-                                mapped_start = whisper_full_get_token_t0_from_state(mvl_state.get(), i, j);
++                        if (group_timing_valid) {
++                            const int64_t next_mapped_start = whisper_full_get_token_t0_from_state(mvl_state.get(), i, j);
++                            const int64_t next_mapped_end = whisper_full_get_token_t1_from_state(mvl_state.get(), i, j);
++                            if (next.t0 < 0 || next.t1 < next.t0 || next_mapped_start < 0 || next_mapped_end < next_mapped_start) {
++                                raw_start = -1;
++                                raw_end = -1;
++                                mapped_start = -1;
++                                mapped_end = -1;
++                                group_timing_valid = false;
++                            } else {
++                                raw_end = next.t1;
++                                mapped_end = next_mapped_end;
+                             }
+-                            mapped_end = whisper_full_get_token_t1_from_state(mvl_state.get(), i, j);
+-                            mapped_token_getter_used = true;
+                         }
+                     }
+                     segment["words"].push_back(json{

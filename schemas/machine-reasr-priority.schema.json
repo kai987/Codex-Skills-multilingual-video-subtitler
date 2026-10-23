@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-reasr-priority.schema.json",
+  "title": "machine-reasr-priority",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "machine-reasr-priority" },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "eligibilityPolicy": {
+      "type": "string",
+      "const": "one-strong-or-two-independent-weak"
+    },
+    "orderingPolicy": {
+      "type": "string",
+      "const": "priority-diversity-recoverability-stable-hash-no-event-id"
+    },
+    "episodeRequestBudget": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "maximumRequestsPerEvent": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "riskFacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "requestEdgeRisk",
+                    "ctcWeak",
+                    "ctcUnscorable",
+                    "tokenWeak",
+                    "tokenConflict",
+                    "speechIncomplete",
+                    "decoderWeak",
+                    "decoderUnknown",
+                    "independentWindowDisagreement",
+                    "repetitionRisk",
+                    "noSpeechConflict",
+                    "durationTextAnomaly",
+                    "pronunciationCoverageWeak",
+                    "associationAmbiguity",
+                    "overlapRisk"
+                  ]
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": ["NONE", "WEAK", "STRONG", "UNKNOWN"]
+                },
+                "correlationGroup": {
+                  "type": "string",
+                  "enum": [
+                    "REQUEST_EDGE",
+                    "CTC",
+                    "TOKEN",
+                    "SPEECH_VAD",
+                    "DECODER",
+                    "CROSS_WINDOW",
+                    "TEXT_SHAPE",
+                    "ASSOCIATION",
+                    "OVERLAP"
+                  ]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "name",
+                "severity",
+                "correlationGroup",
+                "evidenceIds",
+                "reasons"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "correlationGroups": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "REQUEST_EDGE",
+                "CTC",
+                "TOKEN",
+                "SPEECH_VAD",
+                "DECODER",
+                "CROSS_WINDOW",
+                "TEXT_SHAPE",
+                "ASSOCIATION",
+                "OVERLAP"
+              ]
+            }
+          },
+          "strongRiskCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "independentWeakRiskCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evidenceDiversityCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "recoverabilitySignals": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "recommendedAction": {
+            "type": "string",
+            "enum": ["KEEP", "VERIFY", "RE_ASR", "REVIEW"]
+          },
+          "priorityClass": {
+            "type": "string",
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NONE"]
+          },
+          "selectionReason": { "type": "string", "minLength": 1 },
+          "stableTieBreakHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "budgetSelected": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "riskFacts",
+          "correlationGroups",
+          "strongRiskCount",
+          "independentWeakRiskCount",
+          "evidenceDiversityCount",
+          "recoverabilitySignals",
+          "recommendedAction",
+          "priorityClass",
+          "selectionReason",
+          "stableTieBreakHash",
+          "budgetSelected",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "eligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "budgetSelectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "budgetExhaustedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requestBudgetUsed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventCount",
+        "eligibleCount",
+        "budgetSelectedCount",
+        "budgetExhaustedCount",
+        "requestBudgetUsed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "eligibilityPolicy",
+    "orderingPolicy",
+    "episodeRequestBudget",
+    "maximumRequestsPerEvent",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

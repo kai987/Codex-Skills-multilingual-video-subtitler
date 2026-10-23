@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/reference-original-lyrics-resolution.schema.json",
+  "title": "reference-original-lyrics-resolution",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "trustedReferenceOriginalOutranksLyricsAsr": {
+          "type": "boolean",
+          "const": true
+        },
+        "minimumClassifierConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "trustedReferenceOriginalOutranksLyricsAsr",
+        "minimumClassifierConfidence"
+      ],
+      "additionalProperties": false
+    },
+    "addedCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "replacedCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "removedConflictingCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "referenceAnchorIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "referenceCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "conflictingAsrCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "reference-original-selected",
+              "existing-equivalent-kept",
+              "review-unresolved"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "interval",
+          "referenceAnchorIds",
+          "referenceCueIds",
+          "conflictingAsrCueIds",
+          "selectedCueIds",
+          "decision",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "configuration",
+    "addedCueIds",
+    "replacedCueIds",
+    "removedConflictingCueIds",
+    "conflicts",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

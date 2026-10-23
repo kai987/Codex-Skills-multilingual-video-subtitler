@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-text-replacement-contract.schema.json",
+  "title": "machine-text-replacement-contract",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-vad-timebase-acoustic-text-variant-reasr-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-text-replacement-contract"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "replacementId": { "type": "string", "minLength": 1 },
+          "fromCandidateId": { "type": "string", "minLength": 1 },
+          "toCandidateId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "evidenceTierBefore": {
+            "type": "string",
+            "enum": ["NONE", "WEAK", "MEDIUM", "STRONG"]
+          },
+          "evidenceTierAfter": {
+            "type": "string",
+            "enum": ["NONE", "WEAK", "MEDIUM", "STRONG"]
+          },
+          "acousticComparison": {
+            "type": "string",
+            "enum": ["DOMINATES", "WEAKER", "INCOMPARABLE", "UNSCORABLE"]
+          },
+          "tokenComparison": {
+            "type": "string",
+            "enum": [
+              "MORE_SUPPORT",
+              "SAME_SUPPORT",
+              "LESS_SUPPORT",
+              "CONFLICT",
+              "UNAVAILABLE"
+            ]
+          },
+          "independentSupportBefore": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "independentSupportAfter": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "reason": { "type": "string", "minLength": 1 },
+          "accepted": { "type": "boolean" },
+          "textSourceIsRealMachineCandidate": {
+            "type": "boolean",
+            "const": true
+          },
+          "freeRewriteUsed": { "type": "boolean", "const": false },
+          "timingProposalId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "timingNonDegradationPassed": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "replacementId",
+          "fromCandidateId",
+          "toCandidateId",
+          "eventId",
+          "evidenceTierBefore",
+          "evidenceTierAfter",
+          "acousticComparison",
+          "tokenComparison",
+          "independentSupportBefore",
+          "independentSupportAfter",
+          "reason",
+          "accepted",
+          "textSourceIsRealMachineCandidate",
+          "freeRewriteUsed",
+          "timingProposalId",
+          "timingNonDegradationPassed",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "proposedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "acceptedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTimingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "presentationMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freeRewriteCount": { "type": "number", "const": 0 },
+        "weakEvidenceReplacementCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "proposedCount",
+        "acceptedCount",
+        "rejectedCount",
+        "canonicalTextMutationCount",
+        "canonicalTimingMutationCount",
+        "presentationMutationCount",
+        "freeRewriteCount",
+        "weakEvidenceReplacementCount"
+      ],
+      "additionalProperties": false
+    },
+    "beforeTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "afterTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "beforeTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "afterTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "records",
+    "summary",
+    "beforeTextHash",
+    "afterTextHash",
+    "beforeTimingHash",
+    "afterTimingHash",
+    "presentationHash",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

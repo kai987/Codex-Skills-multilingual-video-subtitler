@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-token-timestamp-recovery.schema.json",
+  "title": "machine-token-timestamp-recovery",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.1-machine-quality-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "profile": {
+      "type": "string",
+      "enum": ["legacy", "diagnostics", "coverage", "timing", "full"]
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "runId": { "type": "string", "minLength": 1 },
+        "repositoryCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "goldRuntimeInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "runId",
+        "repositoryCommit",
+        "sourceMediaSha256",
+        "goldRuntimeInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-token-timestamp-recovery"
+    },
+    "baselineCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "baselineCueWithTokenCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "recoveryAttemptCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "recoveryAttemptWithTokenCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "mappedTokenCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unmappedTokenCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "trustedForCanonicalTiming": { "type": "boolean" },
+    "rejectionReasons": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "mode",
+    "profile",
+    "run",
+    "artifactType",
+    "baselineCueCount",
+    "baselineCueWithTokenCount",
+    "recoveryAttemptCount",
+    "recoveryAttemptWithTokenCount",
+    "mappedTokenCount",
+    "unmappedTokenCount",
+    "trustedForCanonicalTiming",
+    "rejectionReasons"
+  ],
+  "additionalProperties": false
+}

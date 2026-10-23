@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-machine-code-snapshot.schema.json",
+  "title": "c6-0-1-14-3-machine-code-snapshot",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-machine-code-snapshot"
+    },
+    "files": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relativePath": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["relativePath", "sha256"],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": ["schemaVersion", "artifactType", "files", "semanticHash"],
+  "additionalProperties": false
+}

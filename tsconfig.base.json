@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "verbatimModuleSyntax": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@mvl/shared": ["./packages/shared/src/index.ts"],
+      "@mvl/media-identity": ["./packages/media-identity/src/index.ts"],
+      "@mvl/subtitle-core": ["./packages/subtitle-core/src/index.ts"],
+      "@mvl/subtitle-search": ["./packages/subtitle-search/src/index.ts"],
+      "@mvl/transcription-core": ["./packages/transcription-core/src/index.ts"],
+      "@mvl/grammar-report-core": [
+        "./packages/grammar-report-core/src/index.ts"
+      ],
+      "@mvl/site-builder-core": ["./packages/site-builder-core/src/index.ts"],
+      "@mvl/pipeline-core": ["./packages/pipeline-core/src/index.ts"],
+      "@mvl/video-subtitler": ["./packages/video-subtitler/src/index.ts"]
+    }
+  }
+}

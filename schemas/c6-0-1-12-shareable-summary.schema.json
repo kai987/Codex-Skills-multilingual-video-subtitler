@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-shareable-summary.schema.json",
+  "title": "c6-0-1-12-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-multi-asr-review-assistance-v2"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-12-shareable-summary"
+    },
+    "shareable": { "type": "boolean", "const": true },
+    "reviewPackageFreezeHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewQualityEvaluationHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "routeDecisionHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "reviewItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewRegions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredRegions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateActionableItems": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "correctionRecords": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "reviewItems",
+        "reviewRegions",
+        "requiredItems",
+        "requiredRegions",
+        "candidateActionableItems",
+        "correctionRecords"
+      ],
+      "additionalProperties": false
+    },
+    "decisionCounts": {
+      "type": "object",
+      "properties": {
+        "KEEP_CURRENT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "USE_REAZON": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "USE_WHISPER_ALTERNATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "MANUAL_EDIT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIMING_EDIT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ADD_NEW_CUE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "MARK_FALSE_POSITIVE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "UNRESOLVED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "WAIVE_REVIEW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "KEEP_CURRENT",
+        "USE_REAZON",
+        "USE_WHISPER_ALTERNATE",
+        "MANUAL_EDIT",
+        "TIMING_EDIT",
+        "ADD_NEW_CUE",
+        "MARK_FALSE_POSITIVE",
+        "UNRESOLVED",
+        "WAIVE_REVIEW"
+      ],
+      "additionalProperties": false
+    },
+    "qualityMetrics": {
+      "type": "object",
+      "properties": {
+        "rankingResult": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "REVIEW_PRIORITY_EFFECTIVE",
+                "REVIEW_PRIORITY_WEAK",
+                "REVIEW_PRIORITY_NOT_EFFECTIVE"
+              ]
+            },
+            { "type": "null" }
+          ]
+        },
+        "candidateFixRate": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "manualEditRate": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "materialRecallAt10": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "materialRecallAt50": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "rankingResult",
+        "candidateFixRate",
+        "manualEditRate",
+        "materialRecallAt10",
+        "materialRecallAt50"
+      ],
+      "additionalProperties": false
+    },
+    "localReviewAudioIncluded": { "type": "boolean", "const": false },
+    "localReviewWorkspaceIncluded": { "type": "boolean", "const": false },
+    "localCorrectionDatasetIncluded": { "type": "boolean", "const": false },
+    "containsRawAudio": { "type": "boolean", "const": false },
+    "containsFullDialogueText": { "type": "boolean", "const": false },
+    "containsFullGoldText": { "type": "boolean", "const": false },
+    "containsAbsolutePaths": { "type": "boolean", "const": false },
+    "secretCount": { "type": "number", "const": 0 },
+    "brokenRelativeReferenceCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "shareable",
+    "reviewPackageFreezeHash",
+    "reviewQualityEvaluationHash",
+    "routeDecisionHash",
+    "counts",
+    "decisionCounts",
+    "qualityMetrics",
+    "localReviewAudioIncluded",
+    "localReviewWorkspaceIncluded",
+    "localCorrectionDatasetIncluded",
+    "containsRawAudio",
+    "containsFullDialogueText",
+    "containsFullGoldText",
+    "containsAbsolutePaths",
+    "secretCount",
+    "brokenRelativeReferenceCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

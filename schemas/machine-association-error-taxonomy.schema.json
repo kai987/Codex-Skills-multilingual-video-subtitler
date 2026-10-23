@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-association-error-taxonomy.schema.json",
+  "title": "machine-association-error-taxonomy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.7-fresh-targeted-reasr-asr-ceiling-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-association-error-taxonomy"
+    },
+    "zone": {
+      "type": "string",
+      "const": "evaluation-only-gold-isolated-post-freeze"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorId": { "type": "string", "minLength": 1 },
+          "eventIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "TRUE_ASSOCIATION_MISMATCH",
+              "NON_UNIQUE_EVENT_TO_CUE_MAPPING",
+              "SEGMENTATION_AMBIGUITY",
+              "MANY_TO_ONE_EXPECTED",
+              "ONE_TO_MANY_EXPECTED",
+              "EVENT_BOUNDARY_AMBIGUITY",
+              "SPAN_LINEAGE_AMBIGUITY",
+              "UNKNOWN_ASSOCIATION"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "errorId",
+          "eventIds",
+          "finalCueIds",
+          "classification",
+          "evidenceIds",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "oldAssociationErrorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trueAssociationMismatchCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "nonUniqueMappingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "segmentationAmbiguityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manyToOneExpectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oneToManyExpectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "eventBoundaryAmbiguityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "spanLineageAmbiguityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownAssociationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "oldAssociationErrorCount",
+        "trueAssociationMismatchCount",
+        "nonUniqueMappingCount",
+        "segmentationAmbiguityCount",
+        "manyToOneExpectedCount",
+        "oneToManyExpectedCount",
+        "eventBoundaryAmbiguityCount",
+        "spanLineageAmbiguityCount",
+        "unknownAssociationCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "zone",
+    "runtimeGoldInputCount",
+    "entries",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

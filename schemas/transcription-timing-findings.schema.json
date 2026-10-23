@@ -1,0 +1,462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/transcription-timing-findings.schema.json",
+  "title": "transcription-timing-findings",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "allFindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "sourceStage": {
+            "type": "string",
+            "enum": [
+              "baseline-qa",
+              "canonical-qa",
+              "no-vad-comparison",
+              "refinement",
+              "timing-repair",
+              "presentation",
+              "post-presentation-qa",
+              "final-integrity-gate",
+              "coverage-integrity",
+              "scene-coverage-integrity",
+              "hypothesis-resolution",
+              "japanese-normalization"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "repaired",
+              "resolved",
+              "superseded",
+              "informational",
+              "needs-human-review"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["text", "timing", "presentation", "mixed"]
+          },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "refinementIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "replacedByCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "supersededByFindingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedHypothesis": {
+            "type": "string",
+            "enum": ["baseline", "refinement", "vad", "no-vad", "unknown"]
+          },
+          "rejectedHypothesis": {
+            "type": "string",
+            "enum": ["baseline", "refinement", "vad", "no-vad"]
+          },
+          "refinementNotRunReason": {
+            "type": "string",
+            "enum": [
+              "not-needed",
+              "covered-by-neighbor",
+              "covered-by-parent-refinement",
+              "superseded",
+              "duplicate-work",
+              "timing-only-repair-sufficient",
+              "budget-limit",
+              "missing-acoustic-evidence",
+              "missing-model-capability",
+              "execution-failed"
+            ]
+          },
+          "coveredByRefinementId": { "type": "string", "minLength": 1 },
+          "resolvedBy": {
+            "type": "object",
+            "properties": {
+              "stage": { "type": "string", "minLength": 1 },
+              "operation": { "type": "string", "minLength": 1 },
+              "artifact": { "type": "string", "minLength": 1 }
+            },
+            "required": ["stage", "operation"],
+            "additionalProperties": false
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "missingDialogue": { "type": "boolean" },
+          "missingLyrics": { "type": "boolean" },
+          "integrityIssue": { "type": "boolean" },
+          "requiresAudioReview": { "type": "boolean" },
+          "vocalRegionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "acceptedCueReview": {
+            "type": "object",
+            "properties": {
+              "finalCueId": { "type": "string", "minLength": 1 },
+              "finalText": { "type": "string", "minLength": 1 },
+              "rawAsrText": { "type": "string" },
+              "repairedText": { "type": "string" },
+              "normalizedText": { "type": "string" },
+              "winnerScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "runnerUpCueId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "runnerUpScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "scoreGap": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "replacementCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "timingDonorCueId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "deduplicationActions": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "reviewReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "finalCueId",
+              "finalText",
+              "rawAsrText",
+              "repairedText",
+              "normalizedText",
+              "winnerScore",
+              "runnerUpCueId",
+              "runnerUpScore",
+              "scoreGap",
+              "replacementCount",
+              "timingDonorCueId",
+              "deduplicationActions",
+              "reviewReasons"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "interval",
+          "sourceStage",
+          "status",
+          "category"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "finalFindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "sourceStage": {
+            "type": "string",
+            "enum": [
+              "baseline-qa",
+              "canonical-qa",
+              "no-vad-comparison",
+              "refinement",
+              "timing-repair",
+              "presentation",
+              "post-presentation-qa",
+              "final-integrity-gate",
+              "coverage-integrity",
+              "scene-coverage-integrity",
+              "hypothesis-resolution",
+              "japanese-normalization"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "repaired",
+              "resolved",
+              "superseded",
+              "informational",
+              "needs-human-review"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["text", "timing", "presentation", "mixed"]
+          },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "refinementIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "replacedByCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "supersededByFindingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedHypothesis": {
+            "type": "string",
+            "enum": ["baseline", "refinement", "vad", "no-vad", "unknown"]
+          },
+          "rejectedHypothesis": {
+            "type": "string",
+            "enum": ["baseline", "refinement", "vad", "no-vad"]
+          },
+          "refinementNotRunReason": {
+            "type": "string",
+            "enum": [
+              "not-needed",
+              "covered-by-neighbor",
+              "covered-by-parent-refinement",
+              "superseded",
+              "duplicate-work",
+              "timing-only-repair-sufficient",
+              "budget-limit",
+              "missing-acoustic-evidence",
+              "missing-model-capability",
+              "execution-failed"
+            ]
+          },
+          "coveredByRefinementId": { "type": "string", "minLength": 1 },
+          "resolvedBy": {
+            "type": "object",
+            "properties": {
+              "stage": { "type": "string", "minLength": 1 },
+              "operation": { "type": "string", "minLength": 1 },
+              "artifact": { "type": "string", "minLength": 1 }
+            },
+            "required": ["stage", "operation"],
+            "additionalProperties": false
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "missingDialogue": { "type": "boolean" },
+          "missingLyrics": { "type": "boolean" },
+          "integrityIssue": { "type": "boolean" },
+          "requiresAudioReview": { "type": "boolean" },
+          "vocalRegionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "acceptedCueReview": {
+            "type": "object",
+            "properties": {
+              "finalCueId": { "type": "string", "minLength": 1 },
+              "finalText": { "type": "string", "minLength": 1 },
+              "rawAsrText": { "type": "string" },
+              "repairedText": { "type": "string" },
+              "normalizedText": { "type": "string" },
+              "winnerScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "runnerUpCueId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "runnerUpScore": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "scoreGap": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "replacementCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "timingDonorCueId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "deduplicationActions": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "reviewReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "finalCueId",
+              "finalText",
+              "rawAsrText",
+              "repairedText",
+              "normalizedText",
+              "winnerScore",
+              "runnerUpCueId",
+              "runnerUpScore",
+              "scoreGap",
+              "replacementCount",
+              "timingDonorCueId",
+              "deduplicationActions",
+              "reviewReasons"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "interval",
+          "sourceStage",
+          "status",
+          "category"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "repaired": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resolved": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "superseded": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "informational": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "open": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "needsHumanReview": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "total",
+        "repaired",
+        "resolved",
+        "superseded",
+        "informational",
+        "open",
+        "needsHumanReview"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "allFindings",
+    "finalFindings",
+    "diagnostics"
+  ],
+  "additionalProperties": false
+}

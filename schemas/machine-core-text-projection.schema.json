@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-core-text-projection.schema.json",
+  "title": "machine-core-text-projection",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-core-text-projection"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "coreSpanSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "groupedWordPolicy": {
+      "type": "string",
+      "const": "preserve-child-token-identities-and-intervals-no-character-ratio-timing"
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL",
+              "RECOVERY",
+              "HISTORICAL_REASR",
+              "FRESH_A",
+              "FRESH_B",
+              "FRESH_C",
+              "FRESH_CORE_VERIFICATION"
+            ]
+          },
+          "requestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "sourceGlobalInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "fullWindowText": { "type": "string" },
+          "fullWindowTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "normalizedFullWindowTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "coreProjectedText": { "type": "string" },
+          "coreProjectedTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "normalizedCoreProjectedTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "preCoreText": { "type": "string" },
+          "postCoreText": { "type": "string" },
+          "groupedTokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "groupId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "interval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "childTokenIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "childIntervals": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "start": { "type": "number", "minimum": 0 },
+                          "end": { "type": "number", "exclusiveMinimum": 0 }
+                        },
+                        "required": ["start", "end"],
+                        "additionalProperties": false
+                      },
+                      { "type": "null" }
+                    ]
+                  }
+                },
+                "mappingStatus": {
+                  "type": "string",
+                  "enum": [
+                    "VERIFIED_CHILDREN",
+                    "PARTIAL_CHILDREN",
+                    "CANDIDATE_INTERVAL_WHOLE",
+                    "UNMAPPED"
+                  ]
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "groupId",
+                "text",
+                "interval",
+                "childTokenIds",
+                "childIntervals",
+                "mappingStatus",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "coreTokenIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "projectedTokenIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "unprojectableTokenIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "projectionCoverage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "coreCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+          "boundaryAmbiguity": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "PARTIAL_BOUNDARY_TOKEN",
+              "UNPROJECTABLE_TOKEN",
+              "CROSS_EVENT_AMBIGUITY",
+              "OVERLAP_AMBIGUITY"
+            ]
+          },
+          "ctcSupport": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "pronunciationSupport": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "averageTokenProbability": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "projectionStatus": {
+            "type": "string",
+            "enum": [
+              "EXACT_TOKEN_PROJECTED",
+              "PARTIAL_TOKEN_PROJECTED",
+              "CONTEXT_ONLY_EXCESS",
+              "UNTIMED_UNPROJECTABLE",
+              "CROSS_EVENT_AMBIGUOUS",
+              "OVERLAP_AMBIGUOUS",
+              "NO_CORE_CONTENT"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "origin",
+          "requestId",
+          "sourceGlobalInterval",
+          "fullWindowText",
+          "fullWindowTextHash",
+          "normalizedFullWindowTextHash",
+          "coreProjectedText",
+          "coreProjectedTextHash",
+          "normalizedCoreProjectedTextHash",
+          "preCoreText",
+          "postCoreText",
+          "groupedTokens",
+          "coreTokenIds",
+          "projectedTokenIds",
+          "unprojectableTokenIds",
+          "projectionCoverage",
+          "coreCoverage",
+          "boundaryAmbiguity",
+          "ctcSupport",
+          "pronunciationSupport",
+          "averageTokenProbability",
+          "projectionStatus",
+          "evidenceIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactTokenProjectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "partialTokenProjectedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextOnlyExcessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "untimeableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossEventAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "noCoreContentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "groupedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "candidateCount",
+        "exactTokenProjectedCount",
+        "partialTokenProjectedCount",
+        "contextOnlyExcessCount",
+        "untimeableCount",
+        "crossEventAmbiguousCount",
+        "overlapAmbiguousCount",
+        "noCoreContentCount",
+        "groupedTokenCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "coreSpanSemanticHash",
+    "groupedWordPolicy",
+    "candidates",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

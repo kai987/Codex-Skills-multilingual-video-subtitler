@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-10-global-gold-evaluation-replay.schema.json",
+  "title": "c6-0-1-10-global-gold-evaluation-replay",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.10-cross-model-arbitration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-10-global-gold-evaluation-replay"
+    },
+    "evaluationMode": {
+      "type": "string",
+      "const": "HASH_ANCHORED_DETERMINISTIC_REPLAY"
+    },
+    "sourceEvaluationSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "evaluatedSourcePackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "finalAPackageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalBPackageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalPackageParity": { "type": "boolean", "const": true },
+    "goldIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldReadOnlyVerified": { "type": "boolean", "const": true },
+    "baselineQuality": {
+      "type": "object",
+      "properties": {
+        "finalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactCer": { "type": "number", "minimum": 0 },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucinationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialErrorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTimingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMaeSeconds": { "type": "number", "minimum": 0 },
+        "endMaeSeconds": { "type": "number", "minimum": 0 },
+        "p95TimingErrorSeconds": { "type": "number", "minimum": 0 },
+        "medianIou": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overlapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "finalCueCount",
+        "exactCer",
+        "normalizedCer",
+        "coverage",
+        "missingCount",
+        "hallucinationCount",
+        "materialErrorCount",
+        "severeTimingCount",
+        "startMaeSeconds",
+        "endMaeSeconds",
+        "p95TimingErrorSeconds",
+        "medianIou",
+        "overlapCount"
+      ],
+      "additionalProperties": false
+    },
+    "finalQuality": {
+      "type": "object",
+      "properties": {
+        "finalCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactCer": { "type": "number", "minimum": 0 },
+        "normalizedCer": { "type": "number", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hallucinationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialErrorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "severeTimingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMaeSeconds": { "type": "number", "minimum": 0 },
+        "endMaeSeconds": { "type": "number", "minimum": 0 },
+        "p95TimingErrorSeconds": { "type": "number", "minimum": 0 },
+        "medianIou": { "type": "number", "minimum": 0, "maximum": 1 },
+        "overlapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "finalCueCount",
+        "exactCer",
+        "normalizedCer",
+        "coverage",
+        "missingCount",
+        "hallucinationCount",
+        "materialErrorCount",
+        "severeTimingCount",
+        "startMaeSeconds",
+        "endMaeSeconds",
+        "p95TimingErrorSeconds",
+        "medianIou",
+        "overlapCount"
+      ],
+      "additionalProperties": false
+    },
+    "modelInferenceCount": { "type": "number", "const": 0 },
+    "deterministic": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evaluationMode",
+    "sourceEvaluationSemanticHash",
+    "evaluatedSourcePackageHash",
+    "finalAPackageHash",
+    "finalBPackageHash",
+    "finalPackageParity",
+    "goldIdentityHash",
+    "goldReadOnlyVerified",
+    "baselineQuality",
+    "finalQuality",
+    "modelInferenceCount",
+    "deterministic",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

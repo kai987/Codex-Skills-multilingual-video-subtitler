@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-shareable-acceptance-summary.schema.json",
+  "title": "c6-0-1-14-3-shareable-acceptance-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-shareable-acceptance-summary"
+    },
+    "visibility": { "type": "string", "const": "SHAREABLE_AGGREGATE_ONLY" },
+    "codeSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "obligationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "hierarchyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "bundleCandidatesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "plannerCertificateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "detectorReplayHits": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "asrReplayHits": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "finalAReplayInference": { "type": "number", "const": 0 },
+    "finalBReplayInference": { "type": "number", "const": 0 },
+    "phaseAObligationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "phaseAObligationCoverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "phaseARegressionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "childCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bundleCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "safetyTargetCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+    "safetyUnionSeconds": { "type": "number", "minimum": 0, "maximum": 60 },
+    "physicalWavCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "regionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "missingComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audibleMissingComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "hallucinationComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audibleHallucinationComponents": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "fullQueueSeconds": { "type": "number", "minimum": 0 },
+    "fullQueueEpisodeRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "engineeringPassed": { "type": "boolean" },
+    "evaluationIntegrityPassed": { "type": "boolean" },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_CROSS_STAGE_COVERAGE_REGRESSION",
+        "HOLD_FOR_HIERARCHICAL_TARGET_SELECTION_REPAIR",
+        "HOLD_FOR_SAFETY_BUDGET_MODEL_REDESIGN",
+        "HOLD_FOR_PLANNER_SEARCH_COMPLETENESS",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_ENGINEERING_REPAIR"
+      ]
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "canonicalMutationCount": { "type": "number", "const": 0 },
+    "rawDialogueIncluded": { "type": "boolean", "const": false },
+    "goldIncluded": { "type": "boolean", "const": false },
+    "nativeScoresIncluded": { "type": "boolean", "const": false },
+    "localPathsIncluded": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "codeSnapshotHash",
+    "obligationHash",
+    "hierarchyHash",
+    "bundleCandidatesHash",
+    "plannerCertificateHash",
+    "finalEvidenceHash",
+    "canonicalTextHash",
+    "canonicalTimingHash",
+    "presentationHash",
+    "detectorReplayHits",
+    "asrReplayHits",
+    "finalAReplayInference",
+    "finalBReplayInference",
+    "phaseAObligationCount",
+    "phaseAObligationCoverage",
+    "phaseARegressionCount",
+    "childCount",
+    "bundleCandidateCount",
+    "safetyTargetCount",
+    "safetyUnionSeconds",
+    "physicalWavCount",
+    "targetCount",
+    "regionCount",
+    "missingComponents",
+    "audibleMissingComponents",
+    "hallucinationComponents",
+    "audibleHallucinationComponents",
+    "fullQueueSeconds",
+    "fullQueueEpisodeRatio",
+    "engineeringPassed",
+    "evaluationIntegrityPassed",
+    "route",
+    "productionStatus",
+    "finalizationMethod",
+    "c602Status",
+    "canonicalMutationCount",
+    "rawDialogueIncluded",
+    "goldIncluded",
+    "nativeScoresIncluded",
+    "localPathsIncluded",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

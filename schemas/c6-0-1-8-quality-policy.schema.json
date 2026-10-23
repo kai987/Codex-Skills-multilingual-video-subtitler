@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-8-quality-policy.schema.json",
+  "title": "c6-0-1-8-quality-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-8-quality-policy" },
+    "defaultModes": {
+      "type": "object",
+      "properties": {
+        "coreSpanProjection": { "type": "string", "const": "observe" },
+        "coreAsrStability": { "type": "string", "const": "observe" },
+        "coreFreshVerification": { "type": "string", "const": "off" }
+      },
+      "required": [
+        "coreSpanProjection",
+        "coreAsrStability",
+        "coreFreshVerification"
+      ],
+      "additionalProperties": false
+    },
+    "goldIsolation": {
+      "type": "object",
+      "properties": {
+        "machineArtifactGoldInputAllowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "postFreezeEvaluationOnly": { "type": "boolean", "const": true },
+        "goldMayDefineCoreSpan": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "machineArtifactGoldInputAllowed",
+        "postFreezeEvaluationOnly",
+        "goldMayDefineCoreSpan"
+      ],
+      "additionalProperties": false
+    },
+    "frozenRules": {
+      "type": "object",
+      "properties": {
+        "timingRulesChanged": { "type": "boolean", "const": false },
+        "overlapTrimmingChanged": { "type": "boolean", "const": false },
+        "missingDialogueRecoveryChanged": { "type": "boolean", "const": false },
+        "associationRulesChanged": { "type": "boolean", "const": false },
+        "canonicalAssemblyChanged": { "type": "boolean", "const": false },
+        "riskRulesChanged": { "type": "boolean", "const": false },
+        "secondAsrUsed": { "type": "boolean", "const": false },
+        "ensembleUsed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "timingRulesChanged",
+        "overlapTrimmingChanged",
+        "missingDialogueRecoveryChanged",
+        "associationRulesChanged",
+        "canonicalAssemblyChanged",
+        "riskRulesChanged",
+        "secondAsrUsed",
+        "ensembleUsed"
+      ],
+      "additionalProperties": false
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineReleaseAuthorized": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "defaultModes",
+    "goldIsolation",
+    "frozenRules",
+    "productionStatus",
+    "finalizationMethod",
+    "machineReleaseAuthorized",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

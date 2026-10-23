@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/missing-speech-evidence-v3.schema.json",
+  "title": "missing-speech-evidence-v3",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "missing-speech-evidence-v3" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-localization-playback-integrity-v1"
+    },
+    "sourceIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "lexicalEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetId": { "type": "string" },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "SPEECH_ISLAND_OBSERVED",
+              "MISSING_DIALOGUE_LEXICAL_POSSIBLE",
+              "MISSING_DIALOGUE_CROSS_MODEL_STRONG",
+              "MISSING_DIALOGUE_SINGLE_MODEL_STABLE",
+              "MISSING_DIALOGUE_ASR_DISAGREEMENT",
+              "MISSING_DIALOGUE_ASR_EMPTY",
+              "NON_SPEECH_CONTRADICTED",
+              "MACHINE_DETECTION_ORPHAN",
+              "LOCALIZATION_UNRESOLVED",
+              "SOURCE_GLOBAL_LINEAGE_UNVERIFIED"
+            ]
+          },
+          "validSourceIdentity": { "type": "boolean" },
+          "verifiedUncovered": { "type": "boolean" },
+          "cueCoveredRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "crossModelLocalizedAgreement": { "type": "boolean" },
+          "singleProviderStable": { "type": "boolean" },
+          "evidenceRequestIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "reasons": { "type": "array", "items": { "type": "string" } },
+          "requiresHumanReview": { "type": "boolean", "const": true },
+          "canonicalCoverageCredit": { "type": "boolean", "const": false },
+          "autoCueGenerationAllowed": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "targetId",
+          "sourceInterval",
+          "classification",
+          "validSourceIdentity",
+          "verifiedUncovered",
+          "cueCoveredRatio",
+          "crossModelLocalizedAgreement",
+          "singleProviderStable",
+          "evidenceRequestIds",
+          "reasons",
+          "requiresHumanReview",
+          "canonicalCoverageCredit",
+          "autoCueGenerationAllowed"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "parentGaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "gapId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "itemIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "searchEnvelopeOnly": { "type": "boolean", "const": true }
+        },
+        "required": [
+          "gapId",
+          "sourceInterval",
+          "itemIds",
+          "searchEnvelopeOnly"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "migratedV2GapIds": { "type": "array", "items": { "type": "string" } },
+    "deprecatedEnvelopeOnlyEvidenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "parentGapNotUsedAsSpeechEvidenceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "canonicalMutationCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "sourceIdentityHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "policyHash",
+    "lexicalEvidenceHash",
+    "targets",
+    "parentGaps",
+    "migratedV2GapIds",
+    "deprecatedEnvelopeOnlyEvidenceCount",
+    "parentGapNotUsedAsSpeechEvidenceCount",
+    "canonicalMutationCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

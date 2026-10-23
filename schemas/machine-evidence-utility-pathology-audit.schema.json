@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-evidence-utility-pathology-audit.schema.json",
+  "title": "machine-evidence-utility-pathology-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-evidence-utility-pathology-audit"
+    },
+    "candidateArtifactHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "hierarchyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "bundleArtifactHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "plannerCertificateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "candidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "candidatePriorityNonzeroCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "candidatePriorityZeroCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSpeechCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "atomCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveEvidenceAtomCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "atomWithAssociatedCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "atomWithoutAssociatedCandidateCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "atomMachinePriorityNonzeroCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveAtomWithZeroPriorityCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "childCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleChildCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleChildMachinePriorityNonzeroCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleChildZeroPriorityCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bundleCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleBundleCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleBundleMachinePriorityNonzeroCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleBundleZeroPriorityCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "selectedBundleCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "selectedBundleMachinePrioritySum": { "type": "number" },
+    "plannerMachinePriorityObjectiveValue": { "type": "number" },
+    "allZeroPriorityAtAtomLayer": { "type": "boolean" },
+    "allZeroPriorityAtChildLayer": { "type": "boolean" },
+    "allZeroPriorityAtBundleLayer": { "type": "boolean" },
+    "rawDurationObjectiveSaturated": { "type": "boolean" },
+    "rootCauseClassifications": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "NO_TEXT_CANDIDATE_PRIORITY_SOURCE",
+          "CANDIDATE_TO_ATOM_ASSOCIATION_LOSS",
+          "SPEECH_EVIDENCE_NOT_INCLUDED_IN_PRIORITY",
+          "CORRELATED_EVIDENCE_DEDUP_FAILURE",
+          "PRIORITY_NOT_PROPAGATED_TO_CHILD",
+          "PRIORITY_NOT_PROPAGATED_TO_BUNDLE",
+          "PLANNER_OBJECTIVE_PRIORITY_DOMINATED",
+          "RAW_DURATION_OBJECTIVE_SATURATED",
+          "ALL_ZERO_SENTINEL_PROPAGATION",
+          "UNKNOWN"
+        ]
+      }
+    },
+    "goldReadAttempted": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "candidateArtifactHash",
+    "hierarchyHash",
+    "bundleArtifactHash",
+    "plannerCertificateHash",
+    "candidateCount",
+    "candidatePriorityNonzeroCount",
+    "candidatePriorityZeroCount",
+    "positiveSpeechCandidateCount",
+    "atomCount",
+    "positiveEvidenceAtomCount",
+    "atomWithAssociatedCandidateCount",
+    "atomWithoutAssociatedCandidateCount",
+    "atomMachinePriorityNonzeroCount",
+    "positiveAtomWithZeroPriorityCount",
+    "childCount",
+    "eligibleChildCount",
+    "eligibleChildMachinePriorityNonzeroCount",
+    "eligibleChildZeroPriorityCount",
+    "bundleCount",
+    "eligibleBundleCount",
+    "eligibleBundleMachinePriorityNonzeroCount",
+    "eligibleBundleZeroPriorityCount",
+    "selectedBundleCount",
+    "selectedBundleMachinePrioritySum",
+    "plannerMachinePriorityObjectiveValue",
+    "allZeroPriorityAtAtomLayer",
+    "allZeroPriorityAtChildLayer",
+    "allZeroPriorityAtBundleLayer",
+    "rawDurationObjectiveSaturated",
+    "rootCauseClassifications",
+    "goldReadAttempted"
+  ],
+  "additionalProperties": false
+}

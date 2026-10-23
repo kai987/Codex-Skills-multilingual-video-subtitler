@@ -1,0 +1,667 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-vs-gold-evaluation.schema.json",
+  "title": "machine-vs-gold-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "machine-vs-gold-evaluation" },
+    "evaluationVersion": {
+      "type": "string",
+      "const": "c6.0.1-machine-vs-gold-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "benchmarkStatus": {
+      "type": "string",
+      "const": "development-known-runtime-blind"
+    },
+    "generationRunId": { "type": "string", "minLength": 1 },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["fileName", "size", "sha256"],
+      "additionalProperties": false
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldIdentity": {
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timestampNormalizationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "firstReadAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "readOnlyVerified": { "type": "boolean" }
+      },
+      "required": [
+        "fileName",
+        "size",
+        "sha256",
+        "cueCount",
+        "timestampNormalizationCount",
+        "firstReadAt",
+        "readOnlyVerified"
+      ],
+      "additionalProperties": false
+    },
+    "evaluationPolicyVersion": {
+      "type": "string",
+      "const": "c6.0.1-gold-isolated-evaluation-v1"
+    },
+    "evaluationPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "globalTextMetrics": {
+      "type": "object",
+      "properties": {
+        "exact": {
+          "type": "object",
+          "properties": {
+            "machineCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "goldCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "editDistance": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "insertionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "deletionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "substitutionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cer": { "type": "number", "minimum": 0 }
+          },
+          "required": [
+            "machineCharacterCount",
+            "goldCharacterCount",
+            "editDistance",
+            "insertionCharacters",
+            "deletionCharacters",
+            "substitutionCharacters",
+            "cer"
+          ],
+          "additionalProperties": false
+        },
+        "normalized": {
+          "type": "object",
+          "properties": {
+            "machineCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "goldCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "editDistance": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "insertionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "deletionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "substitutionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cer": { "type": "number", "minimum": 0 }
+          },
+          "required": [
+            "machineCharacterCount",
+            "goldCharacterCount",
+            "editDistance",
+            "insertionCharacters",
+            "deletionCharacters",
+            "substitutionCharacters",
+            "cer"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": ["exact", "normalized"],
+      "additionalProperties": false
+    },
+    "alignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "alignmentId": { "type": "string", "minLength": 1 },
+          "machineCueIndexes": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "goldCueIndexes": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "machineTextHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "goldTextHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "machineExcerpt": { "type": "string", "maxLength": 96 },
+          "goldExcerpt": { "type": "string", "maxLength": 96 },
+          "machineStart": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "machineEnd": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "goldStart": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "goldEnd": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "textSimilarity": { "type": "number", "minimum": 0, "maximum": 1 },
+          "temporalIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+          "centerDistanceSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "startDeltaSeconds": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "endDeltaSeconds": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "centerDeltaSeconds": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "classification": {
+            "type": "string",
+            "enum": ["matched", "unmatched-machine", "unmatched-gold"]
+          }
+        },
+        "required": [
+          "alignmentId",
+          "machineCueIndexes",
+          "goldCueIndexes",
+          "machineTextHash",
+          "goldTextHash",
+          "machineExcerpt",
+          "goldExcerpt",
+          "machineStart",
+          "machineEnd",
+          "goldStart",
+          "goldEnd",
+          "textSimilarity",
+          "temporalIoU",
+          "centerDistanceSeconds",
+          "startDeltaSeconds",
+          "endDeltaSeconds",
+          "centerDeltaSeconds",
+          "classification"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "alignmentMetrics": {
+      "type": "object",
+      "properties": {
+        "machineCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "goldCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "alignedGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "matchedGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedGoldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedMachineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "machineCueCount",
+        "goldCueCount",
+        "alignedGroupCount",
+        "matchedGroupCount",
+        "unmatchedGoldGroupCount",
+        "unmatchedMachineGroupCount"
+      ],
+      "additionalProperties": false
+    },
+    "timingMetrics": {
+      "type": "object",
+      "properties": {
+        "reliableAlignedGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMaeSeconds": { "type": "number", "minimum": 0 },
+        "endMaeSeconds": { "type": "number", "minimum": 0 },
+        "centerMaeSeconds": { "type": "number", "minimum": 0 },
+        "boundaryMedianSeconds": { "type": "number", "minimum": 0 },
+        "boundaryP90Seconds": { "type": "number", "minimum": 0 },
+        "boundaryP95Seconds": { "type": "number", "minimum": 0 },
+        "boundaryMaxSeconds": { "type": "number", "minimum": 0 },
+        "timingIoUMedian": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within100msRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within250msRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within500msRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within1000msRatio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": [
+        "reliableAlignedGroupCount",
+        "startMaeSeconds",
+        "endMaeSeconds",
+        "centerMaeSeconds",
+        "boundaryMedianSeconds",
+        "boundaryP90Seconds",
+        "boundaryP95Seconds",
+        "boundaryMaxSeconds",
+        "timingIoUMedian",
+        "within100msRatio",
+        "within250msRatio",
+        "within500msRatio",
+        "within1000msRatio"
+      ],
+      "additionalProperties": false
+    },
+    "coverageMetrics": {
+      "type": "object",
+      "properties": {
+        "goldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "machineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "matchedGoldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedGoldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "matchedMachineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedMachineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "goldTextCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "machineSupportedTextRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "goldTemporalCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "goldGroupCount",
+        "machineGroupCount",
+        "matchedGoldGroupCount",
+        "unmatchedGoldGroupCount",
+        "matchedMachineGroupCount",
+        "unmatchedMachineGroupCount",
+        "goldTextCoverageRatio",
+        "machineSupportedTextRatio",
+        "goldTemporalCoverageRatio"
+      ],
+      "additionalProperties": false
+    },
+    "missingDialogueCandidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "defectId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "alignmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "defectId",
+          "code",
+          "severity",
+          "alignmentIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "hallucinationCandidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "defectId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "alignmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "defectId",
+          "code",
+          "severity",
+          "alignmentIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "materialTextErrors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "defectId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "alignmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "defectId",
+          "code",
+          "severity",
+          "alignmentIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "severeTimingErrors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "defectId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "alignmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "defectId",
+          "code",
+          "severity",
+          "alignmentIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "overlapComparisons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "comparisonId": { "type": "string", "minLength": 1 },
+          "machineOverlapCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "goldOverlapCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "preservedSimultaneousContent": { "type": "boolean" }
+        },
+        "required": [
+          "comparisonId",
+          "machineOverlapCount",
+          "goldOverlapCount",
+          "preservedSimultaneousContent"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "properNounMismatches": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "dialectMismatches": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "p0Defects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "defectId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "alignmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "defectId",
+          "code",
+          "severity",
+          "alignmentIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "p1Defects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "defectId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "alignmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "defectId",
+          "code",
+          "severity",
+          "alignmentIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "p2Defects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "defectId": { "type": "string", "minLength": 1 },
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "alignmentIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": [
+          "defectId",
+          "code",
+          "severity",
+          "alignmentIds",
+          "rationale"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "modelInferenceCount": { "type": "number", "const": 0 },
+    "outputHashBeforeGold": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputHashAfterGold": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputHashUnchangedAfterGold": { "type": "boolean" },
+    "goldMutationCount": { "type": "number", "const": 0 },
+    "evaluationWallTimeMs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "evaluationVersion",
+    "generatedAt",
+    "benchmarkStatus",
+    "generationRunId",
+    "sourceIdentity",
+    "machineFreezeHash",
+    "goldIdentity",
+    "evaluationPolicyVersion",
+    "evaluationPolicyHash",
+    "globalTextMetrics",
+    "alignments",
+    "alignmentMetrics",
+    "timingMetrics",
+    "coverageMetrics",
+    "missingDialogueCandidates",
+    "hallucinationCandidates",
+    "materialTextErrors",
+    "severeTimingErrors",
+    "overlapComparisons",
+    "properNounMismatches",
+    "dialectMismatches",
+    "p0Defects",
+    "p1Defects",
+    "p2Defects",
+    "modelInferenceCount",
+    "outputHashBeforeGold",
+    "outputHashAfterGold",
+    "outputHashUnchangedAfterGold",
+    "goldMutationCount",
+    "evaluationWallTimeMs",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

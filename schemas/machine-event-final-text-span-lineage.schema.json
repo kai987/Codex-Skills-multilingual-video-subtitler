@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-event-final-text-span-lineage.schema.json",
+  "title": "machine-event-final-text-span-lineage",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-event-final-text-span-lineage"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "indexingPolicy": {
+      "type": "string",
+      "const": "unicode-code-point-half-open"
+    },
+    "identityPolicy": {
+      "type": "string",
+      "const": "pipeline-provenance-required-no-fuzzy-production-match"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "finalCueId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "finalText": { "type": "string" },
+          "spanStart": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "spanEnd": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "spanText": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "sourceCandidateIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "alignmentMethod": {
+            "type": "string",
+            "enum": [
+              "PROVENANCE_EXACT_SUBSTRING",
+              "PROVENANCE_NORMALIZATION_MAP",
+              "SEGMENTATION_SPLIT_HISTORY",
+              "SEGMENTATION_MERGE_HISTORY",
+              "UNRESOLVED"
+            ]
+          },
+          "alignmentEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "lineageStatus": {
+            "type": "string",
+            "enum": [
+              "EXACT",
+              "NORMALIZED_EXACT",
+              "DERIVED_FROM_SPLIT",
+              "DERIVED_FROM_MERGE",
+              "AMBIGUOUS",
+              "UNRESOLVED"
+            ]
+          },
+          "confidenceClass": {
+            "type": "string",
+            "enum": ["STRONG", "MODERATE", "AMBIGUOUS", "UNRESOLVED"]
+          },
+          "indexingPolicy": {
+            "type": "string",
+            "const": "unicode-code-point-half-open"
+          },
+          "modifiable": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "finalCueId",
+          "finalText",
+          "spanStart",
+          "spanEnd",
+          "spanText",
+          "sourceCandidateIds",
+          "alignmentMethod",
+          "alignmentEvidence",
+          "lineageStatus",
+          "confidenceClass",
+          "indexingPolicy",
+          "modifiable",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "spanMappedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "normalizedExactSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "splitDerivedSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mergeDerivedSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modifiableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "finalCueTextCoverage": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": [
+        "eventCount",
+        "spanMappedEventCount",
+        "exactSpanCount",
+        "normalizedExactSpanCount",
+        "splitDerivedSpanCount",
+        "mergeDerivedSpanCount",
+        "ambiguousSpanCount",
+        "unresolvedSpanCount",
+        "modifiableEventCount",
+        "finalCueTextCoverage"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "indexingPolicy",
+    "identityPolicy",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

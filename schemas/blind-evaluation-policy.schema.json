@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/blind-evaluation-policy.schema.json",
+  "title": "blind-evaluation-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "blind-evaluation-policy" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1-gold-isolated-evaluation-v1"
+    },
+    "frozenAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "normalization": {
+      "type": "object",
+      "properties": {
+        "unicode": { "type": "string", "const": "NFKC" },
+        "whitespaceInsensitive": { "type": "boolean", "const": true },
+        "punctuationInsensitive": { "type": "boolean", "const": true },
+        "dialectStandardization": { "type": "boolean", "const": false },
+        "arbitraryKanaConversion": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "unicode",
+        "whitespaceInsensitive",
+        "punctuationInsensitive",
+        "dialectStandardization",
+        "arbitraryKanaConversion"
+      ],
+      "additionalProperties": false
+    },
+    "alignmentWeights": {
+      "type": "object",
+      "properties": {
+        "textSimilarity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "temporalIoU": { "type": "number", "minimum": 0, "maximum": 1 },
+        "centerDistance": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["textSimilarity", "temporalIoU", "centerDistance"],
+      "additionalProperties": false
+    },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "maximumAlignmentGroupSize": { "type": "number", "const": 3 },
+        "minimumMatchTextSimilarity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumMatchTemporalIoU": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximumMatchCenterDistanceSeconds": { "type": "number", "minimum": 0 },
+        "materialMinimumCharacters": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "materialTextErrorCer": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "severeTimingBoundarySeconds": { "type": "number", "minimum": 0 },
+        "minorTimingBoundarySeconds": { "type": "number", "minimum": 0 },
+        "maximumCrossRunCer": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maximumCrossRunBoundaryP95Seconds": { "type": "number", "minimum": 0 },
+        "maximumCrossRunBoundaryMaxSeconds": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "maximumAlignmentGroupSize",
+        "minimumMatchTextSimilarity",
+        "minimumMatchTemporalIoU",
+        "maximumMatchCenterDistanceSeconds",
+        "materialMinimumCharacters",
+        "materialTextErrorCer",
+        "severeTimingBoundarySeconds",
+        "minorTimingBoundarySeconds",
+        "maximumCrossRunCer",
+        "maximumCrossRunBoundaryP95Seconds",
+        "maximumCrossRunBoundaryMaxSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "defectRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2"] },
+          "rationale": { "type": "string", "minLength": 1 }
+        },
+        "required": ["code", "severity", "rationale"],
+        "additionalProperties": false
+      }
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "frozenAt",
+    "normalization",
+    "alignmentWeights",
+    "thresholds",
+    "defectRules",
+    "policyHash"
+  ],
+  "additionalProperties": false
+}

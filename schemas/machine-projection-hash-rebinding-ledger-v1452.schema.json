@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-projection-hash-rebinding-ledger-v1452.schema.json",
+  "title": "machine-projection-hash-rebinding-ledger-v1452",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-projection-hash-rebinding-ledger"
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "artifactType": { "type": "string", "minLength": 1 },
+          "sourceArtifactHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "projectionArtifactHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceHashDomain": { "type": "string", "minLength": 1 },
+          "projectionHashDomain": { "type": "string", "minLength": 1 },
+          "removedFields": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "addedFields": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceRowCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "projectedRowCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "projectedRowHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "artifactType",
+          "sourceArtifactHash",
+          "projectionArtifactHash",
+          "sourceHashDomain",
+          "projectionHashDomain",
+          "removedFields",
+          "addedFields",
+          "sourceRowCount",
+          "projectedRowCount",
+          "projectedRowHashes",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projectionRebindingRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceRowsVerified": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedRowsRehashed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "staleProjectionHashCount": { "type": "number", "const": 0 },
+    "passed": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "rows",
+    "projectionRebindingRowCount",
+    "sourceRowsVerified",
+    "projectedRowsRehashed",
+    "staleProjectionHashCount",
+    "passed"
+  ],
+  "additionalProperties": false
+}

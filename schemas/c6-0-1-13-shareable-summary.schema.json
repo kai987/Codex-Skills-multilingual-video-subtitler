@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-shareable-summary.schema.json",
+  "title": "c6-0-1-13-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-shareable-review-burden-summary"
+    },
+    "audience": { "type": "string", "const": "AGGREGATE_AUDIT_ONLY" },
+    "itemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "regionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredRegionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "clipSumSeconds": { "type": "number", "minimum": 0 },
+    "actualClipSumSeconds": { "type": "number", "minimum": 0 },
+    "clipSumMeaning": {
+      "type": "string",
+      "const": "ACTUAL_EXTRACTED_WAV_DURATION_SUM"
+    },
+    "plannedContextSumSeconds": { "type": "number", "minimum": 0 },
+    "extractedClipUnionSeconds": { "type": "number", "minimum": 0 },
+    "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+    "uniqueUnionMeaning": {
+      "type": "string",
+      "const": "PLANNED_REVIEW_PLAYBACK_UNION"
+    },
+    "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+    "duplicateContextMeaning": {
+      "type": "string",
+      "const": "PLANNED_CONTEXT_SUM_MINUS_PLANNED_UNION"
+    },
+    "requiredUniqueSeconds": { "type": "number", "minimum": 0 },
+    "requiredUniqueRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "maxScoreShare": { "type": "number", "minimum": 0, "maximum": 1 },
+    "maximumTieCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "absenceRiskBoostCount": { "type": "number", "const": 0 },
+    "canonicalTextMutationCount": { "type": "number", "const": 0 },
+    "canonicalTimingMutationCount": { "type": "number", "const": 0 },
+    "rankingResult": {
+      "type": "string",
+      "enum": [
+        "REGION_RANKER_STRONG_PASS",
+        "REGION_RANKER_PROMISING",
+        "REGION_RANKER_WEAK",
+        "REGION_RANKER_UNSUPPORTED"
+      ]
+    },
+    "burdenResult": {
+      "type": "string",
+      "enum": [
+        "REVIEW_BURDEN_STRONG_REDUCTION",
+        "REVIEW_BURDEN_PROMISING_REDUCTION",
+        "REVIEW_BURDEN_NO_MEANINGFUL_REDUCTION",
+        "REVIEW_BURDEN_REDUCTION_UNSAFE"
+      ]
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_TO_NEW_EPISODE_PROSPECTIVE_HUMAN_TRIAL",
+        "GO_TO_NEW_EPISODE_TRIAL_WITH_RANKING_CAVEAT",
+        "HOLD_FOR_REVIEW_RANKER_REDESIGN",
+        "HOLD_FOR_MISSING_EVIDENCE_REPAIR",
+        "HOLD_FOR_WORKSPACE_V2_REPAIR"
+      ]
+    },
+    "humanReviewTimeMeasured": { "type": "boolean", "const": false },
+    "realHumanSessionExecuted": { "type": "boolean", "const": false },
+    "sourceAudioIncluded": { "type": "boolean", "const": false },
+    "dialogueIncluded": { "type": "boolean", "const": false },
+    "privateEventsIncluded": { "type": "boolean", "const": false },
+    "approvedHashes": {
+      "type": "object",
+      "properties": {
+        "policy": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "machineFreeze": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "rankerFreeze": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "regions": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "playback": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "plans": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "policy",
+        "machineFreeze",
+        "rankerFreeze",
+        "items",
+        "regions",
+        "playback",
+        "plans"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "audience",
+    "itemCount",
+    "regionCount",
+    "requiredItemCount",
+    "requiredRegionCount",
+    "clipSumSeconds",
+    "actualClipSumSeconds",
+    "clipSumMeaning",
+    "plannedContextSumSeconds",
+    "extractedClipUnionSeconds",
+    "uniqueUnionSeconds",
+    "uniqueUnionMeaning",
+    "duplicateContextSeconds",
+    "duplicateContextMeaning",
+    "requiredUniqueSeconds",
+    "requiredUniqueRatio",
+    "maxScoreShare",
+    "maximumTieCount",
+    "absenceRiskBoostCount",
+    "canonicalTextMutationCount",
+    "canonicalTimingMutationCount",
+    "rankingResult",
+    "burdenResult",
+    "route",
+    "humanReviewTimeMeasured",
+    "realHumanSessionExecuted",
+    "sourceAudioIncluded",
+    "dialogueIncluded",
+    "privateEventsIncluded",
+    "approvedHashes",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

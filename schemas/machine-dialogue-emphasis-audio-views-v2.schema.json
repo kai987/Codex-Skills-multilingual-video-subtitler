@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-dialogue-emphasis-audio-views-v2.schema.json",
+  "title": "machine-dialogue-emphasis-audio-views-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-dialogue-emphasis-audio-views-v2"
+    },
+    "baselineViewsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "syntheticControlsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "views": {
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "viewId": { "type": "string", "minLength": 1 },
+          "role": {
+            "type": "string",
+            "enum": [
+              "NATIVE_MONO",
+              "LEFT",
+              "RIGHT",
+              "CENTER_OR_MID",
+              "VOICE_BAND_CENTER",
+              "DIALOGUE_COMPRESSED_MID_V2",
+              "PREEMPHASIS_VOICE_BAND_V1",
+              "LIGHT_DENOISED_CENTER_V1"
+            ]
+          },
+          "parentViewId": { "type": "string", "minLength": 1 },
+          "parentPcmSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "relativePath": { "type": "string", "minLength": 1 },
+          "sampleRate": { "type": "number", "const": 16000 },
+          "channels": { "type": "number", "const": 1 },
+          "bitDepth": { "type": "number", "const": 16 },
+          "frameCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "pcmSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "recipe": { "type": "string", "minLength": 1 },
+          "recipeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "workerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "timeMapping": {
+            "type": "object",
+            "properties": {
+              "sourceStartSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "sourceSampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "outputSampleRate": { "type": "number", "const": 16000 },
+              "numerator": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "denominator": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "outputStartSample": { "type": "number", "const": 0 },
+              "mappingStatus": {
+                "type": "string",
+                "const": "VERIFIED_INTEGER_RATIONAL"
+              },
+              "measuredImpulsePeakDelaySamples": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "syntheticValidationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "sourceStartSample",
+              "sourceSampleRate",
+              "outputSampleRate",
+              "numerator",
+              "denominator",
+              "outputStartSample",
+              "mappingStatus",
+              "measuredImpulsePeakDelaySamples",
+              "syntheticValidationHash"
+            ],
+            "additionalProperties": false
+          },
+          "duplicateOfViewId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "effectiveNoOp": { "type": "boolean" },
+          "detectorEligible": { "type": "boolean" },
+          "rejectionReason": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "viewId",
+          "role",
+          "parentViewId",
+          "parentPcmSha256",
+          "relativePath",
+          "sampleRate",
+          "channels",
+          "bitDepth",
+          "frameCount",
+          "durationSeconds",
+          "audioSha256",
+          "pcmSha256",
+          "recipe",
+          "recipeHash",
+          "workerHash",
+          "timeMapping",
+          "duplicateOfViewId",
+          "effectiveNoOp",
+          "detectorEligible",
+          "rejectionReason",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "logicalViewCount": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "uniqueEffectiveViewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "rejectedViewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelInferenceCount": { "type": "number", "const": 0 },
+        "neuralSourceSeparationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "logicalViewCount",
+        "uniqueEffectiveViewCount",
+        "rejectedViewCount",
+        "modelInferenceCount",
+        "neuralSourceSeparationCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "baselineViewsHash",
+    "syntheticControlsHash",
+    "views",
+    "summary"
+  ],
+  "additionalProperties": false
+}

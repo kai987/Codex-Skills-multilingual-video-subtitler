@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-missing-speech-evidence-v4.schema.json",
+  "title": "machine-missing-speech-evidence-v4",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.1-multiview-speech-inventory-v1"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-missing-speech-evidence-v4"
+    },
+    "inventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "safetyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "lexicalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "nativeInterval": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speechEvidenceClass": { "type": "string", "minLength": 1 },
+          "lexicalEvidenceClass": { "type": "string", "minLength": 1 },
+          "evidenceFlags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SPEECH_INVENTORY_STRONG",
+                "SPEECH_INVENTORY_SAFETY_RESERVE",
+                "LEGACY_FINGERPRINT_RECOVERED",
+                "LEXICAL_CROSS_MODEL_SUPPORT",
+                "LEXICAL_SINGLE_MODEL_SUPPORT",
+                "ASR_DISAGREEMENT",
+                "ASR_EMPTY",
+                "DETECTOR_DISAGREEMENT",
+                "NON_SPEECH_CONTRADICTED",
+                "SPEECH_DETECTION_UNRESOLVED"
+              ]
+            }
+          },
+          "missingEvidenceClass": {
+            "type": "string",
+            "enum": [
+              "MISSING_DIALOGUE_STRONG",
+              "SPEECH_INVENTORY_STRONG",
+              "SPEECH_INVENTORY_SAFETY_RESERVE",
+              "LEGACY_FINGERPRINT_RECOVERED",
+              "LEXICAL_SINGLE_MODEL_SUPPORT",
+              "ASR_DISAGREEMENT",
+              "ASR_EMPTY",
+              "NON_SPEECH_CONTRADICTED",
+              "SPEECH_DETECTION_UNRESOLVED"
+            ]
+          },
+          "subtitleAction": { "type": "string", "const": "HUMAN_REVIEW_ONLY" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "targetId",
+          "sourceInterval",
+          "nativeInterval",
+          "evidenceIds",
+          "requestIds",
+          "speechEvidenceClass",
+          "lexicalEvidenceClass",
+          "evidenceFlags",
+          "missingEvidenceClass",
+          "subtitleAction",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "targetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "strongMissingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "safetyOnlyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalInsertCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "targetCount",
+        "strongMissingCount",
+        "safetyOnlyCount",
+        "canonicalInsertCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "sourceIdentity",
+    "sourceTimebase",
+    "policyHash",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "inventoryHash",
+    "safetyHash",
+    "lexicalHash",
+    "targets",
+    "summary"
+  ],
+  "additionalProperties": false
+}

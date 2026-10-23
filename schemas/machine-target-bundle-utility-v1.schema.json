@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-target-bundle-utility-v1.schema.json",
+  "title": "machine-target-bundle-utility-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-target-bundle-utility-v1"
+    },
+    "bundlesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "childUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "bundleId": { "type": "string", "minLength": 1 },
+          "sourceBundleHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "childUnitIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "childUtilityHashes": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "coveredObligationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "optionalChildIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speechEvidenceTierCounts": {
+            "type": "object",
+            "properties": {
+              "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_0_INELIGIBLE_OR_CONTRADICTED": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH",
+              "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH",
+              "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH",
+              "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH",
+              "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE",
+              "TIER_0_INELIGIBLE_OR_CONTRADICTED"
+            ],
+            "additionalProperties": false
+          },
+          "independentDetectorFamilies": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceStrata": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MULTI_DETECTOR",
+                "PYANNOTE_EXCLUSIVE",
+                "SILERO_EXCLUSIVE",
+                "WEBRTC_EXCLUSIVE",
+                "LEGACY_FINGERPRINT_EXCLUSIVE",
+                "MULTI_VIEW_SAME_DETECTOR",
+                "EXISTING_VERIFIED",
+                "MASKED_SUBTHRESHOLD",
+                "AUDIT_ONLY"
+              ]
+            }
+          },
+          "optionalSpeechCoreIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "optionalSpeechCoreUnionSeconds": { "type": "number", "minimum": 0 },
+          "cappedOptionalDurationUtility": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "detectorExclusiveNovelty": { "type": "boolean" },
+          "timelineNovelty": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sceneNovelty": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "speechEvidenceUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "textCandidateUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "reviewSafetyUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "optionalReviewSafetyUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "targetSlotCost": { "type": "number", "const": 1 },
+          "coreCostSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "predictedAudioCostSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "internalSilenceCostSamples": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "utilityReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "bundleId",
+          "sourceBundleHash",
+          "childUnitIds",
+          "childUtilityHashes",
+          "coveredObligationIds",
+          "optionalChildIds",
+          "speechEvidenceTierCounts",
+          "independentDetectorFamilies",
+          "evidenceStrata",
+          "optionalSpeechCoreIntervals",
+          "optionalSpeechCoreUnionSeconds",
+          "cappedOptionalDurationUtility",
+          "detectorExclusiveNovelty",
+          "timelineNovelty",
+          "sceneNovelty",
+          "speechEvidenceUtilityVector",
+          "textCandidateUtilityVector",
+          "reviewSafetyUtilityVector",
+          "optionalReviewSafetyUtilityVector",
+          "targetSlotCost",
+          "coreCostSamples",
+          "predictedAudioCostSamples",
+          "internalSilenceCostSamples",
+          "utilityReasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "rowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleBundleCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "nonzeroEligibleBundleUtilityCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleOptionalBundleZeroUtilityCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "bundlesHash",
+    "childUtilityHash",
+    "rows",
+    "rowCount",
+    "eligibleBundleCount",
+    "nonzeroEligibleBundleUtilityCount",
+    "eligibleOptionalBundleZeroUtilityCount"
+  ],
+  "additionalProperties": false
+}

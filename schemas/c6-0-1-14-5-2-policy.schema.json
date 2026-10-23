@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-policy.schema.json",
+  "title": "c6-0-1-14-5-2-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-2-product-scorability-playback-realization-policy"
+    },
+    "executionPolicy": {
+      "type": "string",
+      "const": "REPLAY_ONLY_PRODUCT_SCORABILITY_AND_PLAYBACK_REALIZATION"
+    },
+    "maximumInferenceCount": { "type": "number", "const": 0 },
+    "maximumModelLoadCount": { "type": "number", "const": 0 },
+    "maximumProviderProcessStartCount": { "type": "number", "const": 0 },
+    "minimumSpeechAnchorPolicyVersion": {
+      "type": "string",
+      "const": "C601143_MINIMUM_CHILD_CORE_SECONDS_V1"
+    },
+    "minimumSpeechAnchorSeconds": { "type": "number", "const": 0.12 },
+    "degenerateOrphanPolicyVersion": {
+      "type": "string",
+      "const": "C6011452_DEGENERATE_ORPHAN_BOUNDARY_SLIVER_V1"
+    },
+    "physicalContainerPlaybackSeparationVersion": {
+      "type": "string",
+      "const": "C6011452_PHYSICAL_CONTAINER_PLAYBACK_UNION_V1"
+    },
+    "playbackSetSearchVersion": {
+      "type": "string",
+      "const": "C6011452_EXACT_BOUNDED_INTERVAL_COVER_SEARCH_V1"
+    },
+    "witnessConnectivityVersion": {
+      "type": "string",
+      "const": "C6011452_GOLD_FREE_WITNESS_CONNECTIVITY_V2"
+    },
+    "productOutcomeDeterminacyVersion": {
+      "type": "string",
+      "const": "C6011452_DETERMINATE_PRODUCT_OUTCOME_V1"
+    },
+    "machineAnchorMinimumOverlapSeconds": { "type": "number", "const": 0.2 },
+    "machineAnchorMinimumUnitCoverageRatio": { "type": "number", "const": 0.1 },
+    "unitToGoldCoverageThreshold": { "type": "number", "const": 0.8 },
+    "playbackToGoldCoverageThreshold": { "type": "number", "const": 0.8 },
+    "playbackToUnitCoverageThreshold": { "type": "number", "const": 0.95 },
+    "maximumReviewEnvelopeSeconds": { "type": "number", "const": 12 },
+    "maximumOneSideContextSeconds": { "type": "number", "const": 3 },
+    "maximumUnitsPerWitnessCandidate": { "type": "number", "const": 8 },
+    "maximumRealizationsPerWitnessCandidate": { "type": "number", "const": 8 },
+    "maximumWitnessReviewEnvelopeSeconds": { "type": "number", "const": 20 },
+    "maximumInternalMachineGapSeconds": { "type": "number", "const": 0.5 },
+    "coverageUnitMergeGapSeconds": { "type": "number", "const": 0.3 },
+    "maximumPlaybackSetSearchSegments": { "type": "number", "const": 20 },
+    "auditOnlyTargetSemantics": { "type": "boolean", "const": true },
+    "exactPlaybackSegmentSetEnumeration": { "type": "boolean", "const": true },
+    "completeRejectionLedgerRequired": { "type": "boolean", "const": true },
+    "determinateAbsenceIsScorableFail": { "type": "boolean", "const": true },
+    "notScorableReservedForInfrastructure": {
+      "type": "boolean",
+      "const": true
+    },
+    "trueAllMandatoryPreserved": { "type": "boolean", "const": true },
+    "goldFeaturesAllowedBeforeFreeze": { "type": "boolean", "const": false },
+    "targetGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "regionGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "audioGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "playbackGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "canonicalMutationAllowed": { "type": "boolean", "const": false },
+    "plannerMutationAllowed": { "type": "boolean", "const": false },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "executionPolicy",
+    "maximumInferenceCount",
+    "maximumModelLoadCount",
+    "maximumProviderProcessStartCount",
+    "minimumSpeechAnchorPolicyVersion",
+    "minimumSpeechAnchorSeconds",
+    "degenerateOrphanPolicyVersion",
+    "physicalContainerPlaybackSeparationVersion",
+    "playbackSetSearchVersion",
+    "witnessConnectivityVersion",
+    "productOutcomeDeterminacyVersion",
+    "machineAnchorMinimumOverlapSeconds",
+    "machineAnchorMinimumUnitCoverageRatio",
+    "unitToGoldCoverageThreshold",
+    "playbackToGoldCoverageThreshold",
+    "playbackToUnitCoverageThreshold",
+    "maximumReviewEnvelopeSeconds",
+    "maximumOneSideContextSeconds",
+    "maximumUnitsPerWitnessCandidate",
+    "maximumRealizationsPerWitnessCandidate",
+    "maximumWitnessReviewEnvelopeSeconds",
+    "maximumInternalMachineGapSeconds",
+    "coverageUnitMergeGapSeconds",
+    "maximumPlaybackSetSearchSegments",
+    "auditOnlyTargetSemantics",
+    "exactPlaybackSegmentSetEnumeration",
+    "completeRejectionLedgerRequired",
+    "determinateAbsenceIsScorableFail",
+    "notScorableReservedForInfrastructure",
+    "trueAllMandatoryPreserved",
+    "goldFeaturesAllowedBeforeFreeze",
+    "targetGeometryMutationAllowed",
+    "regionGeometryMutationAllowed",
+    "audioGeometryMutationAllowed",
+    "playbackGeometryMutationAllowed",
+    "canonicalMutationAllowed",
+    "plannerMutationAllowed",
+    "machineOnlyReleaseAuthorized",
+    "rankerRetrained",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-run-paths.local-only.schema.json",
+  "title": "c6-0-1-14-3-run-paths.local-only",
+  "type": "object",
+  "properties": {
+    "config": {
+      "type": "object",
+      "properties": {
+        "baselineState": { "type": "string", "minLength": 1 },
+        "outputRoot": { "type": "string", "minLength": 1 },
+        "prefix": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "date": { "type": "string", "pattern": "^\\d{8}$" },
+        "executionPolicy": { "type": "string", "const": "replay-only" }
+      },
+      "required": [
+        "baselineState",
+        "outputRoot",
+        "prefix",
+        "date",
+        "executionPolicy"
+      ],
+      "additionalProperties": false
+    },
+    "configHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputs": {
+      "type": "object",
+      "propertyNames": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "policyPath": { "type": "string", "minLength": 1 }
+  },
+  "required": ["config", "configHash", "outputs", "createdAt", "policyPath"],
+  "additionalProperties": false
+}

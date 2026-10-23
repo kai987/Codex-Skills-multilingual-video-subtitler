@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-cross-model-ctc-arbitration.schema.json",
+  "title": "machine-cross-model-ctc-arbitration",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.9-independent-asr-complementarity-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-cross-model-ctc-arbitration"
+    },
+    "comparisonSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ctcRuntimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ctcModelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "correlationPolicy": {
+      "type": "string",
+      "const": "DATA_FAMILY_CORRELATED_NOT_AN_INDEPENDENT_VOTE"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "whisperProjection": { "type": "string" },
+          "reazonProjection": { "type": "string" },
+          "ctcWhisperEvidence": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "ctcReazonEvidence": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "scoreDifferenceReazonMinusWhisper": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "CTC_FAVORS_WHISPER",
+              "CTC_FAVORS_REAZON",
+              "CTC_AMBIGUOUS",
+              "CTC_UNSCORABLE"
+            ]
+          },
+          "correlationWarning": {
+            "type": "string",
+            "const": "DATA_FAMILY_CORRELATED"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "whisperProjection",
+          "reazonProjection",
+          "ctcWhisperEvidence",
+          "ctcReazonEvidence",
+          "scoreDifferenceReazonMinusWhisper",
+          "outcome",
+          "correlationWarning",
+          "evidenceIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eligibleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "favorsWhisperCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "favorsReazonCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unscorableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimeGoldInputCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eligibleCount",
+        "favorsWhisperCount",
+        "favorsReazonCount",
+        "ambiguousCount",
+        "unscorableCount",
+        "inferenceCount",
+        "modelLoadCount",
+        "runtimeGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "comparisonSemanticHash",
+    "ctcRuntimeIdentityHash",
+    "ctcModelSnapshotHash",
+    "correlationPolicy",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

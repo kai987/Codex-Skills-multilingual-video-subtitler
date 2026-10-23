@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-trial-event.schema.json",
+  "title": "c6-0-1-13-trial-event",
+  "type": "object",
+  "properties": {
+    "eventId": { "type": "string", "minLength": 1 },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "TRIAL_STARTED",
+        "TRIAL_PAUSED",
+        "TRIAL_RESUMED",
+        "REGION_OPENED",
+        "REGION_COMPLETED",
+        "ITEM_OPENED",
+        "AUDIO_PLAYED",
+        "AUDIO_PAUSED",
+        "AUDIO_SEEKED",
+        "CANDIDATE_CLICKED",
+        "CANDIDATE_USED_AS_BASE",
+        "MANUAL_EDIT_STARTED",
+        "DECISION_COMMITTED",
+        "DECISION_UNDONE",
+        "TRIAL_COMPLETED",
+        "ACTIVITY_SAMPLE"
+      ]
+    },
+    "expectedReviewPackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "expectedRankerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "visible": { "type": "boolean" },
+    "focused": { "type": "boolean" },
+    "interaction": { "type": "boolean" },
+    "audioPlaying": { "type": "boolean" },
+    "regionId": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "itemId": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "candidateId": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "sourceInterval": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "minimum": 0 }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "manualCharactersEntered": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "decisionType": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "KEEP_CURRENT",
+            "USE_REAZON",
+            "USE_WHISPER_ALTERNATE",
+            "MANUAL_EDIT",
+            "TIMING_EDIT",
+            "ADD_NEW_CUE",
+            "MARK_FALSE_POSITIVE",
+            "UNRESOLVED",
+            "WAIVE_REVIEW"
+          ]
+        },
+        { "type": "null" }
+      ]
+    },
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "trialId": { "type": "string", "minLength": 1 },
+    "sequence": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "previousEventHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "eventId",
+    "eventType",
+    "expectedReviewPackageHash",
+    "expectedRankerHash",
+    "visible",
+    "focused",
+    "interaction",
+    "audioPlaying",
+    "regionId",
+    "itemId",
+    "candidateId",
+    "sourceInterval",
+    "manualCharactersEntered",
+    "decisionType",
+    "schemaVersion",
+    "trialId",
+    "sequence",
+    "timestamp",
+    "previousEventHash",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/speaker-evidence-cache-entry.schema.json",
+  "title": "speaker-evidence-cache-entry",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "requestType": { "type": "string", "const": "local-speaker-evidence" },
+    "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "requestIdentity": {
+      "type": "object",
+      "properties": {
+        "requestType": { "type": "string", "const": "local-speaker-evidence" },
+        "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "windowType": { "type": "string", "enum": ["context", "union"] },
+        "audioLocalInterval": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        },
+        "mediaGlobalInterval": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "required": ["start", "end"],
+          "additionalProperties": false
+        },
+        "runtimeIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "pyannoteAudioVersion": { "type": "string", "minLength": 1 },
+        "torchVersion": { "type": "string", "minLength": 1 },
+        "torchaudioVersion": { "type": "string", "minLength": 1 },
+        "modelRepo": {
+          "type": "string",
+          "const": "pyannote/speaker-diarization-community-1"
+        },
+        "modelRevision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "dependencyModelHashes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "device": { "type": "string", "enum": ["mps", "cpu"] },
+        "minSpeakers": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "maxSpeakers": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "speakerNormalizationPolicy": { "type": "string", "minLength": 1 },
+        "windowMappingPolicy": { "type": "string", "minLength": 1 },
+        "overlapPolicy": { "type": "string", "minLength": 1 },
+        "prominencePolicy": { "type": "string", "minLength": 1 },
+        "cueAssignmentPolicy": { "type": "string", "minLength": 1 },
+        "relationshipPolicy": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "requestType",
+        "audioSha256",
+        "windowType",
+        "audioLocalInterval",
+        "mediaGlobalInterval",
+        "runtimeIdentityHash",
+        "pyannoteAudioVersion",
+        "torchVersion",
+        "torchaudioVersion",
+        "modelRepo",
+        "modelRevision",
+        "modelSnapshotHash",
+        "dependencyModelHashes",
+        "device",
+        "minSpeakers",
+        "maxSpeakers",
+        "speakerNormalizationPolicy",
+        "windowMappingPolicy",
+        "overlapPolicy",
+        "prominencePolicy",
+        "cueAssignmentPolicy",
+        "relationshipPolicy"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "standardTurns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "speaker": { "type": "string", "minLength": 1 },
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["speaker", "start", "end"],
+            "additionalProperties": false
+          }
+        },
+        "exclusiveTurns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "speaker": { "type": "string", "minLength": 1 },
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["speaker", "start", "end"],
+            "additionalProperties": false
+          }
+        },
+        "confidenceStatus": {
+          "type": "string",
+          "enum": ["available", "unavailable"]
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "required": [
+        "standardTurns",
+        "exclusiveTurns",
+        "confidenceStatus",
+        "warnings"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "requestType",
+    "cacheKey",
+    "createdAt",
+    "requestIdentity",
+    "result",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

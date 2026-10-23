@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-11-validation.schema.json",
+  "title": "c6-0-1-11-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.11-paired-evidence-independent-discriminator-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-11-validation" },
+    "baselineReplayPassed": { "type": "boolean" },
+    "artifactSchemasPassed": { "type": "boolean" },
+    "dataQualityPassed": { "type": "boolean" },
+    "finalParityPassed": { "type": "boolean" },
+    "sourceReadOnly": { "type": "boolean" },
+    "goldReadOnly": { "type": "boolean" },
+    "canonicalTextMutationCount": { "type": "number", "const": 0 },
+    "canonicalTimingMutationCount": { "type": "number", "const": 0 },
+    "finalAssParity": { "type": "boolean" },
+    "finalSrtParity": { "type": "boolean" },
+    "finalVttParity": { "type": "boolean" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "datasetHardcodingCount": { "type": "number", "const": 0 },
+    "inferenceNetworkUsed": { "type": "boolean", "const": false },
+    "checks": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "boolean" }
+    },
+    "passed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "baselineReplayPassed",
+    "artifactSchemasPassed",
+    "dataQualityPassed",
+    "finalParityPassed",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "canonicalTextMutationCount",
+    "canonicalTimingMutationCount",
+    "finalAssParity",
+    "finalSrtParity",
+    "finalVttParity",
+    "runtimeGoldInputCount",
+    "datasetHardcodingCount",
+    "inferenceNetworkUsed",
+    "checks",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

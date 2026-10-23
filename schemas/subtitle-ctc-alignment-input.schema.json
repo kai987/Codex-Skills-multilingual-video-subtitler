@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-ctc-alignment-input.schema.json",
+  "title": "subtitle-ctc-alignment-input",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-ctc-alignment-input"
+    },
+    "alignmentVersion": { "type": "string", "const": "C5.18.1" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baseTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceAlignmentInputHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ctcRuntimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ctcModelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "tokenizerIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "cues": {
+      "minItems": 16,
+      "maxItems": 16,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "componentId": { "type": "string", "minLength": 1 },
+          "originalInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "canonicalText": { "type": "string", "minLength": 1 },
+          "canonicalTextSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "alignmentText": { "type": "string", "minLength": 1 },
+          "alignmentTextSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "ctcTargetText": { "type": "string" },
+          "ctcTargetTextSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "normalizationOperations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "nfc",
+                    "whitespace-collapse",
+                    "remove-display-newline",
+                    "remove-nonspoken-punctuation"
+                  ]
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["operation", "count"],
+              "additionalProperties": false
+            }
+          },
+          "lexicalCharacterDeletionCount": { "type": "number", "const": 0 },
+          "encoding": {
+            "type": "object",
+            "properties": {
+              "targetText": { "type": "string" },
+              "targetTextSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "tokenIds": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "tokenPieces": { "type": "array", "items": { "type": "string" } },
+              "unknownTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "specialTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "targetEncodable": { "type": "boolean" },
+              "blockers": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "targetText",
+              "targetTextSha256",
+              "tokenIds",
+              "tokenPieces",
+              "unknownTokenCount",
+              "specialTokenCount",
+              "targetEncodable",
+              "blockers"
+            ],
+            "additionalProperties": false
+          },
+          "canonicalTextMutated": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "cueId",
+          "componentId",
+          "originalInterval",
+          "canonicalText",
+          "canonicalTextSha256",
+          "alignmentText",
+          "alignmentTextSha256",
+          "ctcTargetText",
+          "ctcTargetTextSha256",
+          "normalizationOperations",
+          "lexicalCharacterDeletionCount",
+          "encoding",
+          "canonicalTextMutated"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "componentCount": { "type": "number", "const": 7 },
+        "cueCount": { "type": "number", "const": 16 },
+        "targetEncodableCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "targetUnrepresentableCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "unknownTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "specialTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lexicalCharacterDeletionCount": { "type": "number", "const": 0 },
+        "canonicalTextMutationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "componentCount",
+        "cueCount",
+        "targetEncodableCueCount",
+        "targetUnrepresentableCueCount",
+        "unknownTokenCount",
+        "specialTokenCount",
+        "lexicalCharacterDeletionCount",
+        "canonicalTextMutationCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "alignmentVersion",
+    "generatedAt",
+    "baseCueHash",
+    "baseTimingHash",
+    "sourceAlignmentInputHash",
+    "ctcRuntimeIdentityHash",
+    "ctcModelSnapshotHash",
+    "tokenizerIdentityHash",
+    "cues",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

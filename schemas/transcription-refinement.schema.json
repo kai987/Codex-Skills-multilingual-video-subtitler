@@ -1,0 +1,1100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/transcription-refinement.schema.json",
+  "title": "transcription-refinement",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "strategy": { "type": "string", "const": "hybrid-vad" },
+        "basePass": {
+          "type": "object",
+          "properties": {
+            "adapter": { "type": "string", "const": "whisper-cpp" },
+            "model": { "type": "string", "minLength": 1 },
+            "vadProfile": { "type": "string", "const": "sensitive-v2" },
+            "timestampStrategy": { "type": "string", "const": "segment" }
+          },
+          "required": ["adapter", "model", "vadProfile", "timestampStrategy"],
+          "additionalProperties": false
+        },
+        "replacements": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 },
+              "purpose": {
+                "type": "string",
+                "enum": ["opening-dialogue", "prologue-music-dialogue"]
+              },
+              "adapter": { "type": "string", "const": "whisper-cpp" },
+              "model": { "type": "string", "minLength": 1 },
+              "vadEnabled": { "type": "boolean", "const": false }
+            },
+            "required": [
+              "start",
+              "end",
+              "purpose",
+              "adapter",
+              "model",
+              "vadEnabled"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "corrections": {
+          "type": "object",
+          "properties": {
+            "relativePath": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+            },
+            "appliedCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["relativePath", "appliedCount"],
+          "additionalProperties": false
+        },
+        "music": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 },
+            "label": { "type": "string", "minLength": 1 },
+            "source": {
+              "type": "string",
+              "const": "local-audio-and-authoritative-identification"
+            }
+          },
+          "required": ["start", "end", "label", "source"],
+          "additionalProperties": false
+        },
+        "thought": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number", "minimum": 0 },
+            "end": { "type": "number", "exclusiveMinimum": 0 },
+            "style": { "type": "string", "const": "thought" }
+          },
+          "required": ["start", "end", "style"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "strategy",
+        "basePass",
+        "replacements",
+        "corrections",
+        "music",
+        "thought"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "strategy": { "type": "string", "const": "adaptive" },
+        "basePass": {
+          "type": "object",
+          "properties": {
+            "adapter": { "type": "string", "const": "whisper-cpp" },
+            "model": { "type": "string", "minLength": 1 },
+            "coreML": { "type": "boolean" },
+            "timestampStrategy": { "type": "string", "const": "segment" }
+          },
+          "required": ["adapter", "model", "coreML", "timestampStrategy"],
+          "additionalProperties": false
+        },
+        "replacements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "interval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              "expandedInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              "sceneId": { "type": "string", "minLength": 1 },
+              "sceneLabel": {
+                "type": "string",
+                "enum": [
+                  "clean-dialogue",
+                  "quiet-dialogue",
+                  "noisy-dialogue",
+                  "singing",
+                  "non-speech",
+                  "unknown"
+                ]
+              },
+              "sceneConfidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "sceneProbabilities": {
+                "type": "object",
+                "properties": {
+                  "speech": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "vocal": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "music": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "drums": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "crowd": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "overlap": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "silence": { "type": "number", "minimum": 0, "maximum": 1 }
+                },
+                "required": [
+                  "speech",
+                  "vocal",
+                  "music",
+                  "drums",
+                  "crowd",
+                  "overlap",
+                  "silence"
+                ],
+                "additionalProperties": false
+              },
+              "sceneRoutingReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "baseline": {
+                "type": "object",
+                "properties": {
+                  "model": { "type": "string", "minLength": 1 },
+                  "coreML": { "type": "boolean" },
+                  "text": { "type": "string" }
+                },
+                "required": ["model", "coreML", "text"],
+                "additionalProperties": false
+              },
+              "baselineHypotheses": {
+                "type": "object",
+                "properties": {
+                  "vad": {
+                    "type": "object",
+                    "properties": {
+                      "text": { "type": "string" },
+                      "model": { "type": "string", "minLength": 1 },
+                      "detectedSpeech": { "type": "boolean" },
+                      "language": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "zh",
+                              "zh-Hans",
+                              "zh-Hant",
+                              "ja",
+                              "en",
+                              "mixed",
+                              "und"
+                            ]
+                          },
+                          { "type": "null" }
+                        ]
+                      },
+                      "quality": {
+                        "type": "object",
+                        "properties": {
+                          "validity": {
+                            "type": "string",
+                            "enum": [
+                              "valid",
+                              "weak",
+                              "invalid-hallucination",
+                              "invalid-empty",
+                              "invalid-timing",
+                              "invalid-language"
+                            ]
+                          },
+                          "qualityScore": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "hardReject": { "type": "boolean" },
+                          "repetitionHallucination": { "type": "boolean" },
+                          "signals": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "EXACT_SENTENCE_LOOP",
+                                "EXTREME_REPETITION_RATIO",
+                                "LONG_PHRASE_LOOP",
+                                "CONSECUTIVE_DUPLICATE_SEGMENTS",
+                                "PROMPT_ECHO_LOOP",
+                                "LOW_UNIQUE_CONTENT_RATIO",
+                                "EMPTY_TEXT",
+                                "INVALID_INTERVAL",
+                                "OVERMERGED_TIMING",
+                                "LANGUAGE_MISMATCH",
+                                "LOW_DECODER_CONFIDENCE"
+                              ]
+                            }
+                          },
+                          "metrics": {
+                            "type": "object",
+                            "properties": {
+                              "normalizedCharacters": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "sentenceCount": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "uniqueSentenceRatio": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "repeatedTextRatio": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "exactSentenceMaxRun": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "longestRepeatedPhraseCharacters": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "consecutiveDuplicateSegments": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "promptEchoCount": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "normalizedCharacters",
+                              "sentenceCount",
+                              "uniqueSentenceRatio",
+                              "repeatedTextRatio",
+                              "exactSentenceMaxRun",
+                              "longestRepeatedPhraseCharacters",
+                              "consecutiveDuplicateSegments",
+                              "promptEchoCount"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "validity",
+                          "qualityScore",
+                          "hardReject",
+                          "repetitionHallucination",
+                          "signals",
+                          "metrics"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "segments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 },
+                            "text": { "type": "string" },
+                            "confidence": {
+                              "anyOf": [
+                                {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 1
+                                },
+                                { "type": "null" }
+                              ]
+                            },
+                            "language": {
+                              "type": "string",
+                              "enum": [
+                                "zh",
+                                "zh-Hans",
+                                "zh-Hant",
+                                "ja",
+                                "en",
+                                "mixed",
+                                "und"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "end",
+                            "text",
+                            "confidence",
+                            "language"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": ["text", "model", "detectedSpeech", "language"],
+                    "additionalProperties": false
+                  },
+                  "noVad": {
+                    "type": "object",
+                    "properties": {
+                      "text": { "type": "string" },
+                      "model": { "type": "string", "minLength": 1 },
+                      "detectedSpeech": { "type": "boolean" },
+                      "language": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "zh",
+                              "zh-Hans",
+                              "zh-Hant",
+                              "ja",
+                              "en",
+                              "mixed",
+                              "und"
+                            ]
+                          },
+                          { "type": "null" }
+                        ]
+                      },
+                      "quality": {
+                        "type": "object",
+                        "properties": {
+                          "validity": {
+                            "type": "string",
+                            "enum": [
+                              "valid",
+                              "weak",
+                              "invalid-hallucination",
+                              "invalid-empty",
+                              "invalid-timing",
+                              "invalid-language"
+                            ]
+                          },
+                          "qualityScore": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "hardReject": { "type": "boolean" },
+                          "repetitionHallucination": { "type": "boolean" },
+                          "signals": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "EXACT_SENTENCE_LOOP",
+                                "EXTREME_REPETITION_RATIO",
+                                "LONG_PHRASE_LOOP",
+                                "CONSECUTIVE_DUPLICATE_SEGMENTS",
+                                "PROMPT_ECHO_LOOP",
+                                "LOW_UNIQUE_CONTENT_RATIO",
+                                "EMPTY_TEXT",
+                                "INVALID_INTERVAL",
+                                "OVERMERGED_TIMING",
+                                "LANGUAGE_MISMATCH",
+                                "LOW_DECODER_CONFIDENCE"
+                              ]
+                            }
+                          },
+                          "metrics": {
+                            "type": "object",
+                            "properties": {
+                              "normalizedCharacters": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "sentenceCount": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "uniqueSentenceRatio": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "repeatedTextRatio": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "exactSentenceMaxRun": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "longestRepeatedPhraseCharacters": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "consecutiveDuplicateSegments": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "promptEchoCount": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "normalizedCharacters",
+                              "sentenceCount",
+                              "uniqueSentenceRatio",
+                              "repeatedTextRatio",
+                              "exactSentenceMaxRun",
+                              "longestRepeatedPhraseCharacters",
+                              "consecutiveDuplicateSegments",
+                              "promptEchoCount"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "validity",
+                          "qualityScore",
+                          "hardReject",
+                          "repetitionHallucination",
+                          "signals",
+                          "metrics"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "segments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 },
+                            "text": { "type": "string" },
+                            "confidence": {
+                              "anyOf": [
+                                {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 1
+                                },
+                                { "type": "null" }
+                              ]
+                            },
+                            "language": {
+                              "type": "string",
+                              "enum": [
+                                "zh",
+                                "zh-Hans",
+                                "zh-Hant",
+                                "ja",
+                                "en",
+                                "mixed",
+                                "und"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "start",
+                            "end",
+                            "text",
+                            "confidence",
+                            "language"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": ["text", "model", "detectedSpeech", "language"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["vad", "noVad"],
+                "additionalProperties": false
+              },
+              "conflict": {
+                "type": "object",
+                "properties": {
+                  "vadNoVadConflict": { "type": "boolean" },
+                  "normalizedSimilarity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "characterEditDistance": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "timingOverlap": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0, "maximum": 1 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "startDifferenceSeconds": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "endDifferenceSeconds": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "durationDifferenceSeconds": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "segmentCountDifference": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "speechBoundaryDifferenceSeconds": {
+                    "anyOf": [
+                      { "type": "number", "minimum": 0 },
+                      { "type": "null" }
+                    ]
+                  },
+                  "boundaryDisagreement": { "type": "boolean" },
+                  "vadBoundary": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "start": { "type": "number", "minimum": 0 },
+                          "end": { "type": "number", "exclusiveMinimum": 0 }
+                        },
+                        "required": ["start", "end"],
+                        "additionalProperties": false
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "noVadBoundary": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "start": { "type": "number", "minimum": 0 },
+                          "end": { "type": "number", "exclusiveMinimum": 0 }
+                        },
+                        "required": ["start", "end"],
+                        "additionalProperties": false
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "lengthRatio": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "languageConflict": { "type": "boolean" },
+                  "oneSideEmpty": { "type": "boolean" },
+                  "repetitionConflict": { "type": "boolean" },
+                  "validCandidateConflict": { "type": "boolean" },
+                  "conflictCodes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "VAD_NO_VAD_VALID_CONFLICT",
+                        "VAD_NO_VAD_BOUNDARY_DISAGREEMENT",
+                        "NO_VAD_HALLUCINATION",
+                        "VAD_HALLUCINATION",
+                        "VAD_INVALID",
+                        "NO_VAD_INVALID"
+                      ]
+                    }
+                  },
+                  "highBackgroundNoise": { "type": "boolean" },
+                  "speechEvidence": {
+                    "type": "string",
+                    "enum": ["strong", "weak", "unknown"]
+                  }
+                },
+                "required": [
+                  "vadNoVadConflict",
+                  "normalizedSimilarity",
+                  "characterEditDistance",
+                  "timingOverlap",
+                  "lengthRatio",
+                  "languageConflict",
+                  "oneSideEmpty",
+                  "repetitionConflict",
+                  "highBackgroundNoise",
+                  "speechEvidence"
+                ],
+                "additionalProperties": false
+              },
+              "refinement": {
+                "type": "object",
+                "properties": {
+                  "model": { "type": "string", "minLength": 1 },
+                  "coreML": { "type": "boolean" },
+                  "round": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "text": { "type": "string" },
+                  "tokenTimestampsAvailable": { "type": "boolean" },
+                  "tokenTimestampsUsed": { "type": "boolean" },
+                  "quality": {
+                    "type": "object",
+                    "properties": {
+                      "validity": {
+                        "type": "string",
+                        "enum": [
+                          "valid",
+                          "weak",
+                          "invalid-hallucination",
+                          "invalid-empty",
+                          "invalid-timing",
+                          "invalid-language"
+                        ]
+                      },
+                      "qualityScore": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "hardReject": { "type": "boolean" },
+                      "repetitionHallucination": { "type": "boolean" },
+                      "signals": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "EXACT_SENTENCE_LOOP",
+                            "EXTREME_REPETITION_RATIO",
+                            "LONG_PHRASE_LOOP",
+                            "CONSECUTIVE_DUPLICATE_SEGMENTS",
+                            "PROMPT_ECHO_LOOP",
+                            "LOW_UNIQUE_CONTENT_RATIO",
+                            "EMPTY_TEXT",
+                            "INVALID_INTERVAL",
+                            "OVERMERGED_TIMING",
+                            "LANGUAGE_MISMATCH",
+                            "LOW_DECODER_CONFIDENCE"
+                          ]
+                        }
+                      },
+                      "metrics": {
+                        "type": "object",
+                        "properties": {
+                          "normalizedCharacters": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "sentenceCount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "uniqueSentenceRatio": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "repeatedTextRatio": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "exactSentenceMaxRun": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "longestRepeatedPhraseCharacters": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "consecutiveDuplicateSegments": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "promptEchoCount": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "normalizedCharacters",
+                          "sentenceCount",
+                          "uniqueSentenceRatio",
+                          "repeatedTextRatio",
+                          "exactSentenceMaxRun",
+                          "longestRepeatedPhraseCharacters",
+                          "consecutiveDuplicateSegments",
+                          "promptEchoCount"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "validity",
+                      "qualityScore",
+                      "hardReject",
+                      "repetitionHallucination",
+                      "signals",
+                      "metrics"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["model", "coreML", "round", "text"],
+                "additionalProperties": false
+              },
+              "consensus": {
+                "type": "object",
+                "properties": {
+                  "localComparison": { "type": "boolean" },
+                  "alignmentMode": {
+                    "type": "string",
+                    "enum": [
+                      "time-aligned",
+                      "text-window-fallback",
+                      "unavailable"
+                    ]
+                  },
+                  "localInterval": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "start": { "type": "number", "minimum": 0 },
+                          "end": { "type": "number", "exclusiveMinimum": 0 }
+                        },
+                        "required": ["start", "end"],
+                        "additionalProperties": false
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "vadSupport": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "noVadSupport": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "refinementSupport": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "tieBreakApplied": { "type": "boolean" }
+                },
+                "required": [
+                  "localComparison",
+                  "alignmentMode",
+                  "localInterval",
+                  "vadSupport",
+                  "noVadSupport",
+                  "refinementSupport",
+                  "tieBreakApplied"
+                ],
+                "additionalProperties": false
+              },
+              "timingRepair": {
+                "type": "object",
+                "properties": {
+                  "attempted": { "type": "boolean" },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "timing-only-token",
+                      "timing-only-speech",
+                      "retranscription",
+                      "human-review"
+                    ]
+                  },
+                  "before": {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "number", "minimum": 0 },
+                      "end": { "type": "number", "exclusiveMinimum": 0 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  "after": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "start": { "type": "number", "minimum": 0 },
+                          "end": { "type": "number", "exclusiveMinimum": 0 }
+                        },
+                        "required": ["start", "end"],
+                        "additionalProperties": false
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "reasons": {
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "repairType": { "type": "string", "const": "timing-only" },
+                  "textChanged": { "type": "boolean" },
+                  "asrRerun": { "type": "boolean" }
+                },
+                "required": [
+                  "attempted",
+                  "method",
+                  "before",
+                  "after",
+                  "reasons"
+                ],
+                "additionalProperties": false
+              },
+              "decision": {
+                "type": "object",
+                "properties": {
+                  "selected": {
+                    "type": "string",
+                    "enum": [
+                      "baseline",
+                      "refinement",
+                      "vad",
+                      "no-vad",
+                      "none",
+                      "needs-human-review"
+                    ]
+                  },
+                  "reason": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "similarity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "accepted",
+                      "accepted-after-refinement",
+                      "needs-refinement",
+                      "needs-human-review"
+                    ]
+                  },
+                  "classification": {
+                    "type": "string",
+                    "enum": [
+                      "normal",
+                      "ambiguous-speech",
+                      "suspected-hallucination",
+                      "probable-non-speech",
+                      "overlapping-speech"
+                    ]
+                  },
+                  "stableConsensus": { "type": "boolean" }
+                },
+                "required": ["selected", "reason", "similarity"],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "interval",
+              "expandedInterval",
+              "baseline",
+              "refinement",
+              "decision"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "maxRounds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "roundsExecuted": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "qualitySummary": {
+          "type": "object",
+          "properties": {
+            "accepted": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "refined": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "needsHumanReview": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "vadNoVadConflicts": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "resolvedByLargeV3": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "suspectedHallucinations": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "probableNonSpeech": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "autoResolvedVad": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "autoResolvedNoVad": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "autoResolvedLargeV3": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "rejectedVadHallucinations": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "rejectedNoVadHallucinations": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "trueUnresolvedConflicts": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "accepted",
+            "refined",
+            "needsHumanReview",
+            "vadNoVadConflicts",
+            "resolvedByLargeV3",
+            "suspectedHallucinations",
+            "probableNonSpeech"
+          ],
+          "additionalProperties": false
+        },
+        "needsHumanReviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "needsHumanReviewIntervals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 },
+              "reasons": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": ["start", "end", "reasons"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "strategy",
+        "basePass",
+        "replacements",
+        "maxRounds",
+        "roundsExecuted",
+        "qualitySummary",
+        "needsHumanReviewCount",
+        "needsHumanReviewIntervals"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

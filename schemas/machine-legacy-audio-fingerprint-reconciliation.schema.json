@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-legacy-audio-fingerprint-reconciliation.schema.json",
+  "title": "machine-legacy-audio-fingerprint-reconciliation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.1-multiview-speech-inventory-v1"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-legacy-audio-fingerprint-reconciliation"
+    },
+    "inputLineageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "viewsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "syntheticControlsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidenceId": { "type": "string", "minLength": 1 },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "retainedPath": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "retainedAudioSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "retainedPcmSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "clipSeconds": { "type": "number", "minimum": 0 },
+          "searched": { "type": "boolean" },
+          "searchScope": { "type": "string", "const": "FULL_SOURCE_ONLY" },
+          "searchViewId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "bestOffsetSamples16k": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "secondOffsetSamples16k": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "bestScore": {
+            "anyOf": [
+              { "type": "number", "minimum": -1, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "secondScore": {
+            "anyOf": [
+              { "type": "number", "minimum": -1, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "scoreMargin": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }]
+          },
+          "residual": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "uniquenessPassed": { "type": "boolean" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "LEGACY_EXACT_PCM_RECOVERED",
+              "LEGACY_SAMPLE_CHAIN_RECOVERED",
+              "LEGACY_UNIQUE_FINGERPRINT_RECOVERED",
+              "FINGERPRINT_AMBIGUOUS",
+              "FINGERPRINT_LOW_SUPPORT",
+              "SOURCE_AUDIO_BYTES_NOT_RETAINED",
+              "EXTRACTION_CONFIG_UNRESOLVED",
+              "SILENT_OR_REPETITIVE_CLIP",
+              "PROVENANCE_STILL_INSUFFICIENT"
+            ]
+          },
+          "nativeInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "startSample": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "endSample": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": ["startSample", "endSample"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "speechPositive": { "type": "boolean" },
+          "lexicalEvidenceEligible": { "type": "boolean" },
+          "lexicalProvenanceReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "evidenceId",
+          "requestIds",
+          "retainedPath",
+          "retainedAudioSha256",
+          "retainedPcmSha256",
+          "clipSeconds",
+          "searched",
+          "searchScope",
+          "searchViewId",
+          "bestOffsetSamples16k",
+          "secondOffsetSamples16k",
+          "bestScore",
+          "secondScore",
+          "scoreMargin",
+          "residual",
+          "uniquenessPassed",
+          "status",
+          "nativeInterval",
+          "speechPositive",
+          "lexicalEvidenceEligible",
+          "lexicalProvenanceReasons",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "quarantinedEntryCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "retainedClipCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniqueSearchedClips": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "searchedClipSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 900
+        },
+        "recoveredEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "noBytesEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rejectedEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lexicalEligibleEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "quarantinedEntryCount",
+        "retainedClipCount",
+        "uniqueSearchedClips",
+        "searchedClipSeconds",
+        "recoveredEntries",
+        "ambiguousEntries",
+        "noBytesEntries",
+        "rejectedEntries",
+        "lexicalEligibleEntries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "sourceIdentity",
+    "sourceTimebase",
+    "policyHash",
+    "runtimeGoldInputCount",
+    "semanticHash",
+    "artifactType",
+    "inputLineageHash",
+    "viewsHash",
+    "syntheticControlsHash",
+    "entries",
+    "summary"
+  ],
+  "additionalProperties": false
+}

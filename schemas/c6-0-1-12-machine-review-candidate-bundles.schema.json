@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-machine-review-candidate-bundles.schema.json",
+  "title": "c6-0-1-12-machine-review-candidate-bundles",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-multi-asr-review-assistance-v2"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-12-machine-review-candidate-bundles"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "bundles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewItemId": { "type": "string", "minLength": 1 },
+          "displayCandidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "displayCandidateId": { "type": "string", "minLength": 1 },
+                "displayText": { "type": "string", "minLength": 1 },
+                "normalizedTextHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "labels": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["CURRENT", "WHISPER", "WHISPER_ALT", "REAZON"]
+                  }
+                },
+                "evidenceBadges": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "STABLE",
+                      "CONTEXT_EXTENSION_ONLY",
+                      "LEXICALLY_UNSTABLE",
+                      "HALLUCINATION_RISK",
+                      "ACOUSTIC_FAVORED",
+                      "ACOUSTIC_DISFAVORED",
+                      "NEAR_TIE",
+                      "LOW_TOKEN_SUPPORT",
+                      "TIMING_UNCERTAIN",
+                      "LOCALIZATION_SAFE",
+                      "LOCALIZATION_AMBIGUOUS",
+                      "EVIDENCE_UNAVAILABLE"
+                    ]
+                  }
+                },
+                "provenance": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "candidateId": { "type": "string", "minLength": 1 },
+                      "label": {
+                        "type": "string",
+                        "enum": ["CURRENT", "WHISPER", "WHISPER_ALT", "REAZON"]
+                      },
+                      "sourceInterval": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "start": { "type": "number", "minimum": 0 },
+                              "end": { "type": "number", "exclusiveMinimum": 0 }
+                            },
+                            "required": ["start", "end"],
+                            "additionalProperties": false
+                          },
+                          { "type": "null" }
+                        ]
+                      },
+                      "evidenceIds": {
+                        "type": "array",
+                        "items": { "type": "string", "minLength": 1 }
+                      },
+                      "provenanceIds": {
+                        "type": "array",
+                        "items": { "type": "string", "minLength": 1 }
+                      },
+                      "evidenceBadges": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "STABLE",
+                            "CONTEXT_EXTENSION_ONLY",
+                            "LEXICALLY_UNSTABLE",
+                            "HALLUCINATION_RISK",
+                            "ACOUSTIC_FAVORED",
+                            "ACOUSTIC_DISFAVORED",
+                            "NEAR_TIE",
+                            "LOW_TOKEN_SUPPORT",
+                            "TIMING_UNCERTAIN",
+                            "LOCALIZATION_SAFE",
+                            "LOCALIZATION_AMBIGUOUS",
+                            "EVIDENCE_UNAVAILABLE"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "candidateId",
+                      "label",
+                      "sourceInterval",
+                      "evidenceIds",
+                      "provenanceIds",
+                      "evidenceBadges"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "displayCandidateId",
+                "displayText",
+                "normalizedTextHash",
+                "labels",
+                "evidenceBadges",
+                "provenance",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "missingCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "availableActions": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "KEEP_CURRENT",
+                "USE_REAZON",
+                "USE_WHISPER_ALTERNATE",
+                "MANUAL_EDIT",
+                "TIMING_EDIT",
+                "ADD_NEW_CUE",
+                "MARK_FALSE_POSITIVE",
+                "UNRESOLVED",
+                "WAIVE_REVIEW"
+              ]
+            }
+          },
+          "selectionAuthority": { "type": "string", "const": "HUMAN_ONLY" },
+          "calibratedConfidencePercentageDisplayed": {
+            "type": "boolean",
+            "const": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "reviewItemId",
+          "displayCandidates",
+          "missingCandidateIds",
+          "availableActions",
+          "selectionAuthority",
+          "calibratedConfidencePercentageDisplayed",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "reviewItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "displayCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "collapsedDuplicateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "missingCandidateReferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateActionableItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "reviewItemCount",
+        "displayCandidateCount",
+        "collapsedDuplicateCount",
+        "missingCandidateReferenceCount",
+        "candidateActionableItemCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "policyHash",
+    "runtimeGoldInputCount",
+    "bundles",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

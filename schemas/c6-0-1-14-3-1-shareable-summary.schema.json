@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-1-shareable-summary.schema.json",
+  "title": "c6-0-1-14-3-1-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-1-shareable-summary"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "SHAREABLE_AGGREGATE_ONLY" },
+    "sourceRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reboundRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedHashValidityRatio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "playbackHashValidityRatio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "integrityFailureCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "detectorReplayHits": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "asrReplayHits": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "evaluationIntegrityPassed": { "type": "boolean" },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_PROJECTION_HASH_INTEGRITY_REPAIR",
+        "HOLD_FOR_NESTED_SEMANTIC_INTEGRITY_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_HIERARCHICAL_TARGET_SELECTION_REPAIR",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_ENGINEERING_REPAIR"
+      ]
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "rawDialogueIncluded": { "type": "boolean", "const": false },
+    "goldIncluded": { "type": "boolean", "const": false },
+    "localPathsIncluded": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "visibility",
+    "sourceRowCount",
+    "reboundRowCount",
+    "projectedHashValidityRatio",
+    "playbackHashValidityRatio",
+    "integrityFailureCount",
+    "detectorReplayHits",
+    "asrReplayHits",
+    "inferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "evaluationIntegrityPassed",
+    "route",
+    "productionStatus",
+    "finalizationMethod",
+    "rawDialogueIncluded",
+    "goldIncluded",
+    "localPathsIncluded",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

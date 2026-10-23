@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-zero-touch-readiness.schema.json",
+  "title": "c6-0-zero-touch-readiness",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "investigationVersion": { "type": "string", "const": "C6.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceSnapshot": {
+      "type": "object",
+      "properties": {
+        "sourceTaskName": { "type": "string", "minLength": 1 },
+        "sourceTaskHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceStatus": { "type": "string", "const": "needs-review" },
+        "sourceFinalizationMethod": { "type": "string", "const": "none" },
+        "sourceReviewItemCount": { "type": "number", "const": 7 },
+        "sourceFinalArtifactPresent": { "type": "boolean", "const": false },
+        "causalReplayParity": { "type": "boolean" },
+        "frozenReplayParity": { "type": "boolean" }
+      },
+      "required": [
+        "sourceTaskName",
+        "sourceTaskHash",
+        "canonicalCueHash",
+        "timingHash",
+        "outputCueHash",
+        "sourceStatus",
+        "sourceFinalizationMethod",
+        "sourceReviewItemCount",
+        "sourceFinalArtifactPresent",
+        "causalReplayParity",
+        "frozenReplayParity"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-0-zero-touch-readiness" },
+    "implementationGo": { "type": "boolean" },
+    "defaultReleaseGo": { "type": "boolean" },
+    "humanBaselinePathReady": { "type": "boolean" },
+    "machineOnlyPathReady": { "type": "boolean" },
+    "currentRunCanFinalizeUnderProposedPositiveRiskPolicy": {
+      "type": "boolean"
+    },
+    "unknownBlockersFailClosed": { "type": "boolean", "const": true },
+    "freshnessCheckedBeforeGate": { "type": "boolean", "const": true },
+    "providerFailureSemantics": {
+      "type": "object",
+      "properties": {
+        "providerFailureBlocksCurrentOutput": {
+          "type": "boolean",
+          "const": false
+        },
+        "providerFailureBlocksDependentMutation": {
+          "type": "boolean",
+          "const": true
+        },
+        "contradictoryPositiveRiskRemainsBlocking": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "providerFailureBlocksCurrentOutput",
+        "providerFailureBlocksDependentMutation",
+        "contradictoryPositiveRiskRemainsBlocking"
+      ],
+      "additionalProperties": false
+    },
+    "evidenceConsensusPolicy": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rationale": { "type": "string", "minLength": 1 }
+  },
+  "required": [
+    "schemaVersion",
+    "investigationVersion",
+    "generatedAt",
+    "sourceSnapshot",
+    "semanticHash",
+    "artifactType",
+    "implementationGo",
+    "defaultReleaseGo",
+    "humanBaselinePathReady",
+    "machineOnlyPathReady",
+    "currentRunCanFinalizeUnderProposedPositiveRiskPolicy",
+    "unknownBlockersFailClosed",
+    "freshnessCheckedBeforeGate",
+    "providerFailureSemantics",
+    "evidenceConsensusPolicy",
+    "prerequisites",
+    "rationale"
+  ],
+  "additionalProperties": false
+}

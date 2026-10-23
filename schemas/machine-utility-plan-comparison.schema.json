@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-utility-plan-comparison.schema.json",
+  "title": "machine-utility-plan-comparison",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-utility-plan-comparison"
+    },
+    "oldPlannerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "newPlannerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "oldSelectedBundleIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "newSelectedBundleIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "retainedBundleIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "removedBundleIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "addedBundleIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "retainedChildIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "removedChildIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "addedChildIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "obligationCoverageBefore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "obligationCoverageAfter": { "type": "number", "minimum": 0, "maximum": 1 },
+    "phaseARegressionBefore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "phaseARegressionAfter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "utilityTierCoverageBefore": {
+      "type": "object",
+      "properties": {
+        "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_0_INELIGIBLE_OR_CONTRADICTED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH",
+        "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH",
+        "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH",
+        "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH",
+        "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE",
+        "TIER_0_INELIGIBLE_OR_CONTRADICTED"
+      ],
+      "additionalProperties": false
+    },
+    "utilityTierCoverageAfter": {
+      "type": "object",
+      "properties": {
+        "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TIER_0_INELIGIBLE_OR_CONTRADICTED": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH",
+        "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH",
+        "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH",
+        "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH",
+        "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE",
+        "TIER_0_INELIGIBLE_OR_CONTRADICTED"
+      ],
+      "additionalProperties": false
+    },
+    "independentFamilyCoverageBefore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "independentFamilyCoverageAfter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "optionalCoreCoverageBefore": { "type": "number", "minimum": 0 },
+    "optionalCoreCoverageAfter": { "type": "number", "minimum": 0 },
+    "targetCountBefore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetCountAfter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "coreUnionBefore": { "type": "number", "minimum": 0 },
+    "coreUnionAfter": { "type": "number", "minimum": 0 },
+    "predictedAudioBefore": { "type": "number", "minimum": 0 },
+    "predictedAudioAfter": { "type": "number", "minimum": 0 },
+    "objectiveBefore": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "objectiveAfter": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "objectiveNonDegradation": { "type": "boolean" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "oldPlannerHash",
+    "newPlannerHash",
+    "oldSelectedBundleIds",
+    "newSelectedBundleIds",
+    "retainedBundleIds",
+    "removedBundleIds",
+    "addedBundleIds",
+    "retainedChildIds",
+    "removedChildIds",
+    "addedChildIds",
+    "obligationCoverageBefore",
+    "obligationCoverageAfter",
+    "phaseARegressionBefore",
+    "phaseARegressionAfter",
+    "utilityTierCoverageBefore",
+    "utilityTierCoverageAfter",
+    "independentFamilyCoverageBefore",
+    "independentFamilyCoverageAfter",
+    "optionalCoreCoverageBefore",
+    "optionalCoreCoverageAfter",
+    "targetCountBefore",
+    "targetCountAfter",
+    "coreUnionBefore",
+    "coreUnionAfter",
+    "predictedAudioBefore",
+    "predictedAudioAfter",
+    "objectiveBefore",
+    "objectiveAfter",
+    "objectiveNonDegradation"
+  ],
+  "additionalProperties": false
+}

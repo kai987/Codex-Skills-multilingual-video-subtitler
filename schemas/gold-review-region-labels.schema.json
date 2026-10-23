@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-review-region-labels.schema.json",
+  "title": "gold-review-region-labels",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "gold-review-region-labels" },
+    "use": { "type": "string", "const": "EVALUATION_CALIBRATION_ONLY" },
+    "datasetRole": {
+      "type": "string",
+      "const": "REVIEW_RANKER_CALIBRATION_DATASET"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineFeaturesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceEvaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "regionId": { "type": "string" },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MATERIAL_TEXT_ERROR",
+                "SEVERE_TIMING_ERROR",
+                "HALLUCINATION",
+                "MISSING_DIALOGUE",
+                "OVERLAP_ERROR",
+                "CLEAN_OR_MINOR"
+              ]
+            }
+          },
+          "errorComponentIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "majorError": { "type": "boolean" }
+        },
+        "required": ["regionId", "labels", "errorComponentIds", "majorError"],
+        "additionalProperties": false
+      }
+    },
+    "errorComponents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorComponentId": { "type": "string" },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MATERIAL_TEXT_ERROR",
+                "SEVERE_TIMING_ERROR",
+                "HALLUCINATION",
+                "MISSING_DIALOGUE",
+                "OVERLAP_ERROR",
+                "CLEAN_OR_MINOR"
+              ]
+            }
+          },
+          "coveredRegionIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "coveredItemIds": { "type": "array", "items": { "type": "string" } },
+          "sourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "foldId": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+        },
+        "required": [
+          "errorComponentId",
+          "labels",
+          "coveredRegionIds",
+          "coveredItemIds",
+          "sourceInterval",
+          "foldId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "unassignedErrorComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "use",
+    "datasetRole",
+    "machineFreezeHash",
+    "machineFeaturesHash",
+    "foldsHash",
+    "sourceEvaluationHash",
+    "regions",
+    "errorComponents",
+    "unassignedErrorComponentCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

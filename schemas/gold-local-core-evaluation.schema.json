@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/gold-local-core-evaluation.schema.json",
+  "title": "gold-local-core-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.8-core-span-asr-stability-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "gold-local-core-evaluation" },
+    "evaluationPhase": {
+      "type": "string",
+      "const": "post-freeze-gold-isolated"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationMarginSeconds": { "type": "number", "const": 0.35 },
+    "alignmentPolicy": {
+      "type": "string",
+      "const": "monotonic-local-many-to-many-v1"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "coreInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "evaluationInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "matchedGoldCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "machineToGoldCardinality": {
+            "type": "string",
+            "enum": ["ONE_TO_ONE", "ONE_TO_MANY", "NONE"]
+          },
+          "goldToMachineCardinality": {
+            "type": "string",
+            "enum": ["ONE_TO_ONE", "MANY_TO_ONE", "NONE"]
+          },
+          "monotonicOrder": { "type": "boolean" },
+          "evaluationStatus": {
+            "type": "string",
+            "enum": [
+              "EVALUABLE_EXACT_LOCAL",
+              "EVALUABLE_MONOTONIC_LOCAL",
+              "EVALUABLE_WITH_AMBIGUITY",
+              "UNEVALUABLE_INSUFFICIENT_REFERENCE",
+              "UNEVALUABLE_OVERLAP",
+              "UNEVALUABLE_MAPPING_CONFLICT"
+            ]
+          },
+          "goldTextHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "goldTextIncluded": { "type": "boolean", "const": false },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "coreInterval",
+          "evaluationInterval",
+          "matchedGoldCueIds",
+          "machineToGoldCardinality",
+          "goldToMachineCardinality",
+          "monotonicOrder",
+          "evaluationStatus",
+          "goldTextHash",
+          "goldTextIncluded",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evaluableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactLocalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "monotonicLocalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousEvaluableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unevaluableEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oneMachineToManyGoldCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "manyMachineToOneGoldCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetNineOfTwelvePassed": { "type": "boolean" }
+      },
+      "required": [
+        "eventCount",
+        "evaluableEventCount",
+        "exactLocalCount",
+        "monotonicLocalCount",
+        "ambiguousEvaluableCount",
+        "unevaluableEventCount",
+        "oneMachineToManyGoldCount",
+        "manyMachineToOneGoldCount",
+        "targetNineOfTwelvePassed"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evaluationPhase",
+    "machineFreezeHash",
+    "goldIdentityHash",
+    "evaluationMarginSeconds",
+    "alignmentPolicy",
+    "runtimeGoldInputCount",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

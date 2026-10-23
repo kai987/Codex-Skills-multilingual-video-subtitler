@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-local-separated-stream-evidence.schema.json",
+  "title": "subtitle-local-separated-stream-evidence",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-local-separated-stream-evidence"
+    },
+    "evidenceVersion": { "type": "string", "const": "C5.18.1" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe"] },
+    "separationRuntimeIdentityHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "separationModelRepo": {
+      "type": "string",
+      "const": "speechbrain/sepformer-whamr16k"
+    },
+    "separationModelRevision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "separationModelSnapshotHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "trainingLanguage": { "type": "string", "const": "English" },
+    "targetLanguage": { "type": "string", "const": "Japanese" },
+    "domainMatched": { "type": "boolean", "const": false },
+    "crossDomainUse": {
+      "type": "string",
+      "const": "experimental-observe-only"
+    },
+    "crossDomainWarning": {
+      "type": "string",
+      "const": "English WHAMR separation is experimental observe-only evidence for Japanese dialogue."
+    },
+    "timingActionable": { "type": "boolean", "const": false },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "componentId": { "type": "string", "minLength": 1 },
+          "cueIds": {
+            "minItems": 2,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "triggered": { "type": "boolean" },
+          "triggerReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "separationCacheHit": { "type": "boolean" },
+          "separationInferenceExecuted": { "type": "boolean" },
+          "streams": {
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "streamId": {
+                  "type": "string",
+                  "enum": ["stream-a", "stream-b"]
+                },
+                "label": {
+                  "type": "string",
+                  "enum": ["Candidate Stream A", "Candidate Stream B"]
+                },
+                "audioSha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+                "rmsDbfs": {
+                  "anyOf": [{ "type": "number" }, { "type": "null" }]
+                },
+                "nonSilentDurationSeconds": { "type": "number", "minimum": 0 },
+                "finiteSampleCheck": { "type": "boolean" },
+                "lengthParity": { "type": "boolean" },
+                "correlationWithMixture": {
+                  "anyOf": [
+                    { "type": "number", "minimum": -1, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "zeroStream": { "type": "boolean" },
+                "highCorrelation": { "type": "boolean" },
+                "lengthMismatch": { "type": "boolean" },
+                "ctcAttemptIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "streamId",
+                "label",
+                "audioSha256",
+                "durationSeconds",
+                "rmsDbfs",
+                "nonSilentDurationSeconds",
+                "finiteSampleCheck",
+                "lengthParity",
+                "correlationWithMixture",
+                "zeroStream",
+                "highCorrelation",
+                "lengthMismatch",
+                "ctcAttemptIds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "streamCorrelation": {
+            "anyOf": [
+              { "type": "number", "minimum": -1, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "mixtureReconstructionError": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "qualityStatus": {
+            "type": "string",
+            "enum": ["not-triggered", "usable-observe-only", "unreliable"]
+          },
+          "bestStreamByCue": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }]
+            }
+          },
+          "scoreMarginByCue": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": {
+              "anyOf": [{ "type": "number" }, { "type": "null" }]
+            }
+          },
+          "qualityBlockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "componentId",
+          "cueIds",
+          "triggered",
+          "triggerReasons",
+          "separationCacheHit",
+          "separationInferenceExecuted",
+          "streams",
+          "streamCorrelation",
+          "mixtureReconstructionError",
+          "qualityStatus",
+          "bestStreamByCue",
+          "scoreMarginByCue",
+          "qualityBlockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "targetComponentCount": { "type": "number", "const": 7 },
+        "triggeredComponentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "separationRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "separationInferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "separationCacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "separationModelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "separatedStreamCtcAttemptCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "separatedStreamCtcInferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "separatedStreamCtcCacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "timingMutationCount": { "type": "number", "const": 0 },
+        "textMutationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "targetComponentCount",
+        "triggeredComponentCount",
+        "separationRequestCount",
+        "separationInferenceCount",
+        "separationCacheHitCount",
+        "separationModelLoadCount",
+        "separatedStreamCtcAttemptCount",
+        "separatedStreamCtcInferenceCount",
+        "separatedStreamCtcCacheHitCount",
+        "timingMutationCount",
+        "textMutationCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "evidenceVersion",
+    "generatedAt",
+    "mode",
+    "separationRuntimeIdentityHash",
+    "separationModelRepo",
+    "separationModelRevision",
+    "separationModelSnapshotHash",
+    "trainingLanguage",
+    "targetLanguage",
+    "domainMatched",
+    "crossDomainUse",
+    "crossDomainWarning",
+    "timingActionable",
+    "components",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

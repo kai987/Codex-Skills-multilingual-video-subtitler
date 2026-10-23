@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-policy.schema.json",
+  "title": "c6-0-1-14-2-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "cluster": {
+      "type": "object",
+      "properties": {
+        "maximumGapSeconds": { "type": "number", "const": 0.3 },
+        "maximumEnvelopeSeconds": { "type": "number", "const": 12 },
+        "minimumCoreSeconds": { "type": "number", "const": 0.12 },
+        "silenceBridgingAllowed": { "type": "boolean", "const": false },
+        "cueCrossingAllowed": { "type": "boolean", "const": false },
+        "targetCrossingAllowed": { "type": "boolean", "const": false },
+        "sceneCrossingAllowed": { "type": "boolean", "const": false },
+        "speakerCrossingAllowed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "maximumGapSeconds",
+        "maximumEnvelopeSeconds",
+        "minimumCoreSeconds",
+        "silenceBridgingAllowed",
+        "cueCrossingAllowed",
+        "targetCrossingAllowed",
+        "sceneCrossingAllowed",
+        "speakerCrossingAllowed"
+      ],
+      "additionalProperties": false
+    },
+    "selection": {
+      "type": "object",
+      "properties": {
+        "maximumTargets": { "type": "number", "const": 24 },
+        "maximumCoreUnionSeconds": { "type": "number", "const": 60 },
+        "reservedExclusiveSlots": { "type": "number", "const": 4 },
+        "binSeconds": { "type": "number", "const": 60 },
+        "localWindowSeconds": { "type": "number", "const": 15 },
+        "maximumLocalTargets": { "type": "number", "const": 3 },
+        "preserveOldCoverage": { "type": "boolean", "const": true },
+        "sourceTimeTieBreakOnly": { "type": "boolean", "const": true },
+        "weights": {
+          "type": "object",
+          "properties": {
+            "evidence": { "type": "number" },
+            "newSeconds": { "type": "number" },
+            "newFamily": { "type": "number" },
+            "newStratum": { "type": "number" },
+            "newBin": { "type": "number" },
+            "newScene": { "type": "number" },
+            "independent": { "type": "number" },
+            "redundancy": { "type": "number" },
+            "density": { "type": "number" },
+            "slotCost": { "type": "number" },
+            "unionCost": { "type": "number" }
+          },
+          "required": [
+            "evidence",
+            "newSeconds",
+            "newFamily",
+            "newStratum",
+            "newBin",
+            "newScene",
+            "independent",
+            "redundancy",
+            "density",
+            "slotCost",
+            "unionCost"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "maximumTargets",
+        "maximumCoreUnionSeconds",
+        "reservedExclusiveSlots",
+        "binSeconds",
+        "localWindowSeconds",
+        "maximumLocalTargets",
+        "preserveOldCoverage",
+        "sourceTimeTieBreakOnly",
+        "weights"
+      ],
+      "additionalProperties": false
+    },
+    "detectors": {
+      "type": "object",
+      "properties": {
+        "maximumRuns": { "type": "number", "const": 8 },
+        "maximumWebrtc": { "type": "number", "const": 4 },
+        "maximumSilero": { "type": "number", "const": 2 },
+        "maximumPyannote": { "type": "number", "const": 2 },
+        "retryCount": { "type": "number", "const": 0 },
+        "backfillAllowed": { "type": "boolean", "const": false },
+        "sileroMainThreshold": { "type": "number", "const": 0.2 },
+        "sileroAuditThreshold": { "type": "number", "const": 0.1 },
+        "pyannoteMainThreshold": { "type": "number", "const": 0.5 },
+        "pyannoteAuditThreshold": { "type": "number", "const": 0.25 },
+        "subthresholdMinimumSeconds": { "type": "number", "const": 0.12 },
+        "webrtc": {
+          "type": "object",
+          "properties": {
+            "sampleRate": { "type": "number", "const": 16000 },
+            "channels": { "type": "number", "const": 1 },
+            "bitDepth": { "type": "number", "const": 16 },
+            "frameMs": { "type": "number", "const": 20 },
+            "aggressiveness": { "type": "number", "const": 0 },
+            "mergeGapMs": { "type": "number", "const": 160 },
+            "minimumSpeechMs": { "type": "number", "const": 100 },
+            "paddingMs": { "type": "number", "const": 40 },
+            "maximumIntervalSeconds": { "type": "number", "const": 12 }
+          },
+          "required": [
+            "sampleRate",
+            "channels",
+            "bitDepth",
+            "frameMs",
+            "aggressiveness",
+            "mergeGapMs",
+            "minimumSpeechMs",
+            "paddingMs",
+            "maximumIntervalSeconds"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "maximumRuns",
+        "maximumWebrtc",
+        "maximumSilero",
+        "maximumPyannote",
+        "retryCount",
+        "backfillAllowed",
+        "sileroMainThreshold",
+        "sileroAuditThreshold",
+        "pyannoteMainThreshold",
+        "pyannoteAuditThreshold",
+        "subthresholdMinimumSeconds",
+        "webrtc"
+      ],
+      "additionalProperties": false
+    },
+    "masked": {
+      "type": "object",
+      "properties": {
+        "minimumVoiceBandRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumModulationRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximumFlatness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minimumRms": { "type": "number", "minimum": 0 },
+        "energyAloneAllowed": { "type": "boolean", "const": false },
+        "sameFamilyVotesIndependent": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "minimumVoiceBandRatio",
+        "minimumModulationRatio",
+        "maximumFlatness",
+        "minimumRms",
+        "energyAloneAllowed",
+        "sameFamilyVotesIndependent"
+      ],
+      "additionalProperties": false
+    },
+    "asr": {
+      "type": "object",
+      "properties": {
+        "maximumTargets": { "type": "number", "const": 4 },
+        "maximumContextTargets": { "type": "number", "const": 2 },
+        "maximumRequests": { "type": "number", "const": 12 },
+        "contextSeconds": { "type": "number", "const": 0.75 },
+        "prompt": { "type": "string", "const": "" },
+        "vadEnabled": { "type": "boolean", "const": false },
+        "retryCount": { "type": "number", "const": 0 },
+        "backfillAllowed": { "type": "boolean", "const": false },
+        "fullMediaAllowed": { "type": "boolean", "const": false }
+      },
+      "required": [
+        "maximumTargets",
+        "maximumContextTargets",
+        "maximumRequests",
+        "contextSeconds",
+        "prompt",
+        "vadEnabled",
+        "retryCount",
+        "backfillAllowed",
+        "fullMediaAllowed"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "majority": { "type": "number", "const": 0.5 },
+        "audible": { "type": "number", "const": 0.8 },
+        "full": { "type": "number", "const": 0.95 },
+        "maximumEpisodeBurden": { "type": "number", "const": 0.95 }
+      },
+      "required": ["majority", "audible", "full", "maximumEpisodeBurden"],
+      "additionalProperties": false
+    },
+    "goldBlind": { "type": "boolean", "const": true },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "canonicalMutationAllowed": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "cluster",
+    "selection",
+    "detectors",
+    "masked",
+    "asr",
+    "coverage",
+    "goldBlind",
+    "rankerRetrained",
+    "canonicalMutationAllowed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

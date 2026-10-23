@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-aggregate-shareable-summary.schema.json",
+  "title": "c6-0-1-14-5-2-aggregate-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-2-aggregate-shareable-summary"
+    },
+    "visibility": { "type": "string", "const": "SHAREABLE_AGGREGATE_ONLY" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "orphanClassificationCounts": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "candidateCounts": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "realizationCounts": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "determinacyCounts": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "recallRatios": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": {
+        "anyOf": [
+          { "type": "number", "minimum": 0, "maximum": 1 },
+          { "type": "null" }
+        ]
+      }
+    },
+    "mandatoryMetrics": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": {
+        "anyOf": [
+          { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          { "type": "number", "minimum": 0 },
+          { "type": "string", "minLength": 1 },
+          {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          }
+        ]
+      }
+    },
+    "artifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "route": { "type": "string", "minLength": 1 },
+    "containsRawAudio": { "type": "boolean", "const": false },
+    "containsDialogueText": { "type": "boolean", "const": false },
+    "containsGoldRows": { "type": "boolean", "const": false },
+    "containsAbsolutePaths": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "visibility",
+    "policyHash",
+    "orphanClassificationCounts",
+    "candidateCounts",
+    "realizationCounts",
+    "determinacyCounts",
+    "recallRatios",
+    "mandatoryMetrics",
+    "artifactHashes",
+    "route",
+    "containsRawAudio",
+    "containsDialogueText",
+    "containsGoldRows",
+    "containsAbsolutePaths",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

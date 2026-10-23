@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-10-policy-profiles.schema.json",
+  "title": "c6-0-1-10-policy-profiles",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.10-cross-model-arbitration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-10-policy-profiles" },
+    "defaultDecision": { "type": "string", "const": "KEEP_CURRENT_WHISPER" },
+    "profilesFrozenBeforeDevGold": { "type": "boolean", "const": true },
+    "profiles": {
+      "minItems": 3,
+      "maxItems": 3,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "enum": ["CONSERVATIVE", "BALANCED", "AGGRESSIVE_SHADOW"]
+          },
+          "productionEligible": { "type": "boolean" },
+          "minimumIndependentSupportingFamilies": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3
+          },
+          "requireStrongWhisperNegativeEvidence": { "type": "boolean" },
+          "requireReazonStable": { "type": "boolean", "const": true },
+          "requireSafeExactSpan": { "type": "boolean", "const": true },
+          "allowOrthographyOnlySwitch": { "type": "boolean", "const": false },
+          "allowCtcToSelectWinner": { "type": "boolean", "const": false },
+          "allowCtcAsVeto": { "type": "boolean", "const": true },
+          "allowRawConfidenceComparison": { "type": "boolean", "const": false },
+          "allowCorrelatedVotesAsIndependent": {
+            "type": "boolean",
+            "const": false
+          },
+          "allowUnresolvedCrossEventAmbiguity": {
+            "type": "boolean",
+            "const": false
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "profile",
+          "productionEligible",
+          "minimumIndependentSupportingFamilies",
+          "requireStrongWhisperNegativeEvidence",
+          "requireReazonStable",
+          "requireSafeExactSpan",
+          "allowOrthographyOnlySwitch",
+          "allowCtcToSelectWinner",
+          "allowCtcAsVeto",
+          "allowRawConfidenceComparison",
+          "allowCorrelatedVotesAsIndependent",
+          "allowUnresolvedCrossEventAmbiguity",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "defaultDecision",
+    "profilesFrozenBeforeDevGold",
+    "profiles",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,2579 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-review-package.schema.json",
+  "title": "subtitle-review-package",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "packageType": {
+      "type": "string",
+      "const": "multilingual-subtitle-review-package"
+    },
+    "reviewVersion": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "sourceFingerprint": {
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "durationSeconds": { "type": "number", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["fileName", "size", "durationSeconds", "sha256"],
+      "additionalProperties": false
+    },
+    "baseSubtitlePackagePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+    },
+    "baseSubtitlePackageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evidenceReconciliationHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "evidenceReconciliationStatus": {
+      "default": "legacy",
+      "type": "string",
+      "enum": ["legacy", "observed", "enforced"]
+    },
+    "deliveryIntegrityPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "reviewActionPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "speakerEvidenceArtifactPath": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+        },
+        { "type": "null" }
+      ]
+    },
+    "speakerEvidenceArtifactHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerRuntimeIdentityHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerModelSnapshotHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerEvidencePolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "speakerAssignmentHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "speakerRelationshipHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcBoundaryEvidenceArtifactPath": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+        },
+        { "type": "null" }
+      ]
+    },
+    "ctcBoundaryEvidenceArtifactHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcRuntimeIdentityHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcModelSnapshotHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcAlignmentInputHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcEvidenceHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "ctcPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "ctcJointAssignmentHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "sourceSeparationEvidenceHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "seriesMemoryHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "memoryPolicyVersion": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "memoryRankingPolicyHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "pronunciationProjectionHash": {
+      "default": null,
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "seriesMemoryDecisionDependency": {
+      "default": "none",
+      "type": "string",
+      "enum": ["none", "ranking"]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewId": { "type": "string", "minLength": 1 },
+          "targetCueIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "currentText": { "type": "string" },
+          "currentStart": { "type": "number", "minimum": 0 },
+          "currentEnd": { "type": "number", "exclusiveMinimum": 0 },
+          "currentStyle": {
+            "type": "string",
+            "enum": ["default", "thought", "music"]
+          },
+          "currentSpeaker": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "previousCue": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "cueId": { "type": "string", "minLength": 1 },
+                  "text": { "type": "string", "minLength": 1 },
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["cueId", "text", "start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "nextCue": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "cueId": { "type": "string", "minLength": 1 },
+                  "text": { "type": "string", "minLength": 1 },
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["cueId", "text", "start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "machineDecision": {
+            "type": "object",
+            "properties": {
+              "decisionId": { "type": "string", "minLength": 1 },
+              "targetCueIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "KEEP",
+                  "REPLACE",
+                  "EXPAND",
+                  "SPLIT",
+                  "MERGE",
+                  "REDISTRIBUTE",
+                  "DELETE_HALLUCINATION",
+                  "TIMING_ONLY",
+                  "REVIEW_ONLY"
+                ]
+              },
+              "currentText": { "type": "string" },
+              "proposedText": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "proposedCues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "minLength": 1 },
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 },
+                    "text": { "type": "string", "minLength": 1 }
+                  },
+                  "required": ["id", "start", "end", "text"],
+                  "additionalProperties": false
+                }
+              },
+              "selectedCandidateId": {
+                "anyOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "alternativeCandidateIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "blockers": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "automaticMutationEligible": { "type": "boolean" },
+              "requiresHumanReview": { "type": "boolean" },
+              "decisionReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "decisionId",
+              "targetCueIds",
+              "action",
+              "currentText",
+              "proposedText",
+              "proposedCues",
+              "selectedCandidateId",
+              "alternativeCandidateIds",
+              "evidenceIds",
+              "blockers",
+              "automaticMutationEligible",
+              "requiresHumanReview",
+              "decisionReasons"
+            ],
+            "additionalProperties": false
+          },
+          "candidateSuggestions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "targetCueIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "candidateText": { "type": "string", "minLength": 1 },
+                "candidateInterval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "localInterval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "associationType": {
+                  "type": "string",
+                  "enum": [
+                    "EXACT_TARGET",
+                    "PROBABLE_TARGET",
+                    "BROAD_WINDOW_ASSOCIATION",
+                    "AMBIGUOUS_ASSOCIATION",
+                    "UNASSOCIATED"
+                  ]
+                },
+                "associationScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "associationMargin": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "sourceRequestIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "sourceProfileIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "independentSupportCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "coverageMetrics": {
+                  "type": "object",
+                  "properties": {
+                    "existingCuePreservationRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "candidateCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "contentOmissionRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "contentAdditionRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "neighborCueIntrusionRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "localSpeechCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "coverageMethod": {
+                      "type": "string",
+                      "const": "heuristic"
+                    },
+                    "semanticSimilarity": { "type": "null" }
+                  },
+                  "required": [
+                    "existingCuePreservationRatio",
+                    "candidateCoverageRatio",
+                    "contentOmissionRatio",
+                    "contentAdditionRatio",
+                    "neighborCueIntrusionRatio",
+                    "localSpeechCoverageRatio",
+                    "coverageMethod",
+                    "semanticSimilarity"
+                  ],
+                  "additionalProperties": false
+                },
+                "directAcousticSupport": { "type": "boolean" },
+                "partialFragment": { "type": "boolean" },
+                "timingResolved": { "type": "boolean" },
+                "languageIntegrityPassed": { "type": "boolean" },
+                "hallucinationQaPassed": { "type": "boolean" },
+                "repetitionQaPassed": { "type": "boolean" },
+                "presentationQaPassed": { "type": "boolean" },
+                "requestedAction": {
+                  "type": "string",
+                  "enum": [
+                    "KEEP",
+                    "REPLACE",
+                    "EXPAND",
+                    "SPLIT",
+                    "MERGE",
+                    "REDISTRIBUTE",
+                    "DELETE_HALLUCINATION",
+                    "TIMING_ONLY",
+                    "REVIEW_ONLY"
+                  ]
+                },
+                "automaticMutationEligible": { "type": "boolean" },
+                "requiresHumanReview": { "type": "boolean" },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "candidateId",
+                "targetCueIds",
+                "candidateText",
+                "candidateInterval",
+                "localInterval",
+                "associationType",
+                "associationScore",
+                "associationMargin",
+                "sourceEvidenceIds",
+                "sourceRequestIds",
+                "sourceProfileIds",
+                "independentSupportCount",
+                "coverageMetrics",
+                "directAcousticSupport",
+                "partialFragment",
+                "timingResolved",
+                "languageIntegrityPassed",
+                "hallucinationQaPassed",
+                "repetitionQaPassed",
+                "presentationQaPassed",
+                "requestedAction",
+                "automaticMutationEligible",
+                "requiresHumanReview",
+                "blockers"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "candidateActionBindings": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "reviewId": { "type": "string", "minLength": 1 },
+                "candidateEvidenceHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "reviewVersion": { "type": "string", "minLength": 1 },
+                "status": {
+                  "type": "string",
+                  "enum": ["active", "stale", "revoked", "deleted"]
+                }
+              },
+              "required": [
+                "candidateId",
+                "reviewId",
+                "candidateEvidenceHash",
+                "reviewVersion",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "findingIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerEvidenceComponentId": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "ctcBoundaryEvidenceComponentId": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "allowedHumanActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "KEEP",
+                "ACCEPT_SUGGESTION",
+                "EDIT_TEXT",
+                "REJECT_SUGGESTION",
+                "SPLIT_CUE",
+                "MERGE_CUES",
+                "EDIT_TIMING",
+                "DELETE_CUE",
+                "MARK_UNRESOLVED"
+              ]
+            }
+          },
+          "audioClipPath": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioError": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "audioSource": {
+            "default": "unavailable",
+            "type": "string",
+            "enum": [
+              "generated-from-source-video",
+              "reused-existing-review-audio",
+              "reused-overlap-audio",
+              "inherited-verified-review-audio",
+              "disabled-by-user",
+              "unavailable"
+            ]
+          },
+          "audioValidationStatus": {
+            "default": "unavailable",
+            "type": "string",
+            "enum": [
+              "validated",
+              "hash-mismatch",
+              "coverage-incomplete",
+              "invalid-wav",
+              "source-missing",
+              "disabled",
+              "unavailable"
+            ]
+          },
+          "audioSourceArtifact": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "audioSourceAudioPath": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioSourceComponentId": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "audioSourceEvidenceLineageIds": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "audioHandoffMethod": {
+            "default": "none",
+            "type": "string",
+            "enum": ["existing", "copy", "hardlink", "generated", "none"]
+          },
+          "componentUnionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "audioRequestedInterval": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioExtractedInterval": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioDurationSeconds": {
+            "default": null,
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "audioActualDurationSeconds": {
+            "default": null,
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "audioSampleRate": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioChannelCount": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioBitsPerSample": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioFrameCount": {
+            "default": null,
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "audioInspectionMethod": {
+            "default": null,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "audioSha256": {
+            "default": null,
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "audioContextSeconds": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0
+          },
+          "audioContextBeforeSeconds": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0
+          },
+          "audioContextAfterSeconds": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0
+          },
+          "audioFullyCoversComponent": { "default": false, "type": "boolean" },
+          "boundaryEvidence": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentRawVadIntervals": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentDecodedSegments": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentMappedTokenEvidence": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "componentPauseEvidence": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string", "minLength": 1 },
+                "evidenceLineageId": { "type": "string", "minLength": 1 },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "mfa-narrow",
+                    "mfa-expanded",
+                    "evidence-dp",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "raw-vad",
+                    "decoded-segment",
+                    "source-cue-prior",
+                    "forced-alignment-selected",
+                    "pause"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["cue", "pair", "component"]
+                },
+                "cueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "componentId": { "type": "string", "minLength": 1 },
+                "interval": {
+                  "type": "object",
+                  "properties": {
+                    "start": { "type": "number", "minimum": 0 },
+                    "end": { "type": "number", "exclusiveMinimum": 0 }
+                  },
+                  "required": ["start", "end"],
+                  "additionalProperties": false
+                },
+                "sideSupport": {
+                  "type": "string",
+                  "enum": ["start", "end", "both", "none"]
+                },
+                "timingUsable": { "type": "boolean" },
+                "acousticEvidence": { "default": true, "type": "boolean" },
+                "trustScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "alignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "boundaryConfidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "neighborIntrusionRatio": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "profile": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "attemptId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "selectedBoundarySource": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "windowType": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "wordInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "startPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "endPinnedToWindowEdge": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "wordCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "phoneCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingCoverageRatio": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "rawInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizedInterval": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "healthStatus": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationApplied": {
+                  "default": null,
+                  "anyOf": [{ "type": "boolean" }, { "type": "null" }]
+                },
+                "normalizationDeltaStart": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "normalizationDeltaEnd": {
+                  "default": null,
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "sourceArtifactType": { "type": "string", "minLength": 1 },
+                "sourceArtifactHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sourceObjectId": { "type": "string", "minLength": 1 },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "notes": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "evidenceId",
+                "evidenceLineageId",
+                "sourceType",
+                "scope",
+                "cueIds",
+                "componentId",
+                "interval",
+                "sideSupport",
+                "timingUsable",
+                "acousticEvidence",
+                "trustScore",
+                "alignmentScore",
+                "boundaryConfidence",
+                "neighborIntrusionRatio",
+                "profile",
+                "attemptId",
+                "parentSegmentId",
+                "selectedBoundarySource",
+                "windowType",
+                "wordInterval",
+                "phoneInterval",
+                "startPinnedToWindowEdge",
+                "endPinnedToWindowEdge",
+                "wordCoverageRatio",
+                "phoneCoverageRatio",
+                "readingCoverageRatio",
+                "rawInterval",
+                "normalizedInterval",
+                "healthStatus",
+                "normalizationApplied",
+                "normalizationDeltaStart",
+                "normalizationDeltaEnd",
+                "sourceArtifactType",
+                "sourceArtifactHash",
+                "sourceObjectId",
+                "blockers",
+                "notes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "evidenceReconciliationHash": {
+            "default": null,
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "evidenceSourceResolutionStatus": {
+            "default": "legacy",
+            "type": "string",
+            "enum": ["legacy", "resolved", "partial", "unresolved"]
+          },
+          "unresolvedEvidenceReferences": {
+            "default": [],
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forcedAlignmentEvidence": {
+            "type": "object",
+            "properties": {
+              "disclaimer": {
+                "type": "string",
+                "const": "MFA boundaries are machine evidence, not confirmed ground truth."
+              },
+              "componentId": { "type": "string", "minLength": 1 },
+              "cues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cueId": { "type": "string", "minLength": 1 },
+                    "canonicalText": { "type": "string", "minLength": 1 },
+                    "alignmentText": { "type": "string", "minLength": 1 },
+                    "normalizedReading": {
+                      "anyOf": [
+                        { "type": "string", "minLength": 1 },
+                        { "type": "null" }
+                      ]
+                    },
+                    "unresolvedOov": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    },
+                    "originalTiming": {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    "suggestedTiming": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "mfaNarrowBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "mfaExpandedBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "evidenceDpBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "mappedTokenBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "rawVadBoundary": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "start": { "type": "number", "minimum": 0 },
+                            "end": { "type": "number", "exclusiveMinimum": 0 }
+                          },
+                          "required": ["start", "end"],
+                          "additionalProperties": false
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "windowStabilityScore": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "wordCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "phoneCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "readingCoverageRatio": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "antiForcingBlockers": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 }
+                    }
+                  },
+                  "required": [
+                    "cueId",
+                    "canonicalText",
+                    "alignmentText",
+                    "normalizedReading",
+                    "unresolvedOov",
+                    "originalTiming",
+                    "suggestedTiming",
+                    "mfaNarrowBoundary",
+                    "mfaExpandedBoundary",
+                    "evidenceDpBoundary",
+                    "mappedTokenBoundary",
+                    "rawVadBoundary",
+                    "windowStabilityScore",
+                    "wordCoverageRatio",
+                    "phoneCoverageRatio",
+                    "readingCoverageRatio",
+                    "antiForcingBlockers"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "bestHypothesis": { "type": "string", "minLength": 1 },
+              "runnerUpHypothesis": { "type": "string", "minLength": 1 },
+              "decisionMargin": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "duplicateOccurrenceConflictCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "blocking": { "type": "boolean" }
+            },
+            "required": [
+              "disclaimer",
+              "componentId",
+              "cues",
+              "bestHypothesis",
+              "runnerUpHypothesis",
+              "decisionMargin",
+              "duplicateOccurrenceConflictCount",
+              "blocking"
+            ],
+            "additionalProperties": false
+          },
+          "requiresHumanReview": { "type": "boolean" }
+        },
+        "required": [
+          "reviewId",
+          "targetCueIds",
+          "interval",
+          "currentText",
+          "currentStart",
+          "currentEnd",
+          "currentStyle",
+          "currentSpeaker",
+          "previousCue",
+          "nextCue",
+          "machineDecision",
+          "candidateSuggestions",
+          "candidateActionBindings",
+          "findingIds",
+          "speakerEvidenceComponentId",
+          "ctcBoundaryEvidenceComponentId",
+          "blockers",
+          "allowedHumanActions",
+          "audioClipPath",
+          "audioError",
+          "audioSource",
+          "audioValidationStatus",
+          "audioSourceArtifact",
+          "audioSourceAudioPath",
+          "audioSourceComponentId",
+          "audioSourceEvidenceLineageIds",
+          "audioHandoffMethod",
+          "audioRequestedInterval",
+          "audioExtractedInterval",
+          "audioDurationSeconds",
+          "audioActualDurationSeconds",
+          "audioSampleRate",
+          "audioChannelCount",
+          "audioBitsPerSample",
+          "audioFrameCount",
+          "audioInspectionMethod",
+          "audioSha256",
+          "audioContextSeconds",
+          "audioContextBeforeSeconds",
+          "audioContextAfterSeconds",
+          "audioFullyCoversComponent",
+          "boundaryEvidence",
+          "componentRawVadIntervals",
+          "componentDecodedSegments",
+          "componentMappedTokenEvidence",
+          "componentPauseEvidence",
+          "evidenceReconciliationHash",
+          "evidenceSourceResolutionStatus",
+          "unresolvedEvidenceReferences",
+          "requiresHumanReview"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mandatoryItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioClipCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioFailureCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioCoverageFailureCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioPhysicalFileCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioReferencedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioPlayableCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioReusedExistingCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioReusedOverlapCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioGeneratedCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioHashMismatchCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioMetadataFailureCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawVadEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "decodedSegmentEvidenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mappedTokenBoundaryCopiedFromEvidenceDpCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedEvidenceReferenceCount": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "itemCount",
+        "mandatoryItemCount",
+        "audioClipCount",
+        "audioFailureCount",
+        "audioCoverageFailureCount",
+        "audioPhysicalFileCount",
+        "audioReferencedCount",
+        "audioPlayableCount",
+        "audioReusedExistingCount",
+        "audioReusedOverlapCount",
+        "audioGeneratedCount",
+        "audioHashMismatchCount",
+        "audioMetadataFailureCount",
+        "mappedTokenEvidenceCount",
+        "rawVadEvidenceCount",
+        "decodedSegmentEvidenceCount",
+        "mappedTokenBoundaryCopiedFromEvidenceDpCount",
+        "unresolvedEvidenceReferenceCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "packageType",
+    "reviewVersion",
+    "generatedAt",
+    "sourceFingerprint",
+    "baseSubtitlePackagePath",
+    "baseSubtitlePackageHash",
+    "baseCueHash",
+    "inputEvidenceHash",
+    "evidenceReconciliationHash",
+    "evidenceReconciliationStatus",
+    "deliveryIntegrityPolicyVersion",
+    "reviewActionPolicyVersion",
+    "speakerEvidenceArtifactPath",
+    "speakerEvidenceArtifactHash",
+    "speakerRuntimeIdentityHash",
+    "speakerModelSnapshotHash",
+    "speakerEvidencePolicyVersion",
+    "speakerAssignmentHash",
+    "speakerRelationshipHash",
+    "ctcBoundaryEvidenceArtifactPath",
+    "ctcBoundaryEvidenceArtifactHash",
+    "ctcRuntimeIdentityHash",
+    "ctcModelSnapshotHash",
+    "ctcAlignmentInputHash",
+    "ctcEvidenceHash",
+    "ctcPolicyVersion",
+    "ctcJointAssignmentHash",
+    "sourceSeparationEvidenceHash",
+    "seriesMemoryHash",
+    "memoryPolicyVersion",
+    "memoryRankingPolicyHash",
+    "pronunciationProjectionHash",
+    "seriesMemoryDecisionDependency",
+    "items",
+    "summary"
+  ],
+  "additionalProperties": false
+}

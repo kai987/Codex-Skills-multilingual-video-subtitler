@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-12-review-assistance-validation.schema.json",
+  "title": "c6-0-1-12-review-assistance-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-multi-asr-review-assistance-v2"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-12-review-assistance-validation"
+    },
+    "validationVersion": {
+      "type": "string",
+      "const": "c6.0.1.12-review-assistance-validation-v2"
+    },
+    "inputArtifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "outputArtifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "checks": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "checkId": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["PASSED", "FAILED", "SKIPPED"]
+          },
+          "evidenceHashes": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "detail": { "type": "string", "minLength": 1 }
+        },
+        "required": ["checkId", "status", "evidenceHashes", "detail"],
+        "additionalProperties": false
+      }
+    },
+    "machineFinalParity": {
+      "type": "object",
+      "properties": {
+        "canonicalTextParity": { "type": "boolean" },
+        "canonicalTimingParity": { "type": "boolean" },
+        "assParity": { "type": "boolean" },
+        "srtParity": { "type": "boolean" },
+        "vttParity": { "type": "boolean" },
+        "textMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "canonicalTextParity",
+        "canonicalTimingParity",
+        "assParity",
+        "srtParity",
+        "vttParity",
+        "textMutationCount",
+        "timingMutationCount"
+      ],
+      "additionalProperties": false
+    },
+    "goldIsolation": {
+      "type": "object",
+      "properties": {
+        "reviewPackageFrozenBeforeGold": { "type": "boolean" },
+        "machineReviewBuildGoldInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "workspaceGoldInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "syntheticWorkflowGoldInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evaluatorGoldInputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "reviewPackageFrozenBeforeGold",
+        "machineReviewBuildGoldInputCount",
+        "workspaceGoldInputCount",
+        "syntheticWorkflowGoldInputCount",
+        "evaluatorGoldInputCount"
+      ],
+      "additionalProperties": false
+    },
+    "reviewWorkspaceOffline": { "type": "boolean" },
+    "reviewWorkspaceLocalOnly": { "type": "boolean" },
+    "reviewAudioLocalOnly": { "type": "boolean" },
+    "realCarnationHumanSessionCreated": { "type": "boolean" },
+    "sourceReadOnlyVerified": { "type": "boolean" },
+    "goldReadOnlyVerified": { "type": "boolean" },
+    "networkUsed": { "type": "boolean" },
+    "shareableAuditPassed": { "type": "boolean" },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "regressions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "suite": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["PASSED", "FAILED", "SKIPPED"]
+          }
+        },
+        "required": ["suite", "status"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "validationVersion",
+    "inputArtifactHashes",
+    "outputArtifactHashes",
+    "checks",
+    "machineFinalParity",
+    "goldIsolation",
+    "reviewWorkspaceOffline",
+    "reviewWorkspaceLocalOnly",
+    "reviewAudioLocalOnly",
+    "realCarnationHumanSessionCreated",
+    "sourceReadOnlyVerified",
+    "goldReadOnlyVerified",
+    "networkUsed",
+    "shareableAuditPassed",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "c602Status",
+    "regressions",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

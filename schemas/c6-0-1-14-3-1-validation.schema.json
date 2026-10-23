@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-1-validation.schema.json",
+  "title": "c6-0-1-14-3-1-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-0-1-14-3-1-validation" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "evidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["id", "passed", "evidenceHash"],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "routeDecision": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_PROJECTION_HASH_INTEGRITY_REPAIR",
+        "HOLD_FOR_NESTED_SEMANTIC_INTEGRITY_REPAIR",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_HIERARCHICAL_TARGET_SELECTION_REPAIR",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_ENGINEERING_REPAIR"
+      ]
+    },
+    "schemaValidatedArtifactCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "generatedSchemaCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "networkUsedForAcceptance": { "type": "boolean", "const": false },
+    "realModelExecuted": { "type": "boolean", "const": false },
+    "goldReadBeforeRefreeze": { "type": "boolean", "const": false }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "generatedAt",
+    "checks",
+    "passed",
+    "routeDecision",
+    "schemaValidatedArtifactCount",
+    "generatedSchemaCount",
+    "networkUsedForAcceptance",
+    "realModelExecuted",
+    "goldReadBeforeRefreeze"
+  ],
+  "additionalProperties": false
+}

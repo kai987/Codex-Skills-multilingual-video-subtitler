@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-evaluation.schema.json",
+  "title": "subtitle-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "referenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "generatedSubtitleSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "guidanceMode": {
+      "type": "string",
+      "enum": ["reference-free", "reference-assisted", "reference-guided"]
+    },
+    "configuration": {
+      "default": { "referenceIsStrongEvidenceNotAbsoluteTruth": true },
+      "type": "object",
+      "properties": {
+        "referenceIsStrongEvidenceNotAbsoluteTruth": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": ["referenceIsStrongEvidenceNotAbsoluteTruth"],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "dialogueAnchorRecall": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "narrationAnchorRecall": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "lyricsAnchorRecall": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "referenceDurationCoverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "generatedDurationCoverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "unmatchedReferenceAnchors": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedGeneratedCues": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "medianStartErrorSeconds": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        },
+        "medianEndErrorSeconds": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        },
+        "timingIouDistribution": {
+          "type": "object",
+          "properties": {
+            "below025": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "from025To05": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "from05To075": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "atLeast075": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["below025", "from025To05", "from05To075", "atLeast075"],
+          "additionalProperties": false
+        },
+        "overmergeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oversplitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exactDuplicateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sentenceLoopCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "longPhraseLoopCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duplicateAssLineCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "missingDialogueDurationSeconds": { "type": "number", "minimum": 0 },
+        "missingLyricsDurationSeconds": { "type": "number", "minimum": 0 },
+        "falseQuarantineCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "falseAcceptanceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "dialogueAnchorRecall",
+        "narrationAnchorRecall",
+        "lyricsAnchorRecall",
+        "referenceDurationCoverage",
+        "generatedDurationCoverage",
+        "unmatchedReferenceAnchors",
+        "unmatchedGeneratedCues",
+        "medianStartErrorSeconds",
+        "medianEndErrorSeconds",
+        "timingIouDistribution",
+        "overmergeCount",
+        "oversplitCount",
+        "exactDuplicateCount",
+        "sentenceLoopCount",
+        "longPhraseLoopCount",
+        "duplicateAssLineCount",
+        "missingDialogueDurationSeconds",
+        "missingLyricsDurationSeconds",
+        "falseQuarantineCount",
+        "falseAcceptanceCount"
+      ],
+      "additionalProperties": false
+    },
+    "fallback": {
+      "default": null,
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "differences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "category": {
+            "type": "string",
+            "enum": [
+              "TEXT_SUBSTITUTION",
+              "TEXT_OMISSION",
+              "TEXT_INSERTION",
+              "HALLUCINATION",
+              "CROSS_CUE_REPETITION",
+              "MISSING_DIALOGUE",
+              "MISSING_LYRICS",
+              "TIMING_START_ERROR",
+              "TIMING_END_ERROR",
+              "OVERMERGE",
+              "OVERSPLIT",
+              "STYLE_MISMATCH",
+              "REFERENCE_EDITORIAL_DIFFERENCE",
+              "ACCEPTABLE_VARIANT",
+              "REFERENCE_POSSIBLE_ERROR"
+            ]
+          },
+          "alignmentId": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["id", "category", "alignmentId", "interval", "evidence"],
+        "additionalProperties": false
+      }
+    },
+    "semanticValidation": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["unavailable", "local-model", "external-model"]
+        },
+        "reason": {
+          "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+        },
+        "evaluatedAlignmentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "entityAgreement": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "numberAgreement": {
+          "anyOf": [
+            { "type": "number", "minimum": 0, "maximum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "negationConflictCount": {
+          "anyOf": [
+            { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "reason",
+        "evaluatedAlignmentCount",
+        "entityAgreement",
+        "numberAgreement",
+        "negationConflictCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "referenceSha256",
+    "generatedSubtitleSha256",
+    "guidanceMode",
+    "configuration",
+    "metrics",
+    "fallback",
+    "differences",
+    "semanticValidation"
+  ],
+  "additionalProperties": false
+}

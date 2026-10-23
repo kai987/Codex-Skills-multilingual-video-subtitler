@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-2-validation.schema.json",
+  "title": "c6-0-1-14-5-2-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-0-1-14-5-2-validation" },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "detail": { "type": "string", "minLength": 1 }
+        },
+        "required": ["name", "passed", "detail"],
+        "additionalProperties": false
+      }
+    },
+    "passedCheckCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "failedCheckCount": { "type": "number", "const": 0 },
+    "artifactValidationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "schemaValidationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceReadOnly": { "type": "boolean", "const": true },
+    "goldReadOnly": { "type": "boolean", "const": true },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "networkUsed": { "type": "boolean", "const": false },
+    "passed": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "artifactType",
+    "visibility",
+    "checks",
+    "passedCheckCount",
+    "failedCheckCount",
+    "artifactValidationCount",
+    "schemaValidationCount",
+    "sourceReadOnly",
+    "goldReadOnly",
+    "inferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "networkUsed",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

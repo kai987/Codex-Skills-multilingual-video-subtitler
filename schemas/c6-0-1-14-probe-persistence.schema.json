@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-probe-persistence.schema.json",
+  "title": "c6-0-1-14-probe-persistence",
+  "type": "object",
+  "properties": {
+    "resultCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "persistedSuccessCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "provider": {
+            "type": "string",
+            "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "EMPTY_OUTPUT",
+              "PROVIDER_ERROR",
+              "EXTRACTION_ERROR",
+              "CACHE_MISS",
+              "CACHE_INVALID"
+            ]
+          },
+          "requestSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "rawOutputHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "cacheByteSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "requestId",
+          "cacheKey",
+          "provider",
+          "status",
+          "requestSemanticHash",
+          "rawOutputHash",
+          "cacheByteSha256"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "resultCount",
+    "persistedSuccessCount",
+    "entries",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

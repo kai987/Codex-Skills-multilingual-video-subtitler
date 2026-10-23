@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-aggregate-shareable-summary.schema.json",
+  "title": "c6-0-1-14-5-1-aggregate-shareable-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-1-aggregate-shareable-summary"
+    },
+    "visibility": { "type": "string", "const": "SHAREABLE_AGGREGATE_ONLY" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fullRegistryUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "registeredVerifiedSpeechUnionSeconds": { "type": "number", "minimum": 0 },
+    "registeredVerifiedSpeechCoverageRatio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "unregisteredVerifiedSpeechSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "planningUnitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredTargetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredTargetBoundCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredTargetUnboundCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetUnitPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "audioUnitPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackUnitPairCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inheritedRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "effectiveProductRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "witnessGroupCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "singleUnitWitnessCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "multiUnitWitnessCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "scorableComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "scorablePassCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "scorableFailCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unscorableComponentCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "formalRecallStatus": {
+      "type": "string",
+      "enum": ["SCORABLE", "NOT_SCORABLE", "INTEGRITY_FAILED"]
+    },
+    "formalRecall": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "numerator": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "denominator": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": ["numerator", "denominator", "ratio"],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "targetCoreRecall": {
+      "type": "object",
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "ordinaryPhysicalAudioRecall": {
+      "type": "object",
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "ordinaryPlaybackAudibleRecall": {
+      "type": "object",
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "hallucinationPlaybackAudibleRecall": {
+      "type": "object",
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["numerator", "denominator", "ratio"],
+      "additionalProperties": false
+    },
+    "mandatory": {
+      "type": "object",
+      "properties": {
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "regionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "targetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "playbackSegmentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniqueAudioSeconds": { "type": "number", "minimum": 0 },
+        "productScorability": {
+          "type": "string",
+          "enum": ["SCORABLE", "NOT_SCORABLE", "INTEGRITY_FAILED"]
+        },
+        "productRecall": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "numerator": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "denominator": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "ratio": { "type": "number", "minimum": 0, "maximum": 1 }
+              },
+              "required": ["numerator", "denominator", "ratio"],
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": [
+        "itemCount",
+        "regionCount",
+        "targetCount",
+        "audioCount",
+        "playbackSegmentCount",
+        "uniqueAudioSeconds",
+        "productScorability",
+        "productRecall"
+      ],
+      "additionalProperties": false
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "routeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_C6_0_1_15_REGION_RANKER_RECALIBRATION",
+        "HOLD_FOR_EVALUATION_INTEGRITY_REPAIR",
+        "HOLD_FOR_FULL_SPEECH_UNIT_REGISTRY_REPAIR",
+        "HOLD_FOR_REVIEW_DELIVERY_UNIT_BINDING_REPAIR",
+        "HOLD_FOR_INHERITED_REALIZATION_REPAIR",
+        "HOLD_FOR_MULTI_UNIT_PRODUCT_WITNESS_REPAIR",
+        "HOLD_FOR_CONTRACT_SCORABILITY_REPAIR",
+        "HOLD_FOR_REMAINING_INVENTORY_TO_TARGET_COVERAGE_REPAIR",
+        "HOLD_FOR_REVIEW_AUDIO_COVERAGE_REPAIR",
+        "HOLD_FOR_SAFETY_BUDGET_MODEL_REDESIGN",
+        "HOLD_FOR_ENGINEERING_REPAIR"
+      ]
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "visibility",
+    "policyVersion",
+    "policyHash",
+    "fullRegistryUnitCount",
+    "registeredVerifiedSpeechUnionSeconds",
+    "registeredVerifiedSpeechCoverageRatio",
+    "unregisteredVerifiedSpeechSamples",
+    "planningUnitCount",
+    "targetCount",
+    "requiredTargetCount",
+    "requiredTargetBoundCount",
+    "requiredTargetUnboundCount",
+    "targetUnitPairCount",
+    "audioUnitPairCount",
+    "playbackUnitPairCount",
+    "inheritedRealizationCount",
+    "effectiveProductRealizationCount",
+    "witnessGroupCount",
+    "singleUnitWitnessCount",
+    "multiUnitWitnessCount",
+    "scorableComponentCount",
+    "scorablePassCount",
+    "scorableFailCount",
+    "unscorableComponentCount",
+    "formalRecallStatus",
+    "formalRecall",
+    "targetCoreRecall",
+    "ordinaryPhysicalAudioRecall",
+    "ordinaryPlaybackAudibleRecall",
+    "hallucinationPlaybackAudibleRecall",
+    "mandatory",
+    "machineFreezeHash",
+    "evaluationHash",
+    "routeHash",
+    "route",
+    "productionStatus",
+    "finalizationMethod",
+    "c602Status",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

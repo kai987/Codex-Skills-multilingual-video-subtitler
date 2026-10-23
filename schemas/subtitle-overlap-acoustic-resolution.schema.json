@@ -1,0 +1,1364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-overlap-acoustic-resolution.schema.json",
+  "title": "subtitle-overlap-acoustic-resolution",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-overlap-acoustic-resolution"
+    },
+    "resolutionVersion": {
+      "type": "string",
+      "enum": ["C5.15", "C5.15.1", "C5.16", "C5.16.1", "C5.17"]
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceFingerprint": {
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "durationSeconds": { "type": "number", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["fileName", "size", "durationSeconds", "sha256"],
+      "additionalProperties": false
+    },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "basePresentationResolutionHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextSeconds": { "type": "number", "minimum": 0 },
+        "maximumWindowSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "hardMaximumWindowSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "maximumAsrRequests": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 28
+        },
+        "profiles": {
+          "minItems": 1,
+          "maxItems": 3,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["current-sensitive-vad", "extra-sensitive-vad", "no-vad"]
+          }
+        },
+        "maximumTimingAdjustmentSeconds": { "type": "number", "minimum": 0 },
+        "minimumPostRepairCueDurationSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximumNeighborIntrusionRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumBoundaryConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumAlignmentConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "minimumIndependentProfileSupport": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "minimumDecisionMargin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rawVadBoundaryNormalizationToleranceSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.1
+        },
+        "workerStateIsolationPolicyVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestOrder": {
+          "type": "string",
+          "enum": ["standard", "adversarial"]
+        },
+        "scoringWeights": {
+          "type": "object",
+          "properties": {
+            "surfaceOrReading": { "type": "number", "minimum": 0 },
+            "tokenCoverage": { "type": "number", "minimum": 0 },
+            "temporalCoverage": { "type": "number", "minimum": 0 },
+            "profileConsensus": { "type": "number", "minimum": 0 },
+            "boundarySupport": { "type": "number", "minimum": 0 },
+            "neighborIntrusionPenalty": { "type": "number", "minimum": 0 }
+          },
+          "required": [
+            "surfaceOrReading",
+            "tokenCoverage",
+            "temporalCoverage",
+            "profileConsensus",
+            "boundarySupport",
+            "neighborIntrusionPenalty"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "mode",
+        "audioStreamIndex",
+        "contextSeconds",
+        "maximumWindowSeconds",
+        "hardMaximumWindowSeconds",
+        "maximumAsrRequests",
+        "profiles",
+        "maximumTimingAdjustmentSeconds",
+        "minimumPostRepairCueDurationSeconds",
+        "maximumNeighborIntrusionRatio",
+        "minimumBoundaryConfidence",
+        "minimumAlignmentConfidence",
+        "minimumIndependentProfileSupport",
+        "scoringWeights"
+      ],
+      "additionalProperties": false
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attemptId": { "type": "string", "minLength": 1 },
+          "componentId": { "type": "string", "minLength": 1 },
+          "profile": {
+            "type": "string",
+            "enum": ["current-sensitive-vad", "extra-sensitive-vad", "no-vad"]
+          },
+          "requestId": { "type": "string", "minLength": 1 },
+          "requestType": { "type": "string", "const": "overlap-evidence" },
+          "useVad": { "type": "boolean" },
+          "vadProfile": { "type": "string", "minLength": 1 },
+          "model": { "type": "string", "minLength": 1 },
+          "modelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "modelFamily": { "type": "string", "minLength": 1 },
+          "coreML": { "type": "boolean" },
+          "whisperCppVersion": { "type": "string", "minLength": 1 },
+          "cacheHit": { "type": "boolean" },
+          "promptSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "targetCueTextUsedAsPrompt": { "type": "boolean", "const": false },
+          "referenceTranslationUsedAsPrompt": {
+            "type": "boolean",
+            "const": false
+          },
+          "humanReviewedSentenceUsedAsPrompt": {
+            "type": "boolean",
+            "const": false
+          },
+          "runtimeCapabilityRef": { "type": "string", "minLength": 1 },
+          "responseSchemaVersion": { "type": "string", "minLength": 1 },
+          "rawTokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tokenId": { "type": "string", "minLength": 1 },
+                "parentSegmentId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "special": { "type": "boolean" },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "coordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "original-audio-local",
+                    "original-media-global",
+                    "vad-processed-local",
+                    "segment-relative",
+                    "unknown"
+                  ]
+                }
+              },
+              "required": [
+                "tokenId",
+                "parentSegmentId",
+                "text",
+                "special",
+                "start",
+                "end",
+                "coordinateSystem"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "mappedTokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tokenId": { "type": "string", "minLength": 1 },
+                "parentSegmentId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "coordinateSystem": {
+                  "type": "string",
+                  "const": "original-media-global"
+                },
+                "mappingMethod": {
+                  "type": "string",
+                  "const": "official-mapped-token-getter"
+                },
+                "timingUsable": { "type": "boolean" }
+              },
+              "required": [
+                "tokenId",
+                "parentSegmentId",
+                "text",
+                "start",
+                "end",
+                "coordinateSystem",
+                "mappingMethod",
+                "timingUsable"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rawText": { "type": "string" },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "segmentId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 },
+                "confidence": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "tokenIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "rawStart": { "type": "number", "minimum": 0 },
+                "rawEnd": { "type": "number", "exclusiveMinimum": 0 },
+                "rawCoordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "original-audio-local",
+                    "original-media-global",
+                    "vad-processed-local",
+                    "segment-relative",
+                    "unknown"
+                  ]
+                },
+                "mappedCoordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "original-audio-local",
+                    "original-media-global",
+                    "vad-processed-local",
+                    "segment-relative",
+                    "unknown"
+                  ]
+                },
+                "timingUsable": { "type": "boolean" }
+              },
+              "required": [
+                "segmentId",
+                "text",
+                "start",
+                "end",
+                "confidence",
+                "tokenIds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tokenId": { "type": "string", "minLength": 1 },
+                "text": { "type": "string" },
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "minimum": 0 },
+                "probability": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "parentSegmentId": { "type": "string", "minLength": 1 },
+                "rawStart": { "type": "number", "minimum": 0 },
+                "rawEnd": { "type": "number", "minimum": 0 },
+                "rawCoordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "original-audio-local",
+                    "original-media-global",
+                    "vad-processed-local",
+                    "segment-relative",
+                    "unknown"
+                  ]
+                },
+                "mappedStart": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "mappedEnd": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0 },
+                    { "type": "null" }
+                  ]
+                },
+                "mappedCoordinateSystem": {
+                  "type": "string",
+                  "enum": [
+                    "original-audio-local",
+                    "original-media-global",
+                    "vad-processed-local",
+                    "segment-relative",
+                    "unknown"
+                  ]
+                },
+                "mappingMethod": {
+                  "type": "string",
+                  "enum": [
+                    "identity-original-local",
+                    "official-mapped-token-getter",
+                    "verified-segment-relative-offset",
+                    "verified-vad-timeline-map",
+                    "verified-original-audio-local-offset",
+                    "unmapped",
+                    "quarantined"
+                  ]
+                },
+                "mappingVersion": { "type": "string", "minLength": 1 },
+                "mappingConfidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "textUsable": { "type": "boolean" },
+                "timingUsable": { "type": "boolean" },
+                "tokenTimelineStatus": {
+                  "type": "string",
+                  "enum": [
+                    "trusted-original-timeline",
+                    "trusted-mapped-original-timeline",
+                    "trusted-segment-relative-remap",
+                    "vad-processed-unmapped",
+                    "parent-segment-drift",
+                    "non-monotonic",
+                    "zero-collapsed",
+                    "boundary-clamped",
+                    "mixed-health",
+                    "untrusted",
+                    "unavailable"
+                  ]
+                },
+                "tokenTimelineTrustScore": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "quarantineReasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "specialToken": { "type": "boolean" },
+                "boundaryClamped": { "type": "boolean" }
+              },
+              "required": ["tokenId", "text", "start", "end", "probability"],
+              "additionalProperties": false
+            }
+          },
+          "speechIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": { "type": "number", "minimum": 0 },
+                "end": { "type": "number", "exclusiveMinimum": 0 }
+              },
+              "required": ["start", "end"],
+              "additionalProperties": false
+            }
+          },
+          "timestampIntegrityRef": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "decodedSegmentIntervals": { "type": "array", "items": {} },
+          "mappedTrustedTokenIntervals": { "type": "array", "items": {} },
+          "rawVadIntervals": { "type": "array", "items": {} },
+          "sourceCueIntervals": { "type": "array", "items": {} },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "durationSeconds": { "type": "number", "minimum": 0 },
+              "segmentCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "tokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "speechIntervalCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "tokenTimestampsRequested": { "type": "boolean" },
+              "tokenTimestampsReturned": { "type": "boolean" },
+              "trustedTokenTimestampsAvailable": { "type": "boolean" },
+              "trustedTokenTimestampsUsed": { "type": "boolean" },
+              "tokenTimestampsUsed": { "type": "boolean" }
+            },
+            "required": [
+              "durationSeconds",
+              "segmentCount",
+              "tokenCount",
+              "speechIntervalCount",
+              "tokenTimestampsRequested",
+              "tokenTimestampsUsed"
+            ],
+            "additionalProperties": false
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "failure": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          }
+        },
+        "required": [
+          "attemptId",
+          "componentId",
+          "profile",
+          "requestId",
+          "requestType",
+          "useVad",
+          "vadProfile",
+          "model",
+          "modelHash",
+          "modelFamily",
+          "coreML",
+          "whisperCppVersion",
+          "cacheHit",
+          "promptSha256",
+          "targetCueTextUsedAsPrompt",
+          "referenceTranslationUsedAsPrompt",
+          "humanReviewedSentenceUsedAsPrompt",
+          "rawText",
+          "segments",
+          "tokens",
+          "speechIntervals",
+          "metrics",
+          "language",
+          "failure"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "componentId": { "type": "string", "minLength": 1 },
+          "sourceOverlapDecisionId": { "type": "string", "minLength": 1 },
+          "cueIds": {
+            "minItems": 2,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "unionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "extractionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "nominalExtractionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "nominalDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+          "audioPath": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/]).+"
+              },
+              { "type": "null" }
+            ]
+          },
+          "audioSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "audioDurationSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "actualAudioDurationSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "actualAudioLocalEndSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "actualMediaGlobalEndSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "durationDifferenceSeconds": { "type": "number" },
+          "durationMeasurementMethod": { "type": "string", "minLength": 1 },
+          "ffprobeDurationSeconds": {
+            "anyOf": [
+              { "type": "number", "exclusiveMinimum": 0 },
+              { "type": "null" }
+            ]
+          },
+          "durationCrossCheckDeltaSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "audioFullyCoversComponent": { "type": "boolean" },
+          "profileAttemptIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "cueAlignments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cueId": { "type": "string", "minLength": 1 },
+                "canonicalText": { "type": "string", "minLength": 1 },
+                "normalizedSurface": { "type": "string" },
+                "normalizedReading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingAvailable": { "type": "boolean" },
+                "surfaceAlignmentScore": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "readingAlignmentScore": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "tokenCoverageScore": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "temporalCoverageRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "localSpeechCoverageRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "neighborIntrusionRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "profileConsensusScore": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "boundarySupportScore": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "boundaryConfidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "independentProfileSupportCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "independentModelSupportCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "matchedAttemptIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "matchedSegmentIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "matchedTokenIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "trustedMatchedTokenIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "quarantinedMatchedTokenIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "individuallyTrustedMatchedTokenIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "individuallyQuarantinedMatchedTokenIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "lexicalOnlySequenceTokenIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "sequenceTimingUsable": { "type": "boolean" },
+                "sequenceTimingEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "sequenceQuarantineReasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "sequenceParentSegmentIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "trustedMappedTokenEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "trustedRawVadEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "decodedSegmentEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "timingEvidenceLineageIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "trustedTimingEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "lexicalOnlyEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "trustedTimingProfileSupportCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "trustedTimingSourceTypeCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "trustedTimingModelSupportCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "matchedIntervals": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "attemptId": { "type": "string", "minLength": 1 },
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "token",
+                          "segment",
+                          "speech",
+                          "vad",
+                          "source",
+                          "trusted-mapped-token",
+                          "trusted-no-vad-token",
+                          "decoded-segment",
+                          "raw-vad",
+                          "source-cue",
+                          "pause",
+                          "legacy-token-untrusted"
+                        ]
+                      },
+                      "start": { "type": "number", "minimum": 0 },
+                      "end": { "type": "number", "exclusiveMinimum": 0 },
+                      "evidenceId": { "type": "string", "minLength": 1 },
+                      "timingUsable": { "type": "boolean" },
+                      "timestampTrustStatus": {
+                        "type": "string",
+                        "enum": [
+                          "trusted-original-timeline",
+                          "trusted-mapped-original-timeline",
+                          "trusted-segment-relative-remap",
+                          "vad-processed-unmapped",
+                          "parent-segment-drift",
+                          "non-monotonic",
+                          "zero-collapsed",
+                          "boundary-clamped",
+                          "mixed-health",
+                          "untrusted",
+                          "unavailable"
+                        ]
+                      },
+                      "timingTrustScore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "alignmentScore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "parentSegmentContainmentPassed": { "type": "boolean" },
+                      "profileConsensusScore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "boundaryConfidence": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "neighborIntrusionRatio": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "containmentScore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "sourceTypeSupportCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "evidenceLineageId": { "type": "string", "minLength": 1 }
+                    },
+                    "required": ["attemptId", "source", "start", "end"],
+                    "additionalProperties": false
+                  }
+                },
+                "alignmentMethod": {
+                  "type": "string",
+                  "enum": [
+                    "surface-token-sequence",
+                    "reading-token-sequence",
+                    "surface-segment",
+                    "temporal-speech-only",
+                    "unresolved"
+                  ]
+                },
+                "alignmentConfidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "cueId",
+                "canonicalText",
+                "normalizedSurface",
+                "normalizedReading",
+                "readingAvailable",
+                "surfaceAlignmentScore",
+                "readingAlignmentScore",
+                "tokenCoverageScore",
+                "temporalCoverageRatio",
+                "localSpeechCoverageRatio",
+                "neighborIntrusionRatio",
+                "profileConsensusScore",
+                "boundarySupportScore",
+                "boundaryConfidence",
+                "independentProfileSupportCount",
+                "independentModelSupportCount",
+                "matchedAttemptIds",
+                "matchedSegmentIds",
+                "matchedTokenIds",
+                "matchedIntervals",
+                "alignmentMethod",
+                "alignmentConfidence",
+                "blockers",
+                "evidence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "pairAssessments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "leftCueId": { "type": "string", "minLength": 1 },
+                "rightCueId": { "type": "string", "minLength": 1 },
+                "originalOverlapSeconds": { "type": "number", "minimum": 0 },
+                "matchedIntervalOverlapSeconds": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "orderConsistent": { "type": "boolean" },
+                "sameOccurrenceLikely": { "type": "boolean" },
+                "simultaneousSpeechSupported": { "type": "boolean" },
+                "boundaryEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "rawVadBoundaryRelation": {
+                  "type": "string",
+                  "enum": [
+                    "pause-supported",
+                    "continuous-speech-island",
+                    "conflicting",
+                    "unavailable"
+                  ]
+                },
+                "rawVadProfileSupportCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "rawVadBoundaryEvidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+              },
+              "required": [
+                "leftCueId",
+                "rightCueId",
+                "originalOverlapSeconds",
+                "matchedIntervalOverlapSeconds",
+                "orderConsistent",
+                "sameOccurrenceLikely",
+                "simultaneousSpeechSupported",
+                "boundaryEvidenceIds",
+                "confidence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "counterfactuals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hypothesis": {
+                  "type": "string",
+                  "enum": [
+                    "ordered-no-overlap",
+                    "rapid-turn-taking",
+                    "nested-background-foreground",
+                    "true-simultaneous-speech",
+                    "same-utterance-alternative"
+                  ]
+                },
+                "score": { "type": "number", "minimum": 0, "maximum": 1 },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "blockers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": ["hypothesis", "score", "evidenceIds", "blockers"],
+              "additionalProperties": false
+            }
+          },
+          "finalRelationship": {
+            "type": "string",
+            "enum": [
+              "exact-duplicate",
+              "near-duplicate",
+              "same-utterance-alternative",
+              "complementary-fragments",
+              "rapid-turn-taking",
+              "true-simultaneous-speech",
+              "crowd-call-plus-dialogue",
+              "nested-background-speech",
+              "different-dialogue-boundary-error",
+              "legal-authoritative-overlap",
+              "unresolved"
+            ]
+          },
+          "classificationConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "bestHypothesis": {
+            "type": "string",
+            "enum": [
+              "ordered-no-overlap",
+              "rapid-turn-taking",
+              "nested-background-foreground",
+              "true-simultaneous-speech",
+              "same-utterance-alternative"
+            ]
+          },
+          "bestHypothesisScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "runnerUpHypothesis": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ordered-no-overlap",
+                  "rapid-turn-taking",
+                  "nested-background-foreground",
+                  "true-simultaneous-speech",
+                  "same-utterance-alternative"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "runnerUpHypothesisScore": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "decisionMargin": { "type": "number", "minimum": 0, "maximum": 1 },
+          "scoreCalibrationStatus": {
+            "type": "string",
+            "enum": ["uncalibrated-heuristic", "holdout-calibrated"]
+          },
+          "timestampIntegrityGateFailures": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "recommendedAction": {
+            "type": "string",
+            "enum": [
+              "preserve-overlap",
+              "delete-duplicate",
+              "select-alternative",
+              "merge-fragments",
+              "trim-boundary",
+              "review"
+            ]
+          },
+          "safeAutomaticAction": {
+            "type": "string",
+            "enum": [
+              "none",
+              "presentation-only",
+              "timing-only",
+              "delete-duplicate",
+              "select-alternative",
+              "merge-fragments"
+            ]
+          },
+          "timingMutations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "mutationId": { "type": "string", "minLength": 1 },
+                "componentId": { "type": "string", "minLength": 1 },
+                "cueId": { "type": "string", "minLength": 1 },
+                "beforeStart": { "type": "number", "minimum": 0 },
+                "beforeEnd": { "type": "number", "exclusiveMinimum": 0 },
+                "afterStart": { "type": "number", "minimum": 0 },
+                "afterEnd": { "type": "number", "exclusiveMinimum": 0 },
+                "startDelta": { "type": "number" },
+                "endDelta": { "type": "number" },
+                "boundarySource": {
+                  "type": "string",
+                  "enum": [
+                    "token",
+                    "speech",
+                    "vad",
+                    "source",
+                    "pause",
+                    "trusted-mapped-token",
+                    "trusted-no-vad-token",
+                    "decoded-segment",
+                    "raw-vad",
+                    "source-cue",
+                    "canonical-forced-alignment"
+                  ]
+                },
+                "evidenceIds": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "textChanged": { "type": "boolean", "const": false }
+              },
+              "required": [
+                "mutationId",
+                "componentId",
+                "cueId",
+                "beforeStart",
+                "beforeEnd",
+                "afterStart",
+                "afterEnd",
+                "startDelta",
+                "endDelta",
+                "boundarySource",
+                "evidenceIds",
+                "textChanged"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "assEventOverrides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cueId": { "type": "string", "minLength": 1 },
+                "layer": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "alignment": {
+                  "anyOf": [
+                    { "type": "integer", "minimum": 1, "maximum": 9 },
+                    { "type": "null" }
+                  ]
+                },
+                "marginLeft": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "marginRight": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "marginVertical": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "position": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" }
+                      },
+                      "required": ["x", "y"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "cueId",
+                "layer",
+                "alignment",
+                "marginLeft",
+                "marginRight",
+                "marginVertical",
+                "position"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "vttCueSettings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cueId": { "type": "string", "minLength": 1 },
+                "settings": { "type": "string", "minLength": 1 }
+              },
+              "required": ["cueId", "settings"],
+              "additionalProperties": false
+            }
+          },
+          "blocking": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forcedAlignmentComponentId": { "type": "string", "minLength": 1 },
+          "forcedAlignmentEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forcedAlignmentBlockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forcedAlignmentResolved": { "type": "boolean" }
+        },
+        "required": [
+          "componentId",
+          "sourceOverlapDecisionId",
+          "cueIds",
+          "unionInterval",
+          "extractionInterval",
+          "audioPath",
+          "audioSha256",
+          "audioDurationSeconds",
+          "audioFullyCoversComponent",
+          "profileAttemptIds",
+          "cueAlignments",
+          "pairAssessments",
+          "counterfactuals",
+          "finalRelationship",
+          "classificationConfidence",
+          "recommendedAction",
+          "safeAutomaticAction",
+          "timingMutations",
+          "assEventOverrides",
+          "vttCueSettings",
+          "blocking",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "componentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioExtractedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioFullyCoveredCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "profileAttemptCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "asrRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingOnlyResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "legalOverlapResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextMutationCount": { "type": "number", "const": 0 },
+        "wholeMediaAsrRequestCount": { "type": "number", "const": 0 },
+        "midpointRepairCount": { "type": "number", "const": 0 },
+        "characterRatioRepairCount": { "type": "number", "const": 0 },
+        "trustedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "quarantinedTokenCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "untrustedTokenUsedForTimingCount": { "type": "number", "const": 0 },
+        "forcedAlignmentAnalyzedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "forcedAlignmentTimingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "componentCount",
+        "cueCount",
+        "audioExtractedCount",
+        "audioFullyCoveredCount",
+        "profileAttemptCount",
+        "asrRequestCount",
+        "cacheHitCount",
+        "resolvedCount",
+        "timingOnlyResolvedCount",
+        "legalOverlapResolvedCount",
+        "unresolvedCount",
+        "timingMutationCount",
+        "canonicalTextMutationCount",
+        "wholeMediaAsrRequestCount",
+        "midpointRepairCount",
+        "characterRatioRepairCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "resolutionVersion",
+    "generatedAt",
+    "sourceFingerprint",
+    "baseCueHash",
+    "basePresentationResolutionHash",
+    "configuration",
+    "attempts",
+    "components",
+    "summary"
+  ],
+  "additionalProperties": false
+}

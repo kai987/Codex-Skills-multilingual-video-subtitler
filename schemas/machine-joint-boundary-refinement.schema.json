@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-joint-boundary-refinement.schema.json",
+  "title": "machine-joint-boundary-refinement",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-joint-boundary-refinement"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "overlapPolicy": {
+      "type": "string",
+      "const": "preserve-evidence-supported-real-overlap"
+    },
+    "pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pairId": { "type": "string", "minLength": 1 },
+          "leftCueId": { "type": "string", "minLength": 1 },
+          "rightCueId": { "type": "string", "minLength": 1 },
+          "originalLeftEnd": { "type": "number", "exclusiveMinimum": 0 },
+          "originalRightStart": { "type": "number", "minimum": 0 },
+          "leftEvidence": {
+            "type": "object",
+            "properties": {
+              "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+              "trustedTokenIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "proposedTime": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "strong": { "type": "boolean" }
+            },
+            "required": [
+              "coverage",
+              "trustedTokenIds",
+              "evidenceIds",
+              "proposedTime",
+              "strong"
+            ],
+            "additionalProperties": false
+          },
+          "rightEvidence": {
+            "type": "object",
+            "properties": {
+              "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+              "trustedTokenIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "proposedTime": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "strong": { "type": "boolean" }
+            },
+            "required": [
+              "coverage",
+              "trustedTokenIds",
+              "evidenceIds",
+              "proposedTime",
+              "strong"
+            ],
+            "additionalProperties": false
+          },
+          "speechEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speakerEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "overlapClass": {
+            "type": "string",
+            "enum": [
+              "NO_OVERLAP",
+              "ACCIDENTAL_OVERLAP",
+              "REAL_OVERLAP",
+              "RAPID_TURN",
+              "AMBIGUOUS"
+            ]
+          },
+          "proposedBoundary": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "proposedLeftEnd": {
+            "anyOf": [
+              { "type": "number", "exclusiveMinimum": 0 },
+              { "type": "null" }
+            ]
+          },
+          "proposedRightStart": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "KEEP_BOTH",
+              "MOVE_A_END",
+              "MOVE_B_START",
+              "MOVE_BOTH",
+              "PRESERVE_OVERLAP",
+              "AMBIGUOUS",
+              "REVIEW"
+            ]
+          },
+          "accepted": { "type": "boolean" },
+          "applied": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "pairId",
+          "leftCueId",
+          "rightCueId",
+          "originalLeftEnd",
+          "originalRightStart",
+          "leftEvidence",
+          "rightEvidence",
+          "speechEvidence",
+          "speakerEvidence",
+          "overlapClass",
+          "proposedBoundary",
+          "proposedLeftEnd",
+          "proposedRightStart",
+          "outcome",
+          "accepted",
+          "applied",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "pairCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "proposalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "appliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "realOverlapPreservedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "accidentalOverlapResolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "pairCount",
+        "proposalCount",
+        "appliedCount",
+        "realOverlapPreservedCount",
+        "accidentalOverlapResolvedCount",
+        "ambiguousCount",
+        "reviewCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "overlapPolicy",
+    "pairs",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

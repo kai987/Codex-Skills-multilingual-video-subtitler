@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-existing-review-delivery-realizations-v1.schema.json",
+  "title": "machine-existing-review-delivery-realizations-v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-existing-review-delivery-realizations-v1"
+    },
+    "bindingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "realizations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "realizationId": { "type": "string", "minLength": 1 },
+          "realizationOrigin": {
+            "type": "string",
+            "const": "INHERITED_EXISTING_REVIEW_DELIVERY_REALIZATION"
+          },
+          "realizationKind": {
+            "type": "string",
+            "enum": [
+              "INHERITED_TARGET_REALIZATION",
+              "INHERITED_REGION_REALIZATION",
+              "INHERITED_MULTI_TARGET_REGION_REALIZATION"
+            ]
+          },
+          "fullCoverageUnitIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "targetIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "regionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "audioIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "playbackSegmentIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomicAnchorIntervals": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "unitCoreCoverageRatios": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "machineAnchorOverlapSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "machineAnchorCoverageRatios": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "actualAudioIntervals": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "actualPlaybackIntervals": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "playbackCoverageOfUnitRatios": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "reviewEnvelope": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "envelopeSeconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 12
+          },
+          "leftContextSeconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "rightContextSeconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "sourceIdentity": {
+            "type": "object",
+            "properties": {
+              "sourceMediaSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+              "sampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioStreamIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioTimebase": {
+                "type": "string",
+                "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+              },
+              "sourceTimebase": {
+                "type": "string",
+                "const": "SOURCE_GLOBAL_SECONDS"
+              }
+            },
+            "required": [
+              "sourceMediaSha256",
+              "durationSeconds",
+              "sampleRate",
+              "audioStreamIndex",
+              "audioTimebase",
+              "sourceTimebase"
+            ],
+            "additionalProperties": false
+          },
+          "physicalAudioVerified": { "type": "boolean", "const": true },
+          "playbackVerified": { "type": "boolean", "const": true },
+          "contractPreconditionsPassed": { "type": "boolean", "const": true },
+          "contractViolations": {
+            "minItems": 0,
+            "maxItems": 0,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "realizationId",
+          "realizationOrigin",
+          "realizationKind",
+          "fullCoverageUnitIds",
+          "targetIds",
+          "regionIds",
+          "audioIds",
+          "playbackSegmentIds",
+          "atomicAnchorIntervals",
+          "unitCoreCoverageRatios",
+          "machineAnchorOverlapSamples",
+          "machineAnchorCoverageRatios",
+          "actualAudioIntervals",
+          "actualPlaybackIntervals",
+          "playbackCoverageOfUnitRatios",
+          "reviewEnvelope",
+          "envelopeSeconds",
+          "leftContextSeconds",
+          "rightContextSeconds",
+          "sourceIdentity",
+          "physicalAudioVerified",
+          "playbackVerified",
+          "contractPreconditionsPassed",
+          "contractViolations",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "inheritedTargetRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inheritedRegionRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inheritedMultiTargetRealizationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inheritedRealizationRejectionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inheritedRealizationUnitZeroOverlapCount": {
+      "type": "number",
+      "const": 0
+    },
+    "inheritedRealizationMissingAudioCount": { "type": "number", "const": 0 },
+    "inheritedRealizationMissingPlaybackCount": {
+      "type": "number",
+      "const": 0
+    },
+    "inheritedRealizationSourceMismatchCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "bindingHash",
+    "realizations",
+    "inheritedTargetRealizationCount",
+    "inheritedRegionRealizationCount",
+    "inheritedMultiTargetRealizationCount",
+    "inheritedRealizationRejectionCount",
+    "inheritedRealizationUnitZeroOverlapCount",
+    "inheritedRealizationMissingAudioCount",
+    "inheritedRealizationMissingPlaybackCount",
+    "inheritedRealizationSourceMismatchCount"
+  ],
+  "additionalProperties": false
+}

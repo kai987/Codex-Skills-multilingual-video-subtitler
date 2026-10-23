@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-blind-acceptance-validation.schema.json",
+  "title": "c6-0-1-blind-acceptance-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-blind-acceptance-validation"
+    },
+    "validationVersion": {
+      "type": "string",
+      "const": "c6.0.1-blind-acceptance-validation-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "benchmarkStatus": {
+      "type": "string",
+      "const": "development-known-runtime-blind"
+    },
+    "repositoryCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "barrierHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runs": {
+      "minItems": 2,
+      "maxItems": 2,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "enum": ["A", "B"] },
+          "runPath": { "type": "string", "minLength": 1 },
+          "generationRunId": { "type": "string", "minLength": 1 },
+          "machineCueCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "canonicalTextHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "canonicalTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "freezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "shadowOutcome": {
+            "type": "string",
+            "enum": ["FINAL_CANDIDATE", "REVIEW_REQUIRED", "REJECTED"]
+          },
+          "evaluationSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "p0Count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "p1Count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "p2Count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "label",
+          "runPath",
+          "generationRunId",
+          "machineCueCount",
+          "canonicalTextHash",
+          "canonicalTimingHash",
+          "presentationHash",
+          "freezeHash",
+          "shadowOutcome",
+          "evaluationSemanticHash",
+          "p0Count",
+          "p1Count",
+          "p2Count"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "canonicalTextParity": { "type": "boolean" },
+    "cueCountParity": { "type": "boolean" },
+    "canonicalTimingParity": { "type": "boolean" },
+    "presentationParity": { "type": "boolean" },
+    "machineMemoryParity": { "type": "boolean" },
+    "riskDecisionParity": { "type": "boolean" },
+    "shadowOutcomeParity": { "type": "boolean" },
+    "crossRunCer": { "type": "number", "minimum": 0 },
+    "differingCueRegionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "boundaryMedianSeconds": { "type": "number", "minimum": 0 },
+    "boundaryP95Seconds": { "type": "number", "minimum": 0 },
+    "boundaryMaxSeconds": { "type": "number", "minimum": 0 },
+    "evaluatorDeterminismPassed": { "type": "boolean" },
+    "bothRunsFrozenBeforeGold": { "type": "boolean" },
+    "goldIsolationPassed": { "type": "boolean" },
+    "sourceVideoReadOnlyVerified": { "type": "boolean" },
+    "goldReadOnlyVerified": { "type": "boolean" },
+    "shareableAuditPassed": { "type": "boolean" },
+    "c60RegressionPassed": { "type": "boolean" },
+    "skill2Compatibility": {
+      "type": "string",
+      "enum": ["passed", "expected-gated", "failed"]
+    },
+    "skill3Compatibility": {
+      "type": "string",
+      "enum": ["passed", "expected-gated", "failed"]
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "artifactType": {
+          "type": "string",
+          "const": "c6-0-1-blind-acceptance-decision"
+        },
+        "decisionVersion": {
+          "type": "string",
+          "const": "c6.0.1-blind-acceptance-decision-v1"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "benchmarkStatus": {
+          "type": "string",
+          "const": "development-known-runtime-blind"
+        },
+        "goldIsolationPassed": { "type": "boolean" },
+        "machineGenerationPassed": { "type": "boolean" },
+        "outputFreezePassed": { "type": "boolean" },
+        "goldEvaluationPassed": { "type": "boolean" },
+        "reproducibilityPassed": { "type": "boolean" },
+        "shadowPolicyEvaluated": { "type": "boolean" },
+        "unsafeFinalizationEscapeTaskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsafeFinalizationEscapeDefectCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unnecessaryReviewTaskCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "machinePolicySafetyPassed": { "type": "boolean" },
+        "runtimeBlindAcceptancePassed": { "type": "boolean" },
+        "unseenGeneralizationPassed": { "type": "boolean", "const": false },
+        "c6_0_2Required": { "type": "boolean", "const": true },
+        "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+        "finalRecommendation": {
+          "type": "string",
+          "enum": ["GO_C6_0_2", "NO_GO_C6_0_2"]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "schemaVersion",
+        "artifactType",
+        "decisionVersion",
+        "generatedAt",
+        "benchmarkStatus",
+        "goldIsolationPassed",
+        "machineGenerationPassed",
+        "outputFreezePassed",
+        "goldEvaluationPassed",
+        "reproducibilityPassed",
+        "shadowPolicyEvaluated",
+        "unsafeFinalizationEscapeTaskCount",
+        "unsafeFinalizationEscapeDefectCount",
+        "unnecessaryReviewTaskCount",
+        "machinePolicySafetyPassed",
+        "runtimeBlindAcceptancePassed",
+        "unseenGeneralizationPassed",
+        "c6_0_2Required",
+        "machineOnlyReleaseAuthorized",
+        "finalRecommendation",
+        "reasonCodes",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "passed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "validationVersion",
+    "generatedAt",
+    "benchmarkStatus",
+    "repositoryCommit",
+    "barrierHash",
+    "runs",
+    "canonicalTextParity",
+    "cueCountParity",
+    "canonicalTimingParity",
+    "presentationParity",
+    "machineMemoryParity",
+    "riskDecisionParity",
+    "shadowOutcomeParity",
+    "crossRunCer",
+    "differingCueRegionCount",
+    "boundaryMedianSeconds",
+    "boundaryP95Seconds",
+    "boundaryMaxSeconds",
+    "evaluatorDeterminismPassed",
+    "bothRunsFrozenBeforeGold",
+    "goldIsolationPassed",
+    "sourceVideoReadOnlyVerified",
+    "goldReadOnlyVerified",
+    "shareableAuditPassed",
+    "c60RegressionPassed",
+    "skill2Compatibility",
+    "skill3Compatibility",
+    "decision",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

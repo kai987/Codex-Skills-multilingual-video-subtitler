@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/zero-touch-blind-generation-proof.schema.json",
+  "title": "zero-touch-blind-generation-proof",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "zero-touch-blind-generation-proof"
+    },
+    "proofVersion": {
+      "type": "string",
+      "const": "c6.0.1-zero-touch-blind-generation-proof-v1"
+    },
+    "phase": { "type": "string", "enum": ["pre-gold", "post-gold"] },
+    "benchmarkStatus": {
+      "type": "string",
+      "const": "development-known-runtime-blind"
+    },
+    "generationRunId": { "type": "string", "minLength": 1 },
+    "sourceVideoIdentity": {
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": ["fileName", "size", "sha256"],
+      "additionalProperties": false
+    },
+    "repositoryCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "generationStartedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "generationCompletedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "goldBarrierReachedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "machineOutputFrozenAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "goldFirstReadAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        { "type": "null" }
+      ]
+    },
+    "humanSubtitleAvailableDuringGeneration": { "type": "boolean" },
+    "humanSubtitleReadDuringGeneration": { "type": "boolean", "const": false },
+    "humanDerivedCanonicalLoaded": { "type": "boolean", "const": false },
+    "humanDerivedTimingLoaded": { "type": "boolean", "const": false },
+    "humanDerivedMemoryLoaded": { "type": "boolean", "const": false },
+    "humanDerivedAlignmentLoaded": { "type": "boolean", "const": false },
+    "humanDerivedCtcLoaded": { "type": "boolean", "const": false },
+    "humanCorrectionFeedbackLoaded": { "type": "boolean", "const": false },
+    "humanAuthorityLoaded": { "type": "boolean", "const": false },
+    "humanProtectedFinalLoaded": { "type": "boolean", "const": false },
+    "priorMediaSpecificCacheImported": { "type": "boolean", "const": false },
+    "onlineSubtitleSearchUsed": { "type": "boolean", "const": false },
+    "networkUsed": { "type": "boolean", "const": false },
+    "machineMemoryStartedEmpty": { "type": "boolean", "const": true },
+    "machineMemoryInitialEntryCount": { "type": "number", "const": 0 },
+    "sameCueMemoryLeakCount": { "type": "number", "const": 0 },
+    "futureCueMemoryLeakCount": { "type": "number", "const": 0 },
+    "goldLoadedAfterOutputFrozen": { "type": "boolean" },
+    "outputHashBeforeGold": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputHashAfterGold": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "outputHashUnchangedAfterGold": { "type": "boolean" },
+    "isolationViolations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "proofPassed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "proofVersion",
+    "phase",
+    "benchmarkStatus",
+    "generationRunId",
+    "sourceVideoIdentity",
+    "repositoryCommit",
+    "generationStartedAt",
+    "generationCompletedAt",
+    "goldBarrierReachedAt",
+    "machineOutputFrozenAt",
+    "goldFirstReadAt",
+    "humanSubtitleAvailableDuringGeneration",
+    "humanSubtitleReadDuringGeneration",
+    "humanDerivedCanonicalLoaded",
+    "humanDerivedTimingLoaded",
+    "humanDerivedMemoryLoaded",
+    "humanDerivedAlignmentLoaded",
+    "humanDerivedCtcLoaded",
+    "humanCorrectionFeedbackLoaded",
+    "humanAuthorityLoaded",
+    "humanProtectedFinalLoaded",
+    "priorMediaSpecificCacheImported",
+    "onlineSubtitleSearchUsed",
+    "networkUsed",
+    "machineMemoryStartedEmpty",
+    "machineMemoryInitialEntryCount",
+    "sameCueMemoryLeakCount",
+    "futureCueMemoryLeakCount",
+    "goldLoadedAfterOutputFrozen",
+    "outputHashBeforeGold",
+    "outputHashAfterGold",
+    "outputHashUnchangedAfterGold",
+    "isolationViolations",
+    "proofPassed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

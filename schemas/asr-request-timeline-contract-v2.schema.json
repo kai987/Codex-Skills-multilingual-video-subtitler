@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/asr-request-timeline-contract-v2.schema.json",
+  "title": "asr-request-timeline-contract-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-vad-timebase-acoustic-text-variant-reasr-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "asr-request-timeline-contract-v2"
+    },
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "vadGlobalTimebaseSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "legacyRequestId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "sourceMediaSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceGlobalStartSample": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sourceGlobalEndSample": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sourceSampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "parentChain": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "parentTransformHashes": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "extractedAudioSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "extractedSampleRate": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "extractedSampleCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "decoderLocalOriginSample": { "type": "number", "const": 0 },
+          "decoderLocalOriginSeconds": { "type": "number", "const": 0 },
+          "tokenTimeBase": {
+            "type": "string",
+            "enum": [
+              "original-audio-local",
+              "mapped-original-audio-local",
+              "vad-processed-local",
+              "unknown"
+            ]
+          },
+          "mappingStatus": {
+            "type": "string",
+            "enum": ["VERIFIED", "QUARANTINED", "AMBIGUOUS", "UNAVAILABLE"]
+          },
+          "mappingReason": { "type": "string", "minLength": 1 },
+          "cacheIdentity": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "cacheEntrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "modelIdentity": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "vadEnabled": { "type": "boolean" },
+          "promptPresent": { "type": "boolean" },
+          "freshEvidence": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "requestId",
+          "legacyRequestId",
+          "sourceMediaSha256",
+          "sourceGlobalStartSample",
+          "sourceGlobalEndSample",
+          "sourceSampleRate",
+          "parentChain",
+          "parentTransformHashes",
+          "extractedAudioSha256",
+          "extractedSampleRate",
+          "extractedSampleCount",
+          "decoderLocalOriginSample",
+          "decoderLocalOriginSeconds",
+          "tokenTimeBase",
+          "mappingStatus",
+          "mappingReason",
+          "cacheIdentity",
+          "cacheEntrySha256",
+          "modelIdentity",
+          "vadEnabled",
+          "promptPresent",
+          "freshEvidence",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "requestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifiedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "quarantinedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailableRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "promptPresentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "guessedOffsetCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "requestCount",
+        "verifiedRequestCount",
+        "quarantinedRequestCount",
+        "ambiguousRequestCount",
+        "unavailableRequestCount",
+        "freshRequestCount",
+        "promptPresentCount",
+        "guessedOffsetCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "sourceMediaSha256",
+    "vadGlobalTimebaseSemanticHash",
+    "requests",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

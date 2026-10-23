@@ -1,0 +1,12 @@
+{
+  "version": "short-response-human-evaluation-v1",
+  "use": "evaluation-only-known-development-case",
+  "expectedText": "あれっ",
+  "labelSource": "User independently confirmed the phrase after listening on 2026-09-20",
+  "machineTexts": ["終わる", "終わる"],
+  "machineSource": "super-no-ura-ep01-short-context-20260920/contrast-zil9Qo/contrast-analysis.json short views",
+  "activityHint": { "start": 41.74, "end": 42.22 },
+  "humanVerifiedTiming": false,
+  "generationPromptAllowed": false,
+  "heldOut": false
+}

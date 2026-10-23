@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-1-policy.schema.json",
+  "title": "c6-0-1-14-5-1-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-1-full-unit-registry-review-binding-policy"
+    },
+    "executionPolicy": {
+      "type": "string",
+      "const": "REPLAY_ONLY_REGISTRY_BINDING_AND_CONTRACT_REEVALUATION"
+    },
+    "maximumInferenceCount": { "type": "number", "const": 0 },
+    "maximumModelLoadCount": { "type": "number", "const": 0 },
+    "maximumProviderProcessStartCount": { "type": "number", "const": 0 },
+    "registryBoundaryPolicyVersion": {
+      "type": "string",
+      "const": "C6011451_INVENTORY_ATOMIC_COVERAGE_STATE_PARTITION_V1"
+    },
+    "coverageStatePartitionVersion": {
+      "type": "string",
+      "const": "C6011451_COVERAGE_STATE_PARTITION_V1"
+    },
+    "planningProjectionPolicyVersion": {
+      "type": "string",
+      "const": "C601145_UNCOVERED_SAFETY_PLANNING_PROJECTION_V1"
+    },
+    "machineAnchorMinimumOverlapSeconds": { "type": "number", "const": 0.2 },
+    "machineAnchorMinimumUnitCoverageRatio": { "type": "number", "const": 0.1 },
+    "unitToGoldCoverageThreshold": { "type": "number", "const": 0.8 },
+    "playbackToGoldCoverageThreshold": { "type": "number", "const": 0.8 },
+    "playbackToUnitCoverageThreshold": { "type": "number", "const": 0.95 },
+    "maximumReviewEnvelopeSeconds": { "type": "number", "const": 12 },
+    "maximumOneSideContextSeconds": { "type": "number", "const": 3 },
+    "maximumUnitsPerWitnessCandidate": { "type": "number", "const": 8 },
+    "maximumRealizationsPerWitnessCandidate": { "type": "number", "const": 8 },
+    "maximumWitnessReviewEnvelopeSeconds": { "type": "number", "const": 20 },
+    "maximumInternalMachineGapSeconds": { "type": "number", "const": 0.5 },
+    "witnessAdjacencySeconds": { "type": "number", "const": 0.3 },
+    "fullRegistryRequiredCoverageRatio": { "type": "number", "const": 1 },
+    "positiveOverlapRequired": { "type": "boolean", "const": true },
+    "goldFeaturesAllowedBeforeFreeze": { "type": "boolean", "const": false },
+    "targetGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "regionGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "audioGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "playbackGeometryMutationAllowed": { "type": "boolean", "const": false },
+    "canonicalMutationAllowed": { "type": "boolean", "const": false },
+    "plannerMutationAllowed": { "type": "boolean", "const": false },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "executionPolicy",
+    "maximumInferenceCount",
+    "maximumModelLoadCount",
+    "maximumProviderProcessStartCount",
+    "registryBoundaryPolicyVersion",
+    "coverageStatePartitionVersion",
+    "planningProjectionPolicyVersion",
+    "machineAnchorMinimumOverlapSeconds",
+    "machineAnchorMinimumUnitCoverageRatio",
+    "unitToGoldCoverageThreshold",
+    "playbackToGoldCoverageThreshold",
+    "playbackToUnitCoverageThreshold",
+    "maximumReviewEnvelopeSeconds",
+    "maximumOneSideContextSeconds",
+    "maximumUnitsPerWitnessCandidate",
+    "maximumRealizationsPerWitnessCandidate",
+    "maximumWitnessReviewEnvelopeSeconds",
+    "maximumInternalMachineGapSeconds",
+    "witnessAdjacencySeconds",
+    "fullRegistryRequiredCoverageRatio",
+    "positiveOverlapRequired",
+    "goldFeaturesAllowedBeforeFreeze",
+    "targetGeometryMutationAllowed",
+    "regionGeometryMutationAllowed",
+    "audioGeometryMutationAllowed",
+    "playbackGeometryMutationAllowed",
+    "canonicalMutationAllowed",
+    "plannerMutationAllowed",
+    "machineOnlyReleaseAuthorized",
+    "rankerRetrained",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

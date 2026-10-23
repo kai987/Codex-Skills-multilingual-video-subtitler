@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-candidate-pool-c6-0-1-5.schema.json",
+  "title": "machine-candidate-pool-c6-0-1-5",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-candidate-pool-c6-0-1-5"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "variantId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "textHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "eventInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceWindowIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentSupportGroups": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "correlatedSupportGroups": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "baseline-machine-candidate",
+              "c6.0.1.4-targeted-reasr",
+              "c6.0.1.5-raw-reasr"
+            ]
+          },
+          "sourceGlobalVerified": { "type": "boolean" },
+          "promptIsolated": { "type": "boolean" },
+          "variantEvidenceSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "evidenceCompleteness": {
+            "type": "string",
+            "enum": ["COMPLETE", "PARTIAL", "UNAVAILABLE"]
+          },
+          "selected": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "variantId",
+          "eventId",
+          "candidateId",
+          "text",
+          "textHash",
+          "interval",
+          "eventInterval",
+          "requestIds",
+          "sourceWindowIds",
+          "independentSupportGroups",
+          "correlatedSupportGroups",
+          "origin",
+          "sourceGlobalVerified",
+          "promptIsolated",
+          "variantEvidenceSemanticHash",
+          "evidenceCompleteness",
+          "selected",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "currentVariantId": { "type": "string", "minLength": 1 },
+          "selectedVariantId": { "type": "string", "minLength": 1 },
+          "candidateIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "rawRecoveryCandidateIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "poolSizeBeforeRawRecovery": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "poolSizeAfterRawRecovery": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "selectionChanged": { "type": "boolean" },
+          "replacementProposalId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "currentVariantId",
+          "selectedVariantId",
+          "candidateIds",
+          "rawRecoveryCandidateIds",
+          "poolSizeBeforeRawRecovery",
+          "poolSizeAfterRawRecovery",
+          "selectionChanged",
+          "replacementProposalId",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "baselineCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "c6014TargetedReAsrCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "c6015RawReAsrCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "completeEvidenceCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "incompleteEvidenceCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectedRawReAsrCandidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectionChangedEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freeRewriteCount": { "type": "number", "const": 0 },
+        "candidateTextPromptLeakCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "candidateCount",
+        "baselineCandidateCount",
+        "c6014TargetedReAsrCandidateCount",
+        "c6015RawReAsrCandidateCount",
+        "completeEvidenceCandidateCount",
+        "incompleteEvidenceCandidateCount",
+        "selectedRawReAsrCandidateCount",
+        "selectionChangedEventCount",
+        "freeRewriteCount",
+        "candidateTextPromptLeakCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "candidates",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

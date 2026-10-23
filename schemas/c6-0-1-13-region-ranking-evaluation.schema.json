@@ -1,0 +1,410 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-region-ranking-evaluation.schema.json",
+  "title": "c6-0-1-13-region-ranking-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-region-ranking-evaluation"
+    },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labelsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "oofHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "episodeDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "formalLearnedMetricsOofOnly": { "type": "boolean", "const": true },
+    "rankings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ranker": {
+            "type": "string",
+            "enum": [
+              "R0_CURRENT_ITEM_PRIORITY",
+              "R1_CURRENT_REGION_MAX",
+              "R2_MISSING_CALIBRATED_DETERMINISTIC",
+              "R3_REGION_RISK_DENSITY_V3",
+              "R4_LINEAR_OOF_REGION_RANKER",
+              "R0_CHRONOLOGICAL",
+              "C60112_R3_FULL_EVIDENCE_RANK",
+              "C60112_R2_DISAGREEMENT_ONLY"
+            ]
+          },
+          "pooled": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "budget": { "type": "string" },
+                "budgetSeconds": { "type": "number", "minimum": 0 },
+                "selectedRegionIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "selectedRegionCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "selectedItemCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "clipSumSeconds": { "type": "number", "minimum": 0 },
+                "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+                "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+                "incrementalUniqueSeconds": {
+                  "type": "array",
+                  "items": { "type": "number", "minimum": 0 }
+                },
+                "materialRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "severeTimingRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "hallucinationRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "missingDialogueRecall": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "reviewPrecision": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "residualErrorRate": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "coveredErrorComponentIds": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "totalMaterialErrors": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "totalSevereTimingErrors": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "totalHallucinations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "totalMissingDialogue": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "budget",
+                "budgetSeconds",
+                "selectedRegionIds",
+                "selectedRegionCount",
+                "selectedItemCount",
+                "clipSumSeconds",
+                "uniqueUnionSeconds",
+                "duplicateContextSeconds",
+                "incrementalUniqueSeconds",
+                "materialRecall",
+                "severeTimingRecall",
+                "hallucinationRecall",
+                "missingDialogueRecall",
+                "reviewPrecision",
+                "residualErrorRate",
+                "coveredErrorComponentIds",
+                "totalMaterialErrors",
+                "totalSevereTimingErrors",
+                "totalHallucinations",
+                "totalMissingDialogue"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "folds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "foldId": { "type": "string" },
+                "hasMajorPositive": { "type": "boolean" },
+                "metrics": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "budget": { "type": "string" },
+                      "budgetSeconds": { "type": "number", "minimum": 0 },
+                      "selectedRegionIds": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "selectedRegionCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "selectedItemCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "clipSumSeconds": { "type": "number", "minimum": 0 },
+                      "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+                      "duplicateContextSeconds": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "incrementalUniqueSeconds": {
+                        "type": "array",
+                        "items": { "type": "number", "minimum": 0 }
+                      },
+                      "materialRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "severeTimingRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "hallucinationRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "missingDialogueRecall": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "reviewPrecision": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "residualErrorRate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "coveredErrorComponentIds": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "totalMaterialErrors": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "totalSevereTimingErrors": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "totalHallucinations": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "totalMissingDialogue": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "budget",
+                      "budgetSeconds",
+                      "selectedRegionIds",
+                      "selectedRegionCount",
+                      "selectedItemCount",
+                      "clipSumSeconds",
+                      "uniqueUnionSeconds",
+                      "duplicateContextSeconds",
+                      "incrementalUniqueSeconds",
+                      "materialRecall",
+                      "severeTimingRecall",
+                      "hallucinationRecall",
+                      "missingDialogueRecall",
+                      "reviewPrecision",
+                      "residualErrorRate",
+                      "coveredErrorComponentIds",
+                      "totalMaterialErrors",
+                      "totalSevereTimingErrors",
+                      "totalHallucinations",
+                      "totalMissingDialogue"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "gainAt30VersusLegacy": { "type": "number" },
+                "negativeGain": { "type": "boolean" }
+              },
+              "required": [
+                "foldId",
+                "hasMajorPositive",
+                "metrics",
+                "gainAt30VersusLegacy",
+                "negativeGain"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "meanMaterialTimingRecall": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "negativeFoldCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "ranker",
+          "pooled",
+          "folds",
+          "meanMaterialTimingRecall",
+          "negativeFoldCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "selectedRanker": {
+      "type": "string",
+      "enum": [
+        "R0_CURRENT_ITEM_PRIORITY",
+        "R1_CURRENT_REGION_MAX",
+        "R2_MISSING_CALIBRATED_DETERMINISTIC",
+        "R3_REGION_RISK_DENSITY_V3",
+        "R4_LINEAR_OOF_REGION_RANKER",
+        "R0_CHRONOLOGICAL",
+        "C60112_R3_FULL_EVIDENCE_RANK",
+        "C60112_R2_DISAGREEMENT_ONLY"
+      ]
+    },
+    "rankingResult": {
+      "type": "string",
+      "enum": [
+        "REGION_RANKER_STRONG_PASS",
+        "REGION_RANKER_PROMISING",
+        "REGION_RANKER_WEAK",
+        "REGION_RANKER_UNSUPPORTED"
+      ]
+    },
+    "burdenResult": {
+      "type": "string",
+      "enum": [
+        "REVIEW_BURDEN_STRONG_REDUCTION",
+        "REVIEW_BURDEN_PROMISING_REDUCTION",
+        "REVIEW_BURDEN_NO_MEANINGFUL_REDUCTION",
+        "REVIEW_BURDEN_REDUCTION_UNSAFE"
+      ]
+    },
+    "requiredUniqueAudioRatio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "requiredSafetyRecall": {
+      "type": "object",
+      "properties": {
+        "hallucination": { "type": "number", "minimum": 0, "maximum": 1 },
+        "missingDialogue": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["hallucination", "missingDialogue"],
+      "additionalProperties": false
+    },
+    "learnedFreezeEligible": { "type": "boolean" },
+    "selectionReasons": { "type": "array", "items": { "type": "string" } },
+    "missedSafetyComponents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "errorComponentId": { "type": "string" },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MATERIAL_TEXT_ERROR",
+                "SEVERE_TIMING_ERROR",
+                "HALLUCINATION",
+                "MISSING_DIALOGUE",
+                "OVERLAP_ERROR",
+                "CLEAN_OR_MINOR"
+              ]
+            }
+          },
+          "coveredRegionIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "reason": { "type": "string" }
+        },
+        "required": [
+          "errorComponentId",
+          "labels",
+          "coveredRegionIds",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "machineFreezeHash",
+    "labelsHash",
+    "oofHash",
+    "episodeDurationSeconds",
+    "formalLearnedMetricsOofOnly",
+    "rankings",
+    "selectedRanker",
+    "rankingResult",
+    "burdenResult",
+    "requiredUniqueAudioRatio",
+    "requiredSafetyRecall",
+    "learnedFreezeEligible",
+    "selectionReasons",
+    "missedSafetyComponents",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

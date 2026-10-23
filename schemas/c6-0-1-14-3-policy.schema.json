@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-policy.schema.json",
+  "title": "c6-0-1-14-3-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3-cross-stage-monotonic-safety-selection-v1"
+    },
+    "executionPolicy": { "type": "string", "const": "replay-only" },
+    "mode": {
+      "type": "string",
+      "const": "REPLAY_ONLY_SELECTION_AND_DELIVERY_REPAIR"
+    },
+    "maximumInferenceCount": { "type": "number", "const": 0 },
+    "maximumModelLoadCount": { "type": "number", "const": 0 },
+    "maximumProviderProcessStartCount": { "type": "number", "const": 0 },
+    "maximumActiveSafetyTargets": { "type": "number", "const": 24 },
+    "maximumSpeechCoreUnionSeconds": { "type": "number", "const": 60 },
+    "maximumFullQueueEpisodeRatio": { "type": "number", "const": 0.95 },
+    "minimumObligationCoverageRatio": { "type": "number", "const": 1 },
+    "roundingToleranceSamples": { "type": "number", "const": 1 },
+    "roundingToleranceRequiresVerifiedTransform": {
+      "type": "boolean",
+      "const": true
+    },
+    "minimumChildCoreSeconds": { "type": "number", "const": 0.12 },
+    "preferredMaximumChildCoreSeconds": { "type": "number", "const": 4 },
+    "hardMaximumChildEnvelopeSeconds": { "type": "number", "const": 6 },
+    "hardParentAuditEnvelopeSeconds": { "type": "number", "const": 12 },
+    "maximumBundleEnvelopeSeconds": { "type": "number", "const": 12 },
+    "maximumBundleGapSeconds": { "type": "number", "const": 0.75 },
+    "reviewContextSeconds": { "type": "number", "const": 2 },
+    "diversityBinSeconds": { "type": "number", "const": 60 },
+    "maximumSearchStates": { "type": "number", "const": 5000000 },
+    "objectives": {
+      "minItems": 10,
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "OBLIGATION_ZERO_REGRESSION",
+          "NEW_INDEPENDENT_SPEECH_COVERAGE",
+          "FAMILY_STRATUM_NOVELTY",
+          "BIN_SCENE_DIVERSITY",
+          "MACHINE_PRIORITY",
+          "MINIMUM_BUNDLES",
+          "MINIMUM_CORE",
+          "MINIMUM_INCREMENTAL_AUDIO",
+          "MINIMUM_INTERNAL_SILENCE",
+          "SOURCE_TIME_FINAL_TIE_BREAK"
+        ]
+      }
+    },
+    "sourceTimeTieBreakOnly": { "type": "boolean", "const": true },
+    "goldBlind": { "type": "boolean", "const": true },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "newOofRun": { "type": "boolean", "const": false },
+    "canonicalMutationAllowed": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "executionPolicy",
+    "mode",
+    "maximumInferenceCount",
+    "maximumModelLoadCount",
+    "maximumProviderProcessStartCount",
+    "maximumActiveSafetyTargets",
+    "maximumSpeechCoreUnionSeconds",
+    "maximumFullQueueEpisodeRatio",
+    "minimumObligationCoverageRatio",
+    "roundingToleranceSamples",
+    "roundingToleranceRequiresVerifiedTransform",
+    "minimumChildCoreSeconds",
+    "preferredMaximumChildCoreSeconds",
+    "hardMaximumChildEnvelopeSeconds",
+    "hardParentAuditEnvelopeSeconds",
+    "maximumBundleEnvelopeSeconds",
+    "maximumBundleGapSeconds",
+    "reviewContextSeconds",
+    "diversityBinSeconds",
+    "maximumSearchStates",
+    "objectives",
+    "sourceTimeTieBreakOnly",
+    "goldBlind",
+    "rankerRetrained",
+    "newOofRun",
+    "canonicalMutationAllowed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

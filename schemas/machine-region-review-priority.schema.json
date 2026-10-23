@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-region-review-priority.schema.json",
+  "title": "machine-region-review-priority",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-machine-region-review-priority"
+    },
+    "ranker": { "type": "string", "const": "REGION_RISK_DENSITY_V3" },
+    "scoreMeaning": {
+      "type": "string",
+      "const": "EXPLAINABLE_RANKING_SCORE_NOT_PROBABILITY"
+    },
+    "regionsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "regionId": { "type": "string", "minLength": 1 },
+          "itemIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "contextInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "itemRiskSummary": {
+            "type": "object",
+            "properties": {
+              "uniqueAffectedCueCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "uniqueEventCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "independentRiskGroupCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "mandatoryItemCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "missingClassifications": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "SPEECH_GAP_OBSERVED",
+                    "MISSING_DIALOGUE_POSSIBLE",
+                    "MISSING_DIALOGUE_STRONG",
+                    "MISSING_DIALOGUE_CONTRADICTED",
+                    "MISSING_DIALOGUE_UNRESOLVED"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "uniqueAffectedCueCount",
+              "uniqueEventCount",
+              "independentRiskGroupCount",
+              "mandatoryItemCount",
+              "missingClassifications"
+            ],
+            "additionalProperties": false
+          },
+          "independentEvidenceFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SPEECH_ACTIVITY",
+                "ASR_LEXICAL_CONTENT",
+                "CUE_COVERAGE",
+                "NEIGHBOR_CONTINUITY",
+                "SPEAKER_ACTIVITY",
+                "CROSS_MODEL_CONTENT",
+                "MUSIC_LYRICS_CONTRADICTION",
+                "LOCALIZATION",
+                "WHISPER_STABILITY",
+                "REAZON_STABILITY",
+                "ACOUSTIC_ALIGNMENT",
+                "DECODER",
+                "TIMING_BOUNDARY",
+                "HALLUCINATION",
+                "OVERLAP",
+                "STRUCTURAL_INTEGRITY"
+              ]
+            }
+          },
+          "mandatoryReasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "candidateActionableCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "estimatedUniqueAudioSeconds": { "type": "number", "minimum": 0 },
+          "priorityVector": {
+            "type": "object",
+            "properties": {
+              "mandatorySafetyClass": {
+                "type": "string",
+                "enum": [
+                  "NONE",
+                  "STRONG_HALLUCINATION",
+                  "STRONG_MISSING",
+                  "STRONG_TIMING",
+                  "STRONG_OVERLAP",
+                  "STRUCTURAL_CORRUPTION"
+                ]
+              },
+              "positiveEvidenceStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "independentEvidenceFamilyCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "errorTypeSeverity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "crossModelConflictStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "hallucinationStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "missingStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "timingStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "candidateActionability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "localizationQuality": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "estimatedReviewCost": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "sourceTime": { "type": "number", "minimum": 0 }
+            },
+            "required": [
+              "mandatorySafetyClass",
+              "positiveEvidenceStrength",
+              "independentEvidenceFamilyCount",
+              "errorTypeSeverity",
+              "crossModelConflictStrength",
+              "hallucinationStrength",
+              "missingStrength",
+              "timingStrength",
+              "candidateActionability",
+              "localizationQuality",
+              "estimatedReviewCost",
+              "sourceTime"
+            ],
+            "additionalProperties": false
+          },
+          "rankScore": { "type": "number", "minimum": 0 },
+          "rankPosition": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "riskCoverageKeys": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "actionableCoverageKeys": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "regionId",
+          "itemIds",
+          "sourceInterval",
+          "contextInterval",
+          "itemRiskSummary",
+          "independentEvidenceFamilies",
+          "mandatoryReasons",
+          "candidateActionableCount",
+          "estimatedUniqueAudioSeconds",
+          "priorityVector",
+          "rankScore",
+          "rankPosition",
+          "riskCoverageKeys",
+          "actionableCoverageKeys",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "ranker",
+    "scoreMeaning",
+    "regionsHash",
+    "regions",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

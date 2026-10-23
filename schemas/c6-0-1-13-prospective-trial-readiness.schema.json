@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-prospective-trial-readiness.schema.json",
+  "title": "c6-0-1-13-prospective-trial-readiness",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-prospective-trial-readiness"
+    },
+    "rankerFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "workspaceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "episodeEligibility": {
+      "type": "string",
+      "const": "NOT_ELIGIBLE_PRIOR_GOLD_EXPOSURE"
+    },
+    "episodeOneEligibleForBlindHumanTrial": {
+      "type": "boolean",
+      "const": false
+    },
+    "realHumanSessionExecuted": { "type": "boolean", "const": false },
+    "humanReviewTimeMeasured": { "type": "boolean", "const": false },
+    "realHumanTrialNotExecutedIsExpected": { "type": "boolean", "const": true },
+    "readiness": {
+      "type": "string",
+      "enum": [
+        "PROSPECTIVE_HUMAN_TRIAL_READY_NOT_EXECUTED",
+        "PROSPECTIVE_HUMAN_TRIAL_NOT_READY_RANKER",
+        "PROSPECTIVE_HUMAN_TRIAL_NOT_READY_WORKFLOW",
+        "PROSPECTIVE_HUMAN_TRIAL_NOT_READY_INSTRUMENTATION"
+      ]
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GO_TO_NEW_EPISODE_PROSPECTIVE_HUMAN_TRIAL",
+        "GO_TO_NEW_EPISODE_TRIAL_WITH_RANKING_CAVEAT",
+        "HOLD_FOR_REVIEW_RANKER_REDESIGN",
+        "HOLD_FOR_MISSING_EVIDENCE_REPAIR",
+        "HOLD_FOR_WORKSPACE_V2_REPAIR"
+      ]
+    },
+    "commands": { "type": "array", "items": { "type": "string" } },
+    "eventTypes": { "type": "array", "items": { "type": "string" } },
+    "instrumentationTestStatus": {
+      "type": "string",
+      "enum": ["PASSED", "FAILED", "NOT_RUN"]
+    },
+    "syntheticTrialOnly": { "type": "boolean", "const": true },
+    "activeTimePolicy": { "type": "string" },
+    "idleTimeoutSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "protocolVersion": {
+      "type": "string",
+      "const": "REAL_HUMAN_TRIAL_PROTOCOL_V2"
+    },
+    "reasons": { "type": "array", "items": { "type": "string" } },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "rankerFreezeHash",
+    "machineFreezeHash",
+    "workspaceHash",
+    "episodeEligibility",
+    "episodeOneEligibleForBlindHumanTrial",
+    "realHumanSessionExecuted",
+    "humanReviewTimeMeasured",
+    "realHumanTrialNotExecutedIsExpected",
+    "readiness",
+    "route",
+    "commands",
+    "eventTypes",
+    "instrumentationTestStatus",
+    "syntheticTrialOnly",
+    "activeTimePolicy",
+    "idleTimeoutSeconds",
+    "protocolVersion",
+    "reasons",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

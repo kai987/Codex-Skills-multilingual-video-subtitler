@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-second-asr-diagnostic-set.schema.json",
+  "title": "machine-second-asr-diagnostic-set",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.9-independent-asr-complementarity-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-second-asr-diagnostic-set"
+    },
+    "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "upstreamTargetSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "selectionPolicy": {
+      "type": "string",
+      "const": "c6018-targets-plus-machine-low-risk-core-localizable-controls-v1"
+    },
+    "targetEventIds": {
+      "minItems": 12,
+      "maxItems": 12,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "controlEventIds": {
+      "minItems": 12,
+      "maxItems": 12,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "events": {
+      "minItems": 24,
+      "maxItems": 24,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "enum": ["TARGET", "CONTROL"] },
+          "coreInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "coreStatus": {
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "VERIFIED_WITH_CAUTION",
+              "MACHINE_CONTROL_CORE"
+            ]
+          },
+          "selectionReasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "machineEvidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "role",
+          "coreInterval",
+          "coreStatus",
+          "selectionReasons",
+          "machineEvidenceIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "frozenBeforeGold": { "type": "boolean", "const": true },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "sourceMediaSha256",
+    "upstreamTargetSemanticHash",
+    "selectionPolicy",
+    "targetEventIds",
+    "controlEventIds",
+    "events",
+    "frozenBeforeGold",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

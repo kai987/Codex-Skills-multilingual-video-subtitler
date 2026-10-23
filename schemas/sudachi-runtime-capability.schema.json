@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/sudachi-runtime-capability.schema.json",
+  "title": "sudachi-runtime-capability",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "sudachi-runtime-capability" },
+    "runtimeVersion": { "type": "string", "const": "C5.17.1" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "pythonVersion": { "type": "string", "pattern": "^3\\.(?:11|12)\\." },
+    "sudachiPyVersion": { "type": "string", "const": "0.6.11" },
+    "sudachiDictionaryVersion": { "type": "string", "const": "20260428" },
+    "dictionary": { "type": "string", "const": "core" },
+    "splitMode": { "type": "string", "const": "C" },
+    "requirementsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "helperSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "executableBasename": { "type": "string", "enum": ["python", "python3"] },
+    "runtimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "offlineVerificationPassed": { "type": "boolean" },
+    "systemPythonModified": { "type": "boolean", "const": false },
+    "mfaRuntimeDependency": { "type": "boolean", "const": false },
+    "shareable": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runtimeVersion",
+    "generatedAt",
+    "pythonVersion",
+    "sudachiPyVersion",
+    "sudachiDictionaryVersion",
+    "dictionary",
+    "splitMode",
+    "requirementsSha256",
+    "helperSha256",
+    "executableBasename",
+    "runtimeIdentityHash",
+    "offlineVerificationPassed",
+    "systemPythonModified",
+    "mfaRuntimeDependency",
+    "shareable"
+  ],
+  "additionalProperties": false
+}

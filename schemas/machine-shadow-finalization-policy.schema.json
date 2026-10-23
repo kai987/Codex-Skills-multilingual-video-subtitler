@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-shadow-finalization-policy.schema.json",
+  "title": "machine-shadow-finalization-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-shadow-finalization-policy"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1-machine-shadow-finalization-v1"
+    },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "positiveEvidenceRequired": { "type": "boolean", "const": true },
+    "unknownSignalsFailClosed": { "type": "boolean", "const": true },
+    "productionStatusUnaffected": { "type": "boolean", "const": true },
+    "requiredChecks": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rejectionChecks": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rationale": { "type": "string", "minLength": 1 },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "machineOnlyReleaseAuthorized",
+    "positiveEvidenceRequired",
+    "unknownSignalsFailClosed",
+    "productionStatusUnaffected",
+    "requiredChecks",
+    "rejectionChecks",
+    "rationale",
+    "policyHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-missing-safety-reserve-targets-v4.schema.json",
+  "title": "machine-missing-safety-reserve-targets-v4",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-missing-safety-reserve-targets-v4"
+    },
+    "sourceSafetyTargetsHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "plannerCertificateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "atomUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "childUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "bundleUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "targets": {
+      "maxItems": 24,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetId": { "type": "string", "minLength": 1 },
+          "bundleId": { "type": "string", "minLength": 1 },
+          "childUnitIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomicCoreIntervals": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "speechCoreUnionSeconds": { "type": "number", "minimum": 0 },
+          "reviewEnvelope": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "internalSilenceIntervals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "obligationIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "optionalChildIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "atomUtilityRefs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "childUtilityRefs": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          },
+          "bundleUtilityRef": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "speechEvidenceTierCounts": {
+            "type": "object",
+            "properties": {
+              "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "TIER_0_INELIGIBLE_OR_CONTRADICTED": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "TIER_5_VERIFIED_MULTI_FAMILY_SPEECH",
+              "TIER_4_VERIFIED_INDEPENDENT_EXCLUSIVE_SPEECH",
+              "TIER_3_VERIFIED_SINGLE_FAMILY_SPEECH",
+              "TIER_2_MASKED_OR_SUBTHRESHOLD_SPEECH",
+              "TIER_1_AUDIT_ONLY_SPEECH_CANDIDATE",
+              "TIER_0_INELIGIBLE_OR_CONTRADICTED"
+            ],
+            "additionalProperties": false
+          },
+          "reviewSafetyUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "textCandidateUtilityVector": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "plannerCertificateId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "selectionReason": { "type": "string", "minLength": 1 },
+          "sourceIdentity": {
+            "type": "object",
+            "properties": {
+              "sourceMediaSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+              "sampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioStreamIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioTimebase": {
+                "type": "string",
+                "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+              },
+              "sourceTimebase": {
+                "type": "string",
+                "const": "SOURCE_GLOBAL_SECONDS"
+              }
+            },
+            "required": [
+              "sourceMediaSha256",
+              "durationSeconds",
+              "sampleRate",
+              "audioStreamIndex",
+              "audioTimebase",
+              "sourceTimebase"
+            ],
+            "additionalProperties": false
+          },
+          "audioRequired": { "type": "boolean", "const": true },
+          "requiredLevel": { "type": "string", "const": "RECOMMENDED" },
+          "canonicalInsertAllowed": { "type": "boolean", "const": false },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "targetId",
+          "bundleId",
+          "childUnitIds",
+          "atomicCoreIntervals",
+          "speechCoreUnionSeconds",
+          "reviewEnvelope",
+          "internalSilenceIntervals",
+          "obligationIds",
+          "optionalChildIds",
+          "atomUtilityRefs",
+          "childUtilityRefs",
+          "bundleUtilityRef",
+          "speechEvidenceTierCounts",
+          "reviewSafetyUtilityVector",
+          "textCandidateUtilityVector",
+          "plannerCertificateId",
+          "selectionReason",
+          "sourceIdentity",
+          "audioRequired",
+          "requiredLevel",
+          "canonicalInsertAllowed",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "retainedTargetIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "removedTargetIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "replacedByTargetIds": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 }
+      }
+    },
+    "activeTargetCount": { "type": "integer", "minimum": 0, "maximum": 24 },
+    "speechCoreUnionSeconds": { "type": "number", "minimum": 0, "maximum": 60 },
+    "wholeEpisodeCatchAllCount": { "type": "number", "const": 0 },
+    "obligationCoverageRatio": { "type": "number", "const": 1 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "sourceSafetyTargetsHash",
+    "plannerCertificateHash",
+    "atomUtilityHash",
+    "childUtilityHash",
+    "bundleUtilityHash",
+    "targets",
+    "retainedTargetIds",
+    "removedTargetIds",
+    "replacedByTargetIds",
+    "activeTargetCount",
+    "speechCoreUnionSeconds",
+    "wholeEpisodeCatchAllCount",
+    "obligationCoverageRatio"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-2-quality-policy.schema.json",
+  "title": "c6-0-1-2-quality-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.2-candidate-precision-global-timeline-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-2-quality-policy" },
+    "candidateConsensus": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "globalTokenTimeline": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "goldRuntimeInputCount": { "type": "number", "const": 0 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyRelease": { "type": "boolean", "const": false },
+    "artifactSemanticHashes": {
+      "minItems": 8,
+      "maxItems": 8,
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "gates": {
+      "type": "object",
+      "properties": {
+        "minimumCoverage": { "type": "number", "const": 0.9 },
+        "maximumMissing": { "type": "number", "const": 15 },
+        "maximumHallucinations": { "type": "number", "const": 2 },
+        "maximumMaterialErrors": { "type": "number", "const": 45 },
+        "maximumSevereTimingErrors": { "type": "number", "const": 30 },
+        "maximumStartMaeSeconds": { "type": "number", "const": 1.2 },
+        "maximumEndMaeSeconds": { "type": "number", "const": 1.2 },
+        "maximumP95BoundaryErrorSeconds": { "type": "number", "const": 3.5 },
+        "maximumNormalizedCer": { "type": "number", "const": 0.55 },
+        "maximumOverlapPairs": { "type": "number", "const": 20 }
+      },
+      "required": [
+        "minimumCoverage",
+        "maximumMissing",
+        "maximumHallucinations",
+        "maximumMaterialErrors",
+        "maximumSevereTimingErrors",
+        "maximumStartMaeSeconds",
+        "maximumEndMaeSeconds",
+        "maximumP95BoundaryErrorSeconds",
+        "maximumNormalizedCer",
+        "maximumOverlapPairs"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "candidateConsensus",
+    "globalTokenTimeline",
+    "goldRuntimeInputCount",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyRelease",
+    "artifactSemanticHashes",
+    "gates",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

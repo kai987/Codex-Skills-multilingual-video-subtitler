@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-10-holdout-reazon-runtime.schema.json",
+  "title": "c6-0-1-10-holdout-reazon-runtime",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.10-cross-model-arbitration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-10-holdout-reazon-runtime"
+    },
+    "executionKind": {
+      "type": "string",
+      "enum": ["OFFICIAL_FRESH_INFERENCE", "FROZEN_EXACT_CACHE_REPLAY"]
+    },
+    "selectionSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "modelIdentity": {
+      "type": "object",
+      "properties": {
+        "modelId": {
+          "type": "string",
+          "const": "reazon-research/reazonspeech-k2-v2"
+        },
+        "modelRevision": {
+          "type": "string",
+          "const": "291488c8151be24d7da4bf7af26e533fad96e407"
+        },
+        "modelSnapshotHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "encoderSha256": {
+          "type": "string",
+          "const": "ecdb0b771e16104aaf8e579cb3c1e32fbd589eb641c5946d82b615bd366c5f96"
+        },
+        "decoderSha256": {
+          "type": "string",
+          "const": "58b18211ae06265466bfa17172dab574df94f76c8bcb61a3640c28ba860e4124"
+        },
+        "joinerSha256": {
+          "type": "string",
+          "const": "d38a81d1191c9ed6de6a1719503692e07e3e973e2364adde0abae5eaaded1174"
+        },
+        "tokensSha256": {
+          "type": "string",
+          "const": "2c3ac659818a48a0c04010e0593bbc4d7c8a24a054340b01131499c05fd52def"
+        },
+        "precision": { "type": "string", "const": "fp32" }
+      },
+      "required": [
+        "modelId",
+        "modelRevision",
+        "modelSnapshotHash",
+        "encoderSha256",
+        "decoderSha256",
+        "joinerSha256",
+        "tokensSha256",
+        "precision"
+      ],
+      "additionalProperties": false
+    },
+    "runtimeIdentity": {
+      "type": "object",
+      "properties": {
+        "runtimeId": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "adapterType": {
+          "type": "string",
+          "const": "DIRECT_SHERPA_ONNX_OFFICIAL_REAZON_FP32"
+        },
+        "sherpaOnnxVersion": { "type": "string", "const": "1.13.6" },
+        "device": { "type": "string", "const": "cpu" },
+        "architecture": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "runtimeId",
+        "adapterType",
+        "sherpaOnnxVersion",
+        "device",
+        "architecture"
+      ],
+      "additionalProperties": false
+    },
+    "requests": {
+      "type": "object",
+      "properties": {
+        "coreExactPlannedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coreExactActualCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coreExactCacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coreExactFreshInferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextEscalationPlannedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextActualCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextCacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contextFreshInferenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "successfulCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emptyOutputCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "processStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "coreExactPlannedCount",
+        "coreExactActualCount",
+        "coreExactCacheHitCount",
+        "coreExactFreshInferenceCount",
+        "contextEscalationPlannedCount",
+        "contextActualCount",
+        "contextCacheHitCount",
+        "contextFreshInferenceCount",
+        "successfulCount",
+        "failedCount",
+        "emptyOutputCount",
+        "modelLoadCount",
+        "processStartCount"
+      ],
+      "additionalProperties": false
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "candidateId": { "type": "string", "minLength": 1 },
+          "providerFamily": { "type": "string", "enum": ["WHISPER", "REAZON"] },
+          "displayText": { "type": "string" },
+          "normalizedDisplayText": { "type": "string" },
+          "pronunciationText": { "type": "string" },
+          "hallucinationRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+          "evidenceAvailability": {
+            "type": "string",
+            "enum": ["COMPLETE", "PARTIAL", "UNAVAILABLE"]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "eventId": { "type": "string", "minLength": 1 },
+          "windowType": {
+            "type": "string",
+            "enum": ["CORE_EXACT", "CORE_CONTEXT"]
+          },
+          "requestId": { "type": "string", "minLength": 1 },
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "cacheHit": { "type": "boolean" },
+          "inferenceExecuted": { "type": "boolean" },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "candidateId",
+          "providerFamily",
+          "displayText",
+          "normalizedDisplayText",
+          "pronunciationText",
+          "hallucinationRisk",
+          "evidenceAvailability",
+          "semanticHash",
+          "eventId",
+          "windowType",
+          "requestId",
+          "cacheKey",
+          "cacheHit",
+          "inferenceExecuted",
+          "sourceInterval"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "networkUsed": { "type": "boolean", "const": false },
+    "remoteApiUsed": { "type": "boolean", "const": false },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "executionKind",
+    "selectionSemanticHash",
+    "modelIdentity",
+    "runtimeIdentity",
+    "requests",
+    "candidates",
+    "networkUsed",
+    "remoteApiUsed",
+    "runtimeGoldInputCount",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

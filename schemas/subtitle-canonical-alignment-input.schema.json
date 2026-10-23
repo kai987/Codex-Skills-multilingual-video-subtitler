@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/subtitle-canonical-alignment-input.schema.json",
+  "title": "subtitle-canonical-alignment-input",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "subtitle-canonical-alignment-input"
+    },
+    "alignmentVersion": { "type": "string", "enum": ["C5.17", "C5.17.1"] },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "baseCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baseTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "unicodeNormalization": { "type": "string", "const": "NFKC" },
+        "displayNewlines": {
+          "type": "string",
+          "const": "remove-from-alignment-only"
+        },
+        "styleMarkers": {
+          "type": "string",
+          "const": "remove-from-alignment-only"
+        },
+        "punctuation": { "type": "string", "const": "separate-for-alignment" },
+        "dialectPolicy": { "type": "string", "const": "preserve-surface" },
+        "oovPolicy": {
+          "type": "string",
+          "const": "terminology-then-sudachi-then-official-g2p-then-kana-else-unresolved"
+        }
+      },
+      "required": [
+        "unicodeNormalization",
+        "displayNewlines",
+        "styleMarkers",
+        "punctuation",
+        "dialectPolicy",
+        "oovPolicy"
+      ],
+      "additionalProperties": false
+    },
+    "cues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "componentId": { "type": "string", "minLength": 1 },
+          "originalInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "canonicalText": { "type": "string", "minLength": 1 },
+          "canonicalTextSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "alignmentText": { "type": "string", "minLength": 1 },
+          "alignmentTextSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "displayNewlinesRemoved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "styleMarkersRemoved": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "punctuationHandling": {
+            "type": "string",
+            "const": "separated-not-deleted-from-canonical"
+          },
+          "morphemes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "surface": { "type": "string", "minLength": 1 },
+                "normalizedSurface": { "type": "string", "minLength": 1 },
+                "dictionaryForm": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "partOfSpeech": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "isOov": { "type": "boolean" },
+                "startCharacter": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endCharacter": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "readingSource": {
+                  "type": "string",
+                  "enum": [
+                    "verified-terminology",
+                    "sudachi-dictionary",
+                    "official-mfa-g2p",
+                    "kana-literal",
+                    "unresolved"
+                  ]
+                },
+                "dialectSurface": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "surface",
+                "normalizedSurface",
+                "dictionaryForm",
+                "reading",
+                "partOfSpeech",
+                "isOov",
+                "startCharacter",
+                "endCharacter",
+                "readingSource",
+                "dialectSurface"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "wordUnits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "unitId": { "type": "string", "minLength": 1 },
+                "surface": { "type": "string", "minLength": 1 },
+                "normalizedSurface": { "type": "string", "minLength": 1 },
+                "reading": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "readingSource": {
+                  "type": "string",
+                  "enum": [
+                    "verified-terminology",
+                    "sudachi-dictionary",
+                    "official-mfa-g2p",
+                    "kana-literal",
+                    "unresolved"
+                  ]
+                },
+                "morphemeIndexes": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "punctuation": { "type": "boolean" },
+                "criticalOov": { "type": "boolean" }
+              },
+              "required": [
+                "unitId",
+                "surface",
+                "normalizedSurface",
+                "reading",
+                "readingSource",
+                "morphemeIndexes",
+                "punctuation",
+                "criticalOov"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "normalizedReading": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "readingAvailable": { "type": "boolean" },
+          "readingCoverageRatio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "unresolvedOov": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "verifiedTerminologyMatches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "surface": { "type": "string", "minLength": 1 },
+                "reading": { "type": "string", "minLength": 1 },
+                "evidenceId": { "type": "string", "minLength": 1 }
+              },
+              "required": ["surface", "reading", "evidenceId"],
+              "additionalProperties": false
+            }
+          },
+          "alignmentEligibility": { "type": "boolean" },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "cueId",
+          "componentId",
+          "originalInterval",
+          "canonicalText",
+          "canonicalTextSha256",
+          "alignmentText",
+          "alignmentTextSha256",
+          "displayNewlinesRemoved",
+          "styleMarkersRemoved",
+          "punctuationHandling",
+          "morphemes",
+          "wordUnits",
+          "normalizedReading",
+          "readingAvailable",
+          "readingCoverageRatio",
+          "unresolvedOov",
+          "verifiedTerminologyMatches",
+          "alignmentEligibility",
+          "blockers"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "componentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "eligibleCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ineligibleCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedOovCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextMutationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "componentCount",
+        "cueCount",
+        "eligibleCueCount",
+        "ineligibleCueCount",
+        "unresolvedOovCount",
+        "canonicalTextMutationCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "alignmentVersion",
+    "generatedAt",
+    "baseCueHash",
+    "baseTimingHash",
+    "configuration",
+    "cues",
+    "summary"
+  ],
+  "additionalProperties": false
+}

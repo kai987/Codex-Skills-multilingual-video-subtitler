@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/lyrics-text-validity.schema.json",
+  "title": "lyrics-text-validity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["conservative", "balanced"] },
+        "maximumAdjacentGapSeconds": { "type": "number", "minimum": 0 }
+      },
+      "required": ["mode", "maximumAdjacentGapSeconds"],
+      "additionalProperties": false
+    },
+    "sequences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "combinedNormalizedText": { "type": "string" },
+          "validity": {
+            "type": "string",
+            "enum": ["valid", "hallucination", "incomplete", "unresolved"]
+          },
+          "independentSupportCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "referenceOriginalConflict": { "type": "boolean" },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "interval",
+          "cueIds",
+          "combinedNormalizedText",
+          "validity",
+          "independentSupportCount",
+          "referenceOriginalConflict",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "configuration",
+    "sequences",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

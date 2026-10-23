@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-missing-speech-evidence-v5.schema.json",
+  "title": "machine-missing-speech-evidence-v5",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-missing-speech-evidence-v5"
+    },
+    "inventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "safetyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "lexicalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "targets": {
+      "maxItems": 24,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetId": { "type": "string", "minLength": 1 },
+          "targetCoreUnion": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "endSample": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["startSample", "endSample"],
+              "additionalProperties": false
+            }
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceStrata": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MULTI_DETECTOR",
+                "PYANNOTE_EXCLUSIVE",
+                "SILERO_EXCLUSIVE",
+                "WEBRTC_EXCLUSIVE",
+                "LEGACY_FINGERPRINT_EXCLUSIVE",
+                "MULTI_VIEW_SAME_DETECTOR",
+                "EXISTING_VERIFIED",
+                "MASKED_SUBTHRESHOLD",
+                "AUDIT_ONLY"
+              ]
+            }
+          },
+          "evidenceFlags": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "lexicalEvidenceClass": {
+            "type": "string",
+            "enum": [
+              "CROSS_MODEL_LOCALIZED_AGREEMENT",
+              "PRONUNCIATION_AGREEMENT",
+              "WHISPER_ONLY_LOCALIZED",
+              "REAZON_ONLY_LOCALIZED",
+              "CROSS_MODEL_DISAGREEMENT",
+              "HISTORICAL_FINGERPRINT_LOCALIZED",
+              "CONTEXT_ONLY_UNPROJECTABLE",
+              "BOTH_EMPTY",
+              "HALLUCINATION_RISK",
+              "LOCALIZATION_UNRESOLVED"
+            ]
+          },
+          "missingEvidenceClass": {
+            "type": "string",
+            "enum": [
+              "MISSING_DIALOGUE_STRONG",
+              "SPEECH_INVENTORY_SAFETY_RESERVE",
+              "ASR_DISAGREEMENT",
+              "ASR_EMPTY",
+              "SPEECH_DETECTION_UNRESOLVED"
+            ]
+          },
+          "requiredLevel": { "type": "string", "const": "RECOMMENDED" },
+          "canonicalInsertAllowed": { "type": "boolean", "const": false },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "targetId",
+          "targetCoreUnion",
+          "evidenceIds",
+          "requestIds",
+          "evidenceStrata",
+          "evidenceFlags",
+          "lexicalEvidenceClass",
+          "missingEvidenceClass",
+          "requiredLevel",
+          "canonicalInsertAllowed",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "targetCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "speechOnlySafetyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "localizedAgreementCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emptyAsrTargetRetainedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "nonMandatoryCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalInsertCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "targetCount",
+        "speechOnlySafetyCount",
+        "localizedAgreementCount",
+        "emptyAsrTargetRetainedCount",
+        "nonMandatoryCount",
+        "canonicalInsertCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "inventoryHash",
+    "safetyHash",
+    "lexicalHash",
+    "targets",
+    "summary"
+  ],
+  "additionalProperties": false
+}

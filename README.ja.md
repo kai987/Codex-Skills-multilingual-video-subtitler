@@ -8,9 +8,9 @@
 
 ## ソースコードの場所
 
-既定の `main` ブランチには、プロジェクト概要、この日本語 README、ライセンスを置いています。**実行用のソースコードは現在、`main` ではなく開発ブランチで管理しています。**
+既定の `main` ブランチには、プロジェクト概要と日本語 README に加え、現在のコア実行コード、Codex Skill、スキーマ、テストを収録しています。生成結果、モデルの重み、キャッシュ、本機専用の実験計画は含めていません。
 
-単体 CLI を使う場合は、[`codex/subtitle-tool-bounded-asr-local-recovery-integration`](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/tree/codex/subtitle-tool-bounded-asr-local-recovery-integration) を参照してください。以下の手順は、このブランチを対象としています。他の実験ブランチにはそれぞれ固有の仕様と検証報告があり、相互に置き換えられるリリースではありません。
+単体 CLI には `main` と[現在の使用ガイド](STANDALONE_SUBTITLE_TOOL_V1.md)を使ってください。過去の開発ブランチにはそれぞれの実験と検証報告を残していますが、相互に置き換えられるリリースではありません。今回のコア統合には、ローカルで開発した有界生成・内容復旧・接合部の再検証モジュールを含め、個人の実行データは含めていません。
 
 ## 主な機能
 
@@ -25,7 +25,7 @@
 ## 必要な環境
 
 - Node.js `>=24 <25`。
-- npm `>=11`。ソースブランチの指定バージョンは `npm@11.18.0` です。
+- 単体 CLI には npm `11.x` が必要です。リポジトリの指定バージョンは `npm@11.18.0` です。
 - FFmpeg と ffprobe。
 - ローカルの `whisper-cli` 実行ファイルと、whisper.cpp に対応する GGML モデル。
 
@@ -33,11 +33,11 @@
 
 ## クイックスタート
 
-**ソースブランチを明示して**クローンします。
+`main` ブランチをクローンします。
 
 ```bash
 git clone --single-branch \
-  --branch codex/subtitle-tool-bounded-asr-local-recovery-integration \
+  --branch main \
   https://github.com/kai987/Codex-Skills-multilingual-video-subtitler.git \
   multilingual-video-subtitler
 cd multilingual-video-subtitler
@@ -96,12 +96,14 @@ npm run subtitle-tool -- validate-edited \
 ## ドキュメントと開発
 
 - [English README](README.md)
-- [単体 CLI のインストール・使用・復旧ガイド](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/blob/codex/subtitle-tool-bounded-asr-local-recovery-integration/STANDALONE_SUBTITLE_TOOL_V1.md)
-- [高度なワークフローと検証コマンド](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/blob/codex/subtitle-tool-bounded-asr-local-recovery-integration/README.md)
-- [Codex Skill の手順](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/blob/codex/subtitle-tool-bounded-asr-local-recovery-integration/.agents/skills/multilingual-video-subtitler/SKILL.md)
+- [単体 CLI のインストール・使用・復旧ガイド](STANDALONE_SUBTITLE_TOOL_V1.md)
+- [高度なワークフロー](.agents/skills/multilingual-video-subtitler/references/research-workflows.md)
+- [Codex Skill の手順](.agents/skills/multilingual-video-subtitler/SKILL.md)
 - [開発ブランチ一覧](https://github.com/kai987/Codex-Skills-multilingual-video-subtitler/branches)
 
-ソースブランチは TypeScript／Node.js のワークスペース構成です。`apps/` にアプリケーションの入口、`packages/` に実行用パッケージ、`schemas/` にスキーマ、`scripts/` にコマンド補助を置いています。メディア、モデル、キャッシュ、生成済みの `output/`、個人の確認用ファイルは、ソースの閲覧・ビルドには不要であり、ドキュメントの素材としてコミットしないでください。
+ソースは TypeScript／Node.js のワークスペース構成です。`apps/` にアプリケーションの入口、`packages/` に実行用パッケージ、`schemas/` にスキーマ、`scripts/` にコマンド補助を置いています。メディア、モデル、キャッシュ、生成済みの `output/`、個人の確認用ファイルは、ソースの閲覧・ビルドには不要であり、ドキュメントの素材としてコミットしないでください。
+
+過去の研究用テストでは、モデル不要の数値検査に NumPy／SciPy を備えた Python も使用します。実モデルや個人の成果物を使う結合テストは明示的な有効化が必要であり、その依存環境や個人のテストデータは同梱していません。
 
 ## ライセンス
 

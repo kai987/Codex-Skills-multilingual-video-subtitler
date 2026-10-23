@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-baseline-replay.schema.json",
+  "title": "c6-0-1-13-baseline-replay",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "c6-0-1-13-baseline-replay" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMs": { "type": "number", "minimum": 0 },
+        "inode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["sha256", "size", "mtimeMs", "inode"],
+      "additionalProperties": false
+    },
+    "sourceDurationSeconds": {
+      "anyOf": [{ "type": "number", "exclusiveMinimum": 0 }, { "type": "null" }]
+    },
+    "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalIdentities": {
+      "type": "object",
+      "properties": {
+        "machineDraftHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalTimingHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "machineDraftHash",
+        "cueCount",
+        "canonicalTextHash",
+        "canonicalTimingHash",
+        "presentationHash"
+      ],
+      "additionalProperties": false
+    },
+    "upstreamFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "replayParity": {
+      "type": "object",
+      "properties": {
+        "items": { "type": "boolean" },
+        "priority": { "type": "boolean" },
+        "regions": { "type": "boolean" },
+        "candidates": { "type": "boolean" }
+      },
+      "required": ["items", "priority", "regions", "candidates"],
+      "additionalProperties": false
+    },
+    "itemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "regionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "requiredRegionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "criticalItemCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "legacyMissingRiskCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "scoreDiagnostics": {
+      "type": "object",
+      "properties": {
+        "maximumScore": { "type": "number" },
+        "maximumScoreCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "largestTieGroup": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniqueScoreCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "entropyBits": { "type": "number", "minimum": 0 },
+        "distribution": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "score": { "type": "number" },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["score", "count"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "maximumScore",
+        "maximumScoreCount",
+        "largestTieGroup",
+        "uniqueScoreCount",
+        "entropyBits",
+        "distribution"
+      ],
+      "additionalProperties": false
+    },
+    "totalClipSeconds": { "type": "number", "minimum": 0 },
+    "totalUniqueAudioSeconds": { "type": "number", "minimum": 0 },
+    "duplicateAudioSeconds": { "type": "number", "minimum": 0 },
+    "requiredUniqueAudioSeconds": { "type": "number", "minimum": 0 },
+    "requiredUniqueAudioRatio": {
+      "anyOf": [
+        { "type": "number", "minimum": 0, "maximum": 1 },
+        { "type": "null" }
+      ]
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "asrInferenceCount": { "type": "number", "const": 0 },
+    "networkUsed": { "type": "boolean", "const": false },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "sourceIdentity",
+    "sourceDurationSeconds",
+    "machineDraftHash",
+    "canonicalIdentities",
+    "upstreamFreezeHash",
+    "replayParity",
+    "itemCount",
+    "regionCount",
+    "requiredItemCount",
+    "requiredRegionCount",
+    "criticalItemCount",
+    "legacyMissingRiskCount",
+    "scoreDiagnostics",
+    "totalClipSeconds",
+    "totalUniqueAudioSeconds",
+    "duplicateAudioSeconds",
+    "requiredUniqueAudioSeconds",
+    "requiredUniqueAudioRatio",
+    "runtimeGoldInputCount",
+    "asrInferenceCount",
+    "networkUsed",
+    "productionStatus",
+    "finalizationMethod",
+    "machineOnlyReleaseAuthorized",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

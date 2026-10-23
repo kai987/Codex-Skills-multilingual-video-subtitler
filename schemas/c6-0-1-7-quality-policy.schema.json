@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-7-quality-policy.schema.json",
+  "title": "c6-0-1-7-quality-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.7-fresh-targeted-reasr-asr-ceiling-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": { "type": "string", "const": "c6-0-1-7-quality-policy" },
+    "policyFrozenAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "goldAccessBeforeFreezeCount": { "type": "number", "const": 0 },
+    "riskTriggerPolicy": {
+      "type": "string",
+      "const": "one-strong-positive-or-two-supporting-provider-families-or-independent-window-or-incomplete-speech"
+    },
+    "freshWindowPolicy": {
+      "type": "string",
+      "const": "near-exact-small-context-expanded-context"
+    },
+    "eventBudget": { "type": "number", "const": 12 },
+    "requestBudget": { "type": "number", "const": 36 },
+    "maximumRequestsPerEvent": { "type": "number", "const": 3 },
+    "freshCacheNamespace": {
+      "type": "string",
+      "const": "c6-0-1-7-fresh-targeted-reasr-v1"
+    },
+    "promptAllowed": { "type": "boolean", "const": false },
+    "runtimeGoldInputAllowed": { "type": "boolean", "const": false },
+    "timingPolicy": {
+      "type": "string",
+      "const": "frozen-c6-0-1-5-safe-six-no-new-rules"
+    },
+    "c602Thresholds": {
+      "type": "object",
+      "properties": {
+        "coverageMinimum": { "type": "number", "const": 0.9 },
+        "missingMaximum": { "type": "number", "const": 15 },
+        "hallucinationMaximum": { "type": "number", "const": 2 },
+        "materialErrorMaximum": { "type": "number", "const": 45 },
+        "normalizedCerMaximum": { "type": "number", "const": 0.55 },
+        "severeTimingMaximum": { "type": "number", "const": 30 },
+        "startMaeMaximumSeconds": { "type": "number", "const": 1.2 },
+        "endMaeMaximumSeconds": { "type": "number", "const": 1.2 },
+        "p95MaximumSeconds": { "type": "number", "const": 3.5 },
+        "overlapMaximum": { "type": "number", "const": 20 }
+      },
+      "required": [
+        "coverageMinimum",
+        "missingMaximum",
+        "hallucinationMaximum",
+        "materialErrorMaximum",
+        "normalizedCerMaximum",
+        "severeTimingMaximum",
+        "startMaeMaximumSeconds",
+        "endMaeMaximumSeconds",
+        "p95MaximumSeconds",
+        "overlapMaximum"
+      ],
+      "additionalProperties": false
+    },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "machineReleaseAuthorized": { "type": "boolean", "const": false },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "policyFrozenAt",
+    "goldAccessBeforeFreezeCount",
+    "riskTriggerPolicy",
+    "freshWindowPolicy",
+    "eventBudget",
+    "requestBudget",
+    "maximumRequestsPerEvent",
+    "freshCacheNamespace",
+    "promptAllowed",
+    "runtimeGoldInputAllowed",
+    "timingPolicy",
+    "c602Thresholds",
+    "productionStatus",
+    "finalizationMethod",
+    "machineReleaseAuthorized",
+    "policyHash",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

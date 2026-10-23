@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-safety-coverage-unit-policy.schema.json",
+  "title": "c6-0-1-14-5-safety-coverage-unit-policy",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5-safety-coverage-unit-contract-v1"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-safety-coverage-unit-policy"
+    },
+    "executionPolicy": { "type": "string", "const": "replay-only" },
+    "mode": {
+      "type": "string",
+      "const": "REPLAY_ONLY_SAFETY_COVERAGE_UNIT_CONTRACT"
+    },
+    "maximumInferenceCount": { "type": "number", "const": 0 },
+    "maximumModelLoadCount": { "type": "number", "const": 0 },
+    "maximumProviderProcessStartCount": { "type": "number", "const": 0 },
+    "coverageUnitBoundaryPolicyVersion": {
+      "type": "string",
+      "const": "C601145_SOURCE_NATIVE_CONNECTED_COMPONENT_V1"
+    },
+    "coverageUnitMergeGapSeconds": { "type": "number", "const": 0.3 },
+    "hardBoundaryKinds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "softBoundaryKinds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "segmentationInvariantIdentity": { "type": "boolean", "const": true },
+    "segmentationInvariantUtility": { "type": "boolean", "const": true },
+    "atomCountUtilityAllowed": { "type": "boolean", "const": false },
+    "childCountUtilityAllowed": { "type": "boolean", "const": false },
+    "bundleCountUtilityAllowed": { "type": "boolean", "const": false },
+    "rawRecognizedTextAllowed": { "type": "boolean", "const": false },
+    "exactSourceTimestampRiskFeatureAllowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "goldFeaturesAllowed": { "type": "boolean", "const": false },
+    "productGoContract": {
+      "type": "string",
+      "const": "MACHINE_ANCHORED_PLAYBACK_AUDIBILITY_CONTRACT_V1"
+    },
+    "targetCoreContract": {
+      "type": "string",
+      "const": "TARGET_CORE_LOCALIZATION_CONTRACT_V1"
+    },
+    "targetCoreGoldCoverageThreshold": { "type": "number", "const": 0.8 },
+    "unitCoreGoldCoverageThreshold": { "type": "number", "const": 0.8 },
+    "machineAnchorMinimumOverlapSeconds": { "type": "number", "const": 0.2 },
+    "machineAnchorMinimumUnitCoverageRatio": { "type": "number", "const": 0.1 },
+    "playbackGoldCoverageThreshold": { "type": "number", "const": 0.8 },
+    "playbackUnitCoverageThreshold": { "type": "number", "const": 0.95 },
+    "coreCompleteUnitCoverageThreshold": { "type": "number", "const": 0.95 },
+    "maximumReviewEnvelopeSeconds": { "type": "number", "const": 12 },
+    "maximumOneSideContextSeconds": { "type": "number", "const": 3 },
+    "maximumActiveSafetyBundles": { "type": "number", "const": 24 },
+    "maximumSpeechCoreUnionSeconds": { "type": "number", "const": 60 },
+    "maximumFullQueueEpisodeRatio": { "type": "number", "const": 0.95 },
+    "maximumSearchStates": { "type": "number", "const": 5000000 },
+    "unitPlannerObjectives": {
+      "minItems": 14,
+      "maxItems": 14,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "projectionHashRebindingRequired": { "type": "boolean", "const": true },
+    "nestedPreGoldPreflightRequired": { "type": "boolean", "const": true },
+    "productContractFrozenBeforeGold": { "type": "boolean", "const": true },
+    "individuallyFeasibleChildDiagnosticOnly": {
+      "type": "boolean",
+      "const": true
+    },
+    "canonicalMutationAllowed": { "type": "boolean", "const": false },
+    "machineOnlyReleaseAuthorized": { "type": "boolean", "const": false },
+    "rankerRetrained": { "type": "boolean", "const": false },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "artifactType",
+    "executionPolicy",
+    "mode",
+    "maximumInferenceCount",
+    "maximumModelLoadCount",
+    "maximumProviderProcessStartCount",
+    "coverageUnitBoundaryPolicyVersion",
+    "coverageUnitMergeGapSeconds",
+    "hardBoundaryKinds",
+    "softBoundaryKinds",
+    "segmentationInvariantIdentity",
+    "segmentationInvariantUtility",
+    "atomCountUtilityAllowed",
+    "childCountUtilityAllowed",
+    "bundleCountUtilityAllowed",
+    "rawRecognizedTextAllowed",
+    "exactSourceTimestampRiskFeatureAllowed",
+    "goldFeaturesAllowed",
+    "productGoContract",
+    "targetCoreContract",
+    "targetCoreGoldCoverageThreshold",
+    "unitCoreGoldCoverageThreshold",
+    "machineAnchorMinimumOverlapSeconds",
+    "machineAnchorMinimumUnitCoverageRatio",
+    "playbackGoldCoverageThreshold",
+    "playbackUnitCoverageThreshold",
+    "coreCompleteUnitCoverageThreshold",
+    "maximumReviewEnvelopeSeconds",
+    "maximumOneSideContextSeconds",
+    "maximumActiveSafetyBundles",
+    "maximumSpeechCoreUnionSeconds",
+    "maximumFullQueueEpisodeRatio",
+    "maximumSearchStates",
+    "unitPlannerObjectives",
+    "projectionHashRebindingRequired",
+    "nestedPreGoldPreflightRequired",
+    "productContractFrozenBeforeGold",
+    "individuallyFeasibleChildDiagnosticOnly",
+    "canonicalMutationAllowed",
+    "machineOnlyReleaseAuthorized",
+    "rankerRetrained",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

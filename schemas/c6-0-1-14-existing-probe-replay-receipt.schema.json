@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-existing-probe-replay-receipt.schema.json",
+  "title": "c6-0-1-14-existing-probe-replay-receipt",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-localization-playback-integrity-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-existing-probe-replay-receipt"
+    },
+    "completionPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "originalProbeByteHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "originalProbeSemanticHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "selectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "requestSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "cacheInventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "requestIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cacheHitCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "cacheMissCount": { "type": "number", "const": 0 },
+    "newInferenceCount": { "type": "number", "const": 0 },
+    "physicalAudioVerificationStatus": {
+      "type": "string",
+      "enum": ["VERIFIED", "NOT_REQUESTED"]
+    },
+    "physicalAudioCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "inferenceBudgetRemaining": { "type": "number", "const": 0 },
+    "cacheReadOnlyVerified": { "type": "boolean", "const": true },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "cacheByteHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "rawOutputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "requestSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+          },
+          "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "runtimeIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "modelIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "requestId",
+          "cacheKey",
+          "cacheByteHash",
+          "rawOutputHash",
+          "requestSemanticHash",
+          "provider",
+          "audioSha256",
+          "runtimeIdentityHash",
+          "modelIdentityHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "completionPolicyHash",
+    "originalProbeByteHash",
+    "originalProbeSemanticHash",
+    "selectionHash",
+    "requestSetHash",
+    "cacheInventoryHash",
+    "requestIds",
+    "cacheHitCount",
+    "cacheMissCount",
+    "newInferenceCount",
+    "physicalAudioVerificationStatus",
+    "physicalAudioCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "inferenceBudgetRemaining",
+    "cacheReadOnlyVerified",
+    "rows",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

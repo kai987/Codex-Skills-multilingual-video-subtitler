@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-5-machine-safety-coverage-freeze.schema.json",
+  "title": "c6-0-1-14-5-machine-safety-coverage-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5-safety-coverage-unit-contract-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-5-machine-safety-coverage-freeze"
+    },
+    "productGoContract": {
+      "type": "string",
+      "const": "MACHINE_ANCHORED_PLAYBACK_AUDIBILITY_CONTRACT_V1"
+    },
+    "contractPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "baselineArtifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "geometryHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "coverageUnitHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "unitUtilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "realizationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "realizationDominanceHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "jointFeasibilityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "plannerCertificateHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "contractLedgerHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "reviewDeliveryHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "projectionHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "nestedPreflightHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "detectorReplaySummary": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "misses": { "type": "number", "const": 0 }
+      },
+      "required": ["expected", "hits", "misses"],
+      "additionalProperties": false
+    },
+    "asrReplaySummary": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "misses": { "type": "number", "const": 0 }
+      },
+      "required": ["expected", "hits", "misses"],
+      "additionalProperties": false
+    },
+    "runtimeGoldInputBeforeFreeze": { "type": "number", "const": 0 },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "providerProcessStartCount": { "type": "number", "const": 0 },
+    "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "subtitleFileHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string", "minLength": 1 },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "freezeCompletedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "finalRole": { "type": "string", "enum": ["A", "B"] }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "productGoContract",
+    "contractPolicyHash",
+    "baselineArtifactHashes",
+    "geometryHashes",
+    "coverageUnitHash",
+    "unitUtilityHash",
+    "realizationHash",
+    "realizationDominanceHash",
+    "jointFeasibilityHash",
+    "plannerCertificateHash",
+    "contractLedgerHash",
+    "reviewDeliveryHashes",
+    "projectionHashes",
+    "nestedPreflightHash",
+    "detectorReplaySummary",
+    "asrReplaySummary",
+    "runtimeGoldInputBeforeFreeze",
+    "inferenceCount",
+    "modelLoadCount",
+    "providerProcessStartCount",
+    "canonicalTextHash",
+    "canonicalTimingHash",
+    "presentationHash",
+    "subtitleFileHashes",
+    "freezeCompletedAt",
+    "finalRole"
+  ],
+  "additionalProperties": false
+}

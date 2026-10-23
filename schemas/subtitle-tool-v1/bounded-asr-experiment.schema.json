@@ -1,0 +1,614 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "bounded-longform-asr-ab-v1"
+    },
+    "baseSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["prepared", "frozen", "blocked"]
+    },
+    "blocker": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "bounded-longform-v1"
+        },
+        "preferredSeconds": {
+          "type": "number",
+          "const": 25
+        },
+        "minCoreSeconds": {
+          "type": "number",
+          "const": 20
+        },
+        "maxRequestSeconds": {
+          "type": "number",
+          "const": 30
+        },
+        "contextSeconds": {
+          "type": "number",
+          "const": 0.3
+        },
+        "minSilenceSeconds": {
+          "type": "number",
+          "const": 0.1
+        },
+        "shortTextCodepoints": {
+          "type": "number",
+          "const": 8
+        },
+        "maxRequests": {
+          "type": "number",
+          "const": 64
+        },
+        "maxRetries": {
+          "type": "number",
+          "const": 1
+        },
+        "maxAudioRatio": {
+          "type": "number",
+          "const": 1.1
+        }
+      },
+      "required": [
+        "version",
+        "preferredSeconds",
+        "minCoreSeconds",
+        "maxRequestSeconds",
+        "contextSeconds",
+        "minSilenceSeconds",
+        "shortTextCodepoints",
+        "maxRequests",
+        "maxRetries",
+        "maxAudioRatio"
+      ],
+      "additionalProperties": false
+    },
+    "policyHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "baseline": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "raw": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "audio": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "historicalPlan": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "attemptLog": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "model": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "runtime": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "task",
+        "raw",
+        "audio",
+        "historicalPlan",
+        "attemptLog",
+        "source",
+        "model",
+        "runtime"
+      ],
+      "additionalProperties": false
+    },
+    "vadRuntime": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "library": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "python": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "script": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        },
+        "adapter": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": ["path", "sha256"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["model", "library", "python", "script", "adapter"],
+      "additionalProperties": false
+    },
+    "software": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": ["path", "sha256"],
+        "additionalProperties": false
+      }
+    },
+    "pcm": {
+      "type": "object",
+      "properties": {
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "frames": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "pcmHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "blockAlign": {
+          "type": "number",
+          "const": 2
+        }
+      },
+      "required": ["sampleRate", "frames", "pcmHash", "blockAlign"],
+      "additionalProperties": false
+    },
+    "audioOffset": {
+      "type": "number",
+      "minimum": 0
+    },
+    "sourceEnd": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "language": {
+      "type": "string",
+      "enum": ["ja", "en", "zh"]
+    },
+    "threads": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991
+    },
+    "decode": {
+      "type": "object",
+      "properties": {
+        "optionsText": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "null"
+        },
+        "vad": {
+          "type": "boolean",
+          "const": false
+        },
+        "coreML": {
+          "type": "boolean",
+          "const": false
+        },
+        "suppressNst": {
+          "type": "boolean",
+          "const": true
+        },
+        "timestamp": {
+          "type": "string",
+          "const": "segment"
+        },
+        "requestIsolation": {
+          "type": "string",
+          "const": "independent-cli-process"
+        },
+        "hardware": {
+          "type": "string"
+        },
+        "historicalEffectiveParameters": {
+          "type": "string"
+        },
+        "confounds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "optionsText",
+        "prompt",
+        "vad",
+        "coreML",
+        "suppressNst",
+        "timestamp",
+        "requestIsolation",
+        "hardware",
+        "historicalEffectiveParameters",
+        "confounds"
+      ],
+      "additionalProperties": false
+    },
+    "vadProfile": {
+      "type": "object",
+      "properties": {
+        "threshold": {
+          "type": "number",
+          "const": 0.5
+        },
+        "minSpeechMs": {
+          "type": "number",
+          "const": 250
+        },
+        "minSilenceMs": {
+          "type": "number",
+          "const": 100
+        },
+        "maxSpeechSeconds": {
+          "type": "number",
+          "const": 9000
+        },
+        "speechPadMs": {
+          "type": "number",
+          "const": 0
+        },
+        "samplesOverlap": {
+          "type": "number",
+          "const": 0
+        }
+      },
+      "required": [
+        "threshold",
+        "minSpeechMs",
+        "minSilenceMs",
+        "maxSpeechSeconds",
+        "speechPadMs",
+        "samplesOverlap"
+      ],
+      "additionalProperties": false
+    },
+    "vadHash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "chunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^chunk-\\d{4}$"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "coreStart": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "coreEnd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "inputStart": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "inputEnd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "boundary": {
+            "type": "string",
+            "enum": ["silence", "hard-cut", "tail"]
+          },
+          "candidateSamples": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "required": [
+          "id",
+          "index",
+          "coreStart",
+          "coreEnd",
+          "inputStart",
+          "inputEnd",
+          "boundary",
+          "candidateSamples"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "chunkPcmHashes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["id", "sha256"],
+        "additionalProperties": false
+      }
+    },
+    "planHash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "manualReview": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["stratified", "seam"]
+          },
+          "start": {
+            "type": "number"
+          },
+          "end": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "const": "NOT_PERFORMED"
+          }
+        },
+        "required": ["kind", "start", "end", "status"],
+        "additionalProperties": false
+      }
+    },
+    "qualityStatus": {
+      "type": "string",
+      "const": "needs-review"
+    },
+    "finalizationMethod": {
+      "type": "string",
+      "const": "none"
+    },
+    "humanValidated": {
+      "type": "boolean",
+      "const": false
+    },
+    "machineOnlyReleaseAuthorized": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "required": [
+    "version",
+    "baseSha",
+    "createdAt",
+    "state",
+    "blocker",
+    "policy",
+    "policyHash",
+    "baseline",
+    "vadRuntime",
+    "software",
+    "pcm",
+    "audioOffset",
+    "sourceEnd",
+    "language",
+    "threads",
+    "decode",
+    "vadProfile",
+    "vadHash",
+    "chunks",
+    "chunkPcmHashes",
+    "planHash",
+    "manualReview",
+    "qualityStatus",
+    "finalizationMethod",
+    "humanValidated",
+    "machineOnlyReleaseAuthorized"
+  ],
+  "additionalProperties": false
+}

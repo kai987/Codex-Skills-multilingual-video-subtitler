@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/forced-alignment-cache-manifest.schema.json",
+  "title": "forced-alignment-cache-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "forced-alignment-cache-manifest"
+    },
+    "cacheVersion": { "type": "string", "enum": ["C5.17", "C5.17.1"] },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "requestType": { "type": "string", "const": "canonical-forced-alignment" },
+    "cacheRootShareableName": { "type": "string", "minLength": 1 },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "attemptId": { "type": "string", "minLength": 1 },
+          "cueId": { "type": "string", "minLength": 1 },
+          "componentId": { "type": "string", "minLength": 1 },
+          "windowType": { "type": "string", "enum": ["narrow", "expanded"] },
+          "entrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "hit": { "type": "boolean" }
+        },
+        "required": [
+          "cacheKey",
+          "attemptId",
+          "cueId",
+          "componentId",
+          "windowType",
+          "entrySha256",
+          "hit"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "entryCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "hitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "missCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mfaProcessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "legacyAsrCacheHitCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "entryCount",
+        "hitCount",
+        "missCount",
+        "mfaProcessCount",
+        "legacyAsrCacheHitCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "cacheVersion",
+    "generatedAt",
+    "requestType",
+    "cacheRootShareableName",
+    "entries",
+    "summary"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-text-variant-oracle-evaluation.schema.json",
+  "title": "machine-text-variant-oracle-evaluation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.4-vad-timebase-acoustic-text-variant-reasr-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-text-variant-oracle-evaluation"
+    },
+    "evaluationPhase": {
+      "type": "string",
+      "const": "post-freeze-gold-isolated"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "machineFreezeHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "goldIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluableEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unevaluableEventCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "selectedVariantError": { "type": "number", "minimum": 0 },
+    "oracleExistingVariantError": { "type": "number", "minimum": 0 },
+    "oracleImprovementPotential": { "type": "number", "minimum": 0 },
+    "selectorRegret": { "type": "number", "minimum": 0 },
+    "eventEntries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "selectedCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "candidateIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "selectedDistance": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "oracleCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "oracleDistance": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "oracleGain": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "oracleClass": {
+            "type": "string",
+            "enum": [
+              "SELECTOR_ERROR",
+              "POOL_INSUFFICIENT",
+              "SELECTED_ALREADY_ORACLE",
+              "ASSOCIATION_AMBIGUOUS",
+              "UNEVALUABLE"
+            ]
+          },
+          "matchedGoldCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "goldTextIncluded": { "type": "boolean", "const": false }
+        },
+        "required": [
+          "eventId",
+          "selectedCandidateId",
+          "candidateIds",
+          "selectedDistance",
+          "oracleCandidateId",
+          "oracleDistance",
+          "oracleGain",
+          "oracleClass",
+          "matchedGoldCueIds",
+          "goldTextIncluded"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "aggregateMetrics": {
+      "type": "object",
+      "properties": {
+        "currentSelectedOracleHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectorErrorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "poolInsufficientCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "associationAmbiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selectedAlreadyOracleCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "oracleNormalizedError": { "type": "number", "minimum": 0 },
+        "theoreticalCandidatePoolGain": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "currentSelectedOracleHitCount",
+        "selectorErrorCount",
+        "poolInsufficientCount",
+        "associationAmbiguousCount",
+        "selectedAlreadyOracleCount",
+        "oracleNormalizedError",
+        "theoreticalCandidatePoolGain"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "evaluationPhase",
+    "runtimeGoldInputCount",
+    "machineFreezeHash",
+    "goldIdentityHash",
+    "evaluableEventCount",
+    "unevaluableEventCount",
+    "selectedVariantError",
+    "oracleExistingVariantError",
+    "oracleImprovementPotential",
+    "selectorRegret",
+    "eventEntries",
+    "aggregateMetrics",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

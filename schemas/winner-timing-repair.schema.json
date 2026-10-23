@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/winner-timing-repair.schema.json",
+  "title": "winner-timing-repair",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "characterRatioTimingAllowed": { "type": "boolean", "const": false },
+    "repairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "textWinnerCueId": { "type": "string", "minLength": 1 },
+          "timingDonorCueId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "before": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "after": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "timingRepairMethod": {
+            "type": "string",
+            "enum": [
+              "winner-token",
+              "equivalent-candidate-token",
+              "speech-boundary",
+              "speech-interval",
+              "reference-anchor",
+              "recovery-target",
+              "equivalent-candidate-interval",
+              "unchanged"
+            ]
+          },
+          "textChanged": { "type": "boolean", "const": false },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "textWinnerCueId",
+          "timingDonorCueId",
+          "before",
+          "after",
+          "timingRepairMethod",
+          "textChanged",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "repairCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timingDonorCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedTimingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["repairCount", "timingDonorCount", "unresolvedTimingCount"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "characterRatioTimingAllowed",
+    "repairs",
+    "summary"
+  ],
+  "additionalProperties": false
+}

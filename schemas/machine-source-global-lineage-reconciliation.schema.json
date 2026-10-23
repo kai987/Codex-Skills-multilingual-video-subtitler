@@ -1,0 +1,318 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-source-global-lineage-reconciliation.schema.json",
+  "title": "machine-source-global-lineage-reconciliation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-localization-playback-integrity-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-source-global-lineage-reconciliation"
+    },
+    "inputEvidenceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactHashes": {
+      "type": "object",
+      "propertyNames": { "type": "string" },
+      "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidenceId": { "type": "string", "minLength": 1 },
+          "originalStatus": {
+            "type": "string",
+            "enum": ["VERIFIED", "QUARANTINED"]
+          },
+          "family": { "type": "string", "minLength": 1 },
+          "artifactId": { "type": "string", "minLength": 1 },
+          "sourceIdentity": {
+            "type": "object",
+            "properties": {
+              "sourceMediaSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+              "sampleRate": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioStreamIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioTimebase": {
+                "type": "string",
+                "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+              },
+              "sourceTimebase": {
+                "type": "string",
+                "const": "SOURCE_GLOBAL_SECONDS"
+              }
+            },
+            "required": [
+              "sourceMediaSha256",
+              "durationSeconds",
+              "sampleRate",
+              "audioStreamIndex",
+              "audioTimebase",
+              "sourceTimebase"
+            ],
+            "additionalProperties": false
+          },
+          "parentRequestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "transformChain": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "transformHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "parentArtifactSha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "childArtifactSha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "parentSampleRate": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "childSampleRate": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "parentStartSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "parentEndSample": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "childTotalSamples": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "transformHash",
+                "parentArtifactSha256",
+                "childArtifactSha256",
+                "parentSampleRate",
+                "childSampleRate",
+                "parentStartSample",
+                "parentEndSample",
+                "childTotalSamples"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "expectedSourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "recomputedSourceInterval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          },
+          "driftSeconds": {
+            "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VERIFIED_EXISTING_TRANSFORM",
+              "VERIFIED_FROM_PARENT_SAMPLE_CHAIN",
+              "QUARANTINED_INSUFFICIENT_PROVENANCE",
+              "QUARANTINED_CONFLICTING_TRANSFORM",
+              "OUT_OF_SOURCE_BOUNDS",
+              "NON_MONOTONIC_MAPPING"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "eligibleForSpeechIsland": { "type": "boolean" },
+          "eligibleForLexicalLocalization": { "type": "boolean" },
+          "nativeSpeechObservation": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "evidenceId",
+          "originalStatus",
+          "family",
+          "artifactId",
+          "sourceIdentity",
+          "parentRequestIds",
+          "transformChain",
+          "expectedSourceInterval",
+          "recomputedSourceInterval",
+          "driftSeconds",
+          "status",
+          "reasons",
+          "eligibleForSpeechIsland",
+          "eligibleForLexicalLocalization",
+          "nativeSpeechObservation",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "originalVerifiedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "originalQuarantinedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "newlyVerifiedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "remainingQuarantinedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "statusCounts": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "VERIFIED_EXISTING_TRANSFORM",
+              "VERIFIED_FROM_PARENT_SAMPLE_CHAIN",
+              "QUARANTINED_INSUFFICIENT_PROVENANCE",
+              "QUARANTINED_CONFLICTING_TRANSFORM",
+              "OUT_OF_SOURCE_BOUNDS",
+              "NON_MONOTONIC_MAPPING"
+            ]
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "required": [
+            "VERIFIED_EXISTING_TRANSFORM",
+            "VERIFIED_FROM_PARENT_SAMPLE_CHAIN",
+            "QUARANTINED_INSUFFICIENT_PROVENANCE",
+            "QUARANTINED_CONFLICTING_TRANSFORM",
+            "OUT_OF_SOURCE_BOUNDS",
+            "NON_MONOTONIC_MAPPING"
+          ]
+        },
+        "sourceGlobalInferenceCount": { "type": "number", "const": 0 },
+        "coordinateGuessCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "originalVerifiedCount",
+        "originalQuarantinedCount",
+        "newlyVerifiedCount",
+        "remainingQuarantinedCount",
+        "statusCounts",
+        "sourceGlobalInferenceCount",
+        "coordinateGuessCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "inputEvidenceHash",
+    "artifactHashes",
+    "entries",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

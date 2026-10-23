@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-4-validation.schema.json",
+  "title": "c6-0-1-14-4-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.4-machine-evidence-utility-selection-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "artifactType": { "type": "string", "const": "c6-0-1-14-4-validation" },
+    "routeDecisionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "passed": { "type": "boolean" },
+          "evidence": { "type": "string", "minLength": 1 }
+        },
+        "required": ["name", "passed", "evidence"],
+        "additionalProperties": false
+      }
+    },
+    "passedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "failedCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "schemaValidatedArtifactCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "generatedSchemaCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unitPassed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unitSkipped": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "e2ePassed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "e2eSkipped": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "uiPassed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "browserPassed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "targetedPassed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "crossVersionPassed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "skillValidationPassed": { "type": "boolean" },
+    "networkUsedForAcceptance": { "type": "boolean", "const": false },
+    "sourceReadOnlyVerified": { "type": "boolean" },
+    "goldReadOnlyVerified": { "type": "boolean" },
+    "worktreeCleanAtValidation": { "type": "boolean" },
+    "engineeringPassed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "artifactType",
+    "routeDecisionHash",
+    "checks",
+    "passedCount",
+    "failedCount",
+    "schemaValidatedArtifactCount",
+    "generatedSchemaCount",
+    "unitPassed",
+    "unitSkipped",
+    "e2ePassed",
+    "e2eSkipped",
+    "uiPassed",
+    "browserPassed",
+    "targetedPassed",
+    "crossVersionPassed",
+    "skillValidationPassed",
+    "networkUsedForAcceptance",
+    "sourceReadOnlyVerified",
+    "goldReadOnlyVerified",
+    "worktreeCleanAtValidation",
+    "engineeringPassed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

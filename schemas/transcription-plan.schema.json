@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/transcription-plan.schema.json",
+  "title": "transcription-plan",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "requestedStrategy": {
+      "type": "string",
+      "enum": ["auto", "quality", "fast", "adaptive"]
+    },
+    "strategy": { "type": "string", "enum": ["quality", "fast", "adaptive"] },
+    "reason": {
+      "minItems": 1,
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "baseline": {
+      "type": "object",
+      "properties": {
+        "capabilityId": { "type": "string", "minLength": 1 },
+        "modelFamily": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "coreML": { "type": "boolean" },
+        "coreMLCapability": {
+          "type": "object",
+          "properties": {
+            "supported": { "type": "boolean" },
+            "status": {
+              "type": "string",
+              "enum": [
+                "unsupported-platform",
+                "not-compiled",
+                "encoder-missing",
+                "encoder-mismatch",
+                "load-failed",
+                "available",
+                "disabled-by-user"
+              ]
+            },
+            "deviceCapable": { "type": "boolean" },
+            "whisperCppCompiledWithCoreML": { "type": "boolean" },
+            "encoderAvailable": { "type": "boolean" },
+            "encoderPath": {
+              "anyOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "null" }
+              ]
+            },
+            "encoderFingerprint": {
+              "anyOf": [
+                { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                { "type": "null" }
+              ]
+            },
+            "runtimeValidated": { "type": "boolean" },
+            "reason": {
+              "anyOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "null" }
+              ]
+            }
+          },
+          "required": [
+            "supported",
+            "status",
+            "deviceCapable",
+            "whisperCppCompiledWithCoreML",
+            "encoderAvailable",
+            "encoderPath",
+            "runtimeValidated",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "role": {
+          "type": "string",
+          "enum": ["baseline", "refinement", "fallback"]
+        }
+      },
+      "required": ["capabilityId", "modelFamily", "model", "coreML", "role"],
+      "additionalProperties": false
+    },
+    "refinement": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "capabilityId": { "type": "string", "minLength": 1 },
+            "modelFamily": { "type": "string", "minLength": 1 },
+            "model": { "type": "string", "minLength": 1 },
+            "coreML": { "type": "boolean" },
+            "coreMLCapability": {
+              "type": "object",
+              "properties": {
+                "supported": { "type": "boolean" },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "unsupported-platform",
+                    "not-compiled",
+                    "encoder-missing",
+                    "encoder-mismatch",
+                    "load-failed",
+                    "available",
+                    "disabled-by-user"
+                  ]
+                },
+                "deviceCapable": { "type": "boolean" },
+                "whisperCppCompiledWithCoreML": { "type": "boolean" },
+                "encoderAvailable": { "type": "boolean" },
+                "encoderPath": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "encoderFingerprint": {
+                  "anyOf": [
+                    { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                    { "type": "null" }
+                  ]
+                },
+                "runtimeValidated": { "type": "boolean" },
+                "reason": {
+                  "anyOf": [
+                    { "type": "string", "minLength": 1 },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "supported",
+                "status",
+                "deviceCapable",
+                "whisperCppCompiledWithCoreML",
+                "encoderAvailable",
+                "encoderPath",
+                "runtimeValidated",
+                "reason"
+              ],
+              "additionalProperties": false
+            },
+            "role": {
+              "type": "string",
+              "enum": ["baseline", "refinement", "fallback"]
+            },
+            "fallbackCoreML": { "type": "boolean" },
+            "maxRounds": { "type": "integer", "minimum": 0, "maximum": 10 },
+            "contextSeconds": { "type": "number", "minimum": 0 },
+            "mergeGapSeconds": { "type": "number", "minimum": 0 },
+            "maxMergedRefinementSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 45
+            },
+            "noVadTieBreakBonus": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.05
+            }
+          },
+          "required": [
+            "capabilityId",
+            "modelFamily",
+            "model",
+            "coreML",
+            "role",
+            "fallbackCoreML",
+            "maxRounds",
+            "contextSeconds",
+            "mergeGapSeconds"
+          ],
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "estimatedRuntime": {
+      "type": "object",
+      "properties": {
+        "baselineSeconds": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        },
+        "fullQualitySeconds": {
+          "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+        }
+      },
+      "required": ["baselineSeconds", "fullQualitySeconds"],
+      "additionalProperties": false
+    },
+    "maxFullQualityRuntimeSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "fullSecondPass": { "type": "boolean" },
+    "fallbacks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "minLength": 1 },
+          "to": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": ["from", "to", "reason"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "requestedStrategy",
+    "strategy",
+    "reason",
+    "baseline",
+    "refinement",
+    "estimatedRuntime",
+    "maxFullQualityRuntimeSeconds",
+    "fullSecondPass",
+    "fallbacks"
+  ],
+  "additionalProperties": false
+}

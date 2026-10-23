@@ -1,0 +1,21 @@
+{
+  "name": "@mvl/pipeline-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@mvl/grammar-report-core": "0.1.0",
+    "@mvl/shared": "0.1.0",
+    "@mvl/site-builder-core": "0.1.0",
+    "@mvl/subtitle-search": "0.1.0",
+    "@mvl/transcription-core": "0.1.0",
+    "@mvl/video-subtitler": "0.1.0",
+    "zod": "4.4.3"
+  }
+}

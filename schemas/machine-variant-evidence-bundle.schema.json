@@ -1,0 +1,330 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-variant-evidence-bundle.schema.json",
+  "title": "machine-variant-evidence-bundle",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.5-evidence-to-canonical-raw-asr-recovery-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-variant-evidence-bundle"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "tokenAssociationPolicy": { "type": "string", "const": "variant-id-only" },
+    "variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "variantId": { "type": "string", "minLength": 1 },
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceWindowIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "tokenIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "trustedGlobalTokenIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "tokenCoverage": {
+            "type": "object",
+            "properties": {
+              "lexicalTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "supportedLexicalTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "coverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+              "variantSpecific": { "type": "boolean", "const": true },
+              "representativeTokenLeakCount": { "type": "number", "const": 0 }
+            },
+            "required": [
+              "lexicalTokenCount",
+              "supportedLexicalTokenCount",
+              "coverageRatio",
+              "variantSpecific",
+              "representativeTokenLeakCount"
+            ],
+            "additionalProperties": false
+          },
+          "ctcEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "ctcScore": {
+            "anyOf": [
+              { "type": "number", "minimum": 0, "maximum": 1 },
+              { "type": "null" }
+            ]
+          },
+          "decoderEvidence": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "available",
+                  "unavailable",
+                  "unknown",
+                  "not-applicable"
+                ]
+              },
+              "averageLogProbability": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "noSpeechProbability": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "compressionRatio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "repetitionRatio": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "tokenTimingQuality": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "textDensity": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "edgePosition": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": ["inside", "left-edge", "right-edge", "both-edges"]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "fallbackLevel": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "temperature": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "requestDurationSeconds": {
+                "anyOf": [
+                  { "type": "number", "exclusiveMinimum": 0 },
+                  { "type": "null" }
+                ]
+              },
+              "decoderEvidenceHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "unavailableReasons": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": [
+              "status",
+              "averageLogProbability",
+              "noSpeechProbability",
+              "compressionRatio",
+              "repetitionRatio",
+              "tokenTimingQuality",
+              "textDensity",
+              "edgePosition",
+              "fallbackLevel",
+              "temperature",
+              "requestDurationSeconds",
+              "decoderEvidenceHash",
+              "unavailableReasons"
+            ],
+            "additionalProperties": false
+          },
+          "edgeEvidence": {
+            "type": "object",
+            "properties": {
+              "leftEdgeRisk": { "type": "boolean" },
+              "rightEdgeRisk": { "type": "boolean" },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "required": ["leftEdgeRisk", "rightEdgeRisk", "evidenceIds"],
+            "additionalProperties": false
+          },
+          "speechCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+          "independentSupportGroups": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "correlatedSupportGroups": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reAsrOrigin": {
+            "type": "object",
+            "properties": {
+              "isReAsr": { "type": "boolean" },
+              "requestFamilyIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "sourceGlobalVerified": { "type": "boolean" },
+              "promptIsolated": { "type": "boolean" }
+            },
+            "required": [
+              "isReAsr",
+              "requestFamilyIds",
+              "sourceGlobalVerified",
+              "promptIsolated"
+            ],
+            "additionalProperties": false
+          },
+          "evidenceCompleteness": {
+            "type": "string",
+            "enum": ["COMPLETE", "PARTIAL", "UNAVAILABLE"]
+          },
+          "blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "variantId",
+          "eventId",
+          "candidateId",
+          "requestIds",
+          "sourceWindowIds",
+          "tokenIds",
+          "trustedGlobalTokenIds",
+          "tokenCoverage",
+          "ctcEvidenceIds",
+          "ctcScore",
+          "decoderEvidence",
+          "edgeEvidence",
+          "speechCoverage",
+          "independentSupportGroups",
+          "correlatedSupportGroups",
+          "reAsrOrigin",
+          "evidenceCompleteness",
+          "blockers",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "variantEvidenceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "completeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "partialCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unavailableCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reAsrVariantCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trustedTokenConsumedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "representativeTokenLeakCount": { "type": "number", "const": 0 },
+        "fabricatedDecoderZeroCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "eventCount",
+        "variantEvidenceCount",
+        "completeCount",
+        "partialCount",
+        "unavailableCount",
+        "reAsrVariantCount",
+        "trustedTokenConsumedCount",
+        "representativeTokenLeakCount",
+        "fabricatedDecoderZeroCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "tokenAssociationPolicy",
+    "variants",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

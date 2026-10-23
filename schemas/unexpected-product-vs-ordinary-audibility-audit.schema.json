@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/unexpected-product-vs-ordinary-audibility-audit.schema.json",
+  "title": "unexpected-product-vs-ordinary-audibility-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.2-product-scorability-playback-realization-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "unexpected-product-vs-ordinary-audibility-audit"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "productPassCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ordinaryAudiblePassCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "productUsedWavContainerAsPlaybackCount": { "type": "number", "const": 0 },
+    "productUsedEnvelopeAsCoverageCount": { "type": "number", "const": 0 },
+    "unrelatedPlaybackCount": { "type": "number", "const": 0 },
+    "thresholdMutationCount": { "type": "number", "const": 0 },
+    "passed": { "type": "boolean", "const": true },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "artifactType",
+    "visibility",
+    "productPassCount",
+    "ordinaryAudiblePassCount",
+    "productUsedWavContainerAsPlaybackCount",
+    "productUsedEnvelopeAsCoverageCount",
+    "unrelatedPlaybackCount",
+    "thresholdMutationCount",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "subtitle-tool-v1.0.1-recovery-2"
+    },
+    "taskId": {
+      "type": "string"
+    },
+    "taskHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rawHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "recoveryId": {
+      "type": "string"
+    },
+    "sourceIdentity": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceDuration": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "audioOffset": {
+      "type": "number",
+      "minimum": 0
+    },
+    "origin": {
+      "type": "number"
+    },
+    "metadataProvenance": {
+      "type": "string",
+      "const": "SAVED_SUCCESSFUL_TASK_METADATA"
+    },
+    "sourceReverification": {
+      "type": "string",
+      "const": "NOT_RUN_SOURCE_UNAVAILABLE"
+    },
+    "sourceReverificationNote": {
+      "type": "string",
+      "const": "Historical paths are not accessed; availability is not probed."
+    },
+    "originalExecutionStatus": {
+      "type": "string"
+    },
+    "originalArtifactIntegrity": {
+      "type": "string"
+    },
+    "asrAttempt": {
+      "type": "string",
+      "const": "completed"
+    },
+    "executionStatus": {
+      "type": "string",
+      "const": "partial"
+    },
+    "fullTimedExport": {
+      "type": "string",
+      "const": "not-produced"
+    },
+    "recoveryIntegrity": {
+      "type": "string",
+      "const": "passed"
+    },
+    "partialSubtitle": {
+      "type": "string",
+      "enum": ["not-requested", "generated", "no-eligible-records", "failed"]
+    },
+    "qualityStatus": {
+      "type": "string",
+      "const": "needs-review"
+    },
+    "finalizationMethod": {
+      "type": "string",
+      "const": "none"
+    },
+    "humanValidated": {
+      "type": "boolean",
+      "const": false
+    },
+    "machineOnlyReleaseAuthorized": {
+      "type": "boolean",
+      "const": false
+    },
+    "profile": {
+      "type": "string",
+      "const": "primary-minimal"
+    },
+    "recordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "eligibleIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unresolvedIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "textExtractionComplete": {
+      "type": "boolean"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "files": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "exportError": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "newASRRequests": {
+      "type": "number",
+      "const": 0
+    },
+    "newModelInference": {
+      "type": "number",
+      "const": 0
+    },
+    "newModelLoads": {
+      "type": "number",
+      "const": 0
+    },
+    "newProviderStarts": {
+      "type": "number",
+      "const": 0
+    },
+    "newAudioExtractions": {
+      "type": "number",
+      "const": 0
+    },
+    "newAudioWindows": {
+      "type": "number",
+      "const": 0
+    }
+  },
+  "required": [
+    "version",
+    "taskId",
+    "taskHash",
+    "rawHash",
+    "recoveryId",
+    "sourceIdentity",
+    "sourceDuration",
+    "audioOffset",
+    "origin",
+    "metadataProvenance",
+    "sourceReverification",
+    "sourceReverificationNote",
+    "originalExecutionStatus",
+    "originalArtifactIntegrity",
+    "asrAttempt",
+    "executionStatus",
+    "fullTimedExport",
+    "recoveryIntegrity",
+    "partialSubtitle",
+    "qualityStatus",
+    "finalizationMethod",
+    "humanValidated",
+    "machineOnlyReleaseAuthorized",
+    "profile",
+    "recordCount",
+    "eligibleIds",
+    "unresolvedIds",
+    "textExtractionComplete",
+    "warnings",
+    "files",
+    "exportError",
+    "newASRRequests",
+    "newModelInference",
+    "newModelLoads",
+    "newProviderStarts",
+    "newAudioExtractions",
+    "newAudioWindows"
+  ],
+  "additionalProperties": false
+}

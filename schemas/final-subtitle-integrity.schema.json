@@ -1,0 +1,499 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/final-subtitle-integrity.schema.json",
+  "title": "final-subtitle-integrity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "validationStatus": {
+      "type": "string",
+      "enum": ["passed", "needs-review"]
+    },
+    "candidateCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "finalCueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "quarantinedCueIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "candidateMetrics": {
+      "type": "object",
+      "properties": {
+        "singleCueDuplicateLineCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossCueExactDuplicateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossCueSentenceLoopCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossCueLongPhraseLoopCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "missingLyricsRegionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uncoveredVocalRegionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "invalidTimestampCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "outOfOrderCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsupportedLongCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "intraCueHypothesisRepetitionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unnaturalJapaneseSpacingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lineExceedsCharacterLimitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueExceedsTwoLinesCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedPresentationCapacityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniqueNormalizedCueRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "singleCueDuplicateLineCount",
+        "crossCueExactDuplicateCount",
+        "crossCueSentenceLoopCount",
+        "crossCueLongPhraseLoopCount",
+        "missingLyricsRegionCount",
+        "uncoveredVocalRegionCount",
+        "invalidTimestampCount",
+        "outOfOrderCount",
+        "overlapCount",
+        "unsupportedLongCueCount",
+        "uniqueNormalizedCueRatio"
+      ],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "singleCueDuplicateLineCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossCueExactDuplicateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossCueSentenceLoopCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "crossCueLongPhraseLoopCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "missingLyricsRegionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uncoveredVocalRegionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "invalidTimestampCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "outOfOrderCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "overlapCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unsupportedLongCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "intraCueHypothesisRepetitionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unnaturalJapaneseSpacingCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lineExceedsCharacterLimitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueExceedsTwoLinesCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unresolvedPresentationCapacityCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uniqueNormalizedCueRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "singleCueDuplicateLineCount",
+        "crossCueExactDuplicateCount",
+        "crossCueSentenceLoopCount",
+        "crossCueLongPhraseLoopCount",
+        "missingLyricsRegionCount",
+        "uncoveredVocalRegionCount",
+        "invalidTimestampCount",
+        "outOfOrderCount",
+        "overlapCount",
+        "unsupportedLongCueCount",
+        "uniqueNormalizedCueRatio"
+      ],
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "code": {
+            "type": "string",
+            "enum": [
+              "PRESENTATION_DUPLICATE_LINE",
+              "CROSS_CUE_EXACT_DUPLICATE",
+              "CROSS_CUE_SENTENCE_LOOP",
+              "CROSS_CUE_LONG_PHRASE_LOOP",
+              "MISSING_LYRICS",
+              "VOCAL_REGION_UNCOVERED",
+              "INVALID_SUBTITLE_TIMESTAMP",
+              "SUBTITLE_OUT_OF_ORDER",
+              "SUBTITLE_OVERLAP",
+              "UNSUPPORTED_LONG_CUE",
+              "SCENE_VOCAL_REGION_UNCOVERED",
+              "SCENE_DIALOGUE_REGION_UNCOVERED",
+              "SCENE_SINGING_REGION_UNCOVERED",
+              "SCENE_ROUTING_CONFLICT",
+              "SCENE_HIGH_CONFIDENCE_MISROUTE",
+              "FINAL_SINGLE_CHARACTER_FRAGMENT",
+              "FINAL_EXTREME_SHORT_DURATION",
+              "FINAL_INCOMPLETE_MORPHEME",
+              "FINAL_INCOMPLETE_CLAUSE",
+              "FINAL_TEXT_BOUNDARY_BREAK",
+              "FINAL_COMPETING_HYPOTHESES",
+              "FINAL_NEAR_DUPLICATE_SEMANTIC_CUE",
+              "FINAL_UNSUPPORTED_CONTENT_WORD",
+              "FINAL_INVALID_JAPANESE_FRAGMENT",
+              "FINAL_LYRICS_HALLUCINATION",
+              "FINAL_LYRICS_INCOMPLETE_LINE",
+              "FINAL_REFERENCE_SEMANTIC_CONFLICT",
+              "FINAL_VISUAL_LINE_WORD_BREAK",
+              "FINAL_INTRA_CUE_HYPOTHESIS_REPETITION",
+              "FINAL_UNNATURAL_JAPANESE_SPACING",
+              "FINAL_LINE_EXCEEDS_CHARACTER_LIMIT",
+              "FINAL_CUE_EXCEEDS_TWO_LINES",
+              "FINAL_UNRESOLVED_PRESENTATION_CAPACITY",
+              "SEGMENTATION_UNRESOLVED"
+            ]
+          },
+          "severity": { "type": "string", "enum": ["hard", "warning"] },
+          "category": {
+            "type": "string",
+            "enum": [
+              "repetition",
+              "coverage",
+              "timing",
+              "fragment",
+              "text",
+              "hypothesis",
+              "lyrics",
+              "segmentation",
+              "semantic",
+              "presentation"
+            ]
+          },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "cueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceRequestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "referenceAnchorIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "vocalRegionIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "repetitionEvidence": {
+            "type": "object",
+            "properties": {
+              "normalizedCorePhrase": { "type": "string", "minLength": 1 },
+              "occurrences": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 9007199254740991
+              },
+              "contributingSegmentIds": {
+                "minItems": 1,
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "suffixVariants": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "repeatedCharacterRatio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "normalizedCorePhrase",
+              "occurrences",
+              "contributingSegmentIds",
+              "suffixVariants",
+              "repeatedCharacterRatio"
+            ],
+            "additionalProperties": false
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "severity",
+          "category",
+          "interval",
+          "cueIds",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "vocalRegions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "interval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "dialogue",
+              "singing",
+              "music-with-possible-vocals",
+              "instrumental",
+              "unknown"
+            ]
+          },
+          "vocalEvidence": { "type": "boolean" },
+          "vocalEvidenceConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reasons": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceRecoveryUnitIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceSceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "finalCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "coverageRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "missingLyrics": { "type": "boolean" }
+        },
+        "required": [
+          "id",
+          "interval",
+          "type",
+          "vocalEvidence",
+          "vocalEvidenceConfidence",
+          "reasons",
+          "finalCueIds",
+          "coverageRatio",
+          "missingLyrics"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "vocalCoverage": {
+      "type": "object",
+      "properties": {
+        "regionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "highConfidenceRegionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "totalVocalDurationSeconds": { "type": "number", "minimum": 0 },
+        "subtitleCoveredVocalDurationSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "explicitReviewVocalDurationSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "uncoveredVocalDurationSeconds": { "type": "number", "minimum": 0 },
+        "subtitleCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "regionCount",
+        "highConfidenceRegionCount",
+        "totalVocalDurationSeconds",
+        "subtitleCoveredVocalDurationSeconds",
+        "explicitReviewVocalDurationSeconds",
+        "uncoveredVocalDurationSeconds",
+        "subtitleCoverageRatio"
+      ],
+      "additionalProperties": false
+    },
+    "gateFailures": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "validationStatus",
+    "candidateCueCount",
+    "finalCueCount",
+    "quarantinedCueIds",
+    "candidateMetrics",
+    "metrics",
+    "findings",
+    "vocalRegions",
+    "vocalCoverage",
+    "gateFailures"
+  ],
+  "additionalProperties": false
+}

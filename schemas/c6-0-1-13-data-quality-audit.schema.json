@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-13-data-quality-audit.schema.json",
+  "title": "c6-0-1-13-data-quality-audit",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-data-quality-audit"
+    },
+    "machineFeaturesHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "foldsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labelsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "checkId": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": ["checkId", "passed", "count"],
+        "additionalProperties": false
+      }
+    },
+    "featureAvailability": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "featureName": {
+            "type": "string",
+            "enum": [
+              "missingSeverity",
+              "hallucinationStrength",
+              "timingStrength",
+              "crossModelConflictStrength",
+              "whisperInstability",
+              "reazonInstability",
+              "acousticMargin",
+              "acousticScorability",
+              "speechCompleteness",
+              "requestEdgeRisk",
+              "localizationQuality",
+              "independentFamilyCount",
+              "correlatedEvidenceCount",
+              "affectedCueCount",
+              "affectedEventCount",
+              "candidateActionableCount",
+              "orphanCount",
+              "coreDurationSeconds",
+              "contextDurationSeconds",
+              "chronologicalIncrementalAudioSeconds",
+              "neighborContextOverlapSeconds",
+              "sceneCount",
+              "speakerGroupCount",
+              "positiveEvidenceStrength"
+            ]
+          },
+          "observedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "trueZeroCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unknownCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "unavailableCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "featureName",
+          "observedCount",
+          "trueZeroCount",
+          "unknownCount",
+          "unavailableCount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "foldClassBalance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "foldId": { "type": "string" },
+          "positiveCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "negativeCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "noMajorPositive": { "type": "boolean" }
+        },
+        "required": [
+          "foldId",
+          "positiveCount",
+          "negativeCount",
+          "noMajorPositive"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "passed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "machineFeaturesHash",
+    "foldsHash",
+    "labelsHash",
+    "checks",
+    "featureAvailability",
+    "foldClassBalance",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

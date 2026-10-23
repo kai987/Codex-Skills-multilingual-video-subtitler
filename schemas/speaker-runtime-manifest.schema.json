@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/speaker-runtime-manifest.schema.json",
+  "title": "speaker-runtime-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "speaker-runtime-manifest" },
+    "runtimeVersion": { "type": "string", "const": "C5.18" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "runtimeId": { "type": "string", "minLength": 1 },
+    "runtimeDirectory": { "type": "string", "minLength": 1 },
+    "pythonExecutable": { "type": "string", "minLength": 1 },
+    "pythonVersion": { "type": "string", "minLength": 1 },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 }
+        },
+        "required": ["name", "version"],
+        "additionalProperties": false
+      }
+    },
+    "explicitSpecPath": { "type": "string", "minLength": 1 },
+    "explicitSpecSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "dependencySpecSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "runtimeIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runtimeVersion",
+    "generatedAt",
+    "runtimeId",
+    "runtimeDirectory",
+    "pythonExecutable",
+    "pythonVersion",
+    "packages",
+    "explicitSpecPath",
+    "explicitSpecSha256",
+    "dependencySpecSha256",
+    "runtimeIdentityHash"
+  ],
+  "additionalProperties": false
+}

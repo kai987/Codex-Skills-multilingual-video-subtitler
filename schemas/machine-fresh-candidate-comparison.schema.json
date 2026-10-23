@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-fresh-candidate-comparison.schema.json",
+  "title": "machine-fresh-candidate-comparison",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.7-fresh-targeted-reasr-asr-ceiling-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-fresh-candidate-comparison"
+    },
+    "zone": { "type": "string", "const": "runtime-machine-only" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "originalCandidateId": { "type": "string", "minLength": 1 },
+          "candidates": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "candidateId": { "type": "string", "minLength": 1 },
+                "origin": {
+                  "type": "string",
+                  "enum": [
+                    "ORIGINAL",
+                    "RECOVERY",
+                    "HISTORICAL_REASR",
+                    "FRESH_REASR"
+                  ]
+                },
+                "textHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                "ctcSupport": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "decoderSupport": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "independentWindowSupport": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "trustedTokenCoverage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "speechCompleteness": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "requestEdgeRisk": {
+                  "type": "string",
+                  "enum": ["NONE", "WEAK", "STRONG", "UNKNOWN"]
+                },
+                "pronunciationSupport": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "repetitionRisk": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "hallucinationRisk": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "evidenceComplete": { "type": "boolean" },
+                "dominanceEvidenceCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "semanticHash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "candidateId",
+                "origin",
+                "textHash",
+                "ctcSupport",
+                "decoderSupport",
+                "independentWindowSupport",
+                "trustedTokenCoverage",
+                "speechCompleteness",
+                "requestEdgeRisk",
+                "pronunciationSupport",
+                "repetitionRisk",
+                "hallucinationRisk",
+                "evidenceComplete",
+                "dominanceEvidenceCount",
+                "semanticHash"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "NEW_CANDIDATE_DOMINATES",
+              "ORIGINAL_DOMINATES",
+              "FRESH_CANDIDATES_AGREE",
+              "FRESH_CANDIDATES_DISAGREE",
+              "ALL_CANDIDATES_WEAK",
+              "AMBIGUOUS"
+            ]
+          },
+          "topCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "freshTopCandidateId": {
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          },
+          "replacementProposed": { "type": "boolean" },
+          "replacementApplied": { "type": "boolean" },
+          "applicationBlocker": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "SELECTOR",
+              "SPAN_LINEAGE",
+              "SAFETY_GATE",
+              "ASSOCIATION",
+              "POOL_NOT_IMPROVED"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "originalCandidateId",
+          "candidates",
+          "outcome",
+          "topCandidateId",
+          "freshTopCandidateId",
+          "replacementProposed",
+          "replacementApplied",
+          "applicationBlocker",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "newCandidateDominatesCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "originalDominatesCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshCandidatesAgreeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshCandidatesDisagreeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "allCandidatesWeakCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "ambiguousCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshCandidateTop1Count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "replacementProposalCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "replacementAppliedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "freshPoolImprovedRuntimeProxyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventCount",
+        "newCandidateDominatesCount",
+        "originalDominatesCount",
+        "freshCandidatesAgreeCount",
+        "freshCandidatesDisagreeCount",
+        "allCandidatesWeakCount",
+        "ambiguousCount",
+        "freshCandidateTop1Count",
+        "replacementProposalCount",
+        "replacementAppliedCount",
+        "freshPoolImprovedRuntimeProxyCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "zone",
+    "runtimeGoldInputCount",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

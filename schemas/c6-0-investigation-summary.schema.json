@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-investigation-summary.schema.json",
+  "title": "c6-0-investigation-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "investigationVersion": { "type": "string", "const": "C6.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "sourceSnapshot": {
+      "type": "object",
+      "properties": {
+        "sourceTaskName": { "type": "string", "minLength": 1 },
+        "sourceTaskHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceStatus": { "type": "string", "const": "needs-review" },
+        "sourceFinalizationMethod": { "type": "string", "const": "none" },
+        "sourceReviewItemCount": { "type": "number", "const": 7 },
+        "sourceFinalArtifactPresent": { "type": "boolean", "const": false },
+        "causalReplayParity": { "type": "boolean" },
+        "frozenReplayParity": { "type": "boolean" }
+      },
+      "required": [
+        "sourceTaskName",
+        "sourceTaskHash",
+        "canonicalCueHash",
+        "timingHash",
+        "outputCueHash",
+        "sourceStatus",
+        "sourceFinalizationMethod",
+        "sourceReviewItemCount",
+        "sourceFinalArtifactPresent",
+        "causalReplayParity",
+        "frozenReplayParity"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": { "type": "string", "const": "c6-0-investigation-summary" },
+    "runLabel": { "type": "string", "minLength": 1 },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "modelInferenceCount": { "type": "number", "const": 0 },
+        "modelLoadCount": { "type": "number", "const": 0 },
+        "networkUsed": { "type": "boolean", "const": false },
+        "subtitleMutationCount": { "type": "number", "const": 0 },
+        "timingMutationCount": { "type": "number", "const": 0 },
+        "presentationMutationCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "modelInferenceCount",
+        "modelLoadCount",
+        "networkUsed",
+        "subtitleMutationCount",
+        "timingMutationCount",
+        "presentationMutationCount"
+      ],
+      "additionalProperties": false
+    },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "inventoryCodeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedBlockerCodeCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "observedUnknownBlockerCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "rawBlockingFindingCount": { "type": "number", "const": 14 },
+        "rootRiskFamilyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "componentCount": { "type": "number", "const": 7 },
+        "positiveCurrentOutputDefectComponentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "safeRepairMissingComponentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "remainingReviewItemCount": { "type": "number", "const": 7 }
+      },
+      "required": [
+        "inventoryCodeCount",
+        "observedBlockerCodeCount",
+        "observedUnknownBlockerCount",
+        "rawBlockingFindingCount",
+        "rootRiskFamilyCount",
+        "componentCount",
+        "positiveCurrentOutputDefectComponentCount",
+        "safeRepairMissingComponentCount",
+        "remainingReviewItemCount"
+      ],
+      "additionalProperties": false
+    },
+    "artifactFiles": {
+      "minItems": 9,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+      }
+    },
+    "semanticParityEligible": { "type": "boolean", "const": true },
+    "currentStatus": { "type": "string", "const": "needs-review" },
+    "currentFinalizationMethod": { "type": "string", "const": "none" },
+    "finalSubtitleEmitted": { "type": "boolean", "const": false },
+    "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "timingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "implementation": { "type": "string", "enum": ["GO", "NO-GO"] },
+        "defaultRelease": { "type": "string", "enum": ["GO", "NO-GO"] },
+        "rationale": { "type": "string", "minLength": 1 }
+      },
+      "required": ["implementation", "defaultRelease", "rationale"],
+      "additionalProperties": false
+    },
+    "shareableAudit": {
+      "type": "object",
+      "properties": {
+        "fileCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "passedFileCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "absolutePathLeakCount": { "type": "number", "const": 0 },
+        "secretFindingCount": { "type": "number", "const": 0 },
+        "brokenRelativeReferenceCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "fileCount",
+        "passedFileCount",
+        "absolutePathLeakCount",
+        "secretFindingCount",
+        "brokenRelativeReferenceCount"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "investigationVersion",
+    "generatedAt",
+    "sourceSnapshot",
+    "semanticHash",
+    "artifactType",
+    "runLabel",
+    "execution",
+    "counts",
+    "artifactFiles",
+    "semanticParityEligible",
+    "currentStatus",
+    "currentFinalizationMethod",
+    "finalSubtitleEmitted",
+    "canonicalCueHash",
+    "timingHash",
+    "presentationHash",
+    "decision",
+    "shareableAudit"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-review-playback-timeline.schema.json",
+  "title": "machine-review-playback-timeline",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.13-region-burden-calibration-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-13-machine-review-playback-timeline"
+    },
+    "regionsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceDurationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "segmentId": { "type": "string", "minLength": 1 },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "regionIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "itemIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "segmentId",
+          "sourceInterval",
+          "regionIds",
+          "itemIds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "regionMappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "regionId": { "type": "string", "minLength": 1 },
+          "segmentIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["regionId", "segmentIds"],
+        "additionalProperties": false
+      }
+    },
+    "clipSumSeconds": { "type": "number", "minimum": 0 },
+    "uniqueUnionSeconds": { "type": "number", "minimum": 0 },
+    "duplicateContextSeconds": { "type": "number", "minimum": 0 },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "artifactType",
+    "regionsHash",
+    "sourceDurationSeconds",
+    "segments",
+    "regionMappings",
+    "clipSumSeconds",
+    "uniqueUnionSeconds",
+    "duplicateContextSeconds",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

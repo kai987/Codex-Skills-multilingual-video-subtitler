@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-detector-transport.schema.json",
+  "title": "c6-0-1-14-2-detector-transport",
+  "type": "object",
+  "properties": {
+    "stdout": { "type": "string" },
+    "stderr": { "type": "string" },
+    "exitCode": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": ["stdout", "stderr", "exitCode"],
+  "additionalProperties": false
+}

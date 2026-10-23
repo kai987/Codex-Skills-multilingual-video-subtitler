@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; media-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'"
+  />
+  <title>短音频听审校准</title>
+  <style>
+    body {
+      font:
+        16px/1.65 system-ui,
+        sans-serif;
+      max-width: 850px;
+      margin: 32px auto;
+      padding: 0 20px;
+      background: #f6f6f3;
+      color: #222;
+    }
+    h1 {
+      font-size: 26px;
+    }
+    article {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin: 12px 0;
+    }
+    select,
+    input,
+    button {
+      font: inherit;
+      padding: 8px;
+      max-width: 100%;
+    }
+    audio {
+      width: 100%;
+    }
+    button {
+      cursor: pointer;
+    }
+    #status {
+      white-space: pre-wrap;
+    }
+    small {
+      color: #555;
+    }
+    .target {
+      font-weight: 600;
+    }
+  </style>
+  <h1>短音频听审校准</h1>
+  <p>
+    只判断标出的<strong>目标时段</strong>，两侧音频用来理解上下文。语音可能和音乐同时存在；「独立发话」不是断言漏字幕。听不清请选「不确定」。本页不展示字幕答案或机器优先级，也不会改字幕。
+  </p>
+  <p>
+    全程本地，无上传。完成后点击底部导出 JSON 并交回
+    Codex。页面关闭前请导出；不会自动保存。未判断的片段保持待听审，不会算作无语音。
+  </p>
+  <label
+    >复核者名称或代号 <input id="reviewer" maxlength="120" autocomplete="off"
+  /></label>
+  <main id="clips"></main>
+  <button id="export" type="button">导出听审结果 JSON（允许未完成）</button>
+  <p id="status" role="status" aria-live="polite"></p>
+  <script type="application/json" id="data">
+    __LISTENING_DATA__
+  </script>
+  <script src="app.js"></script>
+</html>

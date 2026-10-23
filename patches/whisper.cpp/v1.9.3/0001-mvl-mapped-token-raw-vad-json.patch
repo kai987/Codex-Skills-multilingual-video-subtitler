@@ -1,0 +1,249 @@
+diff --git a/examples/server/server.cpp b/examples/server/server.cpp
+index b87ef273..892eac56 100644
+--- a/examples/server/server.cpp
++++ b/examples/server/server.cpp
+@@ -38,8 +38,29 @@ const std::string json_format   = "json";
+ const std::string text_format   = "text";
+ const std::string srt_format    = "srt";
+ const std::string vjson_format  = "verbose_json";
++const std::string mvl_vjson_format = "mvl_verbose_json_v1";
+ const std::string vtt_format    = "vtt";
+ 
++const char * mvl_response_schema = "mvl-whisper-server-response/1.0.0";
++const char * mvl_whisper_cpp_version = "1.9.3";
++const char * mvl_upstream_commit = "371b5a7561823ab2bb32142d2751e35e7534727b";
++const char * mvl_patch_id = "mvl-mapped-token-raw-vad-json-v1";
++
++#ifndef MVL_PATCH_SHA256
++#define MVL_PATCH_SHA256 "build-manifest-required"
++#endif
++
++std::string mvl_hex_bytes(const std::string & value) {
++    static const char digits[] = "0123456789abcdef";
++    std::string result(value.size() * 2, '0');
++    for (size_t i = 0; i < value.size(); ++i) {
++        const unsigned char byte = static_cast<unsigned char>(value[i]);
++        result[2 * i] = digits[byte >> 4];
++        result[2 * i + 1] = digits[byte & 0x0f];
++    }
++    return result;
++}
++
+ std::function<void(int)> shutdown_handler;
+ std::atomic_flag is_terminating = ATOMIC_FLAG_INIT;
+ 
+@@ -1148,6 +1169,184 @@ int main(int argc, char ** argv) {
+             }
+             res.set_content(jres.dump(-1, ' ', false, json::error_handler_t::replace),
+                             "application/json");
++        } else if (params.response_format == mvl_vjson_format) {
++            const std::string results = output_str(ctx, params, pcmf32s);
++            bool mapped_token_getter_used = false;
++            bool raw_vad_getter_used = false;
++            int mapped_token_count = 0;
++            json transcription = json::array();
++
++            const int n_segments = whisper_full_n_segments(ctx);
++            for (int i = 0; i < n_segments; ++i) {
++                const int64_t segment_t0 = whisper_full_get_segment_t0(ctx, i);
++                const int64_t segment_t1 = whisper_full_get_segment_t1(ctx, i);
++                json segment = json{
++                    {"id", i},
++                    {"text", whisper_full_get_segment_text(ctx, i)},
++                    {"startCentiseconds", segment_t0},
++                    {"endCentiseconds", segment_t1},
++                    {"startSeconds", segment_t0 * 0.01},
++                    {"endSeconds", segment_t1 * 0.01},
++                    {"coordinateSystem", "original-audio-local"},
++                    {"tokens", json::array()},
++                    {"words", json::array()},
++                };
++
++                float total_logprob = 0.0f;
++                const int n_tokens = whisper_full_n_tokens(ctx, i);
++                for (int j = 0; j < n_tokens; ++j) {
++                    const whisper_token_data token = whisper_full_get_token_data(ctx, i, j);
++                    const bool special = token.id >= whisper_token_eot(ctx);
++                    const std::string token_text = whisper_full_get_token_text(ctx, i, j);
++                    json raw = nullptr;
++                    json mapped = nullptr;
++                    if (!special && params.token_timestamps && token.t0 >= 0 && token.t1 >= token.t0) {
++                        raw = json{
++                            {"startCentiseconds", token.t0},
++                            {"endCentiseconds", token.t1},
++                            {"coordinateSystem", params.vad ? "vad-processed-local" : "original-audio-local"},
++                        };
++                        const int64_t mapped_t0 = whisper_full_get_token_t0(ctx, i, j);
++                        const int64_t mapped_t1 = whisper_full_get_token_t1(ctx, i, j);
++                        mapped_token_getter_used = true;
++                        if (mapped_t0 >= 0 && mapped_t1 >= mapped_t0) {
++                            mapped = json{
++                                {"startCentiseconds", mapped_t0},
++                                {"endCentiseconds", mapped_t1},
++                                {"coordinateSystem", "original-audio-local"},
++                                {"method", "whisper_full_get_token_t0_t1"},
++                            };
++                            ++mapped_token_count;
++                        }
++                    }
++                    segment["tokens"].push_back(json{
++                        {"index", j},
++                        {"id", token.id},
++                        {"text", token_text},
++                        {"textBytesHex", mvl_hex_bytes(token_text)},
++                        {"special", special},
++                        {"probability", token.p},
++                        {"raw", raw},
++                        {"mapped", mapped},
++                        {"dtwCentiseconds", token.t_dtw >= 0 ? json(token.t_dtw) : json(nullptr)},
++                    });
++                    total_logprob += token.plog;
++                }
++
++                for (int j = 0; j < n_tokens; ++j) {
++                    const whisper_token_data first = whisper_full_get_token_data(ctx, i, j);
++                    if (first.id >= whisper_token_eot(ctx)) {
++                        continue;
++                    }
++                    std::string word_text = whisper_full_get_token_text(ctx, i, j);
++                    std::vector<int> member_indices = {j};
++                    int64_t raw_start = first.t0;
++                    int64_t raw_end = first.t1;
++                    int64_t mapped_start = -1;
++                    int64_t mapped_end = -1;
++                    float probability_sum = first.p;
++                    if (params.token_timestamps && first.t0 >= 0 && first.t1 >= first.t0) {
++                        mapped_start = whisper_full_get_token_t0(ctx, i, j);
++                        mapped_end = whisper_full_get_token_t1(ctx, i, j);
++                        mapped_token_getter_used = true;
++                    }
++                    while (j + 1 < n_tokens && utf8_trailing_bytes_needed(word_text) > 0) {
++                        const whisper_token_data next = whisper_full_get_token_data(ctx, i, j + 1);
++                        if (next.id >= whisper_token_eot(ctx)) {
++                            break;
++                        }
++                        ++j;
++                        member_indices.push_back(j);
++                        word_text += whisper_full_get_token_text(ctx, i, j);
++                        probability_sum += next.p;
++                        if (next.t1 >= 0) {
++                            raw_end = next.t1;
++                        }
++                        if (params.token_timestamps && next.t0 >= 0 && next.t1 >= next.t0) {
++                            if (mapped_start < 0) {
++                                mapped_start = whisper_full_get_token_t0(ctx, i, j);
++                            }
++                            mapped_end = whisper_full_get_token_t1(ctx, i, j);
++                            mapped_token_getter_used = true;
++                        }
++                    }
++                    segment["words"].push_back(json{
++                        {"word", word_text},
++                        {"wordBytesHex", mvl_hex_bytes(word_text)},
++                        {"memberTokenIndices", member_indices},
++                        {"probability", probability_sum / member_indices.size()},
++                        {"rawStartCentiseconds", raw_start >= 0 ? json(raw_start) : json(nullptr)},
++                        {"rawEndCentiseconds", raw_end >= 0 ? json(raw_end) : json(nullptr)},
++                        {"mappedStartCentiseconds", mapped_start >= 0 ? json(mapped_start) : json(nullptr)},
++                        {"mappedEndCentiseconds", mapped_end >= 0 ? json(mapped_end) : json(nullptr)},
++                    });
++                }
++
++                segment["temperature"] = params.temperature;
++                segment["avgLogProbability"] = n_tokens > 0 ? total_logprob / n_tokens : 0.0f;
++                segment["noSpeechProbability"] = whisper_full_get_segment_no_speech_prob(ctx, i);
++                transcription.push_back(segment);
++            }
++
++            json vad_segments = json::array();
++            if (params.vad) {
++                const int n_vad_segments = whisper_full_n_vad_segments(ctx);
++                raw_vad_getter_used = true;
++                for (int i = 0; i < n_vad_segments; ++i) {
++                    const int64_t t0 = whisper_full_get_vad_segment_t0(ctx, i);
++                    const int64_t t1 = whisper_full_get_vad_segment_t1(ctx, i);
++                    vad_segments.push_back(json{
++                        {"index", i},
++                        {"startCentiseconds", t0},
++                        {"endCentiseconds", t1},
++                        {"startSeconds", t0 * 0.01},
++                        {"endSeconds", t1 * 0.01},
++                        {"coordinateSystem", "original-audio-local"},
++                        {"source", "whisper-internal-vad"},
++                    });
++                }
++            }
++
++            json capabilities = json{
++                {"mapped_token_getter_available", true},
++                {"mapped_token_getter_used", mapped_token_getter_used},
++                {"raw_vad_getter_available", true},
++                {"raw_vad_getter_used", raw_vad_getter_used},
++                {"raw_and_mapped_token_times_emitted", mapped_token_count > 0},
++                {"raw_vad_segments_emitted", !vad_segments.empty()},
++                {"time_unit", "centiseconds"},
++            };
++            json jres = json{
++                {"schema_version", mvl_response_schema},
++                {"runtime", json{
++                    {"whisper_cpp_version", mvl_whisper_cpp_version},
++                    {"upstream_commit", mvl_upstream_commit},
++                    {"patch_id", mvl_patch_id},
++                    {"patch_sha256", MVL_PATCH_SHA256},
++                    {"binary_sha256", nullptr},
++                    {"response_schema", mvl_response_schema},
++                    {"capabilities", capabilities},
++                }},
++                {"request", json{
++                    {"response_format", mvl_vjson_format},
++                    {"language", params.language},
++                    {"translate", params.translate},
++                    {"vad", params.vad},
++                    {"token_timestamps", params.token_timestamps},
++                    {"suppress_nst", params.suppress_nst},
++                    {"max_len", params.max_len},
++                    {"split_on_word", params.split_on_word},
++                    {"prompt_present", !params.prompt.empty()},
++                }},
++                {"task", params.translate ? "translate" : "transcribe"},
++                {"language", whisper_lang_str_full(whisper_full_lang_id(ctx))},
++                {"durationSeconds", float(pcmf32.size()) / WHISPER_SAMPLE_RATE},
++                {"text", results},
++                {"transcription", transcription},
++                {"vad_segments", vad_segments},
++            };
++            res.set_content(jres.dump(-1, ' ', false, json::error_handler_t::replace),
++                            "application/json");
+         }
+         // TODO add more output formats
+         else
+@@ -1214,6 +1413,29 @@ int main(int argc, char ** argv) {
+         }
+     });
+ 
++    svr->Get(sparams.request_path + "/mvl/capabilities", [&](const Request &, Response &res){
++        json response = json{
++            {"schema_version", "mvl-whisper-server-capabilities/1.0.0"},
++            {"whisper_cpp_version", mvl_whisper_cpp_version},
++            {"upstream_commit", mvl_upstream_commit},
++            {"patch_id", mvl_patch_id},
++            {"patch_sha256", MVL_PATCH_SHA256},
++            {"mapped_token_getter_available", true},
++            {"raw_vad_getter_available", true},
++            {"supported_response_formats", json::array({json_format, text_format, srt_format, vjson_format, vtt_format, mvl_vjson_format})},
++            {"time_units", json::array({"centiseconds", "seconds"})},
++            {"coordinate_system_contract", json{
++                {"segment", "original-audio-local"},
++                {"token_raw_with_vad", "vad-processed-local"},
++                {"token_raw_without_vad", "original-audio-local"},
++                {"token_mapped", "original-audio-local"},
++                {"raw_vad", "original-audio-local"},
++            }},
++        };
++        res.set_content(response.dump(-1, ' ', false, json::error_handler_t::replace),
++                        "application/json");
++    });
++
+     svr->set_exception_handler([](const Request &, Response &res, std::exception_ptr ep) {
+         const char fmt[] = "500 Internal Server Error\n%s";
+         char buf[BUFSIZ];

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-protected-finalization-validation.schema.json",
+  "title": "c6-0-protected-finalization-validation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-protected-finalization-validation"
+    },
+    "validationVersion": {
+      "type": "string",
+      "const": "c6.0-protected-finalization-validation-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "runs": {
+      "minItems": 6,
+      "maxItems": 6,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "runLabel": {
+            "type": "string",
+            "enum": [
+              "legacy",
+              "default",
+              "observe",
+              "enforce-a",
+              "enforce-b",
+              "negative-control"
+            ]
+          },
+          "taskName": { "type": "string", "minLength": 1 },
+          "mode": {
+            "type": "string",
+            "enum": ["legacy", "protected-observe", "protected-enforce"]
+          },
+          "protectedOutcome": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "FINAL_SAFE",
+                  "FINAL_SAFE_WITH_ADVISORIES",
+                  "HUMAN_REVIEW_REQUIRED",
+                  "REJECTED",
+                  "MACHINE_ONLY_NOT_AUTHORIZED"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "minLength": 1 },
+          "finalizationMethod": { "type": "string", "minLength": 1 },
+          "canonicalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "canonicalTimingHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "riskAssessmentHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "finalPackageExists": { "type": "boolean" }
+        },
+        "required": [
+          "runLabel",
+          "taskName",
+          "mode",
+          "protectedOutcome",
+          "status",
+          "finalizationMethod",
+          "canonicalCueHash",
+          "canonicalTimingHash",
+          "presentationHash",
+          "riskAssessmentHash",
+          "finalPackageExists"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "legacyDefaultParity": { "type": "boolean" },
+    "enforceSemanticParity": { "type": "boolean" },
+    "canonicalCueParity": { "type": "boolean" },
+    "canonicalTimingParity": { "type": "boolean" },
+    "presentationParity": { "type": "boolean" },
+    "machineNegativeControlBlocked": { "type": "boolean" },
+    "unknownFailClosed": { "type": "boolean" },
+    "integrityFailClosed": { "type": "boolean" },
+    "policyIntegrityPassed": { "type": "boolean" },
+    "freshnessIntegrityPassed": { "type": "boolean" },
+    "shareableAuditPassed": { "type": "boolean" },
+    "inputReadOnlyVerified": { "type": "boolean" },
+    "modelInferenceCount": { "type": "number", "const": 0 },
+    "modelLoadCount": { "type": "number", "const": 0 },
+    "networkUsed": { "type": "boolean", "const": false },
+    "passed": { "type": "boolean" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "validationVersion",
+    "generatedAt",
+    "runs",
+    "legacyDefaultParity",
+    "enforceSemanticParity",
+    "canonicalCueParity",
+    "canonicalTimingParity",
+    "presentationParity",
+    "machineNegativeControlBlocked",
+    "unknownFailClosed",
+    "integrityFailClosed",
+    "policyIntegrityPassed",
+    "freshnessIntegrityPassed",
+    "shareableAuditPassed",
+    "inputReadOnlyVerified",
+    "modelInferenceCount",
+    "modelLoadCount",
+    "networkUsed",
+    "passed",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

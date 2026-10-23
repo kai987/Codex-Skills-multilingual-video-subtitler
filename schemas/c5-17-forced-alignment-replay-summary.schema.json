@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c5-17-forced-alignment-replay-summary.schema.json",
+  "title": "c5-17-forced-alignment-replay-summary",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c5-17-forced-alignment-replay-summary"
+    },
+    "replayVersion": { "type": "string", "enum": ["C5.17", "C5.17.1"] },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "runKind": {
+      "type": "string",
+      "enum": ["fresh", "cache-replay", "observe"]
+    },
+    "inputTaskName": { "type": "string", "minLength": 1 },
+    "outputTaskName": { "type": "string", "minLength": 1 },
+    "forcedAlignmentMode": {
+      "type": "string",
+      "enum": ["off", "observe", "enforce"]
+    },
+    "backend": {
+      "type": "string",
+      "enum": ["evidence-dp", "mfa-japanese", "hybrid"]
+    },
+    "runtimeIdentityHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "canonicalInputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "alignmentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "componentDecisionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "mutationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceSha256Before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceSha256After": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "humanSubtitleSha256Before": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "humanSubtitleSha256After": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceReadOnly": {
+      "type": "object",
+      "properties": {
+        "sizeBefore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sizeAfter": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMsBefore": { "type": "number", "minimum": 0 },
+        "mtimeMsAfter": { "type": "number", "minimum": 0 },
+        "verified": { "type": "boolean" }
+      },
+      "required": [
+        "sizeBefore",
+        "sizeAfter",
+        "mtimeMsBefore",
+        "mtimeMsAfter",
+        "verified"
+      ],
+      "additionalProperties": false
+    },
+    "humanSubtitleReadOnly": {
+      "type": "object",
+      "properties": {
+        "sizeBefore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sizeAfter": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mtimeMsBefore": { "type": "number", "minimum": 0 },
+        "mtimeMsAfter": { "type": "number", "minimum": 0 },
+        "verified": { "type": "boolean" }
+      },
+      "required": [
+        "sizeBefore",
+        "sizeAfter",
+        "mtimeMsBefore",
+        "mtimeMsAfter",
+        "verified"
+      ],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "componentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "attemptCount": { "type": "integer", "minimum": 0, "maximum": 40 },
+        "successCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failureCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHitCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mfaProcessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wallClockSeconds": { "type": "number", "minimum": 0 },
+        "timingMutationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewItemCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wholeMediaAsrRequestCount": { "type": "number", "const": 0 },
+        "whisperAsrRequestCount": { "type": "number", "const": 0 },
+        "openAiRequestCount": { "type": "number", "const": 0 },
+        "onlineSubtitleLookupCount": { "type": "number", "const": 0 }
+      },
+      "required": [
+        "componentCount",
+        "cueCount",
+        "attemptCount",
+        "successCount",
+        "failureCount",
+        "cacheHitCount",
+        "mfaProcessCount",
+        "wallClockSeconds",
+        "timingMutationCount",
+        "reviewItemCount",
+        "wholeMediaAsrRequestCount",
+        "whisperAsrRequestCount",
+        "openAiRequestCount",
+        "onlineSubtitleLookupCount"
+      ],
+      "additionalProperties": false
+    },
+    "canonicalTimingUnchanged": { "type": "boolean" },
+    "blockersClosed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "finalStatus": {
+      "type": "string",
+      "enum": ["needs-review", "human-validated"]
+    },
+    "finalizationMethod": { "type": "string", "enum": ["none", "human"] }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "replayVersion",
+    "generatedAt",
+    "runKind",
+    "inputTaskName",
+    "outputTaskName",
+    "forcedAlignmentMode",
+    "backend",
+    "runtimeIdentityHash",
+    "canonicalInputHash",
+    "alignmentHash",
+    "componentDecisionHash",
+    "outputCueHash",
+    "sourceSha256Before",
+    "sourceSha256After",
+    "humanSubtitleSha256Before",
+    "humanSubtitleSha256After",
+    "sourceReadOnly",
+    "humanSubtitleReadOnly",
+    "metrics",
+    "canonicalTimingUnchanged",
+    "blockersClosed",
+    "finalStatus",
+    "finalizationMethod"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+**/dist-types/
+coverage/
+output/
+benchmark-results/
+temp/
+tests/fixtures/generated/
+package-lock.json
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.js
+packages/*/src/**/*.map

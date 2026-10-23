@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-uncovered-speech-candidates-v2.schema.json",
+  "title": "machine-uncovered-speech-candidates-v2",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.2-safety-selection-detector-ceiling-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-uncovered-speech-candidates-v2"
+    },
+    "inventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "finalCueHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "previousTargetsHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "subtractedActiveSafetyHash": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "islandId": { "type": "string", "minLength": 1 },
+          "nativeInterval": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "sourceInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "observationIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "requestIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentFamilies": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "independentFamilyCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "distinctPcmViewIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "evidenceClass": {
+            "type": "string",
+            "enum": [
+              "MULTI_DETECTOR_CONFIRMED",
+              "LEGACY_FINGERPRINT_CONFIRMED",
+              "EXISTING_VERIFIED_SPEECH",
+              "MULTI_VIEW_SPEECH_POSITIVE",
+              "PYANNOTE_ONLY_SPEECH_POSITIVE",
+              "SINGLE_DETECTOR_HIGH_RECALL",
+              "DETECTOR_DISAGREEMENT",
+              "LOW_SUPPORT_VIEW_SPECIFIC",
+              "STRONG_CONTRADICTION",
+              "TIMEBASE_UNVERIFIED",
+              "WEBRTC_EXCLUSIVE_SPEECH_CANDIDATE",
+              "MASKED_SPEECH_SAFETY_CANDIDATE",
+              "CROSS_DETECTOR_SUBTHRESHOLD_CANDIDATE",
+              "SUBTHRESHOLD_MULTI_VIEW_CANDIDATE"
+            ]
+          },
+          "verifiedTimebase": { "type": "boolean" },
+          "strongContradiction": { "type": "boolean" },
+          "reliableLexical": { "type": "boolean" },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "detectorFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SILERO",
+                "PYANNOTE",
+                "WEBRTC",
+                "LEGACY_FINGERPRINT",
+                "EXISTING_VERIFIED",
+                "LOCALIZED_LEXICAL"
+              ]
+            }
+          },
+          "evidenceStratum": {
+            "type": "string",
+            "enum": [
+              "MULTI_DETECTOR",
+              "PYANNOTE_EXCLUSIVE",
+              "SILERO_EXCLUSIVE",
+              "WEBRTC_EXCLUSIVE",
+              "LEGACY_FINGERPRINT_EXCLUSIVE",
+              "MULTI_VIEW_SAME_DETECTOR",
+              "EXISTING_VERIFIED",
+              "MASKED_SUBTHRESHOLD",
+              "AUDIT_ONLY"
+            ]
+          },
+          "maskedEvidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "speechTruthVerified": { "type": "boolean" },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "parentIslandId": { "type": "string", "minLength": 1 },
+          "uncoveredRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+          "partialCueOverlap": { "type": "boolean" },
+          "partialExistingTargetOverlap": { "type": "boolean" },
+          "diversityBin": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "priority": { "type": "number" },
+          "sceneIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "islandId",
+          "nativeInterval",
+          "sourceInterval",
+          "observationIds",
+          "evidenceIds",
+          "requestIds",
+          "independentFamilies",
+          "independentFamilyCount",
+          "distinctPcmViewIds",
+          "evidenceClass",
+          "verifiedTimebase",
+          "strongContradiction",
+          "reliableLexical",
+          "semanticHash",
+          "detectorFamilies",
+          "evidenceStratum",
+          "maskedEvidenceIds",
+          "speechTruthVerified",
+          "candidateId",
+          "parentIslandId",
+          "uncoveredRatio",
+          "partialCueOverlap",
+          "partialExistingTargetOverlap",
+          "diversityBin",
+          "priority",
+          "sceneIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "candidateCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "uncoveredSeconds": { "type": "number", "minimum": 0 }
+      },
+      "required": ["candidateCount", "uncoveredSeconds"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "inventoryHash",
+    "finalCueHash",
+    "previousTargetsHash",
+    "subtractedActiveSafetyHash",
+    "candidates",
+    "summary"
+  ],
+  "additionalProperties": false
+}

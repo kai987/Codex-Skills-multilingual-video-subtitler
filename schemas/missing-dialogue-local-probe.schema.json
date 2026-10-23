@@ -1,0 +1,873 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/missing-dialogue-local-probe.schema.json",
+  "title": "missing-dialogue-local-probe",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "missing-dialogue-local-probe"
+    },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-localization-playback-integrity-v1"
+    },
+    "generatedAt": { "type": "string" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "selectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "cacheNamespace": {
+      "type": "string",
+      "const": "c6.0.1.14-missing-local-probes-v1"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["fresh", "exact-cache-only", "completion-inherited-fresh"]
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "resultCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "persistedSuccessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "requestId": { "type": "string", "minLength": 1 },
+              "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "provider": {
+                "type": "string",
+                "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "SUCCESS",
+                  "EMPTY_OUTPUT",
+                  "PROVIDER_ERROR",
+                  "EXTRACTION_ERROR",
+                  "CACHE_MISS",
+                  "CACHE_INVALID"
+                ]
+              },
+              "requestSemanticHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "rawOutputHash": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "cacheByteSha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "requestId",
+              "cacheKey",
+              "provider",
+              "status",
+              "requestSemanticHash",
+              "rawOutputHash",
+              "cacheByteSha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "resultCount",
+        "persistedSuccessCount",
+        "entries",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "budgetException": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string", "const": "1.0.0" },
+        "artifactType": {
+          "type": "string",
+          "const": "c6-0-1-14-probe-budget-exception"
+        },
+        "authorizationId": { "type": "string", "minLength": 1 },
+        "authorizationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "authorizedBy": { "type": "string", "const": "USER_EXPLICIT" },
+        "authorizedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+        },
+        "sourceIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "selectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "originalProbeByteHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "lossAuditByteHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "previousConsumedInferences": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "previousPersistedSuccessCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "previousLostRawResultCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxAdditionalInferences": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "maxCumulativeInferences": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 66
+        },
+        "affectedRequestIds": {
+          "minItems": 1,
+          "maxItems": 2,
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "required": [
+        "schemaVersion",
+        "artifactType",
+        "authorizationId",
+        "authorizationHash",
+        "authorizedBy",
+        "authorizedAt",
+        "sourceIdentityHash",
+        "policyHash",
+        "selectionHash",
+        "originalProbeByteHash",
+        "lossAuditByteHash",
+        "previousConsumedInferences",
+        "previousPersistedSuccessCount",
+        "previousLostRawResultCount",
+        "maxAdditionalInferences",
+        "maxCumulativeInferences",
+        "affectedRequestIds",
+        "semanticHash"
+      ],
+      "additionalProperties": false
+    },
+    "completion": {
+      "type": "object",
+      "properties": {
+        "originalProbeByteHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "originalProbeSemanticHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "inheritedFreshCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "supplementalFreshCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "originalFailedRequestCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "completedRequestIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "extractionRepair": {
+          "type": "string",
+          "const": "SOURCE_VIDEO_EXACT_SAMPLE_TRIM_NO_PADDING"
+        },
+        "policyUnchanged": { "type": "boolean", "const": true },
+        "selectionUnchanged": { "type": "boolean", "const": true },
+        "successfulRequestsRerun": { "type": "number", "const": 0 },
+        "originalContextSelection": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "targetId": { "type": "string" },
+              "selected": { "type": "boolean" },
+              "reasons": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["targetId", "selected", "reasons"],
+            "additionalProperties": false
+          }
+        },
+        "repairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "requestId": { "type": "string" },
+              "sourceInterval": {
+                "type": "object",
+                "properties": {
+                  "start": { "type": "number", "minimum": 0 },
+                  "end": { "type": "number", "exclusiveMinimum": 0 }
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              },
+              "expectedSampleCount": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "actualSampleCount": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "required": [
+              "requestId",
+              "sourceInterval",
+              "expectedSampleCount",
+              "actualSampleCount",
+              "audioSha256"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "originalProbeByteHash",
+        "originalProbeSemanticHash",
+        "inheritedFreshCount",
+        "supplementalFreshCount",
+        "originalFailedRequestCount",
+        "completedRequestIds",
+        "extractionRepair",
+        "policyUnchanged",
+        "selectionUnchanged",
+        "successfulRequestsRerun",
+        "originalContextSelection",
+        "repairs"
+      ],
+      "additionalProperties": false
+    },
+    "runtime": {
+      "minItems": 2,
+      "maxItems": 2,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+          },
+          "modelId": { "type": "string", "minLength": 1 },
+          "modelRevision": { "type": "string", "minLength": 1 },
+          "modelIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "runtimeIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "modelFileHashes": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "manifestSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "binarySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "workerSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "precision": { "type": "string", "minLength": 1 },
+          "device": { "type": "string", "minLength": 1 },
+          "verified": { "type": "boolean", "const": true }
+        },
+        "required": [
+          "provider",
+          "modelId",
+          "modelRevision",
+          "modelIdentityHash",
+          "runtimeIdentityHash",
+          "modelFileHashes",
+          "manifestSha256",
+          "binarySha256",
+          "workerSha256",
+          "precision",
+          "device",
+          "verified"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "requests": {
+      "maxItems": 64,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestId": { "type": "string", "minLength": 1 },
+          "targetId": { "type": "string", "minLength": 1 },
+          "provider": {
+            "type": "string",
+            "enum": ["whisper-large-v3", "reazonspeech-k2-v2"]
+          },
+          "windowType": {
+            "type": "string",
+            "enum": ["CORE_EXACT", "CORE_CONTEXT"]
+          },
+          "coreInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "extractionInterval": {
+            "type": "object",
+            "properties": {
+              "start": { "type": "number", "minimum": 0 },
+              "end": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "required": ["start", "end"],
+            "additionalProperties": false
+          },
+          "sourceMediaSha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "selectionHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "audioSha256": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "sampleCount": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              { "type": "null" }
+            ]
+          },
+          "extractionIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "runtimeIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "modelIdentityHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "prompt": { "type": "string", "const": "" },
+          "vadEnabled": { "type": "boolean", "const": false },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "EMPTY_OUTPUT",
+              "PROVIDER_ERROR",
+              "EXTRACTION_ERROR",
+              "CACHE_MISS",
+              "CACHE_INVALID"
+            ]
+          },
+          "execution": {
+            "type": "string",
+            "enum": [
+              "FRESH_INFERENCE",
+              "FRESH_ATTEMPT_FAILED",
+              "VERIFIED_EXACT_REPLAY",
+              "NOT_EXECUTED"
+            ]
+          },
+          "rawText": { "type": "string" },
+          "rawOutput": {
+            "anyOf": [{ "$ref": "#/$defs/__schema0" }, { "type": "null" }]
+          },
+          "rawOutputHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string" },
+                "sourceInterval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                },
+                "trusted": { "type": "boolean" },
+                "probability": {
+                  "anyOf": [
+                    { "type": "number", "minimum": 0, "maximum": 1 },
+                    { "type": "null" }
+                  ]
+                },
+                "reason": { "type": "string" }
+              },
+              "required": [
+                "text",
+                "sourceInterval",
+                "trusted",
+                "probability",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "decoder": {
+            "type": "object",
+            "properties": {
+              "averageLogProbability": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              },
+              "noSpeechProbability": {
+                "anyOf": [
+                  { "type": "number", "minimum": 0, "maximum": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "temperature": {
+                "anyOf": [{ "type": "number" }, { "type": "null" }]
+              }
+            },
+            "required": [
+              "averageLogProbability",
+              "noSpeechProbability",
+              "temperature"
+            ],
+            "additionalProperties": false
+          },
+          "localization": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CORE_EXACT_ISLAND_LOCALIZED",
+                  "TRUSTED_GLOBAL_TOKEN_PROJECTION",
+                  "CONTEXT_TEXT_UNPROJECTABLE",
+                  "CORE_GUARD_OR_NEIGHBOR_UNRESOLVED",
+                  "EMPTY",
+                  "FAILED"
+                ]
+              },
+              "localizedText": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "guardSeconds": { "type": "number", "minimum": 0 },
+              "guardNeighborOverlapSeconds": { "type": "number", "minimum": 0 },
+              "coreNeighborOverlapSeconds": { "type": "number", "minimum": 0 },
+              "completeness": {
+                "type": "string",
+                "enum": [
+                  "WHOLE_EXACT_ISLAND",
+                  "TOKEN_CHAIN_COMPLETE",
+                  "PARTIAL",
+                  "UNKNOWN",
+                  "EMPTY"
+                ]
+              },
+              "projectionTokenCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "reasons": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": [
+              "status",
+              "localizedText",
+              "guardSeconds",
+              "guardNeighborOverlapSeconds",
+              "coreNeighborOverlapSeconds",
+              "completeness",
+              "projectionTokenCount",
+              "reasons"
+            ],
+            "additionalProperties": false
+          },
+          "hallucinationRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+          "errorCode": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "warnings": { "type": "array", "items": { "type": "string" } },
+          "wallClockSeconds": { "type": "number", "minimum": 0 },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "requestId",
+          "targetId",
+          "provider",
+          "windowType",
+          "coreInterval",
+          "extractionInterval",
+          "sourceMediaSha256",
+          "sourceIdentityHash",
+          "policyHash",
+          "selectionHash",
+          "audioSha256",
+          "sampleCount",
+          "extractionIdentityHash",
+          "cacheKey",
+          "runtimeIdentityHash",
+          "modelIdentityHash",
+          "prompt",
+          "vadEnabled",
+          "status",
+          "execution",
+          "rawText",
+          "rawOutput",
+          "rawOutputHash",
+          "tokens",
+          "decoder",
+          "localization",
+          "hallucinationRisk",
+          "errorCode",
+          "warnings",
+          "wallClockSeconds",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "contextSelection": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "targetId": { "type": "string" },
+          "selected": { "type": "boolean" },
+          "reasons": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["targetId", "selected", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "properties": {
+        "selectedTargets": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "contextTargets": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "plannedRequests": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "actualFreshInferences": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferenceAttemptCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheHits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cacheMisses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "extractionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "extractionFailures": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "processStartCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failedRequests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "emptyOutputs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fullMediaRequests": { "type": "number", "const": 0 },
+        "sourceMutationCount": { "type": "number", "const": 0 },
+        "promptLeakageCount": { "type": "number", "const": 0 },
+        "canonicalMutationCount": { "type": "number", "const": 0 },
+        "perProvider": {
+          "type": "object",
+          "properties": {
+            "whisper-large-v3": {
+              "type": "object",
+              "properties": {
+                "inferenceAttemptCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "actualFreshInferences": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cacheHits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "failedRequests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "emptyOutputs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "modelLoadCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "processStartCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "inferenceAttemptCount",
+                "actualFreshInferences",
+                "cacheHits",
+                "failedRequests",
+                "emptyOutputs",
+                "modelLoadCount",
+                "processStartCount"
+              ],
+              "additionalProperties": false
+            },
+            "reazonspeech-k2-v2": {
+              "type": "object",
+              "properties": {
+                "inferenceAttemptCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "actualFreshInferences": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cacheHits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "failedRequests": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "emptyOutputs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "modelLoadCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "processStartCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "inferenceAttemptCount",
+                "actualFreshInferences",
+                "cacheHits",
+                "failedRequests",
+                "emptyOutputs",
+                "modelLoadCount",
+                "processStartCount"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": ["whisper-large-v3", "reazonspeech-k2-v2"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "selectedTargets",
+        "contextTargets",
+        "plannedRequests",
+        "actualFreshInferences",
+        "inferenceAttemptCount",
+        "cacheHits",
+        "cacheMisses",
+        "extractionCount",
+        "extractionFailures",
+        "modelLoadCount",
+        "processStartCount",
+        "failedRequests",
+        "emptyOutputs",
+        "fullMediaRequests",
+        "sourceMutationCount",
+        "promptLeakageCount",
+        "canonicalMutationCount",
+        "perProvider"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "policyVersion",
+    "generatedAt",
+    "policyHash",
+    "selectionHash",
+    "sourceIdentityHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "cacheNamespace",
+    "mode",
+    "runtime",
+    "requests",
+    "contextSelection",
+    "accounting",
+    "semanticHash"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        { "type": "array", "items": { "$ref": "#/$defs/__schema0" } },
+        {
+          "type": "object",
+          "propertyNames": { "type": "string" },
+          "additionalProperties": { "$ref": "#/$defs/__schema0" }
+        }
+      ]
+    }
+  }
+}

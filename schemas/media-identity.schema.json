@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/media-identity.schema.json",
+  "title": "media-identity",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "title": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "originalTitle": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "alternativeTitles": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "mediaType": {
+      "type": "string",
+      "enum": ["movie", "series", "anime", "documentary", "unknown"]
+    },
+    "season": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        { "type": "null" }
+      ]
+    },
+    "episode": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        { "type": "null" }
+      ]
+    },
+    "episodeTitle": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "year": {
+      "anyOf": [
+        { "type": "integer", "minimum": 1888, "maximum": 2200 },
+        { "type": "null" }
+      ]
+    },
+    "runtimeSeconds": {
+      "anyOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+    },
+    "releaseSource": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "releaseGroup": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    },
+    "dialogueLanguages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+      }
+    },
+    "primarySubtitleLanguages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+      }
+    },
+    "referenceSubtitleLanguages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["zh", "zh-Hans", "zh-Hant", "ja", "en", "mixed", "und"]
+      }
+    },
+    "identificationSource": {
+      "type": "string",
+      "enum": [
+        "filename",
+        "container-metadata",
+        "filename-and-container-metadata",
+        "user",
+        "filename-and-user-confirmation",
+        "unknown"
+      ]
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "needsConfirmation": { "type": "boolean" },
+    "confirmationReasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "title",
+    "originalTitle",
+    "alternativeTitles",
+    "mediaType",
+    "season",
+    "episode",
+    "episodeTitle",
+    "year",
+    "runtimeSeconds",
+    "releaseSource",
+    "releaseGroup",
+    "dialogueLanguages",
+    "primarySubtitleLanguages",
+    "referenceSubtitleLanguages",
+    "identificationSource",
+    "confidence",
+    "needsConfirmation",
+    "confirmationReasons"
+  ],
+  "additionalProperties": false
+}

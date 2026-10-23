@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/intra-cue-repetition-repair.schema.json",
+  "title": "intra-cue-repetition-repair",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "inputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outputHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cueId": { "type": "string", "minLength": 1 },
+          "sourceCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "detectedRepeatedSpans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string", "minLength": 1 },
+                "normalizedText": { "type": "string", "minLength": 1 },
+                "sourceCueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "interval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "text",
+                "normalizedText",
+                "sourceCueIds",
+                "interval"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "normalizedSpans": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "readingEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "exact-duplicate",
+              "near-duplicate",
+              "kana-kanji-equivalent",
+              "containment-alternative",
+              "true-spoken-repetition",
+              "unresolved"
+            ]
+          },
+          "keptSpan": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string", "minLength": 1 },
+              "normalizedText": { "type": "string", "minLength": 1 },
+              "sourceCueIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "interval": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "start": { "type": "number", "minimum": 0 },
+                      "end": { "type": "number", "exclusiveMinimum": 0 }
+                    },
+                    "required": ["start", "end"],
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["text", "normalizedText", "sourceCueIds", "interval"],
+            "additionalProperties": false
+          },
+          "removedSpans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string", "minLength": 1 },
+                "normalizedText": { "type": "string", "minLength": 1 },
+                "sourceCueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "interval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "text",
+                "normalizedText",
+                "sourceCueIds",
+                "interval"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "preservedTail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": { "type": "string", "minLength": 1 },
+                "normalizedText": { "type": "string", "minLength": 1 },
+                "sourceCueIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "interval": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "start": { "type": "number", "minimum": 0 },
+                        "end": { "type": "number", "exclusiveMinimum": 0 }
+                      },
+                      "required": ["start", "end"],
+                      "additionalProperties": false
+                    },
+                    { "type": "null" }
+                  ]
+                }
+              },
+              "required": [
+                "text",
+                "normalizedText",
+                "sourceCueIds",
+                "interval"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "selectedReason": { "type": "string", "minLength": 1 },
+          "audioRepetitionEvidence": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reviewRecommended": { "type": "boolean" },
+          "outputCueIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": [
+          "cueId",
+          "sourceCueIds",
+          "detectedRepeatedSpans",
+          "normalizedSpans",
+          "readingEvidence",
+          "relationship",
+          "keptSpan",
+          "removedSpans",
+          "preservedTail",
+          "selectedReason",
+          "audioRepetitionEvidence",
+          "reviewRecommended",
+          "outputCueIds"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "inputCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "outputCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "detectedCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "repairedCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "trueSpokenRepetitionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "removedSpanCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "preservedTailCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "japaneseSpacesRemoved": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "inputCueCount",
+        "outputCueCount",
+        "detectedCueCount",
+        "repairedCueCount",
+        "trueSpokenRepetitionCount",
+        "removedSpanCount",
+        "preservedTailCount",
+        "japaneseSpacesRemoved"
+      ],
+      "additionalProperties": false
+    },
+    "fallback": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "inputHash",
+    "outputHash",
+    "records",
+    "summary",
+    "fallback"
+  ],
+  "additionalProperties": false
+}

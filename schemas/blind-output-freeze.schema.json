@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/blind-output-freeze.schema.json",
+  "title": "blind-output-freeze",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": { "type": "string", "const": "blind-output-freeze" },
+    "freezeVersion": {
+      "type": "string",
+      "const": "c6.0.1-machine-output-freeze-v1"
+    },
+    "generationRunId": { "type": "string", "minLength": 1 },
+    "generationCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "sourceVideoSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machinePackageHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTextHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "canonicalTimingHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "presentationHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "assHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "srtHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "vttHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "riskAssessmentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machineEvidenceCoverageHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "shadowPolicyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "shadowOutcome": {
+      "type": "string",
+      "enum": ["FINAL_CANDIDATE", "REVIEW_REQUIRED", "REJECTED"]
+    },
+    "seriesMemoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "provenanceHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "frozenFiles": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relativePath": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!\\/)(?![A-Za-z]:[\\\\/])(?!\\\\\\\\).+"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": ["relativePath", "size", "sha256"],
+        "additionalProperties": false
+      }
+    },
+    "frozenArtifactAggregateHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "freezeTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "freezeSemanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "freezeVersion",
+    "generationRunId",
+    "generationCommit",
+    "sourceVideoSha256",
+    "machinePackageHash",
+    "canonicalTextHash",
+    "canonicalTimingHash",
+    "presentationHash",
+    "assHash",
+    "srtHash",
+    "vttHash",
+    "riskAssessmentHash",
+    "machineEvidenceCoverageHash",
+    "shadowPolicyHash",
+    "shadowOutcome",
+    "seriesMemoryHash",
+    "provenanceHash",
+    "frozenFiles",
+    "frozenArtifactAggregateHash",
+    "freezeTimestamp",
+    "freezeSemanticHash"
+  ],
+  "additionalProperties": false
+}

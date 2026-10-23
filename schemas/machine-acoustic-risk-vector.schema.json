@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-acoustic-risk-vector.schema.json",
+  "title": "machine-acoustic-risk-vector",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.6-acoustic-risk-span-text-joint-boundary-v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-acoustic-risk-vector"
+    },
+    "mode": { "type": "string", "enum": ["off", "observe", "enforce"] },
+    "decisionPolicy": {
+      "type": "string",
+      "const": "multi-label-no-magic-total-score"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string", "minLength": 1 },
+          "candidateId": { "type": "string", "minLength": 1 },
+          "facts": {
+            "minItems": 15,
+            "maxItems": 15,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "enum": [
+                    "requestEdgeRisk",
+                    "ctcWeak",
+                    "ctcUnscorable",
+                    "tokenWeak",
+                    "tokenConflict",
+                    "speechIncomplete",
+                    "decoderWeak",
+                    "decoderUnknown",
+                    "independentWindowDisagreement",
+                    "repetitionRisk",
+                    "noSpeechConflict",
+                    "durationTextAnomaly",
+                    "pronunciationCoverageWeak",
+                    "associationAmbiguity",
+                    "overlapRisk"
+                  ]
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": ["NONE", "WEAK", "STRONG", "UNKNOWN"]
+                },
+                "correlationGroup": {
+                  "type": "string",
+                  "enum": [
+                    "REQUEST_EDGE",
+                    "CTC",
+                    "TOKEN",
+                    "SPEECH_VAD",
+                    "DECODER",
+                    "CROSS_WINDOW",
+                    "TEXT_SHAPE",
+                    "ASSOCIATION",
+                    "OVERLAP"
+                  ]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "required": [
+                "name",
+                "severity",
+                "correlationGroup",
+                "evidenceIds",
+                "reasons"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "strongRiskCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "weakRiskCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "independentWeakRiskCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "activeCorrelationGroups": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "REQUEST_EDGE",
+                "CTC",
+                "TOKEN",
+                "SPEECH_VAD",
+                "DECODER",
+                "CROSS_WINDOW",
+                "TEXT_SHAPE",
+                "ASSOCIATION",
+                "OVERLAP"
+              ]
+            }
+          },
+          "recommendedAction": {
+            "type": "string",
+            "enum": ["KEEP", "VERIFY", "RE_ASR", "REVIEW"]
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "eventId",
+          "candidateId",
+          "facts",
+          "strongRiskCount",
+          "weakRiskCount",
+          "independentWeakRiskCount",
+          "activeCorrelationGroups",
+          "recommendedAction",
+          "reasons",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "eventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "multiRiskEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "keepCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verifyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reAsrCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "strongRiskEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "independentWeakRiskEventCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "eventCount",
+        "multiRiskEventCount",
+        "keepCount",
+        "verifyCount",
+        "reAsrCount",
+        "reviewCount",
+        "strongRiskEventCount",
+        "independentWeakRiskEventCount"
+      ],
+      "additionalProperties": false
+    },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "generatedAt",
+    "artifactType",
+    "mode",
+    "decisionPolicy",
+    "events",
+    "summary",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-2-machine-subtitle-parity-quality.schema.json",
+  "title": "c6-0-1-14-2-machine-subtitle-parity-quality",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-2-machine-subtitle-parity-quality"
+    },
+    "baselineEvaluationByteHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "machinePackageByteHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "machinePackageABByteParity": { "type": "boolean", "const": true },
+    "metricComputation": {
+      "type": "string",
+      "const": "REUSE_HASH_BOUND_BASELINE_METRICS_FOR_BYTE_IDENTICAL_SUBTITLES"
+    },
+    "globalTextMetrics": {
+      "type": "object",
+      "properties": {
+        "exact": {
+          "type": "object",
+          "properties": {
+            "machineCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "goldCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "editDistance": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "insertionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "deletionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "substitutionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cer": { "type": "number", "minimum": 0 }
+          },
+          "required": [
+            "machineCharacterCount",
+            "goldCharacterCount",
+            "editDistance",
+            "insertionCharacters",
+            "deletionCharacters",
+            "substitutionCharacters",
+            "cer"
+          ],
+          "additionalProperties": false
+        },
+        "normalized": {
+          "type": "object",
+          "properties": {
+            "machineCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "goldCharacterCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "editDistance": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "insertionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "deletionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "substitutionCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cer": { "type": "number", "minimum": 0 }
+          },
+          "required": [
+            "machineCharacterCount",
+            "goldCharacterCount",
+            "editDistance",
+            "insertionCharacters",
+            "deletionCharacters",
+            "substitutionCharacters",
+            "cer"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": ["exact", "normalized"],
+      "additionalProperties": false
+    },
+    "alignmentMetrics": {
+      "type": "object",
+      "properties": {
+        "machineCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "goldCueCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "alignedGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "matchedGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedGoldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedMachineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "machineCueCount",
+        "goldCueCount",
+        "alignedGroupCount",
+        "matchedGroupCount",
+        "unmatchedGoldGroupCount",
+        "unmatchedMachineGroupCount"
+      ],
+      "additionalProperties": false
+    },
+    "timingMetrics": {
+      "type": "object",
+      "properties": {
+        "reliableAlignedGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "startMaeSeconds": { "type": "number", "minimum": 0 },
+        "endMaeSeconds": { "type": "number", "minimum": 0 },
+        "centerMaeSeconds": { "type": "number", "minimum": 0 },
+        "boundaryMedianSeconds": { "type": "number", "minimum": 0 },
+        "boundaryP90Seconds": { "type": "number", "minimum": 0 },
+        "boundaryP95Seconds": { "type": "number", "minimum": 0 },
+        "boundaryMaxSeconds": { "type": "number", "minimum": 0 },
+        "timingIoUMedian": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within100msRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within250msRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within500msRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "within1000msRatio": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": [
+        "reliableAlignedGroupCount",
+        "startMaeSeconds",
+        "endMaeSeconds",
+        "centerMaeSeconds",
+        "boundaryMedianSeconds",
+        "boundaryP90Seconds",
+        "boundaryP95Seconds",
+        "boundaryMaxSeconds",
+        "timingIoUMedian",
+        "within100msRatio",
+        "within250msRatio",
+        "within500msRatio",
+        "within1000msRatio"
+      ],
+      "additionalProperties": false
+    },
+    "coverageMetrics": {
+      "type": "object",
+      "properties": {
+        "goldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "machineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "matchedGoldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedGoldGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "matchedMachineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unmatchedMachineGroupCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "goldTextCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "machineSupportedTextRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "goldTemporalCoverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "goldGroupCount",
+        "machineGroupCount",
+        "matchedGoldGroupCount",
+        "unmatchedGoldGroupCount",
+        "matchedMachineGroupCount",
+        "unmatchedMachineGroupCount",
+        "goldTextCoverageRatio",
+        "machineSupportedTextRatio",
+        "goldTemporalCoverageRatio"
+      ],
+      "additionalProperties": false
+    },
+    "missingDialogueCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "hallucinationCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "materialTextErrorCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "severeTimingErrorCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "machineOverlapCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "canonicalMutationCount": { "type": "number", "const": 0 },
+    "productionStatus": { "type": "string", "const": "needs-review" },
+    "finalizationMethod": { "type": "string", "const": "none" },
+    "c602Status": { "type": "string", "const": "HOLD" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "baselineEvaluationByteHash",
+    "machinePackageByteHash",
+    "machinePackageABByteParity",
+    "metricComputation",
+    "globalTextMetrics",
+    "alignmentMetrics",
+    "timingMetrics",
+    "coverageMetrics",
+    "missingDialogueCount",
+    "hallucinationCount",
+    "materialTextErrorCount",
+    "severeTimingErrorCount",
+    "machineOverlapCount",
+    "canonicalMutationCount",
+    "productionStatus",
+    "finalizationMethod",
+    "c602Status",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

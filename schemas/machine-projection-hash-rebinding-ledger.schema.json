@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-projection-hash-rebinding-ledger.schema.json",
+  "title": "machine-projection-hash-rebinding-ledger",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-projection-hash-rebinding-ledger"
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ledgerEntryId": { "type": "string", "minLength": 1 },
+          "projectionId": { "type": "string", "minLength": 1 },
+          "projectionStage": {
+            "type": "string",
+            "enum": ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"]
+          },
+          "rowType": { "type": "string", "const": "PHYSICAL_AUDIO_ROW" },
+          "rowId": { "type": "string", "minLength": 1 },
+          "sourceArtifactType": { "type": "string", "minLength": 1 },
+          "sourceSchemaVersion": { "type": "string", "minLength": 1 },
+          "projectedSchemaVersion": { "type": "string", "minLength": 1 },
+          "sourceHashDomain": {
+            "type": "string",
+            "const": "SOURCE_WORKSPACE_AUDIO_ROW"
+          },
+          "projectedHashDomain": {
+            "type": "string",
+            "const": "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW"
+          },
+          "sourceRowSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "projectedRowSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceHashVerified": { "type": "boolean", "const": true },
+          "projectedHashVerified": { "type": "boolean", "const": true },
+          "projectedSchemaValid": { "type": "boolean", "const": true },
+          "hashDomainChanged": { "type": "boolean", "const": true },
+          "sourceAndProjectedHashEqual": { "type": "boolean" },
+          "removedFields": {
+            "type": "array",
+            "prefixItems": [
+              { "type": "string", "const": "nativeSourceInterval" }
+            ]
+          },
+          "addedFields": {
+            "minItems": 0,
+            "maxItems": 0,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "transformedFields": {
+            "type": "array",
+            "prefixItems": [{ "type": "string", "const": "semanticHash" }]
+          },
+          "reasons": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string",
+                "const": "HASH_DOMAIN_CHANGED_WITHOUT_REHASH"
+              }
+            ]
+          },
+          "audioByteHashPreserved": { "type": "boolean", "const": true },
+          "physicalMetadataPreserved": { "type": "boolean", "const": true },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "ledgerEntryId",
+          "projectionId",
+          "projectionStage",
+          "rowType",
+          "rowId",
+          "sourceArtifactType",
+          "sourceSchemaVersion",
+          "projectedSchemaVersion",
+          "sourceHashDomain",
+          "projectedHashDomain",
+          "sourceRowSemanticHash",
+          "projectedRowSemanticHash",
+          "sourceHashVerified",
+          "projectedHashVerified",
+          "projectedSchemaValid",
+          "hashDomainChanged",
+          "sourceAndProjectedHashEqual",
+          "removedFields",
+          "addedFields",
+          "transformedFields",
+          "reasons",
+          "audioByteHashPreserved",
+          "physicalMetadataPreserved",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sourceRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "reboundRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceHashesValid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedHashesValid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedSchemasValid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ledgerEntryHashesValid": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "hashDomainChangeCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "removedNativeSourceIntervalCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sourceAndProjectedHashEqualCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "failureCount": { "type": "number", "const": 0 },
+    "inferenceCount": { "type": "number", "const": 0 },
+    "goldInputCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "sourceIdentity",
+    "entries",
+    "sourceRowCount",
+    "projectedRowCount",
+    "reboundRowCount",
+    "sourceHashesValid",
+    "projectedHashesValid",
+    "projectedSchemasValid",
+    "ledgerEntryHashesValid",
+    "hashDomainChangeCount",
+    "removedNativeSourceIntervalCount",
+    "sourceAndProjectedHashEqualCount",
+    "failureCount",
+    "inferenceCount",
+    "goldInputCount"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,637 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/c6-0-1-14-3-1-nested-semantic-integrity-preflight.schema.json",
+  "title": "c6-0-1-14-3-1-nested-semantic-integrity-preflight",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.3.1-projection-hash-integrity-v1"
+    },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "c6-0-1-14-3-1-nested-semantic-integrity-preflight"
+    },
+    "scope": { "type": "string", "const": "PRE_GOLD_MACHINE_FREEZE" },
+    "projectionSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "artifactCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "artifactType": { "type": "string", "minLength": 1 },
+          "artifactPathRelative": { "type": "string", "minLength": 1 },
+          "artifactSemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "artifactHashValid": { "type": "boolean" }
+        },
+        "required": [
+          "artifactType",
+          "artifactPathRelative",
+          "artifactSemanticHash",
+          "artifactHashValid"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "nestedRowTypeCounts": {
+      "type": "object",
+      "properties": {
+        "PROJECTION_ARTIFACT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_VARIANT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHYSICAL_AUDIO_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLAYBACK_SEGMENT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_REGION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SAFETY_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SELECTABLE_CHILD_UNIT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TARGET_BUNDLE_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "CONTINUITY_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHASE_A_OBLIGATION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLANNER_CERTIFICATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_REBINDING_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "HIERARCHICAL_ATOM_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "PROJECTION_ARTIFACT",
+        "PROJECTION_VARIANT",
+        "PHYSICAL_AUDIO_ROW",
+        "PLAYBACK_SEGMENT_ROW",
+        "REVIEW_TARGET_ROW",
+        "REVIEW_REGION_ROW",
+        "SAFETY_TARGET_ROW",
+        "SELECTABLE_CHILD_UNIT_ROW",
+        "TARGET_BUNDLE_ROW",
+        "CONTINUITY_LEDGER_ROW",
+        "PHASE_A_OBLIGATION_ROW",
+        "PLANNER_CERTIFICATE",
+        "PROJECTION_REBINDING_LEDGER_ROW",
+        "HIERARCHICAL_ATOM_ROW"
+      ],
+      "additionalProperties": false
+    },
+    "nestedRowVerifiedCounts": {
+      "type": "object",
+      "properties": {
+        "PROJECTION_ARTIFACT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_VARIANT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHYSICAL_AUDIO_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLAYBACK_SEGMENT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_REGION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SAFETY_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SELECTABLE_CHILD_UNIT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TARGET_BUNDLE_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "CONTINUITY_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHASE_A_OBLIGATION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLANNER_CERTIFICATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_REBINDING_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "HIERARCHICAL_ATOM_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "PROJECTION_ARTIFACT",
+        "PROJECTION_VARIANT",
+        "PHYSICAL_AUDIO_ROW",
+        "PLAYBACK_SEGMENT_ROW",
+        "REVIEW_TARGET_ROW",
+        "REVIEW_REGION_ROW",
+        "SAFETY_TARGET_ROW",
+        "SELECTABLE_CHILD_UNIT_ROW",
+        "TARGET_BUNDLE_ROW",
+        "CONTINUITY_LEDGER_ROW",
+        "PHASE_A_OBLIGATION_ROW",
+        "PLANNER_CERTIFICATE",
+        "PROJECTION_REBINDING_LEDGER_ROW",
+        "HIERARCHICAL_ATOM_ROW"
+      ],
+      "additionalProperties": false
+    },
+    "nestedRowFailureCounts": {
+      "type": "object",
+      "properties": {
+        "PROJECTION_ARTIFACT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_VARIANT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHYSICAL_AUDIO_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLAYBACK_SEGMENT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_REGION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SAFETY_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SELECTABLE_CHILD_UNIT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TARGET_BUNDLE_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "CONTINUITY_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHASE_A_OBLIGATION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLANNER_CERTIFICATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_REBINDING_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "HIERARCHICAL_ATOM_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "PROJECTION_ARTIFACT",
+        "PROJECTION_VARIANT",
+        "PHYSICAL_AUDIO_ROW",
+        "PLAYBACK_SEGMENT_ROW",
+        "REVIEW_TARGET_ROW",
+        "REVIEW_REGION_ROW",
+        "SAFETY_TARGET_ROW",
+        "SELECTABLE_CHILD_UNIT_ROW",
+        "TARGET_BUNDLE_ROW",
+        "CONTINUITY_LEDGER_ROW",
+        "PHASE_A_OBLIGATION_ROW",
+        "PLANNER_CERTIFICATE",
+        "PROJECTION_REBINDING_LEDGER_ROW",
+        "HIERARCHICAL_ATOM_ROW"
+      ],
+      "additionalProperties": false
+    },
+    "nestedRowNotApplicableNoRowHashCounts": {
+      "type": "object",
+      "properties": {
+        "PROJECTION_ARTIFACT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_VARIANT": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHYSICAL_AUDIO_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLAYBACK_SEGMENT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "REVIEW_REGION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SAFETY_TARGET_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "SELECTABLE_CHILD_UNIT_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "TARGET_BUNDLE_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "CONTINUITY_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PHASE_A_OBLIGATION_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PLANNER_CERTIFICATE": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "PROJECTION_REBINDING_LEDGER_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "HIERARCHICAL_ATOM_ROW": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "PROJECTION_ARTIFACT",
+        "PROJECTION_VARIANT",
+        "PHYSICAL_AUDIO_ROW",
+        "PLAYBACK_SEGMENT_ROW",
+        "REVIEW_TARGET_ROW",
+        "REVIEW_REGION_ROW",
+        "SAFETY_TARGET_ROW",
+        "SELECTABLE_CHILD_UNIT_ROW",
+        "TARGET_BUNDLE_ROW",
+        "CONTINUITY_LEDGER_ROW",
+        "PHASE_A_OBLIGATION_ROW",
+        "PLANNER_CERTIFICATE",
+        "PROJECTION_REBINDING_LEDGER_ROW",
+        "HIERARCHICAL_ATOM_ROW"
+      ],
+      "additionalProperties": false
+    },
+    "verificationOrder": {
+      "minItems": 14,
+      "maxItems": 14,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "PROJECTION_ARTIFACT",
+          "PROJECTION_VARIANT",
+          "PHYSICAL_AUDIO_ROW",
+          "PLAYBACK_SEGMENT_ROW",
+          "REVIEW_TARGET_ROW",
+          "REVIEW_REGION_ROW",
+          "SAFETY_TARGET_ROW",
+          "SELECTABLE_CHILD_UNIT_ROW",
+          "TARGET_BUNDLE_ROW",
+          "CONTINUITY_LEDGER_ROW",
+          "PHASE_A_OBLIGATION_ROW",
+          "PLANNER_CERTIFICATE",
+          "PROJECTION_REBINDING_LEDGER_ROW",
+          "HIERARCHICAL_ATOM_ROW"
+        ]
+      }
+    },
+    "hashHelperIdentity": {
+      "type": "string",
+      "const": "hashed141/assertHash141"
+    },
+    "canonicalSerializerIdentity": {
+      "type": "string",
+      "const": "stableMachineQualityJson+SHA-256"
+    },
+    "projectionVariantCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inspectedOuterHashCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "validOuterHashCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "projectedAudioRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "validProjectedAudioHashCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "playbackRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "validPlaybackHashCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unknownHashableRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "SOURCE_ROW_HASH_INVALID",
+              "PROJECTED_ROW_HASH_STALE",
+              "PROJECTED_ROW_HASH_MISSING",
+              "PROJECTED_ROW_SCHEMA_INVALID",
+              "NESTED_ROW_HASH_INVALID",
+              "OUTER_HASH_VALID_NESTED_HASH_INVALID",
+              "HASH_DOMAIN_NOT_REBOUND",
+              "UNKNOWN_HASHABLE_ROW_TYPE"
+            ]
+          },
+          "rowType": {
+            "type": "string",
+            "enum": [
+              "PROJECTION_ARTIFACT",
+              "PROJECTION_VARIANT",
+              "PHYSICAL_AUDIO_ROW",
+              "PLAYBACK_SEGMENT_ROW",
+              "REVIEW_TARGET_ROW",
+              "REVIEW_REGION_ROW",
+              "SAFETY_TARGET_ROW",
+              "SELECTABLE_CHILD_UNIT_ROW",
+              "TARGET_BUNDLE_ROW",
+              "CONTINUITY_LEDGER_ROW",
+              "PHASE_A_OBLIGATION_ROW",
+              "PLANNER_CERTIFICATE",
+              "PROJECTION_REBINDING_LEDGER_ROW",
+              "HIERARCHICAL_ATOM_ROW"
+            ]
+          },
+          "rowId": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "pathWithinArtifact": { "type": "string", "minLength": 1 },
+          "domain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "SOURCE_WORKSPACE_AUDIO_ROW",
+                  "STRICT_C601143_COVERAGE_AUDIO_PROJECTION_ROW",
+                  "STRICT_C601143_COVERAGE_PLAYBACK_PROJECTION_ROW",
+                  "C601143_PROJECTION_VARIANT",
+                  "C601143_PROJECTION_SET"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "expectedHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          },
+          "actualHash": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "rowType",
+          "rowId",
+          "path",
+          "pathWithinArtifact",
+          "domain",
+          "expectedHash",
+          "actualHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "integrityPassed": { "type": "boolean" },
+    "validationPassed": { "type": "boolean" },
+    "goldReadAttempted": { "type": "boolean", "const": false },
+    "inferenceCount": { "type": "number", "const": 0 }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "scope",
+    "projectionSetHash",
+    "sourceIdentity",
+    "artifactCount",
+    "artifacts",
+    "nestedRowTypeCounts",
+    "nestedRowVerifiedCounts",
+    "nestedRowFailureCounts",
+    "nestedRowNotApplicableNoRowHashCounts",
+    "verificationOrder",
+    "hashHelperIdentity",
+    "canonicalSerializerIdentity",
+    "projectionVariantCount",
+    "inspectedOuterHashCount",
+    "validOuterHashCount",
+    "projectedAudioRowCount",
+    "validProjectedAudioHashCount",
+    "playbackRowCount",
+    "validPlaybackHashCount",
+    "unknownHashableRowCount",
+    "failures",
+    "integrityPassed",
+    "validationPassed",
+    "goldReadAttempted",
+    "inferenceCount"
+  ],
+  "additionalProperties": false
+}

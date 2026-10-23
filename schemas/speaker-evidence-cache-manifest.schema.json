@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/speaker-evidence-cache-manifest.schema.json",
+  "title": "speaker-evidence-cache-manifest",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "artifactType": {
+      "type": "string",
+      "const": "speaker-evidence-cache-manifest"
+    },
+    "cacheVersion": { "type": "string", "const": "C5.18" },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "requestType": { "type": "string", "const": "local-speaker-evidence" },
+    "mode": { "type": "string", "enum": ["off", "read", "read-write"] },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attemptId": { "type": "string", "minLength": 1 },
+          "cacheKey": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "cacheHit": { "type": "boolean" },
+          "entrySemanticHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "audioSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "windowType": { "type": "string", "enum": ["context", "union"] }
+        },
+        "required": [
+          "attemptId",
+          "cacheKey",
+          "cacheHit",
+          "entrySemanticHash",
+          "audioSha256",
+          "windowType"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "requestCount": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "hitCount": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "missCount": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "writeCount": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "inferenceCount": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "modelLoadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "requestCount",
+        "hitCount",
+        "missCount",
+        "writeCount",
+        "inferenceCount",
+        "modelLoadCount"
+      ],
+      "additionalProperties": false
+    },
+    "cacheIdentityHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "cacheVersion",
+    "generatedAt",
+    "requestType",
+    "mode",
+    "requests",
+    "summary",
+    "cacheIdentityHash",
+    "semanticHash"
+  ],
+  "additionalProperties": false
+}

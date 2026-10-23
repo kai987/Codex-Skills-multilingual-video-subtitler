@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.local/multilingual-video-learning/machine-full-registry-source-reconciliation.schema.json",
+  "title": "machine-full-registry-source-reconciliation",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "policyVersion": {
+      "type": "string",
+      "const": "c6.0.1.14.5.1-full-unit-registry-review-binding-v1"
+    },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "sourceMediaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "sampleRate": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioStreamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "audioTimebase": {
+          "type": "string",
+          "pattern": "^[1-9]\\d*\\/[1-9]\\d*$"
+        },
+        "sourceTimebase": { "type": "string", "const": "SOURCE_GLOBAL_SECONDS" }
+      },
+      "required": [
+        "sourceMediaSha256",
+        "durationSeconds",
+        "sampleRate",
+        "audioStreamIndex",
+        "audioTimebase",
+        "sourceTimebase"
+      ],
+      "additionalProperties": false
+    },
+    "sourceTimebase": {
+      "type": "string",
+      "const": "SOURCE_GLOBAL_NATIVE_SAMPLES"
+    },
+    "runtimeGoldInputCount": { "type": "number", "const": 0 },
+    "visibility": { "type": "string", "const": "LOCAL_ONLY" },
+    "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "artifactType": {
+      "type": "string",
+      "const": "machine-full-registry-source-reconciliation"
+    },
+    "inventoryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "hierarchyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fullRegistryHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidenceObservationId": { "type": "string", "minLength": 1 },
+          "sourceNativeInterval": {
+            "type": "object",
+            "properties": {
+              "startSample": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "endSample": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["startSample", "endSample"],
+            "additionalProperties": false
+          },
+          "fullCoverageUnitIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "mappedSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sourceSamples": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "coverageRatio": { "type": "number", "const": 1 },
+          "hierarchyAtomIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "reconciliationStatus": {
+            "type": "string",
+            "enum": [
+              "EXACT_HIERARCHY_AND_INVENTORY",
+              "INVENTORY_ONLY_REGISTERED",
+              "PARTIAL_HIERARCHY_PROVENANCE"
+            ]
+          },
+          "semanticHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "required": [
+          "evidenceObservationId",
+          "sourceNativeInterval",
+          "fullCoverageUnitIds",
+          "mappedSamples",
+          "sourceSamples",
+          "coverageRatio",
+          "hierarchyAtomIds",
+          "reconciliationStatus",
+          "semanticHash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "verifiedSpeechRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "mappedVerifiedSpeechRowCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "unmappedVerifiedSpeechRowCount": { "type": "number", "const": 0 },
+    "exactHierarchyAndInventoryCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "inventoryOnlyRegisteredCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "partialHierarchyProvenanceCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "registeredUnionParity": { "type": "boolean", "const": true }
+  },
+  "required": [
+    "schemaVersion",
+    "policyVersion",
+    "policyHash",
+    "sourceIdentity",
+    "sourceTimebase",
+    "runtimeGoldInputCount",
+    "visibility",
+    "semanticHash",
+    "artifactType",
+    "inventoryHash",
+    "hierarchyHash",
+    "fullRegistryHash",
+    "rows",
+    "verifiedSpeechRowCount",
+    "mappedVerifiedSpeechRowCount",
+    "unmappedVerifiedSpeechRowCount",
+    "exactHierarchyAndInventoryCount",
+    "inventoryOnlyRegisteredCount",
+    "partialHierarchyProvenanceCount",
+    "registeredUnionParity"
+  ],
+  "additionalProperties": false
+}
