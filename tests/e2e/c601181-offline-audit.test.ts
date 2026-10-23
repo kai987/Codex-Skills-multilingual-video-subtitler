@@ -15,7 +15,7 @@ it("actual project worker creates twelve separate stub streams; never imports na
     [
       "-p",
       "(version 1)(allow default)(deny network*)",
-      "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      process.env.MVL_TEST_PYTHON ?? "python3",
       "-S",
       "tests/helpers/c601181_worker_stub.py",
     ],

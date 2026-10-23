@@ -1,0 +1,141 @@
+name: Offline CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-typecheck-test:
+    name: Build, typecheck and offline tests
+    # Existing isolation tests require Apple's sandbox-exec.
+    runs-on: macos-15
+    timeout-minutes: 20
+    env:
+      CI: "true"
+      MVL_OFFLINE_CI: "1"
+      MVL_MFA_INTEGRATION_TEST: "0"
+      MVL_SPEAKER_INTEGRATION_TEST: "0"
+      MVL_C6_C519_TASK: ""
+      MVL_C6_SOURCE_VIDEO: ""
+      MVL_C5171_FRESH_TASK: ""
+      HF_HUB_OFFLINE: "1"
+      HF_DATASETS_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_HOME: ${{ runner.temp }}/mvl-ci-empty-hf
+      OPENAI_API_KEY: ""
+      HF_TOKEN: ""
+      HUGGING_FACE_HUB_TOKEN: ""
+      HUGGINGFACE_HUB_TOKEN: ""
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          lfs: false
+          submodules: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Set up Python for model-free numerical fixtures
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: .github/requirements-offline-tests.txt
+
+      - name: Install build and test dependencies (no models)
+        run: |
+          npm install --global npm@11.18.0 --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
+          python -m pip install --only-binary=:all: -r .github/requirements-offline-tests.txt
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            brew install ffmpeg
+          fi
+          node --version
+          npm --version
+          python --version
+          ffmpeg -version
+          ffprobe -version
+
+      - name: Assert no speech-model frameworks were installed
+        run: |
+          python -I - <<'PY'
+          import importlib.util
+          forbidden = ["torch", "transformers", "onnxruntime", "sherpa_onnx", "pyannote", "whisper", "montreal_forced_aligner"]
+          found = [name for name in forbidden if importlib.util.find_spec(name) is not None]
+          if found:
+              raise SystemExit(f"Speech-model frameworks are forbidden in offline CI: {found}")
+          print("MODEL_FREE_PYTHON_ENVIRONMENT_PASSED")
+          PY
+
+      - name: Check offline isolation
+        env:
+          PIP_NO_INDEX: "1"
+          npm_config_offline: "true"
+        run: /usr/bin/sandbox-exec -f .github/offline-tests.sb node scripts/ci/check-offline-environment.mjs
+
+      - name: Typecheck (offline)
+        env:
+          PIP_NO_INDEX: "1"
+          npm_config_offline: "true"
+        run: /usr/bin/sandbox-exec -f .github/offline-tests.sb npm run typecheck
+
+      - name: Build (offline)
+        env:
+          PIP_NO_INDEX: "1"
+          npm_config_offline: "true"
+        run: /usr/bin/sandbox-exec -f .github/offline-tests.sb npm run build
+
+      - name: Run unit and mock end-to-end tests (offline)
+        env:
+          PIP_NO_INDEX: "1"
+          npm_config_offline: "true"
+        # These tests create their own stricter OS sandboxes. macOS rejects
+        # sandbox_apply in Node descendants already inside an outer sandbox.
+        run: npm test -- --maxWorkers=2
+
+      - name: Run bounded-generation offline regressions
+        env:
+          PIP_NO_INDEX: "1"
+          npm_config_offline: "true"
+        run: |
+          /usr/bin/sandbox-exec -f .github/offline-tests.sb node --test --test-concurrency=2 \
+            tests/context-delivery-packaging.mjs tests/bounded-product.mjs \
+            tests/stored-token-evidence.mjs tests/bounded-seam-evidence.mjs \
+            tests/bounded-evidence-audit.mjs tests/content-safety-gate.mjs \
+            tests/default-seam-delivery.mjs tests/seam-refinement.mjs \
+            tests/seam-text-only.mjs tests/bounded-longform-flow.mjs
+
+      - name: Verify no model cache was populated
+        if: always()
+        run: |
+          python -I - <<'PY'
+          import os
+          from pathlib import Path
+          cache = Path(os.environ["HF_HOME"])
+          files = [p for p in cache.rglob("*") if p.is_file()] if cache.exists() else []
+          if files:
+              raise SystemExit(f"Offline CI must not populate the model cache: {files}")
+          print("MODEL_CACHE_EMPTY_PASSED")
+          PY

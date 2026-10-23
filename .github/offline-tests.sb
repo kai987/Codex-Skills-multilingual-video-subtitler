@@ -1,0 +1,7 @@
+(version 1)
+(allow default)
+
+; Deny external IP connections without blocking local Unix IPC (tsx and
+; sandbox-exec use local sockets). Loopback mock HTTP servers remain usable.
+(deny network-outbound (remote ip "*:*"))
+(allow network-outbound (remote ip "localhost:*"))

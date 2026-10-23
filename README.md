@@ -105,6 +105,12 @@ The source uses TypeScript/Node.js workspaces, with application entry points in 
 
 Historical research tests additionally use Python with NumPy/SciPy for model-free numerical checks. Real-model and personal-artifact integration checks require explicit opt-in; these dependencies and private fixtures are not bundled.
 
+### Continuous integration
+
+[Offline CI](.github/workflows/offline-ci.yml) runs on pushes to `main`, pull requests targeting `main`, and manual dispatch. It typechecks, builds, runs unit/mock end-to-end tests, and checks bounded-generation regressions on macOS so the existing sandbox-isolation tests remain active.
+
+Preparation installs Node/npm dependencies, NumPy/SciPy, and FFmpeg if needed—not speech models or model frameworks. Typecheck, build, and bounded regressions run inside an OS sandbox that permits local mock servers but denies external IP connections. The complete test suite retains its own isolation tests without an incompatible outer sandbox. All test stages enable offline flags, disable real-model/private-artifact tests, and receive no provider credentials. CI rejects installed model frameworks and checks that its model cache stays empty; it never downloads or restores model weights/runtime caches.
+
 ## License
 
 [MIT](LICENSE). External tools, model weights, reference subtitles, and media have their own licenses and usage conditions.
