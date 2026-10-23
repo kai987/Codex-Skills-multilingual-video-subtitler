@@ -105,13 +105,15 @@ Partial export is not a complete subtitle delivery. Format/text-accounting check
 
 The source uses TypeScript/Node.js workspaces, with application entry points in `apps/`, runtime packages in `packages/`, schemas in `schemas/`, and command helpers in `scripts/`. Media, models, caches, generated `output/`, and personal review files are not prerequisites for reading or building the source and should not be committed as documentation assets.
 
-Historical research tests additionally use Python with NumPy/SciPy for model-free numerical checks. Real-model and personal-artifact integration checks require explicit opt-in; these dependencies and private fixtures are not bundled.
+Historical research tests additionally use Python with NumPy/SciPy for model-free numerical checks. The two real-model integration tests (MFA and Community-1) require explicit opt-in; their model runtimes, weights, and private probe data are not bundled.
 
 ### Continuous integration
 
 [Offline CI](.github/workflows/offline-ci.yml) runs on pushes to `main`, pull requests targeting `main`, and manual dispatch. It typechecks, builds, runs unit/mock end-to-end tests, and checks bounded-generation regressions on macOS so the existing sandbox-isolation tests remain active.
 
-Preparation installs Node/npm dependencies, NumPy/SciPy, and FFmpeg if needed—not speech models or model frameworks. Typecheck, build, and bounded regressions run inside an OS sandbox that permits local mock servers but denies external IP connections. The complete test suite retains its own isolation tests without an incompatible outer sandbox. All test stages enable offline flags, disable real-model/private-artifact tests, and receive no provider credentials. CI rejects installed model frameworks and checks that its model cache stays empty; it never downloads or restores model weights/runtime caches.
+Preparation installs Node/npm dependencies, NumPy/SciPy, and FFmpeg if needed—not speech models or model frameworks. Typecheck, build, and bounded regressions run inside an OS sandbox that permits local mock servers but denies external IP connections. The complete test suite retains its own isolation tests without an incompatible outer sandbox. All test stages enable offline flags, disable real-model tests, and receive no personal-artifact paths or provider credentials. CI rejects installed model frameworks and checks that its model cache stays empty; it never downloads or restores model weights/runtime caches.
+
+Review-delivery repair and protected finalization run by default with repository-owned synthetic fixtures generated in temporary directories. They exercise the actual orchestration and integrity gates; simulated human-reviewed authority is test input, not evidence of real human validation or subtitle accuracy. CI checks the test report to require all three synthetic end-to-end cases to pass and permits only the two real-model cases to be skipped.
 
 ## License
 

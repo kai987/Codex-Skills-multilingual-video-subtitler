@@ -115,7 +115,11 @@ jobs:
         # sandbox_apply in Node descendants already inside an outer sandbox.
         # Cold CLI subprocess startup on hosted runners can exceed the default
         # five-second per-test limit. Keep a bounded limit without auto-retries.
-        run: npm test -- --maxWorkers=2 --testTimeout=30000
+        run: |
+          npm test -- --maxWorkers=2 --testTimeout=30000 \
+            --reporter=default --reporter=json \
+            --outputFile.json="$RUNNER_TEMP/offline-vitest-report.json"
+          node scripts/ci/verify-offline-test-report.mjs "$RUNNER_TEMP/offline-vitest-report.json"
 
       - name: Run bounded-generation offline regressions
         env:
@@ -127,7 +131,8 @@ jobs:
             tests/stored-token-evidence.mjs tests/bounded-seam-evidence.mjs \
             tests/bounded-evidence-audit.mjs tests/content-safety-gate.mjs \
             tests/default-seam-delivery.mjs tests/seam-refinement.mjs \
-            tests/seam-text-only.mjs tests/bounded-longform-flow.mjs
+            tests/seam-text-only.mjs tests/bounded-longform-flow.mjs \
+            tests/offline-ci-report.mjs
 
       - name: Verify no model cache was populated
         if: always()
