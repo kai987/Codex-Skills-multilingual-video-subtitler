@@ -113,7 +113,9 @@ jobs:
           npm_config_offline: "true"
         # These tests create their own stricter OS sandboxes. macOS rejects
         # sandbox_apply in Node descendants already inside an outer sandbox.
-        run: npm test -- --maxWorkers=2
+        # Cold CLI subprocess startup on hosted runners can exceed the default
+        # five-second per-test limit. Keep a bounded limit without auto-retries.
+        run: npm test -- --maxWorkers=2 --testTimeout=30000
 
       - name: Run bounded-generation offline regressions
         env:
