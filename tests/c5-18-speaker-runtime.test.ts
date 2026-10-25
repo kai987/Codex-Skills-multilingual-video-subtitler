@@ -173,7 +173,7 @@ async function workerFixture(root: string): Promise<string> {
     String.raw`import readline from 'node:readline';
 const requested=process.argv[process.argv.indexOf('--device')+1];
 const emit=value=>process.stdout.write(JSON.stringify(value)+'\n');
-if(process.env.HF_TOKEN||process.env.HUGGING_FACE_HUB_TOKEN||process.env.HF_HUB_OFFLINE!=='1'||process.env.TRANSFORMERS_OFFLINE!=='1'){
+if(process.env.HF_TOKEN||process.env.HUGGING_FACE_HUB_TOKEN||process.env.HF_HUB_OFFLINE!=='1'||process.env.TRANSFORMERS_OFFLINE!=='1'||process.env.MPL_IGNORE_SYSTEM_FONTS!=='1'){
   emit({type:'fatal',code:'ENVIRONMENT_NOT_OFFLINE',message:'worker environment leak'});
   process.exit(2);
 }
@@ -387,8 +387,25 @@ describe("C5.18 local speaker runtime", () => {
           maxSpeakers: 3,
         });
         expect(ready.allPipelineModulesOnDevice).toBe(true);
+        expect(ready.modelLoadCount).toBe(1);
         expect(output.standardTurns.length).toBeGreaterThan(0);
         expect(output.exclusiveTurns.length).toBeGreaterThan(0);
+        const capability = buildSpeakerRuntimeCapability({
+          ...verified,
+          ready,
+          inference: output,
+        });
+        expect(capability.finiteOutputVerified).toBe(true);
+        console.info("REAL_SPEAKER_TEST_RESULT", {
+          deviceUsed: ready.deviceUsed,
+          fallback: ready.fallback,
+          modelLoadCount: ready.modelLoadCount,
+          modelSnapshotHash: capability.modelSnapshotHash,
+          runtimeIdentityHash: capability.runtimeIdentityHash,
+          standardTurnCount: output.standardTurns.length,
+          exclusiveTurnCount: output.exclusiveTurns.length,
+          finiteOutputVerified: capability.finiteOutputVerified,
+        });
       } finally {
         await worker.close();
       }

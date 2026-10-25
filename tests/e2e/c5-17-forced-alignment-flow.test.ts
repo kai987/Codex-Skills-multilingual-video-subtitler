@@ -33,6 +33,7 @@ import {
   loadHumanReviewedSubtitle,
   sha256LocalFile,
   verifyMfaRuntimeCapability,
+  type MfaAlignmentExecutorInput,
 } from "@mvl/video-subtitler";
 
 const HASH_A = "a".repeat(64);
@@ -49,6 +50,76 @@ function requiredEnvironmentVariable(name: string): string {
     );
   }
   return value;
+}
+
+function integrationCanonicalInput(input: {
+  transcript: string;
+  dictionary: string;
+}): Pick<
+  MfaAlignmentExecutorInput,
+  "canonicalUnits" | "expectedPhones" | "expectedUnitIds"
+> {
+  // align_one uses --no_tokenization: the explicit transcript supplies units,
+  // and only the actual selected dictionary may supply their phones.
+  const tokens = input.transcript.trim().split(/\s+/u).filter(Boolean);
+  if (tokens.length === 0) {
+    throw new Error("MFA integration transcript must contain lexical units.");
+  }
+  const pronunciations = new Map<string, string[][]>();
+  for (const line of input.dictionary.split(/\r?\n/u)) {
+    const trimmed = line.trim();
+    if (trimmed === "" || trimmed.startsWith("#")) continue;
+    // Match the production dictionary contract: word, optional tab-separated
+    // probabilities, then the final tab-separated pronunciation field.
+    const fields = line.split("\t");
+    const word = fields[0]?.normalize("NFKC").trim() ?? "";
+    const phones = (fields.at(-1) ?? "")
+      .trim()
+      .split(/\s+/u)
+      .filter((phone) => phone !== "" && !/^\d+(?:\.\d+)?$/u.test(phone));
+    if (fields.length < 2 || word === "" || phones.length === 0) {
+      throw new Error(
+        "MFA integration requires a tab-separated dictionary with nonempty phones.",
+      );
+    }
+    const variants = pronunciations.get(word) ?? [];
+    if (!variants.some((variant) => variant.join(" ") === phones.join(" "))) {
+      variants.push(phones);
+      pronunciations.set(word, variants);
+    }
+  }
+  const canonicalUnits = tokens.map((surface, index) => {
+    const normalizedSurface = surface.normalize("NFKC");
+    const variants = pronunciations.get(normalizedSurface) ?? [];
+    if (variants.length === 0) {
+      throw new Error(`MFA integration dictionary OOV: ${surface}.`);
+    }
+    const phones = variants[0];
+    if (variants.length !== 1 || phones === undefined) {
+      throw new Error(
+        `MFA integration dictionary pronunciation is ambiguous: ${surface}.`,
+      );
+    }
+    if (phones.some((phone) => ["sil", "sp", "spn", "<eps>"].includes(phone))) {
+      throw new Error(
+        `MFA integration unit has non-lexical phones: ${surface}.`,
+      );
+    }
+    return {
+      unitId: `integration-unit-${String(index + 1)}`,
+      surface,
+      normalizedSurface,
+      reading: null,
+      phones,
+      punctuation: false,
+      criticalOov: false,
+    };
+  });
+  return {
+    canonicalUnits,
+    expectedUnitIds: canonicalUnits.map((unit) => unit.unitId),
+    expectedPhones: canonicalUnits.flatMap((unit) => unit.phones),
+  };
 }
 
 afterEach(async () => {
@@ -732,6 +803,143 @@ describe("C5.17 mock end-to-end finalization", () => {
   });
 });
 
+describe("C5.17 real MFA integration input contract (offline)", () => {
+  const transcript = "あ い";
+  const dictionary = "# synthetic offline dictionary\nあ\ta\nい\t0.8\ti\n";
+
+  it("supplies canonical units and dictionary-derived expected phones to the executor parser", async () => {
+    const canonicalInput = integrationCanonicalInput({
+      transcript,
+      dictionary,
+    });
+    expect(canonicalInput.expectedUnitIds).toEqual([
+      "integration-unit-1",
+      "integration-unit-2",
+    ]);
+    expect(canonicalInput.canonicalUnits).toEqual([
+      {
+        unitId: "integration-unit-1",
+        surface: "あ",
+        normalizedSurface: "あ",
+        reading: null,
+        phones: ["a"],
+        punctuation: false,
+        criticalOov: false,
+      },
+      {
+        unitId: "integration-unit-2",
+        surface: "い",
+        normalizedSurface: "い",
+        reading: null,
+        phones: ["i"],
+        punctuation: false,
+        criticalOov: false,
+      },
+    ]);
+    expect(canonicalInput.expectedPhones).toEqual(["a", "i"]);
+    const calls: string[] = [];
+    const result = await defaultMfaAlignmentExecutor({
+      attemptId: "offline-integration-attempt",
+      componentId: "offline-integration-component",
+      cueId: "offline-integration-cue",
+      windowType: "narrow",
+      windowAudioPath: "synthetic.wav",
+      transcriptPath: "synthetic.txt",
+      outputPath: "synthetic.TextGrid",
+      temporaryDirectory: "synthetic-temp",
+      mediaOffsetSeconds: 0,
+      ...canonicalInput,
+      capability: runtimeCapability(),
+      mfaExecutable: "synthetic-mfa",
+      pythonExecutable: "synthetic-python",
+      acousticModel: "synthetic-acoustic.zip",
+      dictionaryModel: "synthetic.dict",
+      g2pModel: "synthetic-g2p.zip",
+      parserHelperPath: "synthetic-parser.py",
+      runner: {
+        run: (executable) => {
+          calls.push(executable);
+          return Promise.resolve({
+            exitCode: 0,
+            stderr: "",
+            stdout: JSON.stringify({
+              fileInterval: { start: 0, end: 3 },
+              words: [
+                { label: "あ", start: 0.5, end: 1 },
+                { label: "い", start: 1.2, end: 2 },
+              ],
+              phones: [
+                { label: "a", start: 0.5, end: 1 },
+                { label: "i", start: 1.2, end: 2 },
+              ],
+            }),
+          });
+        },
+      },
+    });
+    expect(calls).toEqual(["synthetic-mfa", "synthetic-python"]);
+    expect(result.parsed).toMatchObject({
+      canonicalUnitCoverageRatio: 1,
+      alignedWordCoverageRatio: 1,
+      pronunciationUnitCoverageRatio: 1,
+      expectedPhoneCoverageRatio: 1,
+      expectedPhoneCount: 2,
+      alignedExpectedPhoneCount: 2,
+      unresolvedMappingCount: 0,
+      ambiguousMappingCount: 0,
+    });
+    expect(
+      result.parsed?.wordAlignments.map((word) => word.expectedUnitIds),
+    ).toEqual([["integration-unit-1"], ["integration-unit-2"]]);
+  });
+
+  it.each([
+    {
+      label: "empty transcript",
+      transcript: " ",
+      dictionary,
+      error: /lexical units/u,
+    },
+    {
+      label: "OOV token",
+      transcript: "う",
+      dictionary,
+      error: /dictionary OOV/u,
+    },
+    {
+      label: "empty phones",
+      transcript,
+      dictionary: "あ\t\n",
+      error: /nonempty phones/u,
+    },
+    {
+      label: "ambiguous pronunciation",
+      transcript: "あ",
+      dictionary: "あ\ta\nあ\ti\n",
+      error: /ambiguous/u,
+    },
+    {
+      label: "unstructured dictionary",
+      transcript,
+      dictionary: "あ a\n",
+      error: /tab-separated/u,
+    },
+    {
+      label: "unknown phone fallback",
+      transcript: "あ",
+      dictionary: "あ\tspn\n",
+      error: /non-lexical phones/u,
+    },
+  ])(
+    "rejects $label before any model execution",
+    ({ transcript, dictionary, error }) => {
+      expect(() =>
+        integrationCanonicalInput({ transcript, dictionary }),
+      ).toThrow(error);
+    },
+  );
+});
+
 describe.runIf(process.env.MVL_MFA_INTEGRATION_TEST === "1")(
   "C5.17 optional real MFA integration",
   () => {
@@ -767,6 +975,10 @@ describe.runIf(process.env.MVL_MFA_INTEGRATION_TEST === "1")(
       const transcriptPath = requiredEnvironmentVariable(
         "MVL_MFA_INTEGRATION_TRANSCRIPT",
       );
+      const canonicalInput = integrationCanonicalInput({
+        transcript: await readFile(transcriptPath, "utf8"),
+        dictionary: await readFile(dictionaryModel, "utf8"),
+      });
       const directory = await mkdtemp(
         path.join(tmpdir(), "mvl-c5-17-real-mfa-"),
       );
@@ -790,7 +1002,7 @@ describe.runIf(process.env.MVL_MFA_INTEGRATION_TEST === "1")(
         outputPath,
         temporaryDirectory: path.join(directory, "mfa-temp"),
         mediaOffsetSeconds: 0,
-        expectedUnitIds: ["integration-unit-1"],
+        ...canonicalInput,
         capability,
         mfaExecutable,
         pythonExecutable,
@@ -804,6 +1016,39 @@ describe.runIf(process.env.MVL_MFA_INTEGRATION_TEST === "1")(
       expect(result.failure).toBeNull();
       expect(result.parsed?.wordAlignments.length).toBeGreaterThan(0);
       expect(result.parsed?.phoneAlignments.length).toBeGreaterThan(0);
+      expect(result.parsed).toMatchObject({
+        canonicalUnitCoverageRatio: 1,
+        alignedWordCoverageRatio: 1,
+        pronunciationUnitCoverageRatio: 1,
+        expectedPhoneCoverageRatio: 1,
+        expectedPhoneCount: canonicalInput.expectedPhones.length,
+        alignedExpectedPhoneCount: canonicalInput.expectedPhones.length,
+        unresolvedMappingCount: 0,
+        ambiguousMappingCount: 0,
+      });
+      expect(
+        result.parsed?.phoneAlignments.map((phone) => phone.label),
+      ).toEqual(canonicalInput.expectedPhones);
+      expect(
+        [
+          ...new Set(
+            result.parsed?.wordAlignments.flatMap(
+              (word) => word.expectedUnitIds,
+            ),
+          ),
+        ].sort(),
+      ).toEqual([...canonicalInput.expectedUnitIds].sort());
+      expect(result.parsed?.wordAlignments.every((word) => !word.oov)).toBe(
+        true,
+      );
+      console.info("REAL_MFA_TEST_RESULT", {
+        wordCount: result.parsed?.wordAlignments.length,
+        phoneCount: result.parsed?.phoneAlignments.length,
+        canonicalUnitCoverageRatio: result.parsed?.canonicalUnitCoverageRatio,
+        expectedPhoneCoverageRatio: result.parsed?.expectedPhoneCoverageRatio,
+        unresolvedMappingCount: result.parsed?.unresolvedMappingCount,
+        ambiguousMappingCount: result.parsed?.ambiguousMappingCount,
+      });
     });
   },
 );

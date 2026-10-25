@@ -71,6 +71,10 @@ def main() -> int:
     os.environ["HF_HUB_OFFLINE"] = "1"
     os.environ["TRANSFORMERS_OFFLINE"] = "1"
     os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+    # This inference-only worker does not render text. Avoid macOS system font
+    # discovery in matplotlib (imported by torchmetrics) when its profiler
+    # returns no font records; bundled matplotlib fonts remain available.
+    os.environ["MPL_IGNORE_SYSTEM_FONTS"] = "1"
     os.environ.pop("HF_TOKEN", None)
     os.environ.pop("HUGGING_FACE_HUB_TOKEN", None)
 

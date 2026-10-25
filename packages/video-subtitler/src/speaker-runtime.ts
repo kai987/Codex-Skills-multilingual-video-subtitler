@@ -409,6 +409,7 @@ export class LocalSpeakerWorker {
       environment.HF_HUB_OFFLINE = "1";
       environment.TRANSFORMERS_OFFLINE = "1";
       environment.HF_HUB_DISABLE_TELEMETRY = "1";
+      environment.MPL_IGNORE_SYSTEM_FONTS = "1";
       const child = spawn(
         this.#runtime.pythonExecutable,
         [
